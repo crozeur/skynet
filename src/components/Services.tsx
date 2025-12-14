@@ -119,7 +119,7 @@ export const Services = () => {
             <p className="mt-3 text-sm sm:text-base md:text-lg text-slate-700 max-w-3xl mx-auto dark:text-slate-200/90">
               {language === "en"
                 ? "Pick the pillar you need now and expand later. Each offer is designed to deliver fast, tangible results."
-                : "Commencez par le pilier dont vous avez besoin, puis élargissez ensuite. Nous vous garantissons des résultats rapides et concrets."}
+                : "Commencez par le pilier dont vous avez besoin, puis élargissez ensuite. Nous garantissons des résultats rapides et concrets."}
             </p>
           </div>
 
