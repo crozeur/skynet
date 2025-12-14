@@ -92,7 +92,7 @@ export const Cta = () => {
                         href="https://calendly.com/skynet-consulting-dz/30min"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:-translate-y-1 active:scale-95 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900 overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-cyan-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <span className="relative">{language === "en" ? "Schedule a discovery call" : "Planifier un appel de découverte"}</span>
@@ -126,7 +126,7 @@ export const Cta = () => {
                     <div className="space-y-3">
                       <a
                         href="mailto:skynet.consulting.dz@email.com"
-                        className="w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-all duration-300 hover:shadow-lg"
+                        className="w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 text-base font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 transition-all duration-300 hover:shadow-lg active:scale-95 focus:ring-2 focus:ring-gray-400/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                       >
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
