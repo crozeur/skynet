@@ -388,7 +388,7 @@ export const translations = {
 
     faq_q6: "Pouvez-vous travailler avec nos outils ?",
     faq_a6:
-      "Oui. Nous nous intégrons aux principales solutions SIEM/EDR/cloud/ticketing. Si vous disposez déjà d'outils, nous nous connectons ; sinon, nous fournissons une stack managée prête à l'emploi.",
+      "Oui. Nous intégrons les principales solutions SIEM/EDR/cloud/ticketing. Si vous disposez déjà d'outils, nous les connectons ; sinon, nous fournissons une stack managée prête à l'emploi.",
 
     // CTA
     cta_title: "Prêt à Sécuriser Votre Organisation ?",
@@ -419,14 +419,14 @@ export const translations = {
 
     // About Section
     about_title: "Skynet Consulting : Votre partenaire technologique mondial",
-    about_intro: "Skynet Consulting est une société de conseil en cybersécurité proposant des solutions de niveau entreprise à l'échelle internationale. Fondée par deux frères, nous nous positionnons comme le partenaire de confiance des organisations de toutes tailles, des startups aux grands groupes.",
+    about_intro: "Skynet Consulting est une société de conseil en cybersécurité proposant des solutions de niveau entreprise à l'échelle internationale. Fondée par deux frères, la société est le partenaire de confiance des organisations de toutes tailles, des startups aux grands groupes.",
     about_expertise_title: "Notre Expertise",
     about_expertise_market: "Expertise des marchés internationaux",
     about_expertise_market_desc: "Notre connaissance approfondie des environnements économiques diversifiés nous permet d'intervenir efficacement sur les marchés internationaux. Cette expertise est essentielle pour adapter nos services aux besoins de chaque région et saisir les opportunités émergentes.",
     about_expertise_innovation: "Veille technologique",
     about_expertise_innovation_desc: "L'intégration constante des dernières innovations technologiques est au cœur de notre approche. Nous restons ainsi à la pointe pour offrir des solutions modernes et performantes à nos clients partout dans le monde.",
     about_expertise_client: "Approche client",
-    about_expertise_client_desc: "Nous nous distinguons par notre capacité à élaborer des solutions sur mesure, parfaitement adaptées aux enjeux de chaque client. Cette approche personnalisée garantit une réponse optimale aux besoins de nos clients, quel que soit leur secteur ou leur région.",
+    about_expertise_client_desc: "Notre force réside dans l'élaboration de solutions sur mesure, parfaitement adaptées aux enjeux de chaque client. Cette approche personnalisée garantit une réponse optimale à leurs besoins, quel que soit leur secteur ou leur région.",
     about_expertise_quality: "Qualité et sécurité",
     about_expertise_quality_desc: "Ces domaines cruciaux constituent notre priorité. Nous mettons en œuvre des processus rigoureux et respectons les normes internationales les plus strictes, garantissant ainsi la fiabilité et la performance de nos services.",
     about_conclusion: "Cette combinaison d'expertises nous positionne comme le partenaire de référence pour les organisations mondiales souhaitant renforcer leur cybersécurité, avec un accompagnement complet et sur mesure.",
