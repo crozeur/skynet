@@ -19,12 +19,12 @@ export const Hero = () => {
 
   return (
     <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-all duration-700" aria-hidden />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.12),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.1),transparent_35%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.14),transparent_35%)]" aria-hidden />
 
       <Container className="relative">
         <div className="text-center max-w-5xl mx-auto mb-12 lg:mb-14">
-          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-cyan-500/10 dark:from-emerald-400/10 dark:via-blue-400/10 dark:to-cyan-400/10 backdrop-blur-sm border border-emerald-400/30 dark:border-emerald-400/20 shadow-lg shadow-emerald-500/10 animate-[fadeInUp_0.6s_ease-out] group hover:scale-105 transition-transform duration-300">
+          <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500/10 via-blue-500/10 to-cyan-500/10 dark:from-emerald-400/10 dark:via-blue-400/10 dark:to-cyan-400/10 backdrop-blur-sm border border-emerald-400/30 dark:border-emerald-400/20 shadow-lg shadow-emerald-500/10 animate-[fadeInUp_0.6s_ease-out] group hover:scale-105 active:scale-95 transition-all duration-300">
             <div className="relative">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
               <span className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-ping opacity-75" />
@@ -47,7 +47,7 @@ export const Hero = () => {
             {[t.hero_benefit1, t.hero_benefit2, t.hero_benefit3].map((benefit, idx) => (
               <div
                 key={benefit}
-                className="group relative overflow-hidden rounded-2xl border-2 border-blue-200/60 dark:border-white/10 bg-gradient-to-br from-white via-blue-50/30 to-white dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-xl shadow-blue-500/5 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300 dark:hover:border-white/20"
+                className="group relative overflow-hidden rounded-2xl border-2 border-blue-200/60 dark:border-white/10 bg-gradient-to-br from-white via-blue-50/30 to-white dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-xl shadow-blue-500/5 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 active:translate-y-0 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300 dark:hover:border-white/20 cursor-default"
                 style={{ animationDelay: `${0.1 * idx}s`, animationFillMode: "backwards" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.08] via-cyan-500/[0.06] to-indigo-500/[0.08] dark:from-blue-600/12 dark:via-cyan-500/12 dark:to-indigo-600/12 opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
@@ -67,7 +67,7 @@ export const Hero = () => {
               {["24/7 SOC", "Evidence-ready reports", "Deployment < 10 days"].map((pill, idx) => (
                 <span
                   key={pill}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-white/10 dark:to-white/8 border border-blue-300/50 dark:border-white/15 text-xs font-bold text-blue-700 dark:text-blue-100 shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-white/10 dark:to-white/8 border border-blue-300/50 dark:border-white/15 text-xs font-bold text-blue-700 dark:text-blue-100 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
                   style={{ animationDelay: `${0.08 * idx}s`, animationFillMode: "backwards" }}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -122,7 +122,7 @@ export const Hero = () => {
                     href="https://calendly.com/skynet-consulting-dz/30min"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-sm font-bold hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 transition-all duration-500 shadow-2xl shadow-blue-500/40 hover:shadow-[0_20px_50px_-12px_rgba(59,130,246,0.6)] hover:-translate-y-0.5 hover:scale-105"
+                    className="group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-sm font-bold hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 active:scale-95 transition-all duration-300 shadow-2xl shadow-blue-500/40 hover:shadow-[0_20px_50px_-12px_rgba(59,130,246,0.6)] hover:-translate-y-0.5 hover:scale-105"
                   >
                     {t.hero_schedule_call}
                     <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

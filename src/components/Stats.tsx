@@ -54,7 +54,7 @@ export const Stats = () => {
             {metrics.map((metric, index) => (
               <div
                 key={index}
-                className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/80 backdrop-blur rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-7 shadow-[0_18px_60px_-40px_rgba(15,23,42,0.55)] transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl animate-[fadeInUp_0.6s_ease-out]"
+                className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/80 backdrop-blur rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-7 shadow-[0_18px_60px_-40px_rgba(15,23,42,0.55)] transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] cursor-default animate-[fadeInUp_0.6s_ease-out]"
                 style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "backwards" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-cyan-500/8 to-indigo-500/8 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none z-0" />
@@ -112,7 +112,7 @@ export const Stats = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <a
                 href="#hero"
-                className="group inline-flex items-center justify-center px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 text-white font-semibold shadow-[0_18px_45px_-30px_rgba(59,130,246,0.9)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-28px_rgba(59,130,246,0.95)]"
+                className="group inline-flex items-center justify-center px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 text-white font-semibold shadow-[0_18px_45px_-30px_rgba(59,130,246,0.9)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-28px_rgba(59,130,246,0.95)] active:scale-95 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
               >
                 {language === "en" ? "Request a Free Audit" : "Demander un audit gratuit"}
                 <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

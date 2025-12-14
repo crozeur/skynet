@@ -104,7 +104,7 @@ export const CaseStudies = () => {
         {t.cases.map((caseStudy, idx) => (
           <div
             key={idx}
-            className="group relative flex flex-col p-7 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:-translate-y-2 transition-all duration-400 animate-[fadeInUp_0.6s_ease-out]"
+            className="group relative flex flex-col p-7 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-2xl hover:-translate-y-2 active:scale-[0.98] active:shadow-xl transition-all duration-400 animate-[fadeInUp_0.6s_ease-out] cursor-default"
             style={{ animationDelay: `${idx * 0.1}s`, animationFillMode: "backwards" }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl" />

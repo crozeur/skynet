@@ -124,7 +124,7 @@ export const Services = () => {
                   <button
                     key={idx}
                     onClick={() => setActiveTab(idx)}
-                    className={`group relative flex w-full items-start gap-3 sm:gap-4 rounded-2xl border px-3 py-3 sm:px-5 sm:py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer shadow-md hover:shadow-xl ${
+                    className={`group relative flex w-full items-start gap-3 sm:gap-4 rounded-2xl border px-3 py-3 sm:px-5 sm:py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer shadow-md hover:shadow-xl active:scale-[0.98] focus:ring-2 focus:ring-blue-500/50 focus:outline-none ${
                       isActive
                         ? "border-blue-400 bg-gradient-to-br from-white via-blue-50/50 to-cyan-50/30 shadow-2xl shadow-blue-200/60 dark:border-blue-500/80 dark:from-blue-900/20 dark:via-blue-800/10 dark:to-cyan-900/10 dark:shadow-blue-900/40 scale-105"
                         : "border-slate-200 bg-white/90 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-white hover:shadow-xl hover:shadow-blue-100/50 hover:scale-[1.02] dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:from-blue-900/10 dark:hover:to-transparent"

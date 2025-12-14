@@ -120,7 +120,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md"
+            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
           />
         </div>
 
@@ -136,7 +136,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md"
+            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
           />
         </div>
 
@@ -153,7 +153,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md"
+            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
           />
         </div>
 
@@ -196,10 +196,20 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:shadow-xl hover:-translate-y-0.5 text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ animation: "pulseGlow 2.8s ease-in-out infinite" }}
+            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] active:shadow-lg text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            style={{ animation: loading ? "none" : "pulseGlow 2.8s ease-in-out infinite" }}
           >
-            {loading ? t.audit_form_sending : t.audit_form_submit}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {t.audit_form_sending}
+              </span>
+            ) : (
+              t.audit_form_submit
+            )}
           </button>
         </div>
       </form>
