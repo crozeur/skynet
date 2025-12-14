@@ -18,9 +18,14 @@ export const Services = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [activePanel, setActivePanel] = useState<"solution" | "results">("solution");
   const contentRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
-  // Auto-scroll to content when tab changes on mobile
+  // Auto-scroll to content when tab changes on mobile (but not on first render)
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (contentRef.current && window.innerWidth < 1024) {
       setTimeout(() => {
         contentRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
