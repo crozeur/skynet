@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Container } from "@/components/Container";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translations } from "@/lib/translations";
@@ -17,6 +17,16 @@ export const Services = () => {
   const t = translations[language];
   const [activeTab, setActiveTab] = useState(0);
   const [activePanel, setActivePanel] = useState<"solution" | "results">("solution");
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to content when tab changes on mobile
+  useEffect(() => {
+    if (contentRef.current && window.innerWidth < 1024) {
+      setTimeout(() => {
+        contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [activeTab]);
 
   const services = [
     {
@@ -181,7 +191,7 @@ export const Services = () => {
 
             {/* Service Content */}
             {/* Mobile: problem card + toggle between Solution / Results, then CTA */}
-            <div className="md:hidden space-y-4" key={`mobile-${activeTab}`}>
+            <div ref={contentRef} className="md:hidden space-y-4" key={`mobile-${activeTab}`}>
               {/* Problem & For */}
               <div className="w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
