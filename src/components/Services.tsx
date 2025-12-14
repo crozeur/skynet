@@ -84,10 +84,10 @@ export const Services = () => {
   const activeService = services[activeTab];
 
   return (
-    <Container className="py-10 lg:py-12 !overflow-visible">
-      <div className="relative overflow-visible rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+    <Container className="py-10 lg:py-12">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none max-w-5xl mx-auto">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
-        <div className="relative px-4 py-6 sm:px-6 sm:py-8 md:px-10 lg:px-12 min-w-0">
+        <div className="relative px-5 py-6 sm:px-6 sm:py-8 md:px-8 lg:px-12 min-w-0">
           <div className="mb-10 text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-white/10 dark:text-blue-100">
               {t.services_section_title}
