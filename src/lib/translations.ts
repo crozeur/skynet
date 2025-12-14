@@ -234,7 +234,7 @@ export const translations = {
     schedule_demo: "Planifier un appel de découverte",
     schedule_demo_subtext: "30 minutes avec un expert en cybersécurité Skynet pour discuter de votre situation.",
     contact_sales: "Nous contacter",
-    audit_cta: "Demander un audit de sécurité gratuit",
+    audit_cta: "Demandez un audit de sécurité gratuit",
 
     // Hero
     hero_title: "Protégez vos infrastructures critiques en toute confiance",
@@ -243,7 +243,7 @@ export const translations = {
     hero_benefit1: "Surveillance continue par notre centre de sécurité (SOC) et réponse aux menaces 24/7, assistées par IA",
     hero_benefit2: "Audits de sécurité et évaluations de conformité sur l'ensemble du SI",
     hero_benefit3: "Conseil expert et stratégie adaptés à tous secteurs et tailles d'organisation",
-    hero_audit_title: "Demander un audit de sécurité gratuit",
+    hero_audit_title: "Demandez un audit de sécurité gratuit",
     hero_audit_desc: "Partagez votre adresse email : nous évaluerons votre posture de sécurité et vous enverrons un plan d'action priorisé et opérationnel.",
     hero_call_to_action: "Vous préférez un échange direct ? 30 minutes avec un expert en cybersécurité senior.",
     hero_schedule_call: "Planifier un appel de découverte",
@@ -432,7 +432,7 @@ export const translations = {
     about_conclusion: "Cette combinaison d'expertises nous positionne comme le partenaire de référence pour les organisations mondiales souhaitant renforcer leur cybersécurité, avec un accompagnement complet et sur mesure.",
 
     // Audit Form
-    audit_form_title: "Demander un audit de sécurité gratuit",
+    audit_form_title: "Demandez un audit de sécurité gratuit",
     audit_form_subtitle: "Partagez votre adresse email : nous évaluerons votre posture de sécurité et vous enverrons un plan d'action priorisé et opérationnel.",
     audit_form_name_label: "Nom",
     audit_form_name_placeholder: "Votre nom",
