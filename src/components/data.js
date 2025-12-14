@@ -1,60 +1,54 @@
 import {
-  FaceSmileIcon,
-  ChartBarSquareIcon,
-  CursorArrowRaysIcon,
-  DevicePhoneMobileIcon,
-  AdjustmentsHorizontalIcon,
-  SunIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  BoltIcon,
+  GlobeAltIcon,
+  ArchiveBoxIcon,
+  EyeIcon,
 } from "@heroicons/react/24/solid";
 
-import benefitOneImg from "../../public/img/benefit-one.png";
-import benefitTwoImg from "../../public/img/benefit-two.png";
-
 const benefitOne = {
-  title: "Highlight your benefits",
-  desc: "You can use this space to highlight your first benefit or a feature of your product. It can also contain an image or Illustration like in the example along with some bullet points.",
-  image: benefitOneImg,
+  title: "Why Skynet?",
+  desc: "Skynet delivers enterprise-grade security capabilities specifically designed for SMBs and mid-market organizations. Our AI-powered platform provides continuous monitoring, rapid threat detection, and expert-led incident response.",
   bullets: [
     {
-      title: "Understand your customers",
-      desc: "Then explain the first point breifly in one or two lines.",
-      icon: <FaceSmileIcon />,
+      title: "24/7 SOC Monitoring",
+      desc: "Round-the-clock security operations center staffed by certified analysts monitoring your environment.",
+      icon: <ShieldCheckIcon />,
     },
     {
-      title: "Improve acquisition",
-      desc: "Here you can add the next benefit point.",
-      icon: <ChartBarSquareIcon />,
+      title: "AI-Powered Threat Detection",
+      desc: "Advanced machine learning algorithms detect known and unknown threats in real-time.",
+      icon: <SparklesIcon />,
     },
     {
-      title: "Drive customer retention",
-      desc: "This will be your last bullet point in this section.",
-      icon: <CursorArrowRaysIcon />,
+      title: "Fast Incident Response",
+      desc: "Immediate containment and remediation when threats are detected, minimizing impact.",
+      icon: <BoltIcon />,
     },
   ],
 };
 
 const benefitTwo = {
-  title: "Offer more benefits here",
-  desc: "You can use this same layout with a flip image to highlight your rest of the benefits of your product. It can also contain an image or Illustration as above section along with some bullet points.",
-  image: benefitTwoImg,
+  title: "Our MSSP Services",
+  desc: "Comprehensive security services to protect your organization from evolving cyber threats. From detection to response, we've got you covered.",
   bullets: [
     {
-      title: "Mobile Responsive Template",
-      desc: "Nextly is designed as a mobile first responsive template.",
-      icon: <DevicePhoneMobileIcon />,
+      title: "Managed Detection & Response (MDR)",
+      desc: "24/7 monitoring, threat hunting, and rapid incident response from our expert team.",
+      icon: <EyeIcon />,
     },
     {
-      title: "Powered by Next.js & TailwindCSS",
-      desc: "This template is powered by latest technologies and tools.",
-      icon: <AdjustmentsHorizontalIcon />,
+      title: "Threat Hunting & Intelligence",
+      desc: "Proactive hunting for advanced threats and continuous threat intelligence feeds.",
+      icon: <ArchiveBoxIcon />,
     },
     {
-      title: "Dark & Light Mode",
-      desc: "Nextly comes with a zero-config light & dark mode. ",
-      icon: <SunIcon />,
+      title: "Vulnerability & Compliance Management",
+      desc: "Identify, prioritize, and remediate vulnerabilities while maintaining compliance standards.",
+      icon: <GlobeAltIcon />,
     },
   ],
 };
 
-
-export {benefitOne, benefitTwo};
+export { benefitOne, benefitTwo };

@@ -16,12 +16,12 @@ const ThemeChanger = () => {
       {theme === "dark" ? (
         <button
           onClick={() => setTheme("light")}
-          className="text-gray-300 rounded-full outline-none focus:outline-none ">
+          className="text-gray-200 rounded-full outline-none focus:outline-none p-2 hover:text-white transition-colors">
           <span className="sr-only">Light Mode</span>
 
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="w-5 h-5"
+            className="w-7 h-7"
             viewBox="0 0 20 20"
             fill="currentColor">
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
@@ -30,16 +30,16 @@ const ThemeChanger = () => {
       ) : (
         <button
           onClick={() => setTheme("dark")}
-          className="text-gray-500 rounded-full outline-none focus:outline-none focus-visible:ring focus-visible:ring-gray-100 focus:ring-opacity-20">
+          className="text-gray-600 rounded-full outline-none focus:outline-none focus-visible:ring focus-visible:ring-gray-200 focus:ring-opacity-40 p-2 hover:text-gray-800 transition-colors">
           <span className="sr-only">Dark Mode</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="28"
+            height="28"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1"
+            strokeWidth="1.2"
             strokeLinecap="round"
             strokeLinejoin="round">
             <circle cx="12" cy="12" r="5" />

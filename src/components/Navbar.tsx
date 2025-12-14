@@ -1,104 +1,122 @@
 "use client";
-import Link from "next/link";
+
+import { useState } from "react";
+import { Container } from "@/components/Container";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "./LanguageProvider";
 import ThemeChanger from "./DarkSwitch";
-import Image from "next/image"
-import { Disclosure } from "@headlessui/react";
 
 export const Navbar = () => {
-  const navigation = [
-    "Product",
-    "Features",
-    "Pricing",
-    "Company",
-    "Blog",
-  ];
+  const { language } = useLanguage();
+  const [open, setOpen] = useState(false);
+  // translations are consumed directly inside components that need them
 
   return (
-    <div className="w-full">
-      <nav className="container relative flex flex-wrap items-center justify-between p-8 mx-auto lg:justify-between xl:px-1">
-        {/* Logo  */}
-        <Link href="/">
-          <span className="flex items-center space-x-2 text-2xl font-medium text-indigo-500 dark:text-gray-100">
-              <span>
-                <Image
-                  src="/img/logo.svg"
-                  width="32"
-                  alt="N"
-                  height="32"
-                  className="w-8"
-                />
-              </span>
-            <span>Nextly</span>
-          </span>
-        </Link>
+    <nav className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 shadow-md shadow-gray-200/60 dark:shadow-black/30 relative">
+      <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
+        <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100">
+          <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-32 w-auto md:h-36 hover:opacity-90 transition-opacity duration-150" />
+          <span className="sr-only">Skynet Consulting</span>
+        </a>
+        <div className="hidden md:flex items-center gap-5">
+          <a
+            href="/#hero"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "Home" : "Accueil"}
+          </a>
+          <a
+            href="/#case-studies"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "Success Stories" : "Nos Succès"}
+          </a>
+          <a
+            href="/#services-overview"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "Services" : "Nos Services"}
+          </a>
+          <a
+            href="/#compliance"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "Compliance" : "Conformité & Risques"}
+          </a>
+          <a
+            href="/#about"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "About Us" : "À Propos"}
+          </a>
+          <a
+            href="/#contact"
+            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          >
+            {language === "en" ? "Contact" : "Nous Contacter"}
+          </a>
+        </div>
+        <div className="flex items-center gap-3 md:gap-4">
+          <LanguageSwitcher />
+          
+          <div className="md:hidden">
+            <button
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="inline-flex items-center justify-center p-3 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {open ? (
+                <svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="h-7 w-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
 
-        {/* get started  */}
-        <div className="gap-3 nav__item mr-2 lg:flex ml-auto lg:ml-0 lg:order-2">
-            <ThemeChanger />
-            <div className="hidden mr-3 lg:flex nav__item">
-              <Link href="/" className="px-6 py-2 text-white bg-indigo-600 rounded-md md:ml-5">
-                Get Started
-              </Link>
+          <ThemeChanger />
+        </div>
+      </Container>
+
+      {/* Accent line */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-blue-500/40 via-cyan-400/40 to-blue-600/40"></div>
+
+      {/* Mobile menu */}
+      {/* Mobile menu: uses max-height + opacity transition for slide/fade effect */}
+      <div className={`md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${open ? 'max-h-96 opacity-100 py-3' : 'max-h-0 opacity-0 py-0'}`}>
+        <Container className="px-4">
+          <div className={`flex flex-col items-start gap-4 ${open ? '' : 'pointer-events-none'}`}>
+            <a href="/#hero" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Home" : "Accueil"}
+            </a>
+            <a href="/#case-studies" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Success Stories" : "Nos Succès"}
+            </a>
+            <a href="/#services-overview" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Services" : "Nos Services"}
+            </a>
+            <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Compliance" : "Conformité & Risques"}
+            </a>
+            <a href="/#about" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "About Us" : "À Propos"}
+            </a>
+            <a href="/#contact" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Contact" : "Nous Contacter"}
+            </a>
+
+            <div className="pt-2 w-full flex items-center gap-4">
+              <ThemeChanger />
+              <LanguageSwitcher />
             </div>
-        </div>
-                
-        <Disclosure>
-          {({ open }) => (
-            <>
-                <Disclosure.Button
-                  aria-label="Toggle Menu"
-                  className="px-2 py-1 text-gray-500 rounded-md lg:hidden hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:text-gray-300 dark:focus:bg-trueGray-700">
-                  <svg
-                    className="w-6 h-6 fill-current"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24">
-                    {open && (
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M18.278 16.864a1 1 0 0 1-1.414 1.414l-4.829-4.828-4.828 4.828a1 1 0 0 1-1.414-1.414l4.828-4.829-4.828-4.828a1 1 0 0 1 1.414-1.414l4.829 4.828 4.828-4.828a1 1 0 1 1 1.414 1.414l-4.828 4.829 4.828 4.828z"
-                      />
-                    )}
-                    {!open && (
-                      <path
-                        fillRule="evenodd"
-                        d="M4 5h16a1 1 0 0 1 0 2H4a1 1 0 1 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2zm0 6h16a1 1 0 0 1 0 2H4a1 1 0 0 1 0-2z"
-                      />
-                    )}
-                  </svg>
-                </Disclosure.Button>
-
-                <Disclosure.Panel className="flex flex-wrap w-full my-5 lg:hidden">
-                  <>
-                    {navigation.map((item, index) => (
-                      <Link key={index} href="/" className="w-full px-4 py-2 -ml-4 text-gray-500 rounded-md dark:text-gray-300 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 dark:focus:bg-gray-800 focus:outline-none">
-                          {item}
-                      </Link>
-                    ))}
-                    <Link href="/" className="w-full px-6 py-2 mt-3 text-center text-white bg-indigo-600 rounded-md lg:ml-5">         
-                        Get Started
-                    </Link>
-                  </>
-                </Disclosure.Panel>
-            </>
-          )}
-        </Disclosure>
-        
-        {/* menu  */}
-        <div className="hidden text-center lg:flex lg:items-center">
-          <ul className="items-center justify-end flex-1 pt-6 list-none lg:pt-0 lg:flex">
-            {navigation.map((menu, index) => (
-              <li className="mr-3 nav__item" key={index}>
-                <Link href="/" className="inline-block px-4 py-2 text-lg font-normal text-gray-800 no-underline rounded-md dark:text-gray-200 hover:text-indigo-500 focus:text-indigo-500 focus:bg-indigo-100 focus:outline-none dark:focus:bg-gray-800">
-                    {menu}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-      </nav>
-    </div>
+          </div>
+        </Container>
+      </div>
+    </nav>
   );
-}
+};
 
