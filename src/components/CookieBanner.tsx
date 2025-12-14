@@ -8,10 +8,7 @@ export function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
-    if (!stored) {
-      setVisible(true);
-    }
+    // Cookie banner disabled
   }, []);
 
   const accept = () => {
