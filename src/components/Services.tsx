@@ -92,7 +92,7 @@ export const Services = () => {
             <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-white/10 dark:text-blue-100">
               {t.services_section_title}
             </p>
-            <h2 className="mt-4 text-[1.75rem] leading-[1.25] sm:text-3xl lg:text-4xl xl:text-5xl font-bold sm:leading-tight text-slate-900 dark:text-white">
+            <h2 className="mt-4 text-[1.75rem] leading-[1.25] sm:text-3xl lg:text-4xl xl:text-5xl font-bold sm:leading-tight text-slate-900 break-words dark:text-white">
               {t.services_section_subtitle}
             </h2>
             <p className="mt-3 text-sm sm:text-base md:text-lg text-slate-700 max-w-3xl mx-auto dark:text-slate-200/90">
@@ -210,7 +210,7 @@ export const Services = () => {
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-blue-900 dark:text-white">{activeService.solution}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-blue-900 break-words dark:text-white">{activeService.solution}</h3>
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.points.map((point, idx) => (
@@ -233,7 +233,7 @@ export const Services = () => {
                         <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-emerald-900 dark:text-white">{activeService.results}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-emerald-900 break-words dark:text-white">{activeService.results}</h3>
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.resultsList.map((result, idx) => (
@@ -253,7 +253,7 @@ export const Services = () => {
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-100">
                       {language === "en" ? "Custom Engagements" : "Engagements personnalisés"}
                     </p>
-                    <h4 className="text-xl font-bold text-slate-900 mt-1 dark:text-white">
+                    <h4 className="text-xl font-bold text-slate-900 mt-1 break-words dark:text-white">
                       {language === "en"
                         ? "Tailored scopes and clear execution."
                         : "Périmètres adaptés et exécution claire."}
@@ -269,13 +269,13 @@ export const Services = () => {
                       href="https://calendly.com/skynet-consulting-dz/30min"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-blue-300 hover:scale-105 dark:shadow-blue-900/40"
+                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-blue-300 hover:scale-105 dark:shadow-blue-900/40 break-words"
                     >
                       {language === "en" ? "Book a call" : "Réserver un appel"}
                     </a>
                     <a
                       href="mailto:skynet.consulting.dz@email.com"
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/30 dark:text-white dark:hover:border-white/60"
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/30 dark:text-white dark:hover:border-white/60 break-words"
                     >
                       {language === "en" ? "Email us" : "Nous écrire"}
                     </a>
