@@ -48,7 +48,7 @@ export function StickyCta() {
         href={calendlyUrl}
         target="_blank"
         rel="noreferrer"
-        className="md:hidden fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 shadow-xl shadow-blue-500/25 text-white text-sm font-semibold"
+        className="md:hidden fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 px-5 py-3.5 rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 shadow-2xl shadow-blue-500/40 text-white text-sm font-bold hover:scale-105 active:scale-95 transition-transform duration-200"
       >
         <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h16v16H4z" />

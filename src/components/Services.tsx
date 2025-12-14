@@ -92,7 +92,7 @@ export const Services = () => {
             <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-white/10 dark:text-blue-100">
               {t.services_section_title}
             </p>
-            <h2 className="mt-4 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-slate-900 dark:text-white">
+            <h2 className="mt-4 text-[1.75rem] leading-[1.25] sm:text-3xl lg:text-4xl xl:text-5xl font-bold sm:leading-tight text-slate-900 dark:text-white">
               {t.services_section_subtitle}
             </h2>
             <p className="mt-3 text-sm sm:text-base md:text-lg text-slate-700 max-w-3xl mx-auto dark:text-slate-200/90">
@@ -124,7 +124,7 @@ export const Services = () => {
                   <button
                     key={idx}
                     onClick={() => setActiveTab(idx)}
-                    className={`group relative flex w-full items-start gap-3 sm:gap-4 rounded-2xl border px-3 py-3 sm:px-5 sm:py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer ${
+                    className={`group relative flex w-full items-start gap-3 sm:gap-4 rounded-2xl border px-3 py-3 sm:px-5 sm:py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer shadow-md hover:shadow-xl ${
                       isActive
                         ? "border-blue-400 bg-gradient-to-br from-white via-blue-50/50 to-cyan-50/30 shadow-2xl shadow-blue-200/60 dark:border-blue-500/80 dark:from-blue-900/20 dark:via-blue-800/10 dark:to-cyan-900/10 dark:shadow-blue-900/40 scale-105"
                         : "border-slate-200 bg-white/90 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-white hover:shadow-xl hover:shadow-blue-100/50 hover:scale-[1.02] dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:from-blue-900/10 dark:hover:to-transparent"
