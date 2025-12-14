@@ -87,15 +87,15 @@ export const Services = () => {
     <Container className="py-10 lg:py-12">
       <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
-        <div className="relative px-6 py-10 md:px-10 lg:px-12">
+        <div className="relative px-4 py-8 sm:px-6 sm:py-10 md:px-10 lg:px-12">
           <div className="mb-10 text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-white/10 dark:text-blue-100">
               {t.services_section_title}
             </p>
-            <h2 className="mt-4 text-4xl lg:text-5xl font-bold leading-tight text-slate-900 dark:text-white">
+            <h2 className="mt-4 text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight text-slate-900 dark:text-white">
               {t.services_section_subtitle}
             </h2>
-            <p className="mt-3 text-base md:text-lg text-slate-700 max-w-3xl mx-auto dark:text-slate-200/90">
+            <p className="mt-3 text-sm sm:text-base md:text-lg text-slate-700 max-w-3xl mx-auto dark:text-slate-200/90">
               {language === "en"
                 ? "Pick the pillar you need now and expand later. Each offer is designed to deliver fast, tangible results."
                 : "Choisissez le pilier dont vous avez besoin maintenant et étendez ensuite. Chaque offre est conçue pour délivrer des résultats rapides et concrets."}
@@ -124,7 +124,7 @@ export const Services = () => {
                   <button
                     key={idx}
                     onClick={() => setActiveTab(idx)}
-                    className={`group relative flex w-full items-start gap-4 rounded-2xl border px-5 py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer ${
+                    className={`group relative flex w-full items-start gap-3 sm:gap-4 rounded-2xl border px-3 py-3 sm:px-5 sm:py-5 text-left transition-all duration-300 backdrop-blur cursor-pointer ${
                       isActive
                         ? "border-blue-400 bg-gradient-to-br from-white via-blue-50/50 to-cyan-50/30 shadow-2xl shadow-blue-200/60 dark:border-blue-500/80 dark:from-blue-900/20 dark:via-blue-800/10 dark:to-cyan-900/10 dark:shadow-blue-900/40 scale-105"
                         : "border-slate-200 bg-white/90 hover:border-blue-300 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-white hover:shadow-xl hover:shadow-blue-100/50 hover:scale-[1.02] dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:from-blue-900/10 dark:hover:to-transparent"
@@ -136,7 +136,7 @@ export const Services = () => {
                     )}
                     
                     <span
-                      className={`flex h-14 w-14 items-center justify-center rounded-xl border shadow-lg transition-all duration-300 ${
+                      className={`flex h-10 w-10 sm:h-14 sm:w-14 items-center justify-center rounded-xl border shadow-lg transition-all duration-300 ${
                         isActive
                           ? "border-blue-300 bg-gradient-to-br from-blue-100 to-cyan-100 text-blue-700 scale-110 shadow-blue-200 dark:border-blue-400/60 dark:from-blue-500/30 dark:to-cyan-500/30 dark:text-white"
                           : "border-slate-200 bg-gradient-to-br from-slate-50 to-white text-slate-600 group-hover:border-blue-200 group-hover:from-blue-50 group-hover:to-cyan-50 group-hover:text-blue-600 group-hover:scale-105 dark:border-white/10 dark:from-white/10 dark:to-white/5 dark:text-white"
@@ -157,7 +157,7 @@ export const Services = () => {
                           {language === "en" ? "Offer" : "Offre"}
                         </span>
                       </div>
-                      <p className={`text-lg font-bold leading-tight transition-colors ${
+                      <p className={`text-base sm:text-lg font-bold leading-tight transition-colors ${
                         isActive 
                           ? "text-blue-900 dark:text-white" 
                           : "text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300"
@@ -181,7 +181,7 @@ export const Services = () => {
             {/* Service Content */}
             <div className="grid gap-5 lg:grid-cols-2 animate-[fadeInUp_0.5s_ease-out]" key={activeTab}>
               {/* Problem & For */}
-              <div className="col-span-2 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-6 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
+              <div className="col-span-2 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-4 sm:p-6 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -201,7 +201,7 @@ export const Services = () => {
               </div>
 
               {/* Solution */}
-              <div className="relative group rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-6 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
+              <div className="relative group rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-4 sm:p-6 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-4">
@@ -210,7 +210,7 @@ export const Services = () => {
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-blue-900 dark:text-white">{activeService.solution}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-blue-900 dark:text-white">{activeService.solution}</h3>
                   </div>
                   <ul className="space-y-3">
                     {activeService.points.map((point, idx) => (
@@ -224,7 +224,7 @@ export const Services = () => {
               </div>
 
               {/* Results */}
-              <div className="relative group rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-6 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
+              <div className="relative group rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-4 sm:p-6 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-4">
@@ -233,7 +233,7 @@ export const Services = () => {
                         <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <h3 className="text-xl font-bold text-emerald-900 dark:text-white">{activeService.results}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-emerald-900 dark:text-white">{activeService.results}</h3>
                   </div>
                   <ul className="space-y-3">
                     {activeService.resultsList.map((result, idx) => (
