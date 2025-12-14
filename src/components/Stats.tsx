@@ -45,7 +45,7 @@ export const Stats = () => {
             title={t.stats_section_title || "Skynet en un coup d'œil"}
             align="center"
           />
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{language === "en" ? "Real service commitments, not vanity metrics." : "Des objectifs mesurables, pas d'indicateurs de vanité."}</p>
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{language === "en" ? "Measurable objectives, not vanity metrics." : "Des objectifs mesurables, pas d'indicateurs de vanité."}</p>
         </div>
 
         <div className="relative">
