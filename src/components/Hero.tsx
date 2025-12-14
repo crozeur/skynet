@@ -33,10 +33,10 @@ export const Hero = () => {
               {heroTag}
             </span>
           </div>
-          <h1 className="mt-6 text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.1] tracking-tight bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent animate-[fadeInUp_0.6s_ease-out] drop-shadow-sm">
+          <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.15] tracking-tight bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent animate-[fadeInUp_0.6s_ease-out] drop-shadow-sm">
             {heroTitle}
           </h1>
-          <p className="mt-5 text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-blue-100/90 max-w-4xl mx-auto animate-[fadeInUp_0.8s_ease-out] font-medium">
+          <p className="mt-4 text-base sm:text-lg lg:text-xl leading-relaxed text-gray-600 dark:text-blue-100/90 max-w-4xl mx-auto animate-[fadeInUp_0.8s_ease-out] font-medium">
             {heroDesc}
           </p>
         </div>
@@ -47,7 +47,7 @@ export const Hero = () => {
             {[t.hero_benefit1, t.hero_benefit2, t.hero_benefit3].map((benefit, idx) => (
               <div
                 key={benefit}
-                className="group relative overflow-hidden rounded-2xl border-2 border-blue-200/60 dark:border-white/10 bg-gradient-to-br from-white via-blue-50/30 to-white dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-6 py-5 shadow-xl shadow-blue-500/5 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300 dark:hover:border-white/20"
+                className="group relative overflow-hidden rounded-2xl border-2 border-blue-200/60 dark:border-white/10 bg-gradient-to-br from-white via-blue-50/30 to-white dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-4 py-4 sm:px-6 sm:py-5 shadow-xl shadow-blue-500/5 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300 dark:hover:border-white/20"
                 style={{ animationDelay: `${0.1 * idx}s`, animationFillMode: "backwards" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.08] via-cyan-500/[0.06] to-indigo-500/[0.08] dark:from-blue-600/12 dark:via-cyan-500/12 dark:to-indigo-600/12 opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
@@ -58,7 +58,7 @@ export const Hero = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="text-base lg:text-lg text-gray-900 dark:text-white leading-relaxed">{benefit}</p>
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-900 dark:text-white leading-relaxed">{benefit}</p>
                 </div>
               </div>
             ))}
@@ -79,7 +79,7 @@ export const Hero = () => {
 
           {/* Right: form card */}
           <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards]">
-            <div className="relative rounded-3xl border-2 border-blue-200/40 dark:border-white/10 bg-white/95 dark:bg-gray-900/70 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 dark:shadow-[0_28px_90px_-48px_rgba(0,0,0,0.75)] p-8 lg:p-10 transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_40px_130px_-50px_rgba(59,130,246,0.4)]">
+            <div className="relative rounded-3xl border-2 border-blue-200/40 dark:border-white/10 bg-white/95 dark:bg-gray-900/70 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 dark:shadow-[0_28px_90px_-48px_rgba(0,0,0,0.75)] p-5 sm:p-8 lg:p-10 transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_40px_130px_-50px_rgba(59,130,246,0.4)]">
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-indigo-50/80 dark:from-blue-600/10 dark:via-cyan-500/8 dark:to-indigo-600/10" aria-hidden />
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-0 hover:opacity-20 blur-2xl transition-opacity duration-700" aria-hidden />
               <div className="relative">
@@ -88,7 +88,7 @@ export const Hero = () => {
                     <p className="text-xs font-bold uppercase tracking-[0.1em] bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 dark:from-blue-400 dark:via-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent">
                       {t.audit_form_title}
                     </p>
-                    <h2 className="text-2xl lg:text-3xl font-extrabold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent mt-2 leading-tight">
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent mt-2 leading-tight">
                       {t.hero_audit_title}
                     </h2>
                     <p className="text-sm text-gray-600 dark:text-blue-100/80 mt-2 leading-relaxed">
@@ -105,7 +105,7 @@ export const Hero = () => {
 
                 <AuditForm />
 
-                <div className="mt-8 p-6 rounded-2xl border-2 border-blue-200/50 dark:border-white/10 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-blue-50/80 dark:from-white/[0.06] dark:via-cyan-500/[0.03] dark:to-white/[0.06] backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
+                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border-2 border-blue-200/50 dark:border-white/10 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-blue-50/80 dark:from-white/[0.06] dark:via-cyan-500/[0.03] dark:to-white/[0.06] backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
                   <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-blue-100">
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-white/10 border border-blue-300 dark:border-white/20 text-blue-600 dark:text-blue-100 shadow-sm">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">

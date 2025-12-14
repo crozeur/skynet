@@ -15,7 +15,7 @@ export const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-white/90 dark:bg-gray-900/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 shadow-md shadow-gray-200/60 dark:shadow-black/30 relative">
       <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100">
-          <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-32 w-auto md:h-36 hover:opacity-90 transition-opacity duration-150" />
+          <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-20 w-auto sm:h-24 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className="hidden md:flex items-center gap-5">
