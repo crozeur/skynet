@@ -85,9 +85,9 @@ export const Services = () => {
 
   return (
     <Container className="py-10 lg:py-12">
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+      <div className="relative overflow-x-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
-        <div className="relative px-4 py-8 sm:px-6 sm:py-10 md:px-10 lg:px-12">
+        <div className="relative px-3 py-6 sm:px-4 sm:py-8 md:px-10 lg:px-12">
           <div className="mb-10 text-center">
             <p className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:bg-white/10 dark:text-blue-100">
               {t.services_section_title}
@@ -179,7 +179,7 @@ export const Services = () => {
             </div>
 
             {/* Service Content */}
-            <div className="grid gap-5 lg:grid-cols-2 animate-[fadeInUp_0.5s_ease-out]" key={activeTab}>
+            <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0" key={activeTab}>
               {/* Problem & For */}
               <div className="col-span-2 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-4 sm:p-6 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -196,8 +196,8 @@ export const Services = () => {
                     {language === "en" ? "Challenge" : "Défi"}
                   </span>
                 </div>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-3 dark:text-slate-200/90">{activeService.for}</p>
-                <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed dark:text-white">{activeService.problem}</p>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-3 break-words dark:text-slate-200/90">{activeService.for}</p>
+                <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed break-words dark:text-white">{activeService.problem}</p>
               </div>
 
               {/* Solution */}
