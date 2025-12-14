@@ -181,7 +181,7 @@ export const Services = () => {
             {/* Service Content */}
             <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0 w-full" key={activeTab}>
               {/* Problem & For */}
-              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
+              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -201,8 +201,7 @@ export const Services = () => {
               </div>
 
               {/* Solution */}
-              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-blue-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:bg-slate-900">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg">
@@ -224,8 +223,7 @@ export const Services = () => {
               </div>
 
               {/* Results */}
-              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-emerald-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:bg-slate-900">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center shadow-lg">
@@ -247,7 +245,7 @@ export const Services = () => {
               </div>
 
               {/* CTA Card */}
-              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 backdrop-blur dark:border-white/10 dark:bg-white/5">
+              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-lg dark:border-white/10 dark:bg-slate-900">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-100">
