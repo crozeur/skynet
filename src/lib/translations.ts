@@ -240,7 +240,7 @@ export const translations = {
     hero_title: "Protégez vos infrastructures critiques en toute confiance",
     hero_desc:
       "Détection et réponse 24/7, audits complets et pilotage stratégique. Une approche intégrée pour sécuriser, auditer et gouverner votre cybersécurité.",
-    hero_benefit1: "MDR (détection, investigation, réponse) piloté par l'IA – 24/7",
+    hero_benefit1: "Surveillance et réponse aux menaces 24/7, assistées par IA",
     hero_benefit2: "Audits de sécurité et évaluations de conformité sur l'ensemble du SI",
     hero_benefit3: "Conseil expert et stratégie adaptés à tous secteurs et tailles d'organisation",
     hero_audit_title: "Demander un audit de sécurité gratuit",
