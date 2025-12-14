@@ -65,19 +65,8 @@
 
 @layer base {
   html {
-    zoom: 0.85;
     scroll-behavior: smooth;
     scroll-padding-top: 80px;
-  }
-
-  @supports not (zoom: 0.85) {
-    html {
-      transform: scale(0.85);
-      transform-origin: top center;
-    }
-    body {
-      width: calc(100% / 0.85);
-    }
   }
 
   html,
