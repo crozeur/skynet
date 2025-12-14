@@ -23,7 +23,7 @@ export const Services = () => {
   useEffect(() => {
     if (contentRef.current && window.innerWidth < 1024) {
       setTimeout(() => {
-        contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        contentRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       }, 100);
     }
   }, [activeTab]);
