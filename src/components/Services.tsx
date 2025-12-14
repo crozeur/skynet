@@ -84,8 +84,8 @@ export const Services = () => {
   const activeService = services[activeTab];
 
   return (
-    <Container className="py-10 lg:py-12 !overflow-x-visible">
-      <div className="relative overflow-visible rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
+    <Container className="py-10 lg:py-12">
+      <div className="relative overflow-x-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-blue-100/40 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-none">
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
         <div className="relative px-4 py-6 sm:px-6 sm:py-8 md:px-10 lg:px-12 min-w-0">
           <div className="mb-10 text-center">
@@ -203,7 +203,7 @@ export const Services = () => {
               {/* Solution */}
               <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative">
+                <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -226,7 +226,7 @@ export const Services = () => {
               {/* Results */}
               <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative">
+                <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center shadow-lg">
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
