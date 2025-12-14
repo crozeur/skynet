@@ -214,9 +214,9 @@ export const Services = () => {
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.points.map((point, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90">
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0">
                         <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
-                        <span>{point}</span>
+                        <span className="break-words flex-1 min-w-0">{point}</span>
                       </li>
                     ))}
                   </ul>
@@ -237,9 +237,9 @@ export const Services = () => {
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.resultsList.map((result, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90">
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0">
                         <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
-                        <span>{result}</span>
+                        <span className="break-words flex-1 min-w-0">{result}</span>
                       </li>
                     ))}
                   </ul>
