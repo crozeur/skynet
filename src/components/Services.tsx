@@ -115,7 +115,7 @@ export const Services = () => {
           </div>
 
           {/* Tabs */}
-          <div className="relative z-10 grid gap-4 sm:gap-5 lg:grid-cols-[1.05fr_1.4fr] min-w-0">
+          <div className="relative z-10 grid gap-4 sm:gap-5 xl:grid-cols-[1.05fr_1.4fr] min-w-0">
             <div className="space-y-3 sm:space-y-4">
               {services.map((service, idx) => {
                 const Icon = service.icon;
@@ -179,7 +179,7 @@ export const Services = () => {
             </div>
 
             {/* Service Content */}
-            <div className="grid gap-4 sm:gap-5 lg:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0" key={activeTab}>
+            <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0" key={activeTab}>
               {/* Problem & For */}
               <div className="col-span-2 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
