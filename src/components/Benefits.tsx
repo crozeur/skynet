@@ -30,18 +30,18 @@ export const Benefits = (props: Readonly<BenefitsProps>) => {
           title: t.benefit_two_title,
           desc: t.benefit_two_1_desc,
           bullets: [
-            { title: t.benefit_two_1, desc: t.benefit_two_1_desc },
-            { title: t.benefit_two_2, desc: t.benefit_two_2_desc },
-            { title: t.benefit_two_3, desc: t.benefit_two_3_desc },
+            { title: t.benefit_two_1, desc: t.benefit_two_1_desc, icon: undefined },
+            { title: t.benefit_two_2, desc: t.benefit_two_2_desc, icon: undefined },
+            { title: t.benefit_two_3, desc: t.benefit_two_3_desc, icon: undefined },
           ],
         }
       : {
           title: t.benefit_one_title,
           desc: t.benefit_one_1_desc,
           bullets: [
-            { title: t.benefit_one_1, desc: t.benefit_one_1_desc },
-            { title: t.benefit_one_2, desc: t.benefit_one_2_desc },
-            { title: t.benefit_one_3, desc: t.benefit_one_3_desc },
+            { title: t.benefit_one_1, desc: t.benefit_one_1_desc, icon: undefined },
+            { title: t.benefit_one_2, desc: t.benefit_one_2_desc, icon: undefined },
+            { title: t.benefit_one_3, desc: t.benefit_one_3_desc, icon: undefined },
           ],
         };
 
