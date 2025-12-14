@@ -28,7 +28,12 @@ export const Services = () => {
     }
     if (contentRef.current && window.innerWidth < 1024) {
       setTimeout(() => {
-        contentRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        const element = contentRef.current;
+        if (element) {
+          const yOffset = -80; // Offset to show Target Audience header
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
       }, 100);
     }
   }, [activeTab]);
