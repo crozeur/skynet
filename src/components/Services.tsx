@@ -196,8 +196,8 @@ export const Services = () => {
                     {language === "en" ? "Challenge" : "Défi"}
                   </span>
                 </div>
-                <p className="text-base text-slate-700 leading-relaxed mb-3 dark:text-slate-200/90">{activeService.for}</p>
-                <p className="text-lg font-semibold text-slate-900 leading-relaxed dark:text-white">{activeService.problem}</p>
+                <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-3 dark:text-slate-200/90">{activeService.for}</p>
+                <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed dark:text-white">{activeService.problem}</p>
               </div>
 
               {/* Solution */}
@@ -236,10 +236,10 @@ export const Services = () => {
                     <h3 className="text-lg sm:text-xl font-bold text-emerald-900 dark:text-white">{activeService.results}</h3>
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
-                    {activeService.points.map((point, idx) => (
+                    {activeService.resultsList.map((result, idx) => (
                       <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90">
-                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
-                        <span>{point}</span>
+                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
+                        <span>{result}</span>
                       </li>
                     ))}
                   </ul>
