@@ -42,7 +42,7 @@ export const translations = {
     // Service 1: SOC 24/7
     service1_title: "24/7 Surveillance & Response - External SOC",
     service1_for: "For Ministries, banks, large enterprises and VIO (vital importance operators)",
-    service1_problem: "Many organizations lack centralized supervision or incident response. Breaches can remain undetected for days, leaving systems exposed.",
+    service1_problem: "Many organizations lack centralized monitoring or incident response. Breaches can remain undetected for days, leaving systems exposed.",
     service1_solution: "Rapid deployment of an AI-powered external SOC with global coverage:",
     service1_point1: "24/7 monitoring of all servers, networks, firewalls, and critical applications",
     service1_point2: "Automatic threat detection with instant alerts",
@@ -74,7 +74,7 @@ export const translations = {
     // Service 3: Cloud Modernization & FinOps
     service3_title: "Cloud Modernization & Cost Optimization (FinOps)",
     service3_for: "Private groups, VIO, public institutions wanting to digitize or reduce IT costs",
-    service3_problem: "Infrastructure is costly (hardware, on-premises, poorly managed cloud). Concerns over control and security often delay cloud migration.",
+    service3_problem: "Infrastructure is costly (hardware, on-premises, poorly managed cloud). Security concerns and loss of control often delay cloud migration.",
     service3_solution: "Rapid assessment and modernization:",
     service3_point1: "Quick assessment of current infrastructure (on-prem + cloud)",
     service3_point2: "Progressive cloud migration proposal (sovereign or hybrid) with security",
@@ -154,7 +154,7 @@ export const translations = {
     faq_a5:
       "ISO 27001, SOC 2 Type II practices, GDPR alignment, and sector mappings (PCI-DSS, HIPAA). We provide audit-ready evidence and policy packs.",
 
-    faq_q6: "Can you work with our existing tools?",
+    faq_q6: "Can we work with our existing tools?",
     faq_a6:
       "Yes. We integrate with major SIEM/EDR/cloud and ticketing stacks. If you already have tooling, we connect; if not, we provision a managed stack for you.",
 
