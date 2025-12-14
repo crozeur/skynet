@@ -55,7 +55,7 @@ export const CaseStudies = () => {
       subtitle: "Protected organizations, measurable results",
       cases: [
         {
-          title: "Regional Bank – North Africa",
+          title: "Regional Bank – 50+ Branches",
           sector: "Financial Services | 24/7 Managed SOC",
           icon: "🏦",
           points: [
@@ -67,7 +67,7 @@ export const CaseStudies = () => {
           ],
         },
         {
-          title: "Government Ministry – Algeria",
+          title: "Government Ministry – Critical Infrastructure",
           sector: "Public Administration | Audit & Compliance",
           icon: "🏛️",
           points: [
@@ -79,11 +79,11 @@ export const CaseStudies = () => {
           ],
         },
         {
-          title: "European Industrial Group – International",
+          title: "Multinational Industrial Group – Global Operations",
           sector: "Manufacturing | Multi-site Managed Services",
           icon: "🏭",
           points: [
-            "Group with sites in Europe, North Africa and Middle East",
+            "Global industrial group with multiple regional sites",
             "Dispersed infrastructure, incidents undetected for weeks",
             "24/7 hybrid SOC for all sites, multilingual support",
             "40% reduction in cybersecurity costs",
