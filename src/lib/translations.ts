@@ -18,7 +18,7 @@ export const translations = {
     hero_benefit2: "Comprehensive security audits and compliance assessments for your entire IT infrastructure",
     hero_benefit3: "Expert consulting and strategic guidance adapted to all organization sizes and sectors",
     hero_audit_title: "Request a Free Security Audit",
-    hero_audit_desc: "Share your email so we can assess your security posture and deliver concrete, prioritized recommendations by email.",
+    hero_audit_desc: "Share your email address and we will assess your security posture and deliver concrete, prioritized recommendations.",
     hero_call_to_action: "Prefer a direct conversation? 30 minutes with a senior security expert.",
     hero_schedule_call: "Schedule a discovery call",
     stats_section_title: "Our Commitment to Excellence",
@@ -201,7 +201,7 @@ export const translations = {
 
     // Audit Form
     audit_form_title: "Request a Free Security Audit",
-    audit_form_subtitle: "Share your email so we can review your security posture and send a concise, prioritized action plan by email.",
+    audit_form_subtitle: "Share your email address and we will evaluate your security posture and send you a prioritized, actionable plan.",
     audit_form_name_label: "Name",
     audit_form_name_placeholder: "Your name",
     audit_form_company_label: "Company Name",
