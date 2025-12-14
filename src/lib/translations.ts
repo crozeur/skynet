@@ -288,9 +288,9 @@ export const translations = {
     service2_problem: "Les audits internes sont souvent superficiels. Beaucoup ignorent leurs failles ou comment adresser ISO 27001, PCI-DSS, RGPD.",
     service2_solution: "Audit complet (technique et organisationnel) :",
     service2_point1: "Audit global, tests d'intrusion simulés, évaluation des processus",
-    service2_point2: "Rapport de risques priorisés avec plan d'action 90 jours réaliste",
-    service2_point3: "Préparation certification/conformité, documentation et sensibilisation",
-    service2_point4: "Simulations de phishing, accompagnement remédiation",
+    service2_point2: "Rapport de risques priorisés avec plan d'action de 90 jours réaliste",
+    service2_point3: "Préparation à la certification/conformité, documentation et sensibilisation",
+    service2_point4: "Simulations de phishing, accompagnement à la remédiation",
     service2_results: "Résultats pour votre organisation :",
     service2_result1: "Vision claire des vrais risques SI",
     service2_result2: "Feuille de route claire, planifiée, adaptée aux contraintes",
@@ -319,9 +319,9 @@ export const translations = {
 
     // Benefits One
     benefit_one_title: "Pourquoi Skynet ?",
-    benefit_one_1: "Centre des Opérations de Sécurité 24/7",
+    benefit_one_1: "Centre d'Opérations de Sécurité 24/7",
     benefit_one_1_desc:
-      "Notre équipe SOC d'experts surveille votre infrastructure 24h/24, détectant et enquêtant sur les activités suspectes en temps réel.",
+      "Notre équipe SOC d'experts surveille votre infrastructure 24h/24, détectant et analysant les activités suspectes en temps réel.",
     benefit_one_2: "Détection des menaces par IA",
     benefit_one_2_desc:
       "Des algorithmes d'apprentissage automatique avancés détectent les anomalies et menaces que les outils de sécurité traditionnels ne repèrent pas.",
@@ -357,7 +357,7 @@ export const translations = {
       "Nous déployons des capteurs et des agents dans votre infrastructure pour permettre la surveillance continue et la détection des menaces.",
     monitoring: "Surveillance",
     monitoring_desc:
-      "Notre équipe SOC 24/7 surveille votre environnement en temps réel, détectant et enquêtant sur les menaces potentielles.",
+      "Notre équipe SOC 24/7 surveille votre environnement en temps réel, détectant et analysant les menaces potentielles.",
     response: "Réaction",
     response_desc:
       "Lorsqu'une menace est détectée, nous intervenons immédiatement : confinement, remédiation et analyse détaillée post-incident.",
@@ -368,7 +368,7 @@ export const translations = {
 
     faq_q1: "Qu'est-ce qu'un MSSP ?",
     faq_a1:
-      "Un MSSP (Managed Security Service Provider) assure la détection, la surveillance et la réponse aux menaces. Skynet fournit un SOC 24/7, la réponse aux incidents, des audits et un accompagnement conformité, sans que vous ayez à tout construire en interne.",
+      "Un MSSP (Managed Security Service Provider) assure la détection, la surveillance et la réponse aux menaces. Skynet fournit un SOC 24/7, la réponse aux incidents, des audits et un accompagnement à la conformité, sans que vous ayez à tout construire en interne.",
 
     faq_q2: "Quel est votre délai de réaction ?",
     faq_a2:
@@ -380,7 +380,7 @@ export const translations = {
 
     faq_q4: "Combien de temps pour être opérationnel ?",
     faq_a4:
-      "La plupart des clients passent en production en 2–4 semaines : audit rapide, déploiement d'agents/capteurs, adaptation des playbooks, puis supervision avec revues hebdo.",
+      "La plupart des clients passent en production en 2–4 semaines : audit rapide, déploiement d'agents/capteurs, adaptation des playbooks, puis supervision avec revues hebdomadaires.",
 
     faq_q5: "Quelles certifications détenez-vous ?",
     faq_a5:
