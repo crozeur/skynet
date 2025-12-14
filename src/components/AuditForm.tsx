@@ -111,7 +111,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
         {/* Name Field */}
         <div className="group animate-[fadeInUp_0.7s_ease-out]" style={{ animationFillMode: "backwards" }}>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.audit_form_name_label}
+            {t.audit_form_name_label} <span className="text-red-500">*</span>
           </label>
           <input
             id="name"
@@ -127,7 +127,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
         {/* Company Field */}
         <div className="group animate-[fadeInUp_0.75s_ease-out]" style={{ animationFillMode: "backwards", animationDelay: "0.05s" }}>
           <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.audit_form_company_label}
+            {t.audit_form_company_label} <span className="text-red-500">*</span>
           </label>
           <input
             id="company"
