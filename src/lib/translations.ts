@@ -244,7 +244,7 @@ export const translations = {
     hero_benefit2: "Audits de sécurité et évaluations de conformité sur l'ensemble du SI",
     hero_benefit3: "Conseil expert et stratégie adaptés à tous secteurs et tailles d'organisation",
     hero_audit_title: "Demander un audit de sécurité gratuit",
-    hero_audit_desc: "Partagez votre email : nous évaluons votre posture de sécurité et vous envoyons un plan d'action priorisé et opérationnel.",
+    hero_audit_desc: "Partagez votre adresse email : nous évaluerons votre posture de sécurité et vous enverrons un plan d'action priorisé et opérationnel.",
     hero_call_to_action: "Vous préférez un échange direct ? 30 minutes avec un expert en cybersécurité senior.",
     hero_schedule_call: "Planifier un appel de découverte",
     stats_section_title: "Notre Engagement d'Excellence",
@@ -433,7 +433,7 @@ export const translations = {
 
     // Audit Form
     audit_form_title: "Demander un audit de sécurité gratuit",
-    audit_form_subtitle: "Partagez votre email : nous évaluons votre posture de sécurité et vous envoyons un plan d'action priorisé par email.",
+    audit_form_subtitle: "Partagez votre adresse email : nous évaluerons votre posture de sécurité et vous enverrons un plan d'action priorisé et opérationnel.",
     audit_form_name_label: "Nom",
     audit_form_name_placeholder: "Votre nom",
     audit_form_company_label: "Nom de l'entreprise",
