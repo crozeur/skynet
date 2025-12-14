@@ -232,7 +232,7 @@ export const translations = {
     about: "À Propos",
     contact: "Contact",
     schedule_demo: "Planifier un appel de découverte",
-    schedule_demo_subtext: "30 minutes avec un expert cybersécurité Skynet pour discuter de votre situation.",
+    schedule_demo_subtext: "30 minutes avec un expert en cybersécurité Skynet pour discuter de votre situation.",
     contact_sales: "Nous contacter",
     audit_cta: "Demander un audit de sécurité gratuit",
 
@@ -245,12 +245,12 @@ export const translations = {
     hero_benefit3: "Conseil expert et stratégie adaptés à tous secteurs et tailles d'organisation",
     hero_audit_title: "Demander un audit de sécurité gratuit",
     hero_audit_desc: "Partagez votre email : nous évaluons votre posture de sécurité et vous envoyons un plan d'action priorisé et opérationnel.",
-    hero_call_to_action: "Vous préférez un échange direct ? 30 minutes avec un expert cybersécurité senior.",
+    hero_call_to_action: "Vous préférez un échange direct ? 30 minutes avec un expert en cybersécurité senior.",
     hero_schedule_call: "Planifier un appel de découverte",
     stats_section_title: "Notre Engagement d'Excellence",
     stats_threats: "Détection de menaces",
     stats_response_time: "Temps de réponse",
-    stats_system_health: "Disponibilité service",
+    stats_system_health: "Disponibilité du service",
     stats_coverage: "Couverture",
     stats_threats_value: "<15 min",
     stats_response_value: "<2 heures",
@@ -284,7 +284,7 @@ export const translations = {
 
     // Service 2: Audit & Compliance
     service2_title: "Audit & Mise en Conformité",
-    service2_for: "Administrations, entreprises régulées (banque, santé, énergie) ou sans politique sécurité structurée",
+    service2_for: "Administrations, entreprises régulées (banque, santé, énergie) ou sans politique de sécurité structurée",
     service2_problem: "Les audits internes sont souvent superficiels. Beaucoup ignorent leurs failles ou comment adresser ISO 27001, PCI-DSS, RGPD.",
     service2_solution: "Audit complet (technique et organisationnel) :",
     service2_point1: "Audit global, tests d'intrusion simulés, évaluation des processus",
