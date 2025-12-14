@@ -67,7 +67,7 @@ export const About = () => {
             <p className="text-base lg:text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               {language === "en"
                 ? "Four pillars, stated simply. Skimmable and action-focused."
-                : "Quatre piliers, expliqués simplement. Lisible et orienté action."}
+                : "Quatre piliers, expliqués simplement. Lisibles et orientés action."}
             </p>
           </div>
 
