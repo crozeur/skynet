@@ -104,19 +104,19 @@ export const Services = () => {
 
           {/* Instruction Text */}
           <div className="mb-8 text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-700 animate-[fadeInUp_0.8s_ease-out]">
+            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 py-2 sm:px-6 sm:py-3 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-700 animate-[fadeInUp_0.8s_ease-out]">
               <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
               </svg>
-              <span className="text-sm font-bold text-blue-700 dark:text-blue-300">
+              <span className="text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-300">
                 {language === "en" ? "👇 Click on an offer to explore details" : "👇 Cliquez sur une offre pour explorer les détails"}
               </span>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="relative z-10 grid gap-5 lg:grid-cols-[1.05fr_1.4fr]">
-            <div className="space-y-4">
+          <div className="relative z-10 grid gap-4 sm:gap-5 lg:grid-cols-[1.05fr_1.4fr]">
+            <div className="space-y-3 sm:space-y-4">
               {services.map((service, idx) => {
                 const Icon = service.icon;
                 const isActive = activeTab === idx;
@@ -164,7 +164,7 @@ export const Services = () => {
                       }`}>
                         {service.title}
                       </p>
-                      <p className="text-sm text-slate-600 line-clamp-2 dark:text-slate-300/80">{service.for}</p>
+                      <p className="text-xs sm:text-sm text-slate-600 line-clamp-3 dark:text-slate-300/80">{service.for}</p>
                     </div>
                     <ChevronRightIcon
                       className={`ml-auto h-6 w-6 transition-all duration-300 flex-shrink-0 ${
@@ -212,10 +212,10 @@ export const Services = () => {
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-blue-900 dark:text-white">{activeService.solution}</h3>
                   </div>
-                  <ul className="space-y-3">
+                  <ul className="space-y-2 sm:space-y-3">
                     {activeService.points.map((point, idx) => (
-                      <li key={idx} className="flex gap-3 text-sm text-slate-700 group/item dark:text-slate-100/90">
-                        <CheckCircleIcon className="h-5 w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90">
+                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -235,11 +235,11 @@ export const Services = () => {
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-emerald-900 dark:text-white">{activeService.results}</h3>
                   </div>
-                  <ul className="space-y-3">
-                    {activeService.resultsList.map((result, idx) => (
-                      <li key={idx} className="flex gap-3 text-sm text-slate-700 group/item dark:text-slate-100/90">
-                        <CheckCircleIcon className="h-5 w-5 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
-                        <span>{result}</span>
+                  <ul className="space-y-2 sm:space-y-3">
+                    {activeService.points.map((point, idx) => (
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90">
+                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
+                        <span>{point}</span>
                       </li>
                     ))}
                   </ul>
