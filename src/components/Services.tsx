@@ -115,8 +115,8 @@ export const Services = () => {
           </div>
 
           {/* Tabs */}
-          <div className="relative z-10 grid gap-4 sm:gap-5 xl:grid-cols-[1.05fr_1.4fr] min-w-0">
-            <div className="space-y-3 sm:space-y-4">
+          <div className="relative z-10 grid gap-4 sm:gap-5 xl:grid-cols-[1.05fr_1.4fr] min-w-0 w-full">
+            <div className="space-y-3 sm:space-y-4 w-full">
               {services.map((service, idx) => {
                 const Icon = service.icon;
                 const isActive = activeTab === idx;
@@ -179,9 +179,9 @@ export const Services = () => {
             </div>
 
             {/* Service Content */}
-            <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0" key={activeTab}>
+            <div className="grid gap-4 sm:gap-5 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0 w-full" key={activeTab}>
               {/* Problem & For */}
-              <div className="col-span-2 rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
+              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-gradient-to-br from-white via-slate-50/50 to-white p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:from-white/5 dark:via-slate-800/20 dark:to-white/5">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -201,7 +201,7 @@ export const Services = () => {
               </div>
 
               {/* Solution */}
-              <div className="relative group rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
+              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-cyan-50/50 to-blue-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:from-blue-900/20 dark:via-cyan-900/10 dark:to-blue-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-4">
@@ -214,7 +214,7 @@ export const Services = () => {
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.points.map((point, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0">
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-snug">
                         <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
                         <span className="break-words flex-1 min-w-0">{point}</span>
                       </li>
@@ -224,7 +224,7 @@ export const Services = () => {
               </div>
 
               {/* Results */}
-              <div className="relative group rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
+              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-green-50/50 to-emerald-50 p-5 sm:p-7 backdrop-blur shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:from-emerald-900/20 dark:via-green-900/10 dark:to-emerald-900/20">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-green-500/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-4">
@@ -237,7 +237,7 @@ export const Services = () => {
                   </div>
                   <ul className="space-y-2 sm:space-y-3">
                     {activeService.resultsList.map((result, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0">
+                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-snug">
                         <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
                         <span className="break-words flex-1 min-w-0">{result}</span>
                       </li>
@@ -247,7 +247,7 @@ export const Services = () => {
               </div>
 
               {/* CTA Card */}
-              <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 backdrop-blur dark:border-white/10 dark:bg-white/5 lg:col-span-2">
+              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 backdrop-blur dark:border-white/10 dark:bg-white/5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700 dark:text-blue-100">
@@ -258,7 +258,7 @@ export const Services = () => {
                         ? "Tailored scopes and clear execution."
                         : "Périmètres adaptés et exécution claire."}
                     </h4>
-                    <p className="text-sm text-slate-700 mt-2 dark:text-slate-200/90 break-words">
+                    <p className="text-sm text-slate-700 mt-2 dark:text-slate-200/90 break-words leading-relaxed">
                       {language === "en"
                         ? "Share your context with us and we'll design the right combination of SOC, audit, and cloud modernization services."
                         : "Partagez votre contexte avec nous et nous concevrons la bonne combinaison de services SOC, audit et modernisation cloud."}
