@@ -58,7 +58,32 @@ export const Hero = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <p className="text-sm sm:text-base lg:text-lg text-gray-900 dark:text-white leading-relaxed">{benefit}</p>
+                  <div className="flex-1">
+                    <p className="text-sm sm:text-base lg:text-lg text-gray-900 dark:text-white leading-relaxed flex items-center gap-2">
+                      {benefit}
+                      {idx === 0 && (
+                        <span className="hidden md:inline-flex items-center gap-1 text-xs text-gray-600 dark:text-blue-100/80 relative group">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                            <circle cx="12" cy="12" r="9" />
+                            <path strokeLinecap="round" d="M12 8.5v4.2" />
+                            <circle cx="12" cy="16.2" r="0.8" />
+                          </svg>
+                          <span className="absolute left-5 top-1 z-20 whitespace-nowrap rounded-md bg-gray-900 text-white px-2 py-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                            {language === "en"
+                              ? "SOC = Security Operations Center"
+                              : "SOC = Centre des opérations de sécurité"}
+                          </span>
+                        </span>
+                      )}
+                    </p>
+                    {idx === 0 && (
+                      <p className="md:hidden mt-1 text-xs text-gray-600 dark:text-blue-100/80">
+                        {language === "en"
+                          ? "Powered by our Security Operations Center"
+                          : "Propulsé par notre centre des opérations de sécurité (SOC)"}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
