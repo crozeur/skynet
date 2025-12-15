@@ -202,24 +202,36 @@ export const Services = () => {
             {/* Service Content */}
             {/* Mobile: problem card + toggle between Solution / Results, then CTA */}
             <div ref={contentRef} className="md:hidden space-y-4" key={`mobile-${activeTab}`}>
-              {/* Problem & For */}
-              <div className="w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                    {language === "en" ? "Target Audience" : "Public Cible"}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-100 to-orange-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-red-700 shadow-sm dark:from-red-500/20 dark:to-orange-500/20 dark:text-red-300">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {language === "en" ? "Challenge" : "Défi"}
-                  </span>
+              {/* Problem & For - split into two clear sections */}
+              <div className="w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900 space-y-5">
+                {/* Target Audience section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                      {language === "en" ? "Target Audience" : "Public Cible"}
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base text-slate-700 leading-relaxed break-words dark:text-slate-200/90">{activeService.for}</p>
                 </div>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-3 break-words dark:text-slate-200/90">{activeService.for}</p>
-                <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed break-words dark:text-white">{activeService.problem}</p>
+
+                {/* Divider */}
+                <div className="border-t border-slate-200 dark:border-slate-700" />
+
+                {/* Challenge section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-100 to-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-700 shadow-sm dark:from-red-500/20 dark:to-orange-500/20 dark:text-red-300">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {language === "en" ? "Challenge" : "Défi"}
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed break-words dark:text-white">{activeService.problem}</p>
+                </div>
               </div>
 
               {/* Toggle buttons */}
@@ -342,24 +354,36 @@ export const Services = () => {
 
             {/* Desktop: show all cards */}
             <div className="hidden md:grid gap-4 sm:gap-5 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0 w-full" key={activeTab}>
-              {/* Problem & For */}
-              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                    </svg>
-                    {language === "en" ? "Target Audience" : "Public Cible"}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-100 to-orange-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-red-700 shadow-sm dark:from-red-500/20 dark:to-orange-500/20 dark:text-red-300">
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {language === "en" ? "Challenge" : "Défi"}
-                  </span>
+              {/* Problem & For - split into two clear sections */}
+              <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900 space-y-5">
+                {/* Target Audience section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                      {language === "en" ? "Target Audience" : "Public Cible"}
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base text-slate-700 leading-relaxed break-words dark:text-slate-200/90">{activeService.for}</p>
                 </div>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed mb-3 break-words dark:text-slate-200/90">{activeService.for}</p>
-                <p className="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed break-words dark:text-white">{activeService.problem}</p>
+
+                {/* Divider */}
+                <div className="border-t border-slate-200 dark:border-slate-700" />
+
+                {/* Challenge section */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-100 to-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-700 shadow-sm dark:from-red-500/20 dark:to-orange-500/20 dark:text-red-300">
+                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {language === "en" ? "Challenge" : "Défi"}
+                    </span>
+                  </div>
+                  <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed break-words dark:text-white">{activeService.problem}</p>
+                </div>
               </div>
 
               {/* Solution */}
