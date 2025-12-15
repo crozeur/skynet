@@ -275,7 +275,7 @@ export const translations = {
 
     // Service 1: SOC 24/7
     service1_title: "Surveillance & réponse 24/7 – SOC externalisé",
-    service1_for: "Pour ministères, banques, grands groupes et OIV (opérateurs d'importance vitale)",
+    service1_for: "Ministères, Banques, Grands Groupes et OIV (Opérateurs d'Importance Vitale)",
     service1_problem: "Sans supervision centralisée ni réponse formalisée, les attaques passent inaperçues plusieurs jours et exposent le SI.",
     service1_solution: "Déploiement rapide d'un SOC externalisé piloté par l'IA, couverture mondiale :",
     service1_point1: "Monitoring 24/7 de tous vos serveurs, réseaux, firewalls et applications critiques",
@@ -292,7 +292,7 @@ export const translations = {
 
     // Service 2: Audit cybersécurité & conformité
     service2_title: "Audit cybersécurité & mise en conformité",
-    service2_for: "Administrations, banques, santé, énergie — toute organisation qui doit prouver la sécurité de son SI (ISO 27001, PCI‑DSS, RGPD, exigences locales)",
+    service2_for: "Administrations, Banques, Secteur de la Santé, Énergie — Toute organisation devant démontrer la sécurité de son SI (ISO 27001, PCI-DSS, RGPD, exigences réglementaires)",
     service2_problem: "Les audits internes n'apportent pas toujours la profondeur technique ni les preuves d'efficacité attendues (réseaux, systèmes, applications, données sensibles). La résilience du SI face aux attaques reste non démontrée et l'alignement des contrôles avec les référentiels (ISO 27001, PCI‑DSS, RGPD) n'est pas objectivé.",
     service2_solution: "Ce que nous faisons concrètement :",
     service2_point1: "Audit de cybersécurité complet du SI (technique + organisationnel), avec tests d'intrusion et revue des contrôles",
@@ -307,7 +307,7 @@ export const translations = {
 
     // Service 3: Cloud Modernization & FinOps
     service3_title: "Modernisation Cloud & Optimisation des Coûts (FinOps)",
-    service3_for: "Groupes privés, OIV, établissements publics souhaitant digitaliser ou réduire leurs coûts IT",
+    service3_for: "Groupes Privés, OIV, Établissements Publics — Organisations souhaitant moderniser leur infrastructure ou optimiser leurs coûts IT",
     service3_problem: "Infrastructure coûteuse (matériel, on-prem, cloud mal optimisé) et migrations freinées par des craintes de contrôle ou de sécurité.",
     service3_solution: "État des lieux rapide et modernisation :",
     service3_point1: "Diagnostic express de l'infrastructure (on-premise et cloud)",

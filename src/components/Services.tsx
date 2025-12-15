@@ -206,7 +206,7 @@ export const Services = () => {
               <div className="w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900 space-y-5">
                 {/* Target Audience section */}
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -214,7 +214,7 @@ export const Services = () => {
                       {language === "en" ? "Target Audience" : "Public Cible"}
                     </span>
                   </div>
-                  <p className="text-sm sm:text-base text-slate-700 leading-relaxed break-words dark:text-slate-200/90">{activeService.for}</p>
+                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">{activeService.for}</p>
                 </div>
 
                 {/* Divider */}
@@ -358,7 +358,7 @@ export const Services = () => {
               <div className="col-span-2 w-full max-w-2xl mx-auto rounded-2xl border-2 border-slate-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-xl transition-all duration-300 dark:border-white/10 dark:bg-slate-900 space-y-5">
                 {/* Target Audience section */}
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-700 shadow-sm dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-300">
                       <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -366,7 +366,7 @@ export const Services = () => {
                       {language === "en" ? "Target Audience" : "Public Cible"}
                     </span>
                   </div>
-                  <p className="text-sm sm:text-base text-slate-700 leading-relaxed break-words dark:text-slate-200/90">{activeService.for}</p>
+                  <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">{activeService.for}</p>
                 </div>
 
                 {/* Divider */}
