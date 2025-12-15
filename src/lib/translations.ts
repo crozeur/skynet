@@ -276,7 +276,7 @@ export const translations = {
     // Service 1: SOC 24/7
     service1_title: "Surveillance & réponse 24/7 – SOC externalisé",
     service1_for: "Ministères, Banques, Grands Groupes et OIV (Opérateurs d'Importance Vitale)",
-    service1_problem: "Sans supervision centralisée ni réponse formalisée, les attaques passent inaperçues plusieurs jours et exposent le SI.",
+    service1_problem: "Sans supervision centralisée ni capacité de réponse formalisée, les attaques sophistiquées passent inaperçues pendant plusieurs jours, voire plusieurs semaines. Les équipes internes détectent trop tard les compromissions, les mouvements latéraux et les exfiltrations de données. Le manque de corrélation entre les événements et l'absence de couverture 24/7 exposent gravement le SI et augmentent le risque de non-conformité réglementaire.",
     service1_solution: "Déploiement rapide d'un SOC externalisé piloté par l'IA, couverture mondiale :",
     service1_point1: "Monitoring 24/7 de tous vos serveurs, réseaux, firewalls et applications critiques",
     service1_point2: "Détection automatique et alertes instantanées",
