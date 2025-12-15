@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container } from "@/components/Container";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "./LanguageProvider";
@@ -9,10 +9,48 @@ import ThemeChanger from "./DarkSwitch";
 export const Navbar = () => {
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("hero");
+  const [scrolled, setScrolled] = useState(false);
   // translations are consumed directly inside components that need them
 
+  useEffect(() => {
+    const handleScroll = () => {
+      // Track scroll position for enhanced shadow
+      setScrolled(window.scrollY > 50);
+
+      // Detect active section
+      const sections = ["hero", "case-studies", "services-overview", "compliance", "about", "contact"];
+      const scrollPos = window.scrollY + 100;
+
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPos >= offsetTop && scrollPos < offsetTop + offsetHeight) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isActive = (sectionId: string) => activeSection === sectionId;
+
+  const navItemClass = (sectionId: string) =>
+    `text-gray-800 dark:text-gray-100 transition font-semibold text-lg lg:text-xl px-3 py-2 rounded-md ${
+      isActive(sectionId)
+        ? "text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 border-b-2 border-blue-600 dark:border-blue-300"
+        : "hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+    }`;
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-lg shadow-gray-200/60 dark:shadow-black/30 relative transition-all duration-300">
+    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 relative transition-all duration-300 ${
+      scrolled ? "shadow-lg shadow-gray-300/80 dark:shadow-black/50" : "shadow-md shadow-gray-200/40 dark:shadow-black/20"
+    }`}>
       <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200">
           <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-20 w-auto sm:h-24 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
@@ -21,37 +59,37 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-5">
           <a
             href="/#hero"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("hero")}
           >
             {language === "en" ? "Home" : "Accueil"}
           </a>
           <a
             href="/#case-studies"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("case-studies")}
           >
             {language === "en" ? "Success Stories" : "Nos Succès"}
           </a>
           <a
             href="/#services-overview"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("services-overview")}
           >
             {language === "en" ? "Services" : "Nos Services"}
           </a>
           <a
             href="/#compliance"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("compliance")}
           >
             {language === "en" ? "Compliance" : "Conformité & Risques"}
           </a>
           <a
             href="/#about"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("about")}
           >
             {language === "en" ? "About Us" : "À Propos"}
           </a>
           <a
             href="/#contact"
-            className="text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg lg:text-xl px-2 py-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30"
+            className={navItemClass("contact")}
           >
             {language === "en" ? "Contact" : "Nous Contacter"}
           </a>
