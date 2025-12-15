@@ -104,7 +104,7 @@ export const Navbar = () => {
           </div>
           
           {/* Mobile: compact icons with theme switcher and search above */}
-          <div className="md:hidden flex flex-col-reverse items-end gap-1">
+          <div className="md:hidden flex flex-col items-end gap-1">
             <div className="flex items-center gap-1.5">
               <SearchBar />
               <ThemeChanger />
