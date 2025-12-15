@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import { ThemeProviderClient } from "@/components/ThemeProviderClient";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import "./globals.css";
 
 import { Navbar } from "@/components/Navbar";
@@ -25,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={inter.className}>
         <ThemeProviderClient>
           <LanguageProvider>
