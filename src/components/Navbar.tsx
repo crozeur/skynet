@@ -103,11 +103,13 @@ export const Navbar = () => {
             <LanguageSwitcher />
           </div>
           
-          {/* Mobile: compact icons with theme switcher above */}
+          {/* Mobile: compact icons with theme switcher and search above */}
           <div className="md:hidden flex flex-col-reverse items-end gap-1">
-            <ThemeChanger />
             <div className="flex items-center gap-1.5">
               <SearchBar />
+              <ThemeChanger />
+            </div>
+            <div className="flex items-center gap-1.5">
               <LanguageSwitcher />
               <button
                 onClick={() => setOpen(!open)}
