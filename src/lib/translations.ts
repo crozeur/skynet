@@ -45,8 +45,8 @@ export const translations = {
 
     // Service 1: SOC 24/7
     service1_title: "24/7 Surveillance & Response - External SOC",
-    service1_for: "For Ministries, banks, large enterprises and VIO (vital importance operators)",
-    service1_problem: "Many organizations lack centralized monitoring or incident response. Breaches can remain undetected for days, leaving systems exposed.",
+    service1_for: "Ministries, banks, large enterprises, and operators of vital importance (OIV)",
+    service1_problem: "Without centralized monitoring or formal incident response, attacks stay undetected for days. Compromises surface too late, lateral movement slips through, data is exfiltrated. Lack of 24/7 coverage allows threats to persist inside the environment.",
     service1_solution: "Rapid deployment of an AI-powered external SOC with global coverage:",
     service1_point1: "24/7 monitoring of all servers, networks, firewalls, and critical applications",
     service1_point2: "Automatic threat detection with instant alerts",
@@ -62,8 +62,8 @@ export const translations = {
 
     // Service 2: Audit & Compliance
     service2_title: "Audit & Compliance",
-    service2_for: "Administrations, regulated enterprises (banking, healthcare, energy), organizations without clear security policies",
-    service2_problem: "Internal audits are often superficial. Most organizations don't know their vulnerabilities or how to meet ISO 27001, PCI-DSS, GDPR requirements.",
+    service2_for: "Administrations, banks, healthcare, energy — any organization that must demonstrate the security of its information systems (ISO 27001, PCI-DSS, GDPR, regulatory requirements)",
+    service2_problem: "Internal audits often lack technical depth and tangible evidence (networks, systems, applications, sensitive data). Resilience against attacks is not demonstrated, and compliance with key frameworks (ISO 27001, PCI-DSS, GDPR) has not been validated.",
     service2_solution: "Complete audit (technical & organizational):",
     service2_point1: "Full security assessment and simulated penetration testing",
     service2_point2: "Prioritized risk report with 90-day action plan",
@@ -77,8 +77,8 @@ export const translations = {
 
     // Service 3: Cloud Modernization & FinOps
     service3_title: "Cloud Modernization & Cost Optimization (FinOps)",
-    service3_for: "Private groups, VIO, public institutions wanting to digitize or reduce IT costs",
-    service3_problem: "Infrastructure is costly (hardware, on-premises, poorly managed cloud). Security concerns and loss of control often delay cloud migration.",
+    service3_for: "Private groups, OIV, public institutions — organizations aiming to modernize their infrastructure or optimize IT costs",
+    service3_problem: "Costly and aging infrastructure (on-prem, aging hardware, fragmented cloud); complex migrations slowed by technical debt, critical business dependencies, and hidden costs (licensing, maintenance, under-optimized cloud).",
     service3_solution: "Rapid assessment and modernization:",
     service3_point1: "Quick assessment of current infrastructure (on-prem + cloud)",
     service3_point2: "Progressive cloud migration proposal (sovereign or hybrid) with security",
