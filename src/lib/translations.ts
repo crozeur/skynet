@@ -293,7 +293,7 @@ export const translations = {
     // Service 2: Audit cybersécurité & conformité
     service2_title: "Audit cybersécurité & mise en conformité",
     service2_for: "Administrations, Banques, Secteur de la Santé, Énergie — Toute organisation devant démontrer la sécurité de son SI (ISO 27001, PCI-DSS, RGPD, exigences réglementaires)",
-    service2_problem: "Les audits internes n'apportent pas toujours la profondeur technique ni les preuves d'efficacité attendues (réseaux, systèmes, applications, données sensibles). La résilience du SI face aux attaques reste non démontrée et l'alignement des contrôles avec les référentiels (ISO 27001, PCI‑DSS, RGPD) n'est pas objectivé.",
+    service2_problem: "Les audits internes manquent souvent de profondeur technique et de preuves concrètes (réseaux, systèmes, applications, données sensibles). La résilience du SI face aux attaques n'est pas démontrée et la conformité avec les référentiels majeurs (ISO 27001, PCI-DSS, RGPD) n'a pas été validée.",
     service2_solution: "Ce que nous faisons concrètement :",
     service2_point1: "Audit de cybersécurité complet du SI (technique + organisationnel), avec tests d'intrusion et revue des contrôles",
     service2_point2: "Cartographie des données sensibles, des accès et des vulnérabilités, alignée sur ISO 27001, PCI‑DSS et RGPD",
