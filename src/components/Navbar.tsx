@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Container } from "@/components/Container";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { SearchBar } from "@/components/SearchBar";
 import { useLanguage } from "./LanguageProvider";
 import ThemeChanger from "./DarkSwitch";
 
@@ -95,6 +96,7 @@ export const Navbar = () => {
           </a>
         </div>
         <div className="flex items-center gap-3 md:gap-4">
+          <SearchBar />
           <LanguageSwitcher />
           
           <div className="md:hidden">
