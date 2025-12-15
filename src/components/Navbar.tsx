@@ -53,8 +53,8 @@ export const Navbar = () => {
       scrolled ? "shadow-lg shadow-gray-300/80 dark:shadow-black/50" : "shadow-md shadow-gray-200/40 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
-        <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200">
-          <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-20 w-auto sm:h-24 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
+        <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
+          <img src="/img/skynet-logo.svg" alt="Skynet Consulting" className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className="hidden md:flex items-center gap-5">
