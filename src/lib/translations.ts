@@ -8,15 +8,15 @@ export const translations = {
     schedule_demo: "Schedule a discovery call",
     schedule_demo_subtext: "30 minutes with a Skynet cybersecurity expert to discuss your situation.",
     contact_sales: "Contact Sales",
-    audit_cta: "Request a Free Security Audit by Email",
+    audit_cta: "Request a Free Security Audit",
 
     // Hero
     hero_title: "Protect Your Critical Infrastructure with Confidence",
     hero_desc:
-      "Around-the-clock threat detection and response, comprehensive audits, and strategic guidance. A holistic approach to secure, audit, and govern your cybersecurity.",
-    hero_benefit1: "Managed Detection and Response (MDR) powered by AI – detect, investigate, and respond to threats 24/7",
-    hero_benefit2: "Comprehensive security audits and compliance assessments for your entire IT infrastructure",
-    hero_benefit3: "Expert consulting and strategic guidance adapted to all organization sizes and sectors",
+      "24/7 threat monitoring and response by our SOC, end-to-end security audits, and strategic guidance. A holistic approach to secure, audit, and govern your cybersecurity.",
+    hero_benefit1: "Continuous monitoring by our Security Operations Center (SOC) and 24/7 threat response assisted by AI",
+    hero_benefit2: "Security audits and compliance assessments across your entire information system",
+    hero_benefit3: "Expert consulting and strategy tailored to all sectors and organization sizes",
     hero_audit_title: "Request a Free Security Audit",
     hero_audit_desc: "Share your email address and we will assess your security posture and deliver concrete, prioritized recommendations.",
     hero_call_to_action: "Prefer a direct conversation? 30 minutes with a senior security expert.",
