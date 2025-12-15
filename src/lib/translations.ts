@@ -308,7 +308,7 @@ export const translations = {
     // Service 3: Cloud Modernization & FinOps
     service3_title: "Modernisation Cloud & Optimisation des Coûts (FinOps)",
     service3_for: "Groupes Privés, OIV, Établissements Publics — Organisations souhaitant moderniser leur infrastructure ou optimiser leurs coûts IT",
-    service3_problem: "Infrastructure coûteuse (matériel, on-prem, cloud mal optimisé) et migrations freinées par des craintes de contrôle ou de sécurité.",
+    service3_problem: "Infrastructure coûteuse et obsolète (on-prem, matériel vieillissant, cloud fragmenté), migrations complexes freinées par la dette technique, les dépendances métier critiques et les coûts cachés (licences, maintenance, cloud mal optimisé).",
     service3_solution: "État des lieux rapide et modernisation :",
     service3_point1: "Diagnostic express de l'infrastructure (on-premise et cloud)",
     service3_point2: "Migration progressive (cloud souverain ou hybride) avec sécurisation",
