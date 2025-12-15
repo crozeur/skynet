@@ -290,19 +290,19 @@ export const translations = {
     service1_result4: "Supervision continue par nos analystes, 24/7",
     service1_price: "À partir de 7 000 USD/mois (budget moyen 10–16 000 USD/mois)",
 
-    // Service 2: Audit & Compliance
-    service2_title: "Audit & Mise en Conformité",
-    service2_for: "Administrations, entreprises régulées (banque, santé, énergie) ou sans politique de sécurité structurée",
-    service2_problem: "Les audits internes sont souvent superficiels. Beaucoup ignorent leurs failles ou comment adresser ISO 27001, PCI-DSS, RGPD.",
-    service2_solution: "Audit complet (technique et organisationnel) :",
-    service2_point1: "Audit global, tests d'intrusion simulés, évaluation des processus",
-    service2_point2: "Rapport de risques priorisés avec plan d'action de 90 jours réaliste",
-    service2_point3: "Préparation à la certification/conformité, documentation et sensibilisation",
-    service2_point4: "Simulations de phishing, accompagnement à la remédiation",
+    // Service 2: Audit cybersécurité & conformité
+    service2_title: "Audit cybersécurité & mise en conformité",
+    service2_for: "Administrations, banques, santé, énergie — toute organisation qui doit prouver la sécurité de son SI (ISO 27001, PCI‑DSS, RGPD, exigences locales)",
+    service2_problem: "Les audits internes passent à côté de vraies failles techniques (réseaux, serveurs, applications) et de la protection des données sensibles. Beaucoup d'organisations ne savent pas si leur SI résisterait à une cyberattaque ni si leurs mesures répondent réellement aux standards.",
+    service2_solution: "Ce que nous faisons concrètement :",
+    service2_point1: "Audit de cybersécurité complet du SI (technique + organisationnel), avec tests d'intrusion et revue des contrôles",
+    service2_point2: "Cartographie des données sensibles, des accès et des vulnérabilités, alignée sur ISO 27001, PCI‑DSS et RGPD",
+    service2_point3: "Plan d'actions 90 jours pour corriger les risques critiques avec les équipes locales",
+    service2_point4: "Sensibilisation sécurité (phishing, bonnes pratiques) et accompagnement à la remédiation",
     service2_results: "Résultats pour votre organisation :",
-    service2_result1: "Vision claire des vrais risques SI",
-    service2_result2: "Feuille de route claire, planifiée, adaptée aux contraintes",
-    service2_result3: "Crédibilité renforcée auprès des directions et clients",
+    service2_result1: "Vision claire des risques cyber prioritaires et de l'exposition réelle aux attaques",
+    service2_result2: "Trajectoire de mise en conformité (ISO 27001 / PCI‑DSS / RGPD) compréhensible par la DSI et la direction",
+    service2_result3: "Crédibilité renforcée vis‑à‑vis des instances de gouvernance et des clients",
     service2_price: "À partir de 7 000–10 000 USD, jusqu'à 25 000 USD pour une administration multi-sites",
 
     // Service 3: Cloud Modernization & FinOps
