@@ -89,16 +89,18 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
         setEmail("");
         setSectors([]);
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API error response:", errorData);
         setMessage({
           type: "error",
-          text: t.audit_form_error,
+          text: t.audit_form_error + (errorData.details ? ` (${errorData.details})` : ""),
         });
       }
     } catch (error) {
       console.error("Form submission error:", error);
       setMessage({
         type: "error",
-        text: t.audit_form_error,
+        text: t.audit_form_error + " (Erreur réseau ou serveur)",
       });
     } finally {
       setLoading(false);
