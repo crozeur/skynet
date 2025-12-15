@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 import { SectionTitle } from "@/components/SectionTitle";
 import { useLanguage } from "./LanguageProvider";
 import { translations } from "@/lib/translations";
+import Acronym from "./Acronym";
 
 export const Stats = () => {
   const { language } = useLanguage();
@@ -73,7 +74,12 @@ export const Stats = () => {
                     <p className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
                       {metric.value}
                     </p>
-                    <span className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">SLA</span>
+                    <Acronym
+                      term="SLA"
+                      titleKey="glossary_sla_title"
+                      descKey="glossary_sla_desc"
+                      className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400"
+                    />
                   </div>
 
                   <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-5">

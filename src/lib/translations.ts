@@ -35,6 +35,10 @@ export const translations = {
     stats_health_desc: "Service level agreement for SOC platform availability",
     stats_coverage_desc: "Continuous monitoring of your IT infrastructure, every day of the year",
 
+    // Glossary
+    glossary_sla_title: "Service Level Agreement (SLA)",
+    glossary_sla_desc: "Formal commitment defining the availability, response times, and support levels you can expect. We publish clear SLA targets and measure them continuously.",
+
     // Services Section
     services_section_title: "Our Services",
     services_section_subtitle: "Three Pillars of Excellence",
@@ -260,6 +264,10 @@ export const translations = {
     stats_response_desc: "Temps de réponse garanti pour les incidents critiques nécessitant une action immédiate",
     stats_health_desc: "Niveau de service garanti pour la disponibilité de notre plateforme SOC",
     stats_coverage_desc: "Surveillance continue de votre infrastructure informatique, tous les jours de l'année",
+
+    // Glossaire
+    glossary_sla_title: "Accord de niveau de service (SLA)",
+    glossary_sla_desc: "Engagement contractuel qui définit les niveaux de disponibilité, de temps de réponse et de support attendus. Nous publions des objectifs SLA clairs et les mesurons en continu.",
 
     // Services Section
     services_section_title: "Nos Services",
