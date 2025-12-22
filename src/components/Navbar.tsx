@@ -83,6 +83,12 @@ export const Navbar = () => {
             {language === "en" ? "Compliance" : "Conformité & Risques"}
           </a>
           <a
+            href="/blog"
+            className="text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 transition-colors duration-200 font-medium"
+          >
+            Blog
+          </a>
+          <a
             href="/#about"
             className={navItemClass("about")}
           >
@@ -161,6 +167,9 @@ export const Navbar = () => {
             </a>
             <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Compliance" : "Conformité & Risques"}
+            </a>
+            <a href="/blog" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              Blog
             </a>
             <a href="/#about" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "About Us" : "À Propos"}
