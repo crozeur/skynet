@@ -84,9 +84,9 @@ export const Navbar = () => {
           </a>
           <a
             href="/blog"
-            className="text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 transition-colors duration-200 font-medium"
+            className={navItemClass("blog")}
           >
-            Blog
+            {language === "en" ? "Blog" : "Blog"}
           </a>
           <a
             href="/#about"
