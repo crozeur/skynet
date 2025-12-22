@@ -57,7 +57,7 @@ export const Navbar = () => {
   const isActive = (sectionId: string) => activeSection === sectionId;
 
   const navItemClass = (sectionId: string) =>
-    `text-gray-800 dark:text-gray-100 transition font-semibold text-lg lg:text-xl px-3 py-2 rounded-md ${
+    `text-gray-800 dark:text-gray-100 transition font-semibold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
       isActive(sectionId)
         ? "text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 border-b-2 border-blue-600 dark:border-blue-300"
         : "hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
