@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Container } from "@/components/Container";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { SearchBar } from "@/components/SearchBar";
@@ -14,30 +15,44 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   // translations are consumed directly inside components that need them
 
+  const pathname = usePathname();
+
+  // Always track scrolled state for navbar shadow
   useEffect(() => {
-    const handleScroll = () => {
-      // Track scroll position for enhanced shadow
-      setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-      // Detect active section
-      const sections = ["hero", "case-studies", "services-overview", "compliance", "about", "contact"];
-      const scrollPos = window.scrollY + 100;
-
-      for (const sectionId of sections) {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPos >= offsetTop && scrollPos < offsetTop + offsetHeight) {
-            setActiveSection(sectionId);
-            break;
+  // Active item detection: sections on home, route-based on other pages
+  useEffect(() => {
+    if (pathname === "/") {
+      const detectActiveSection = () => {
+        const sections = ["hero", "case-studies", "services-overview", "compliance", "about", "contact"];
+        const scrollPos = window.scrollY + 100;
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const { offsetTop, offsetHeight } = element;
+            if (scrollPos >= offsetTop && scrollPos < offsetTop + offsetHeight) {
+              setActiveSection(sectionId);
+              break;
+            }
           }
         }
+      };
+      window.addEventListener("scroll", detectActiveSection);
+      detectActiveSection();
+      return () => window.removeEventListener("scroll", detectActiveSection);
+    } else {
+      if (pathname && pathname.startsWith("/blog")) {
+        setActiveSection("blog");
+      } else {
+        setActiveSection("");
       }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    }
+  }, [pathname]);
 
   const isActive = (sectionId: string) => activeSection === sectionId;
 
