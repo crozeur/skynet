@@ -9,6 +9,7 @@ import type { PostSummary } from "@/lib/blog";
 export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   const { language } = useLanguage();
   const [filterTag, setFilterTag] = React.useState<string | null>(null);
+  const [filterPillar, setFilterPillar] = React.useState<string | null>(null);
 
   const pillarColors: Record<string, string> = {
     SOC: "from-blue-600 to-cyan-500",
@@ -23,9 +24,17 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   }, [posts]);
 
   const visiblePosts = React.useMemo(() => {
-    if (!filterTag) return posts;
-    return posts.filter(({ metadata }) => (metadata.tags || []).includes(filterTag));
-  }, [posts, filterTag]);
+    let filtered = posts;
+    if (filterPillar) {
+      filtered = filtered.filter(({ metadata }) => metadata.pillar === filterPillar);
+    }
+    if (filterTag) {
+      filtered = filtered.filter(({ metadata }) => (metadata.tags || []).includes(filterTag));
+    }
+    return filtered;
+  }, [posts, filterPillar, filterTag]);
+
+  const pillars = ["SOC", "AUDIT", "CLOUD"] as const;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -40,6 +49,37 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               : "Analyses concrètes sur la cybersécurité, la loi 18‑07 et les SOC gérés pour l'Algérie et la région."}
           </p>
         </div>
+
+        {/* Pillar Filters */}
+        {pillars.length > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+            <button
+              type="button"
+              onClick={() => setFilterPillar(null)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                filterPillar === null
+                  ? "bg-gray-800 dark:bg-gray-700 text-white border-gray-600"
+                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
+            >
+              {language === "en" ? "All Pillars" : "Tous les piliers"}
+            </button>
+            {pillars.map((pillar) => (
+              <button
+                key={pillar}
+                type="button"
+                onClick={() => setFilterPillar(pillar)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                  filterPillar === pillar
+                    ? `bg-gradient-to-r ${pillarColors[pillar]} text-white border-transparent`
+                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                {pillar}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Tag Filters */}
         {allTags.length > 0 && (
