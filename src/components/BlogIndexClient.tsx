@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Container } from "@/components/Container";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -7,12 +8,24 @@ import type { PostSummary } from "@/lib/blog";
 
 export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   const { language } = useLanguage();
+  const [filterTag, setFilterTag] = React.useState<string | null>(null);
 
   const pillarColors: Record<string, string> = {
     SOC: "from-blue-600 to-cyan-500",
     AUDIT: "from-purple-600 to-pink-500",
     CLOUD: "from-green-600 to-teal-500",
   };
+
+  const allTags = React.useMemo(() => {
+    const tags = new Set<string>();
+    posts.forEach(({ metadata }) => (metadata.tags || []).forEach((t) => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [posts]);
+
+  const visiblePosts = React.useMemo(() => {
+    if (!filterTag) return posts;
+    return posts.filter(({ metadata }) => (metadata.tags || []).includes(filterTag));
+  }, [posts, filterTag]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -28,8 +41,39 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
           </p>
         </div>
 
+        {/* Tag Filters */}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+            <button
+              type="button"
+              onClick={() => setFilterTag(null)}
+              className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
+                filterTag === null
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-800"
+              }`}
+            >
+              {language === "en" ? "All" : "Tous"}
+            </button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setFilterTag(tag)}
+                className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
+                  filterTag === tag
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-800"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.map(({ slug, metadata }) => (
+          {visiblePosts.map(({ slug, metadata }) => (
             <Link
               key={slug}
               href={`/blog/${slug}`}
