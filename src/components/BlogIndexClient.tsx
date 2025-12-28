@@ -62,6 +62,17 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   }, [posts, filterPillar, filterTag, searchQuery]);
 
   const pillars = ["SOC", "AUDIT", "CLOUD"] as const;
+  const pageSize = 9;
+  const [page, setPage] = React.useState(1);
+  const totalPages = Math.max(1, Math.ceil(visiblePosts.length / pageSize));
+  const pagedPosts = React.useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return visiblePosts.slice(start, start + pageSize);
+  }, [visiblePosts, page]);
+  React.useEffect(() => {
+    // Reset to first page on filter/search change
+    setPage(1);
+  }, [filterPillar, filterTag, searchQuery]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -266,14 +277,22 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {visiblePosts.map(({ slug, metadata }) => (
+            {pagedPosts.map(({ slug, metadata, readingTimeMinutes }) => (
               <Link
                 key={slug}
                 href={`/blog/${slug}`}
                 className="group relative overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-white/10 bg-white dark:bg-gray-900/70 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 hover:border-blue-300 dark:hover:border-blue-500/50"
               >
-                {/* Gradient overlay on top */}
-                <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${pillarColors[metadata.pillar]}`} />
+                {/* Cover image */}
+                {metadata.coverImage && (
+                  <div className="relative h-40 sm:h-44 md:h-48 w-full overflow-hidden">
+                    <img src={metadata.coverImage} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                  </div>
+                )}
+                {!metadata.coverImage && (
+                  <div className={`h-2 w-full bg-gradient-to-r ${pillarColors[metadata.pillar]}`} />
+                )}
                 
                 <div className="absolute top-6 right-4 z-10">
                   <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-2 ring-white/20`}>
@@ -314,7 +333,15 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all">
+                  <div className="flex items-center justify-between gap-2 text-blue-600 dark:text-blue-400 font-semibold text-sm">
+                    <div className="flex items-center gap-2">
+                      {readingTimeMinutes && (
+                        <span className="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" /></svg>
+                          {readingTimeMinutes} {language === "en" ? "min read" : "min de lecture"}
+                        </span>
+                      )}
+                    </div>
                     <span>{language === "en" ? "Read article" : "Lire l'article"}</span>
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -326,6 +353,37 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               </Link>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-10 flex items-center justify-center gap-2">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                className={`px-3 py-2 rounded-lg border text-sm ${page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+              >
+                {language === 'en' ? 'Previous' : 'Précédent'}
+              </button>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i + 1)}
+                  className={`w-9 h-9 rounded-lg border text-sm font-semibold ${page === i + 1 ? 'bg-gray-900 dark:bg-gray-700 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'} border-gray-300 dark:border-gray-700`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                className={`px-3 py-2 rounded-lg border text-sm ${page === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+              >
+                {language === 'en' ? 'Next' : 'Suivant'}
+              </button>
+            </div>
+          )}
         )}
       </Container>
     </main>

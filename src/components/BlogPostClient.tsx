@@ -10,6 +10,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
   const { metadata, Content } = post;
   const [readingProgress, setReadingProgress] = React.useState(0);
+  const articleRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const updateReadingProgress = () => {
@@ -28,6 +29,26 @@ export function BlogPostClient({ post }: { post: PostData }) {
     AUDIT: "from-purple-600 to-pink-500",
     CLOUD: "from-green-600 to-teal-500",
   };
+
+  const [headings, setHeadings] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
+
+  React.useEffect(() => {
+    const container = articleRef.current;
+    if (!container) return;
+    const hs = Array.from(container.querySelectorAll('h2, h3')) as HTMLElement[];
+    const items: Array<{ id: string; text: string; level: number }> = [];
+    hs.forEach((el) => {
+      const text = el.textContent?.trim() || "";
+      const slug = text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+      if (!el.id) el.id = slug;
+      items.push({ id: el.id, text, level: el.tagName === 'H2' ? 2 : 3 });
+    });
+    setHeadings(items);
+  }, [post]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -52,6 +73,12 @@ export function BlogPostClient({ post }: { post: PostData }) {
         </Link>
 
         <article className="max-w-4xl mx-auto">
+          {/* Hero cover image */}
+          {metadata.coverImage && (
+            <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
+              <img src={metadata.coverImage} alt="" className="w-full h-64 object-cover" />
+            </div>
+          )}
           {/* Article Header */}
           <header className="mb-12">
             <div className="flex items-center gap-4 mb-6">
@@ -97,6 +124,21 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
           {/* Article Content */}
           <div
+          {/* Table of contents */}
+          {headings.length > 0 && (
+            <div className="mb-10 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <div className="font-bold text-gray-900 dark:text-white mb-2">
+                {language === 'en' ? 'On this page' : 'Sur cette page'}
+              </div>
+              <div className="flex flex-col gap-2">
+                {headings.map((h) => (
+                  <a key={h.id} href={`#${h.id}`} className={`text-sm ${h.level === 2 ? 'font-semibold' : ''} text-blue-700 dark:text-blue-300 hover:underline`}>{h.text}</a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div
             className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
               prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
@@ -111,6 +153,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
               prose-img:rounded-xl prose-img:shadow-2xl prose-img:my-8"
           >
+          ref={articleRef}>
             <Content />
           </div>
 

@@ -33,11 +33,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const mod: any = await import(
       /* webpackInclude: /\\.mdx$/ */ `../../../../content/blog/${params.slug}.mdx`
     );
-    const { title, description } = mod.metadata || {};
+    const { title, description, coverImage } = mod.metadata || {};
+    const url = `https://www.skynet-consulting.net/blog/${params.slug}`;
     return {
       title: title ?? params.slug,
       description: description ?? undefined,
-    };
+      openGraph: {
+        title: title ?? params.slug,
+        description: description ?? undefined,
+        type: "article",
+        url,
+        images: coverImage ? [{ url: coverImage }] : undefined,
+      },
+      twitter: {
+        card: coverImage ? "summary_large_image" : "summary",
+        title: title ?? params.slug,
+        description: description ?? undefined,
+        images: coverImage ? [coverImage] : undefined,
+      },
+    } as any;
   } catch {
     return {
       title: params.slug,
