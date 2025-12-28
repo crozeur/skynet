@@ -12,6 +12,24 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   const [filterPillar, setFilterPillar] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
 
+  // Highlight matches in titles/descriptions for better search UX
+  const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const highlight = React.useCallback(
+    (text: string): React.ReactNode => {
+      if (!searchQuery || !text) return text;
+      const pattern = new RegExp(`(${escapeRegExp(searchQuery)})`, "ig");
+      const parts = text.split(pattern);
+      return parts.map((part, i) =>
+        part.toLowerCase() === searchQuery.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-200/70 dark:bg-yellow-600/40 rounded px-0.5">{part}</mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      );
+    },
+    [searchQuery]
+  );
+
   const pillarColors: Record<string, string> = {
     SOC: "from-blue-600 to-cyan-500",
     AUDIT: "from-purple-600 to-pink-500",
@@ -102,6 +120,22 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </svg>
                 </button>
               )}
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterPillar(null);
+                  setFilterTag(null);
+                  setSearchQuery("");
+                }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              >
+                {language === "en" ? "Clear filters" : "Réinitialiser les filtres"}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.836 0H20V4M4 20v-5h.582m15.836 0H20v5M10 10l4 4m0-4l-4 4" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -262,11 +296,11 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 mb-3">
-                    {metadata.title}
+                    {highlight(metadata.title)}
                   </h2>
 
                   <p className="text-gray-600 dark:text-gray-300 line-clamp-3 leading-relaxed mb-6">
-                    {metadata.description}
+                    {highlight(metadata.description)}
                   </p>
 
                   {/* Tags */}
