@@ -119,10 +119,12 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 </span>
               </div>
               <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-3">
-                {language === "en" ? "Choose Your Focus" : "Choisissez Votre Focus"}
+                {language === "en" ? "Explore Our Expertise" : "Découvrez nos expertises"}
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                {language === "en" ? "Dive into specialized cybersecurity content tailored to your needs" : "Plongez dans du contenu spécialisé en cybersécurité adapté à vos besoins"}
+                {language === "en"
+                  ? "Access specialized content on managed SOC, security audits, and cloud security"
+                  : "Accédez à des contenus spécialisés sur le SOC managé, l'audit de sécurité et le cloud"}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
