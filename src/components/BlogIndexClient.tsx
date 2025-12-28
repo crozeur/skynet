@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Container } from "@/components/Container";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -286,7 +287,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 {/* Cover image */}
                 {metadata.coverImage && (
                   <div className="relative h-40 sm:h-44 md:h-48 w-full overflow-hidden">
-                    <img src={metadata.coverImage} alt={metadata.coverAlt ?? ''} className="w-full h-full object-cover" />
+                    <Image src={metadata.coverImage} alt={metadata.coverAlt ?? 'Blog cover'} fill className="object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                   </div>
                 )}
@@ -353,37 +354,37 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               </Link>
             ))}
           </div>
+        )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-2">
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className={`px-3 py-2 rounded-lg border text-sm ${page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+            >
+              {language === 'en' ? 'Previous' : 'Précédent'}
+            </button>
+            {Array.from({ length: totalPages }).map((_, i) => (
               <button
-                type="button"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className={`px-3 py-2 rounded-lg border text-sm ${page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`w-9 h-9 rounded-lg border text-sm font-semibold ${page === i + 1 ? 'bg-gray-900 dark:bg-gray-700 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'} border-gray-300 dark:border-gray-700`}
               >
-                {language === 'en' ? 'Previous' : 'Précédent'}
+                {i + 1}
               </button>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={`w-9 h-9 rounded-lg border text-sm font-semibold ${page === i + 1 ? 'bg-gray-900 dark:bg-gray-700 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'} border-gray-300 dark:border-gray-700`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-              <button
-                type="button"
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className={`px-3 py-2 rounded-lg border text-sm ${page === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
-              >
-                {language === 'en' ? 'Next' : 'Suivant'}
-              </button>
-            </div>
-          )}
+            ))}
+            <button
+              type="button"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className={`px-3 py-2 rounded-lg border text-sm ${page === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+            >
+              {language === 'en' ? 'Next' : 'Suivant'}
+            </button>
+          </div>
         )}
       </Container>
     </main>

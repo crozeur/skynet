@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Container } from "@/components/Container";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -60,7 +61,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
         />
       </div>
 
-      <Container className="py-16 sm:py-20 lg:py-24">;
+      <Container className="py-16 sm:py-20 lg:py-24">
         {/* Back Button */}
         <Link
           href="/blog"
@@ -75,8 +76,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
         <article className="max-w-4xl mx-auto">
           {/* Hero cover image */}
           {metadata.coverImage && (
-            <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
-              <img src={metadata.coverImage} alt={metadata.coverAlt ?? ''} className="w-full h-64 object-cover" />
+            <div className="relative mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-64">
+              <Image src={metadata.coverImage} alt={metadata.coverAlt ?? 'Article cover'} fill className="object-cover" />
             </div>
           )}
           {/* Article Header */}
@@ -123,7 +124,6 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          <div
           {/* Table of contents */}
           {headings.length > 0 && (
             <div className="mb-10 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -139,21 +139,21 @@ export function BlogPostClient({ post }: { post: PostData }) {
           )}
 
           <div
+            ref={articleRef}
             className="prose prose-lg dark:prose-invert max-w-none
               prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
               prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
               prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-              prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline prose-a:font-semibold
-              prose-strong:text-gray-900 dark:prose-strong:text-white prose-strong:font-bold
-              prose-ul:my-6 prose-ul:list-disc prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-li:my-2
+              prose-p:text-gray-700 dark:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
+              prose-a:text-blue-600 dark:text-blue-400 prose-a:no-underline hover:prose-a:underline prose-a:font-semibold
+              prose-strong:text-gray-900 dark:text-white prose-strong:font-bold
+              prose-ul:my-6 prose-ul:list-disc prose-li:text-gray-700 dark:text-gray-300 prose-li:my-2
               prose-ol:my-6 prose-ol:list-decimal
-              prose-code:text-blue-600 dark:prose-code:text-blue-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm
-              prose-pre:bg-gray-900 dark:prose-pre:bg-gray-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:border prose-pre:border-gray-700
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
+              prose-code:text-blue-600 dark:text-blue-400 prose-code:bg-gray-100 dark:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm
+              prose-pre:bg-gray-900 dark:bg-gray-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:border prose-pre:border-gray-700
+              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:bg-blue-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
               prose-img:rounded-xl prose-img:shadow-2xl prose-img:my-8"
           >
-          ref={articleRef}>
             <Content />
           </div>
 
