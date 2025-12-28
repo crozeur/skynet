@@ -19,6 +19,12 @@
     <line x1="-80" y1="20" x2="20" y2="20" opacity="0.7"/>
     <path d="M-20,100 l30,30 l60,-60" opacity="0.9"/>
   </g>
+  <!-- Corner label -->
+  <g transform="translate(40,40)">
+    <rect x="0" y="0" rx="18" width="340" height="56" fill="#ffffff" opacity="0.18"/>
+    <rect x="0" y="0" rx="18" width="340" height="56" fill="none" stroke="#ffffff" opacity="0.35"/>
+    <text x="20" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff" opacity="0.95">Audit & Compliance</text>
+  </g>
   <!-- Watermark -->
   <text x="1520" y="860" text-anchor="end" font-family="Arial, sans-serif" font-size="42" fill="#ffffff" opacity="0.25">Skynet Consulting</text>
 </svg>

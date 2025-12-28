@@ -17,6 +17,12 @@
     <rect x="-160" y="0" width="220" height="80" rx="16" opacity="0.8"/>
     <rect x="60" y="0" width="100" height="80" rx="16" opacity="0.8"/>
   </g>
+  <!-- Corner label -->
+  <g transform="translate(40,40)">
+    <rect x="0" y="0" rx="18" width="240" height="56" fill="#ffffff" opacity="0.18"/>
+    <rect x="0" y="0" rx="18" width="240" height="56" fill="none" stroke="#ffffff" opacity="0.35"/>
+    <text x="20" y="38" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff" opacity="0.95">MDX Intro</text>
+  </g>
   <!-- Watermark -->
   <text x="1520" y="860" text-anchor="end" font-family="Arial, sans-serif" font-size="42" fill="#ffffff" opacity="0.25">Skynet Consulting</text>
 </svg>
