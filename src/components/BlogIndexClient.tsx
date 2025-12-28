@@ -199,19 +199,14 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
         {/* Tag Filters */}
         {allTags.length > 0 && (
           <div className="mb-12">
-            <div className="text-center mb-4">
-              <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                {language === "en" ? "Filter by Topic" : "Filtrer par Sujet"}
-              </span>
-            </div>
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => setFilterTag(null)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                   filterTag === null
-                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-105"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                    ? "bg-gray-900 dark:bg-gray-700 text-white shadow-lg"
+                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
                 }`}
               >
                 {language === "en" ? "All Topics" : "Tous"}
@@ -221,10 +216,10 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   key={tag}
                   type="button"
                   onClick={() => setFilterTag(tag)}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                     filterTag === tag
-                      ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-105"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                      ? "bg-gray-900 dark:bg-gray-700 text-white shadow-lg"
+                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
                   }`}
                 >
                   #{tag}
