@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <g fill="#ffffff" opacity="0.08">
+    <circle cx="1300" cy="240" r="220"/>
+    <circle cx="260" cy="680" r="180"/>
+    <rect x="500" y="300" width="600" height="300" rx="36"/>
+  </g>
+  <!-- Shield + radar lines -->
+  <g transform="translate(750,420)" fill="none" stroke="#ffffff" stroke-width="12">
+    <path d="M0,-120 L-120,-40 V40 c0,80 60,150 120,176 c60,-26 120,-96 120,-176 V-40 L0,-120 Z" opacity="0.85"/>
+    <circle cx="0" cy="20" r="60" opacity="0.9"/>
+    <path d="M-60,20 h120" opacity="0.9"/>
+    <path d="M-30,-10 h60" opacity="0.6"/>
+    <path d="M-40,50 h80" opacity="0.6"/>
+  </g>
+</svg>
