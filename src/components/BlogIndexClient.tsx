@@ -108,13 +108,21 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
 
         {/* Expertise Filters */}
         {pillars.length > 0 && (
-          <div className="mb-12">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {language === "en" ? "Explore by Expertise" : "Explorer par Expertise"}
+          <div className="mb-16">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 border border-blue-200 dark:border-blue-700 mb-4">
+                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                  {language === "en" ? "Our Expertise Areas" : "Nos Domaines d'Expertise"}
+                </span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white mb-3">
+                {language === "en" ? "Choose Your Focus" : "Choisissez Votre Focus"}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                {language === "en" ? "Select an expertise to discover specialized content" : "Sélectionnez une expertise pour découvrir du contenu spécialisé"}
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                {language === "en" ? "Dive into specialized cybersecurity content tailored to your needs" : "Plongez dans du contenu spécialisé en cybersécurité adapté à vos besoins"}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
