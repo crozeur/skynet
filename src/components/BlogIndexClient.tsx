@@ -48,11 +48,27 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <Container className="py-16 sm:py-20 lg:py-24">
-        <div className="text-center max-w-4xl mx-auto mb-16">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent mb-6">
-            {language === "en" ? "Skynet Consulting Blog" : "Blog Skynet Consulting"}
+        {/* Hero Section */}
+        <div className="text-center max-w-5xl mx-auto mb-20">
+          <div className="mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-sm font-semibold">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              {language === "en" ? "Knowledge Base" : "Base de Connaissances"}
+            </span>
+          </div>
+          
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6">
+            <span className="block bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
+              {language === "en" ? "Cybersecurity" : "Cybersécurité"}
+            </span>
+            <span className="block bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
+              {language === "en" ? "Insights" : "& Expertise"}
+            </span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
+          
+          <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed mb-10 max-w-3xl mx-auto font-light">
             {language === "en"
               ? "Managed SOC, security audits, and cloud security. Operational best practices and real-world experience."
               : "SOC managés, audits de sécurité et sécurisation cloud. Retours d'expérience et bonnes pratiques opérationnelles."}
