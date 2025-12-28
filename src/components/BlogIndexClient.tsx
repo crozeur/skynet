@@ -106,7 +106,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
           </div>
         </div>
 
-        {/* Pillar Filters */}
+        {/* Expertise Filters */}
         {pillars.length > 0 && (
           <div className="mb-12">
             <div className="text-center mb-6">
@@ -114,7 +114,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 {language === "en" ? "Explore by Expertise" : "Explorer par Expertise"}
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                {language === "en" ? "Select a pillar to discover specialized content" : "Sélectionnez un pilier pour découvrir du contenu spécialisé"}
+                {language === "en" ? "Select an expertise to discover specialized content" : "Sélectionnez une expertise pour découvrir du contenu spécialisé"}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
