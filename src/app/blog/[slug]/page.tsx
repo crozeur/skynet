@@ -35,6 +35,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     );
     const { title, description, coverImage } = mod.metadata || {};
     const url = `https://www.skynet-consulting.net/blog/${params.slug}`;
+    const absoluteImage = coverImage && coverImage.startsWith('/')
+      ? `https://www.skynet-consulting.net${coverImage}`
+      : coverImage;
     return {
       title: title ?? params.slug,
       description: description ?? undefined,
@@ -43,13 +46,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         description: description ?? undefined,
         type: "article",
         url,
-        images: coverImage ? [{ url: coverImage }] : undefined,
+        images: absoluteImage ? [{ url: absoluteImage }] : undefined,
       },
       twitter: {
-        card: coverImage ? "summary_large_image" : "summary",
+        card: absoluteImage ? "summary_large_image" : "summary",
         title: title ?? params.slug,
         description: description ?? undefined,
-        images: coverImage ? [coverImage] : undefined,
+        images: absoluteImage ? [absoluteImage] : undefined,
       },
     } as any;
   } catch {

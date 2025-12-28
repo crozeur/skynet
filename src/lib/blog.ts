@@ -12,6 +12,7 @@ export interface PostMetadata {
   pillar: Pillar;
   tags?: string[];
   coverImage?: string; // /img/blog/...
+  coverAlt?: string;
 }
 
 export interface PostSummary {

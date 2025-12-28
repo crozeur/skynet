@@ -286,7 +286,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 {/* Cover image */}
                 {metadata.coverImage && (
                   <div className="relative h-40 sm:h-44 md:h-48 w-full overflow-hidden">
-                    <img src={metadata.coverImage} alt="" className="w-full h-full object-cover" />
+                    <img src={metadata.coverImage} alt={metadata.coverAlt ?? ''} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                   </div>
                 )}

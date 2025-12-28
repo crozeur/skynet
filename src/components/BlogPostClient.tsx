@@ -76,7 +76,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
           {/* Hero cover image */}
           {metadata.coverImage && (
             <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700">
-              <img src={metadata.coverImage} alt="" className="w-full h-64 object-cover" />
+              <img src={metadata.coverImage} alt={metadata.coverAlt ?? ''} className="w-full h-64 object-cover" />
             </div>
           )}
           {/* Article Header */}

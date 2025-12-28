@@ -19,4 +19,6 @@
     <path d="M-30,-10 h60" opacity="0.6"/>
     <path d="M-40,50 h80" opacity="0.6"/>
   </g>
+  <!-- Watermark -->
+  <text x="1520" y="860" text-anchor="end" font-family="Arial, sans-serif" font-size="42" fill="#ffffff" opacity="0.25">Skynet Consulting</text>
 </svg>
