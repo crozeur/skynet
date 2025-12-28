@@ -54,8 +54,8 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-8">
             {language === "en"
-              ? "Concrete insights on cybersecurity, Law 18-07, and managed SOCs for Algeria and the region."
-              : "Analyses concrètes sur la cybersécurité, la loi 18‑07 et les SOC gérés pour l'Algérie et la région."}
+              ? "Managed SOC, security audits, and cloud security. Operational best practices and real-world experience."
+              : "SOC managés, audits de sécurité et sécurisation cloud. Retours d'expérience et bonnes pratiques opérationnelles."}
           </p>
           
           {/* Search Bar */}
@@ -92,63 +92,129 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
 
         {/* Pillar Filters */}
         {pillars.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setFilterPillar(null)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                filterPillar === null
-                  ? "bg-gray-800 dark:bg-gray-700 text-white border-gray-600"
-                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-            >
-              {language === "en" ? "All Pillars" : "Tous les piliers"}
-            </button>
-            {pillars.map((pillar) => (
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                {language === "en" ? "Explore by Expertise" : "Explorer par Expertise"}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                {language === "en" ? "Select a pillar to discover specialized content" : "Sélectionnez un pilier pour découvrir du contenu spécialisé"}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
               <button
-                key={pillar}
                 type="button"
-                onClick={() => setFilterPillar(pillar)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                  filterPillar === pillar
-                    ? `bg-gradient-to-r ${pillarColors[pillar]} text-white border-transparent`
-                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
+                onClick={() => setFilterPillar(null)}
+                className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
+                  filterPillar === null
+                    ? "bg-gray-900 dark:bg-gray-700 text-white shadow-2xl scale-105 ring-4 ring-gray-900/20 dark:ring-gray-700/50"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-gray-200 dark:border-gray-700"
                 }`}
               >
-                {pillar}
+                <div className="relative z-10">
+                  <svg className="w-8 h-8 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
+                  <span className="text-lg font-bold">
+                    {language === "en" ? "All" : "Tous"}
+                  </span>
+                </div>
               </button>
-            ))}
+              {pillars.map((pillar) => (
+                <button
+                  key={pillar}
+                  type="button"
+                  onClick={() => setFilterPillar(pillar)}
+                  className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
+                    filterPillar === pillar
+                      ? "text-white shadow-2xl scale-105 ring-4 ring-white/30"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-gray-200 dark:border-gray-700"
+                  }`}
+                  style={
+                    filterPillar === pillar
+                      ? {
+                          background: `linear-gradient(135deg, ${pillar === 'SOC' ? 'rgb(37, 99, 235), rgb(6, 182, 212)' : pillar === 'AUDIT' ? 'rgb(147, 51, 234), rgb(236, 72, 153)' : 'rgb(22, 163, 74), rgb(20, 184, 166)'})`,
+                        }
+                      : undefined
+                  }
+                >
+                  <div className="relative z-10">
+                    <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
+                      filterPillar === pillar
+                        ? "bg-white/20 backdrop-blur-sm"
+                        : `bg-gradient-to-br ${pillarColors[pillar]} opacity-10 group-hover:opacity-20 transition-opacity`
+                    }`}>
+                      {pillar === 'SOC' && (
+                        <svg className={`w-6 h-6 ${filterPillar === pillar ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      )}
+                      {pillar === 'AUDIT' && (
+                        <svg className={`w-6 h-6 ${filterPillar === pillar ? 'text-white' : 'text-purple-600 dark:text-purple-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                      )}
+                      {pillar === 'CLOUD' && (
+                        <svg className={`w-6 h-6 ${filterPillar === pillar ? 'text-white' : 'text-green-600 dark:text-green-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-lg font-bold block mb-1">
+                      {pillar}
+                    </span>
+                    <span className={`text-xs ${
+                      filterPillar === pillar ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'
+                    }`}>
+                      {pillar === 'SOC' ? (language === "en" ? "Operations" : "Opérations") :
+                       pillar === 'AUDIT' ? (language === "en" ? "Assessment" : "Évaluation") :
+                       (language === "en" ? "Infrastructure" : "Infrastructure")}
+                    </span>
+                  </div>
+                  {filterPillar !== pillar && (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${pillarColors[pillar]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Tag Filters */}
         {allTags.length > 0 && (
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-            <button
-              type="button"
-              onClick={() => setFilterTag(null)}
-              className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
-                filterTag === null
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-800"
-              }`}
-            >
-              {language === "en" ? "All" : "Tous"}
-            </button>
-            {allTags.map((tag) => (
+          <div className="mb-12">
+            <div className="text-center mb-4">
+              <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                {language === "en" ? "Filter by Topic" : "Filtrer par Sujet"}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
               <button
-                key={tag}
                 type="button"
-                onClick={() => setFilterTag(tag)}
-                className={`px-3 py-1.5 rounded-full text-sm font-semibold border ${
-                  filterTag === tag
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-800"
+                onClick={() => setFilterTag(null)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                  filterTag === null
+                    ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-105"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
                 }`}
               >
-                {tag}
+                {language === "en" ? "All Topics" : "Tous"}
               </button>
-            ))}
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setFilterTag(tag)}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    filterTag === tag
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-105"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                  }`}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
