@@ -196,38 +196,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
           </div>
         )}
 
-        {/* Tag Filters */}
-        {allTags.length > 0 && (
-          <div className="mb-12">
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <button
-                type="button"
-                onClick={() => setFilterTag(null)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-                  filterTag === null
-                    ? "bg-gray-900 dark:bg-gray-700 text-white shadow-lg"
-                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
-                }`}
-              >
-                {language === "en" ? "All Topics" : "Tous"}
-              </button>
-              {allTags.map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setFilterTag(tag)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-                    filterTag === tag
-                      ? "bg-gray-900 dark:bg-gray-700 text-white shadow-lg"
-                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
-                  }`}
-                >
-                  #{tag}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {/* Results count */}
         <div className="text-center mb-8">
