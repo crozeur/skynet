@@ -179,17 +179,17 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 onClick={() => setFilterPillar(null)}
                 className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
                   filterPillar === null
-                    ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/50 scale-105 ring-4 ring-purple-500/30"
-                    : "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-2xl hover:shadow-gray-400/20 dark:hover:shadow-black/40 hover:scale-105 border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500"
+                    ? "bg-gradient-to-br from-slate-700 via-slate-600 to-slate-700 text-white shadow-2xl shadow-slate-500/50 scale-105 ring-4 ring-slate-500/30"
+                    : "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-2xl hover:shadow-gray-400/20 dark:hover:shadow-black/40 hover:scale-105 border-2 border-gray-300 dark:border-gray-600 hover:border-slate-400 dark:hover:border-slate-500"
                 }`}
               >
                 <div className="relative z-10">
                   <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
                     filterPillar === null
                       ? "bg-white/20 backdrop-blur-sm"
-                      : "bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 group-hover:from-indigo-200 group-hover:to-purple-200 dark:group-hover:from-indigo-800/50 dark:group-hover:to-purple-800/50 transition-all"
+                      : "bg-gradient-to-br from-slate-100 to-gray-200 dark:from-slate-800/30 dark:to-gray-800/30 group-hover:from-slate-200 group-hover:to-gray-300 dark:group-hover:from-slate-700/50 dark:group-hover:to-gray-700/50 transition-all"
                   }`}>
-                    <svg className={`w-6 h-6 ${filterPillar === null ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className={`w-6 h-6 ${filterPillar === null ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
                   </div>
@@ -198,7 +198,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </span>
                 </div>
                 {filterPillar !== null && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-500/0 via-gray-500/0 to-slate-500/0 group-hover:from-slate-500/10 group-hover:via-gray-500/10 group-hover:to-slate-500/10 transition-all duration-300" />
                 )}
               </button>
               {pillars.map((pillar) => (
