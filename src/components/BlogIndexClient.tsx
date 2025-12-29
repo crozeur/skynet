@@ -179,18 +179,27 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 onClick={() => setFilterPillar(null)}
                 className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
                   filterPillar === null
-                    ? "bg-gray-900 dark:bg-gray-700 text-white shadow-2xl scale-105 ring-4 ring-gray-900/20 dark:ring-gray-700/50"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-gray-200 dark:border-gray-700"
+                    ? "bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-2xl shadow-purple-500/50 scale-105 ring-4 ring-purple-500/30"
+                    : "bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-2xl hover:shadow-gray-400/20 dark:hover:shadow-black/40 hover:scale-105 border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500"
                 }`}
               >
                 <div className="relative z-10">
-                  <svg className="w-8 h-8 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
+                  <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
+                    filterPillar === null
+                      ? "bg-white/20 backdrop-blur-sm"
+                      : "bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 group-hover:from-indigo-200 group-hover:to-purple-200 dark:group-hover:from-indigo-800/50 dark:group-hover:to-purple-800/50 transition-all"
+                  }`}>
+                    <svg className={`w-6 h-6 ${filterPillar === null ? 'text-white' : 'text-indigo-600 dark:text-indigo-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </div>
                   <span className="text-lg font-bold">
                     {language === "en" ? "All" : "Tous"}
                   </span>
                 </div>
+                {filterPillar !== null && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-indigo-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300" />
+                )}
               </button>
               {pillars.map((pillar) => (
                 <button
@@ -200,7 +209,12 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
                     filterPillar === pillar
                       ? "text-white shadow-2xl scale-105 ring-4 ring-white/30"
-                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-xl hover:scale-105 border-2 border-gray-200 dark:border-gray-700"
+                      : "bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 text-gray-700 dark:text-gray-200 shadow-lg hover:shadow-2xl hover:scale-105 border-2 transition-all"
+                  } ${
+                    pillar === 'SOC' && filterPillar !== pillar ? "border-blue-200 dark:border-blue-800/50 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-blue-400/30 dark:hover:shadow-blue-500/20" :
+                    pillar === 'AUDIT' && filterPillar !== pillar ? "border-purple-200 dark:border-purple-800/50 hover:border-purple-400 dark:hover:border-purple-600 hover:shadow-purple-400/30 dark:hover:shadow-purple-500/20" :
+                    pillar === 'CLOUD' && filterPillar !== pillar ? "border-green-200 dark:border-green-800/50 hover:border-green-400 dark:hover:border-green-600 hover:shadow-green-400/30 dark:hover:shadow-green-500/20" :
+                    ""
                   }`}
                   style={
                     filterPillar === pillar
@@ -211,10 +225,12 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   }
                 >
                   <div className="relative z-10">
-                    <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center ${
+                    <div className={`w-12 h-12 mx-auto mb-3 rounded-lg flex items-center justify-center transition-all ${
                       filterPillar === pillar
                         ? "bg-white/20 backdrop-blur-sm"
-                        : `bg-gradient-to-br ${pillarColors[pillar]} opacity-10 group-hover:opacity-20 transition-opacity`
+                        : pillar === 'SOC' ? "bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 group-hover:from-blue-200 group-hover:to-cyan-200 dark:group-hover:from-blue-800/50 dark:group-hover:to-cyan-800/50" :
+                          pillar === 'AUDIT' ? "bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 group-hover:from-purple-200 group-hover:to-pink-200 dark:group-hover:from-purple-800/50 dark:group-hover:to-pink-800/50" :
+                          "bg-gradient-to-br from-green-100 to-teal-100 dark:from-green-900/30 dark:to-teal-900/30 group-hover:from-green-200 group-hover:to-teal-200 dark:group-hover:from-green-800/50 dark:group-hover:to-teal-800/50"
                     }`}>
                       {pillar === 'SOC' && (
                         <svg className={`w-6 h-6 ${filterPillar === pillar ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,7 +260,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                     </span>
                   </div>
                   {filterPillar !== pillar && (
-                    <div className={`absolute inset-0 bg-gradient-to-br ${pillarColors[pillar]} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${pillarColors[pillar]} opacity-0 group-hover:opacity-15 transition-opacity duration-300`} />
                   )}
                 </button>
               ))}
