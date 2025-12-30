@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revalidation Endpoint Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #60a5fa;
+            margin: 0 0 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #475569;
+            border-radius: 4px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button:disabled {
+            background: #64748b;
+            cursor: not-allowed;
+        }
+        .response {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .success {
+            color: #22c55e;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .info {
+            color: #60a5fa;
+        }
+        .loading {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔄 Revalidation Endpoint Tester</h1>
+    
+    <div class="card">
+        <h2>Configuration</h2>
+        <div class="form-group">
+            <label>Bearer Token:</label>
+            <input type="text" id="token" value="406baaff935f03c8c8703085032cf451a30706a318ad97fead7e8549400094ad" placeholder="Enter your secret token">
+        </div>
+        <div class="form-group">
+            <label>Endpoint URL:</label>
+            <input type="text" id="url" value="http://localhost:3000/api/revalidate" placeholder="http://localhost:3000/api/revalidate">
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Request Body</h2>
+        <div class="form-group">
+            <label>Slug (optional):</label>
+            <input type="text" id="slug" value="hello-world" placeholder="hello-world">
+        </div>
+        <div class="form-group">
+            <label>Paths (optional, comma-separated):</label>
+            <input type="text" id="paths" placeholder="/about,/contact">
+        </div>
+        <div class="form-group">
+            <label>Tags (optional, comma-separated):</label>
+            <input type="text" id="tags" placeholder="blog,featured">
+        </div>
+        <button onclick="testEndpoint()">🚀 Send Test Request</button>
+    </div>
+
+    <div class="card">
+        <h2>Response</h2>
+        <div id="response" class="response"><span class="info">Click "Send Test Request" to see the response here...</span></div>
+    </div>
+
+    <script>
+        function testEndpoint() {
+            const token = document.getElementById('token').value;
+            const url = document.getElementById('url').value;
+            const slug = document.getElementById('slug').value;
+            const paths = document.getElementById('paths').value;
+            const tags = document.getElementById('tags').value;
+            const responseDiv = document.getElementById('response');
+
+            if (!token) {
+                responseDiv.innerHTML = '<span class="error">❌ Token is required</span>';
+                return;
+            }
+
+            // Build request body
+            const body = {};
+            if (slug) body.slug = slug;
+            if (paths) body.paths = paths.split(',').map(p => p.trim()).filter(p => p);
+            if (tags) body.tags = tags.split(',').map(t => t.trim()).filter(t => t);
+
+            responseDiv.innerHTML = '<span class="loading">⏳ Sending request...</span>';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+            .then(async (response) => {
+                const data = await response.json();
+                const status = response.status;
+                
+                let html = `<span class="${status === 200 ? 'success' : 'error'}">HTTP ${status}</span>\n\n`;
+                html += JSON.stringify(data, null, 2);
+                
+                if (status === 200) {
+                    html = '<span class="success">✅ SUCCESS</span>\n\n' + html;
+                } else {
+                    html = '<span class="error">❌ FAILED</span>\n\n' + html;
+                }
+                
+                responseDiv.innerHTML = html;
+            })
+            .catch(error => {
+                responseDiv.innerHTML = `<span class="error">❌ Network Error</span>\n\n${error.message}`;
+            });
+        }
+
+        // Allow Enter key to send request
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                testEndpoint();
+            }
+        });
+    </script>
+</body>
+</html>
