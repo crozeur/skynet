@@ -387,16 +387,16 @@ export const Services = () => {
               </div>
 
               {/* Solution */}
-              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-blue-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:bg-slate-900">
+              <div className="relative group w-full rounded-2xl border-2 border-blue-200 bg-white p-8 md:p-10 lg:p-12 shadow-lg hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 dark:border-blue-500/40 dark:bg-slate-900">
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                      <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
                       </svg>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg sm:text-xl font-bold text-blue-900 break-words dark:text-white">{activeService.solution}</h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl sm:text-2xl font-bold text-blue-900 break-words dark:text-white">{activeService.solution}</h3>
                       {activeTab === 0 && (
                         <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-300 relative group">
                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -411,10 +411,10 @@ export const Services = () => {
                       )}
                     </div>
                   </div>
-                  <ul className="space-y-2 sm:space-y-3">
+                  <ul className="space-y-3 sm:space-y-4">
                     {activeService.points.map((point, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-snug">
-                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
+                      <li key={idx} className="flex gap-3 sm:gap-4 text-sm sm:text-base text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-relaxed">
+                        <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-blue-400" />
                         <span className="break-words flex-1 min-w-0">{point}</span>
                       </li>
                     ))}
@@ -423,20 +423,20 @@ export const Services = () => {
               </div>
 
               {/* Results */}
-              <div className="relative group w-full max-w-2xl mx-auto rounded-2xl border-2 border-emerald-200 bg-white p-5 sm:p-7 shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:bg-slate-900">
+              <div className="relative group w-full rounded-2xl border-2 border-emerald-200 bg-white p-8 md:p-10 lg:p-12 shadow-lg hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 dark:border-emerald-500/40 dark:bg-slate-900">
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center shadow-lg">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-600 to-green-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                      <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                     </div>
-                      <h3 className="text-lg sm:text-xl font-bold text-emerald-900 break-words dark:text-white">{activeService.results}</h3>
+                      <h3 className="text-xl sm:text-2xl font-bold text-emerald-900 break-words dark:text-white">{activeService.results}</h3>
                   </div>
-                  <ul className="space-y-2 sm:space-y-3">
+                  <ul className="space-y-3 sm:space-y-4">
                     {activeService.resultsList.map((result, idx) => (
-                      <li key={idx} className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-snug">
-                        <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
+                      <li key={idx} className="flex gap-3 sm:gap-4 text-sm sm:text-base text-slate-700 group/item dark:text-slate-100/90 min-w-0 leading-relaxed">
+                        <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600 flex-shrink-0 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
                         <span className="break-words flex-1 min-w-0">{result}</span>
                       </li>
                     ))}
