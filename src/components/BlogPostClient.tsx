@@ -31,6 +31,12 @@ export function BlogPostClient({ post }: { post: PostData }) {
     CLOUD: "from-green-600 to-teal-500",
   };
 
+  const pillarRings: Record<string, string> = {
+    SOC: "ring-blue-500/20",
+    AUDIT: "ring-purple-500/20",
+    CLOUD: "ring-green-500/20",
+  };
+
   const [headings, setHeadings] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
 
   React.useEffect(() => {
@@ -77,13 +83,19 @@ export function BlogPostClient({ post }: { post: PostData }) {
           {/* Hero cover image */}
           {metadata.coverImage && (
             <div className="relative mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-64">
-              <Image src={metadata.coverImage} alt={metadata.coverAlt ?? 'Article cover'} fill className="object-cover" />
+              <Image
+                src={metadata.coverImage}
+                alt={metadata.coverAlt ?? "Article cover"}
+                fill
+                sizes="(min-width: 1024px) 896px, 100vw"
+                className="object-cover"
+              />
             </div>
           )}
           {/* Article Header */}
           <header className="mb-12">
             <div className="flex items-center gap-4 mb-6">
-              <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-4 ring-${metadata.pillar === 'SOC' ? 'blue' : metadata.pillar === 'AUDIT' ? 'purple' : 'green'}-500/20`}>
+              <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-4 ${pillarRings[metadata.pillar]}`}>
                 {metadata.pillar}
               </span>
               <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">

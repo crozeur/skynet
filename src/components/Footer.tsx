@@ -21,10 +21,10 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">{t.services_title}</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-              <li><a href="#" className="hover:text-gray-900 dark:hover:text-white transition">{t.mdr}</a></li>
-              <li><a href="#" className="hover:text-gray-900 dark:hover:text-white transition">{t.threat_hunting}</a></li>
-              <li><a href="#" className="hover:text-gray-900 dark:hover:text-white transition">{t.incident_response}</a></li>
-              <li><a href="#" className="hover:text-gray-900 dark:hover:text-white transition">{t.vuln_management}</a></li>
+              <li><a href="/#services-overview" className="hover:text-gray-900 dark:hover:text-white transition">{t.mdr}</a></li>
+              <li><a href="/#services-overview" className="hover:text-gray-900 dark:hover:text-white transition">{t.threat_hunting}</a></li>
+              <li><a href="/#services-overview" className="hover:text-gray-900 dark:hover:text-white transition">{t.incident_response}</a></li>
+              <li><a href="/#services-overview" className="hover:text-gray-900 dark:hover:text-white transition">{t.vuln_management}</a></li>
             </ul>
           </div>
           <div>
@@ -33,7 +33,7 @@ export function Footer() {
               <li><a href="/#about" className="hover:text-gray-900 dark:hover:text-white transition">{t.about_us}</a></li>
               <li><a href="mailto:skynet.consulting.dz@email.com" className="hover:text-gray-900 dark:hover:text-white transition">{t.contact}</a></li>
               <li><a href={"https://www.linkedin.com/company/skynet-consulting-dz/about"} className="hover:text-gray-900 dark:hover:text-white transition" target="_blank" rel="noreferrer">LinkedIn</a></li>
-              <li><a href="#" className="hover:text-gray-900 dark:hover:text-white transition">{t.careers}</a></li>
+              <li><a href="/#contact" className="hover:text-gray-900 dark:hover:text-white transition">{t.careers}</a></li>
             </ul>
           </div>
           <div>

@@ -32,3 +32,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local test helpers
+/public/test-api.html
