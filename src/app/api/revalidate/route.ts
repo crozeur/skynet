@@ -23,7 +23,7 @@ function normalizeTags(tags: Body["tags"]): string[] {
 }
 
 export async function POST(request: NextRequest) {
-  const expected = process.env.REVALIDATE_SECRET;
+  const expected = process.env.REVALIDATE_SECRET?.trim();
 
   if (!expected) {
     return Response.json(
