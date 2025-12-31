@@ -33,6 +33,7 @@ export const Services = () => {
 
     setTimeout(() => {
       const element = contentRef.current;
+      if (!element) return;
       const yOffset = -100; // Keep the section title visible
       const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
