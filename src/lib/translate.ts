@@ -6,86 +6,97 @@
 
 import type { PostMetadata } from "@/lib/blog";
 
-const TRANSLATE_API_URL = "https://api.mymemory.translated.net/get";
-
 interface TranslationCache {
   [key: string]: string;
 }
 
 const cache: TranslationCache = {};
 
+// Improve French translation quality
+function improveTranslationQuality(text: string, lang: string): string {
+  if (lang !== "fr") return text;
+  const terms: Record<string, string> = {
+    "threat detection": "détection des menaces",
+    "threat": "menace",
+    "incident response": "réponse aux incidents",
+    "security audit": "audit de sécurité",
+    "cybersecurity": "cybersécurité",
+    "vulnerability": "vulnérabilité",
+    "compliance": "conformité",
+    "monitoring": "surveillance",
+    "ransomware": "ransomware",
+    "critical": "critique",
+  };
+  let result = text;
+  Object.entries(terms).forEach(([en, fr]) => {
+    result = result.replace(new RegExp(`\\b${en}\\b`, "gi"), fr);
+  });
+  return result;
+}
+
 export async function translateText(
   text: string,
   targetLang: string
 ): Promise<string> {
-  if (targetLang === "en") return text;
+  if (targetLang === "en" || !text || text.trim().length === 0) return text;
 
-  const cacheKey = `${text.substring(0, 50)}_${targetLang}`;
+  const cacheKey = `${text.substring(0, 100)}_${targetLang}`;
 
-  // Check cache first
   if (cache[cacheKey]) {
     return cache[cacheKey];
   }
 
   try {
-    // Use MyMemory Translation API (free, no key required)
-    const response = await fetch(
-      `${TRANSLATE_API_URL}?q=${encodeURIComponent(text)}&langpair=en|${targetLang.toUpperCase()}`,
-      {
-        method: "GET",
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${targetLang === "fr" ? "fr" : targetLang}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.responseStatus === 200 && data.responseData?.translatedText) {
+        let translatedText = data.responseData.translatedText;
+        translatedText = improveTranslationQuality(translatedText, targetLang);
+        cache[cacheKey] = translatedText;
+        return translatedText;
       }
-    );
-
-    if (!response.ok) {
-      console.warn("Translation API error, returning original text");
-      return text;
-    }
-
-    const data = await response.json();
-
-    if (data.responseStatus === 200 && data.responseData) {
-      const translatedText = data.responseData.translatedText;
-      cache[cacheKey] = translatedText;
-      return translatedText;
     }
 
     return text;
   } catch (error) {
-    console.warn("Translation failed, returning original text", error);
+    console.warn("Translation error:", error);
     return text;
   }
 }
 
 /**
  * Translate HTML content while preserving tags
- * Splits content into text nodes and HTML tags, translates only text
  */
 export async function translateHtmlContent(
   html: string,
   targetLang: string
 ): Promise<string> {
-  if (targetLang === "en") return html;
+  if (targetLang === "en" || !html) return html;
 
-  // Split HTML into tokens (tags and text)
-  const tokens = html.split(/(<[^>]+>)/);
-
-  const translatedTokens = await Promise.all(
-    tokens.map(async (token) => {
-      // Skip HTML tags and empty strings
-      if (token.startsWith("<") || !token.trim()) {
-        return token;
+  // Split into text and tags
+  const parts = html.split(/(<[^>]+>)/);
+  const translated = await Promise.all(
+    parts.map(async (part) => {
+      // If it's a tag or empty, return as-is
+      if (part.startsWith("<") || !part.trim()) {
+        return part;
       }
-
-      // Translate text content
-      return await translateText(token, targetLang);
+      // Translate text
+      return await translateText(part, targetLang);
     })
   );
 
-  return translatedTokens.join("");
+  return translated.join("");
 }
 
 /**
- * Translate article title and metadata
+ * Translate article metadata
  */
 export async function translateArticleMetadata(
   metadata: PostMetadata,
@@ -95,19 +106,26 @@ export async function translateArticleMetadata(
 
   const translated: PostMetadata = { ...metadata };
 
-  // Translate key fields
-  if (metadata.title) {
-    translated.title = await translateText(metadata.title, targetLang);
-  }
+  try {
+    if (metadata.title) {
+      translated.title = await translateText(metadata.title, targetLang);
+    }
 
-  if (metadata.description) {
-    translated.description = await translateText(metadata.description, targetLang);
-  }
+    if (metadata.description) {
+      translated.description = await translateText(metadata.description, targetLang);
+    }
 
-  if (metadata.tags && Array.isArray(metadata.tags)) {
-    translated.tags = await Promise.all(
-      metadata.tags.map((tag: string) => translateText(tag, targetLang))
-    );
+    if (metadata.tags && Array.isArray(metadata.tags)) {
+      translated.tags = await Promise.all(
+        metadata.tags.map((tag: string) => translateText(tag, targetLang))
+      );
+    }
+
+    if (metadata.coverAlt) {
+      translated.coverAlt = await translateText(metadata.coverAlt, targetLang);
+    }
+  } catch (error) {
+    console.warn("Metadata translation error:", error);
   }
 
   return translated;
