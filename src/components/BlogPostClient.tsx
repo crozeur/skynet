@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { PostData } from "@/lib/blog";
 import React from "react";
-import { translateHtmlContent, translateArticleMetadata } from "@/lib/translate";
+import { translateHtmlContent, translateArticleMetadata, getUIString } from "@/lib/translateArticle";
 
 export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
@@ -129,7 +129,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
             <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            {language === "en" ? "Back to Blog" : "Retour au Blog"}
+            {getUIString("Back to Blog", language)}
           </Link>
 
           <article className="max-w-4xl mx-auto">
@@ -174,7 +174,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>{readingTime} {language === "en" ? "min read" : "min de lecture"}</span>
+                <span>{readingTime} {getUIString("min read", language)}</span>
               </div>
             </div>
             
@@ -212,7 +212,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
                 <h3 className="font-bold text-gray-900 dark:text-white text-lg">
-                  {language === 'en' ? 'Contents' : 'Sommaire'}
+                  {getUIString("Contents", language)}
                 </h3>
               </div>
               <div className="flex flex-col gap-3">
@@ -492,10 +492,10 @@ export function BlogPostClient({ post }: { post: PostData }) {
             <div className="flex items-center justify-between flex-col sm:flex-row gap-8">
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  {language === "en" ? "Found this article valuable?" : "Cet article vous a été utile ?"}
+                  {getUIString("Found this article valuable?", language)}
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  {language === "en" ? "Share it with your network" : "Partagez-le avec votre réseau"}
+                  {getUIString("Share it with your network", language)}
                 </p>
               </div>
               
@@ -510,11 +510,11 @@ export function BlogPostClient({ post }: { post: PostData }) {
                         });
                       } else {
                         navigator.clipboard.writeText(window.location.href);
-                        alert(language === "en" ? "Link copied!" : "Lien copié !");
+                        alert(getUIString("Link copied!", language));
                       }
                     }}
                     className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-colors"
-                    title={language === "en" ? "Share" : "Partager"}
+                    title={getUIString("Share", language)}
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -567,18 +567,16 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 </svg>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                {language === "en" ? "Download the Cybersecurity Checklist" : "Télécharger la checklist cybersécurité"}
+                {getUIString("Download the Cybersecurity Checklist", language)}
               </h2>
               <p className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-lg">
-                {language === "en"
-                  ? "Leave your email to receive our practical checklist to strengthen your cyber posture."
-                  : "Laissez votre email pour recevoir notre checklist pratique pour renforcer votre posture cyber."}
+                {getUIString("Leave your email to receive our practical checklist to strengthen your cyber posture.", language)}
               </p>
               <Link
                 href="/#contact"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-lg font-bold hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 active:scale-95 transition-all duration-300 shadow-2xl shadow-blue-500/40 hover:shadow-blue-500/60"
               >
-                {language === "en" ? "Get the Checklist" : "Obtenir la Checklist"}
+                {getUIString("Get the Checklist", language)}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
