@@ -1,0 +1,17 @@
+{
+  "slug": "soc-externalise-pme-algerie",
+  "metadata": {
+    "title": "Pourquoi un SOC externalisé pour les PME algériennes ?",
+    "description": "Les limites des antivirus et firewalls classiques face aux attaques modernes.",
+    "date": "2025-01-08",
+    "pillar": "SOC",
+    "tags": [
+      "managed-soc",
+      "threat-detection",
+      "24/7-monitoring"
+    ],
+    "coverImage": "/img/blog/cover-soc.svg",
+    "coverAlt": "SOC managé — surveillance et réponse 24/7"
+  },
+  "content": "<h2>Contexte</h2>\r\nLes PME algériennes font face à des menaces croissantes. Les solutions traditionnelles ne suffisent plus.\r\n\r\n<h2>Qu'est‑ce qu'un SOC ?</h2>\r\nUn <strong>Security Operations Center</strong> surveille et répond aux incidents 24/7.\r\n\r\n<h2>Limites des solutions classiques</h2>\r\n<li>Signatures antivirus insuffisantes</li>\r\n<li>Firewalls incapables de détecter les comportements internes</li>\r\n<li>Absence de surveillance continue</li>\r\n\r\n<h2>Avantages d'un SOC externalisé</h2>\r\n<li>Coût optimisé</li>\r\n<li>Expertise immédiate</li>\r\n<li>Couverture 24/7</li>\r\n<li>Conformité 18‑07 et ISO</li>\r\n\r\n<h2>Conclusion</h2>\r\nLe SOC externalisé de Skynet Consulting offre une couverture opérationnelle et une réponse rapide pour protéger vos actifs."
+}

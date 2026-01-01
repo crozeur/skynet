@@ -1,0 +1,16 @@
+{
+  "slug": "test-article",
+  "metadata": {
+    "title": "Test Article",
+    "description": "Ceci est un article de test créé automatiquement.",
+    "date": "2025-12-31",
+    "pillar": "AUDIT",
+    "tags": [
+      "test",
+      "auto"
+    ],
+    "coverImage": "/img/blog/test.jpg",
+    "coverAlt": "Image de test"
+  },
+  "content": "<h1>Article de test</h1>\r\n\r\nCeci est le contenu de l'article de test généré automatiquement pour vérifier le workflow Make + GitHub + Vercel.\r\n\r\n<li>Point 1</li>\r\n<li>Point 2</li>\r\n\r\n> Ceci est une citation de test.\r\n\r\nMerci de vérifier l'apparition sur le site après déploiement."
+}

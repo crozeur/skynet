@@ -2,6 +2,37 @@
 const fs = require("fs");
 const path = require("path");
 
+// Minimal markdown to HTML converter
+function markdownToHtml(markdown) {
+  let html = markdown
+    // Headings
+    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.*?)$/gm, "<h2>$1</h2>")
+    .replace(/^# (.*?)$/gm, "<h1>$1</h1>")
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    // Italic
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Code inline
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    // Lists
+    .replace(/^\- (.*?)$/gm, "<li>$1</li>")
+    // Line breaks and paragraphs
+    .split("\n\n")
+    .map(para => {
+      if (para.includes("<h") || para.includes("<li>")) {
+        return para;
+      }
+      if (para.trim()) {
+        return `<p>${para.trim()}</p>`;
+      }
+      return "";
+    })
+    .join("\n");
+
+  return html;
+}
+
 // This script pre-compiles all blog posts to JSON for Vercel deployment
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
@@ -47,7 +78,7 @@ function extractContent(source) {
     /export\s+const\s+metadata[\s\S]*?};\s*/m,
     ""
   );
-  return cleaned;
+  return cleaned.trim();
 }
 
 // Get all MDX files
@@ -68,7 +99,8 @@ files.forEach((file) => {
     return;
   }
 
-  const content = extractContent(source);
+  const markdownContent = extractContent(source);
+  const htmlContent = markdownToHtml(markdownContent);
 
   // Write JSON file
   const jsonPath = path.join(OUTPUT_DIR, `${slug}.json`);
@@ -78,7 +110,7 @@ files.forEach((file) => {
       {
         slug,
         metadata,
-        content,
+        content: htmlContent,
       },
       null,
       2
