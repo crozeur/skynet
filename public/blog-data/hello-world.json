@@ -12,5 +12,5 @@
     "coverImage": "/img/blog/cover-hello.svg",
     "coverAlt": "Introduction au blog Skynet Consulting"
   },
-  "content": "<h2 id=\"bienvenue\">Bienvenue</h2>\r\n\r\nCe blog utilise désormais <strong>MDX</strong> pour rédiger des contenus structurés, réutiliser des composants, et garder un style moderne.\r\n\r\n<h3 id=\"pourquoi-mdx-\">Pourquoi MDX ?</h3>\r\n\r\n<ul><li>Écriture simple en Markdown</li><li>Possibilité d'insérer des composants React</li><li>Contrôle total sur le rendu et le style</li></ul>\r\n\r\n> Nous garderons la mise en page sombre et élégante propre au site et continuerons à publier des analyses utiles pour RSSI/DSI."
+  "content": "<h2 id=\"bienvenue\">Bienvenue</h2>\r\n\r\nCe blog utilise désormais <strong>MDX</strong> pour rédiger des contenus structurés, réutiliser des composants, et garder un style moderne.\r\n\r\n<h3 id=\"pourquoi-mdx-\">Pourquoi MDX ?</h3>\r\n\r\n<ul>\n<li>Écriture simple en Markdown</li>\n<li>Possibilité d'insérer des composants React</li>\n<li>Contrôle total sur le rendu et le style</li>\n</ul>\n\r\n<blockquote class=\"article-blockquote\">Nous garderons la mise en page sombre et élégante propre au site et continuerons à publier des analyses utiles pour RSSI/DSI.</blockquote>"
 }

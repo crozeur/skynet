@@ -80,7 +80,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
         <article className="max-w-4xl mx-auto">
           {/* Hero cover image */}
           {metadata.coverImage && (
-            <div className="relative mb-8 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-64">
+            <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-80 shadow-2xl">
               <Image
                 src={metadata.coverImage}
                 alt={metadata.coverAlt ?? "Article cover"}
@@ -88,19 +88,24 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 sizes="(min-width: 1024px) 896px, 100vw"
                 className="object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
             </div>
           )}
+          
           {/* Article Header */}
-          <header className="mb-12">
-            <div className="flex items-center gap-4 mb-6">
-              <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-4 ${pillarRings[metadata.pillar]}`}>
+          <header className="mb-16">
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              {/* Pillar Badge */}
+              <span className={`inline-flex items-center px-4 py-2.5 rounded-full text-sm font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-4 ${pillarRings[metadata.pillar]} uppercase tracking-wide`}>
                 {metadata.pillar}
               </span>
-              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              
+              {/* Date */}
+              <div className="flex items-center gap-2.5 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <time className="font-medium">
+                <time>
                   {new Date(metadata.date).toLocaleDateString(language === "en" ? "en-US" : "fr-FR", {
                     year: "numeric",
                     month: "long",
@@ -110,11 +115,13 @@ export function BlogPostClient({ post }: { post: PostData }) {
               </div>
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent mb-6 leading-tight">
+            {/* Title */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent mb-8 leading-tight tracking-tight">
               {metadata.title}
             </h1>
             
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-6">
+            {/* Description */}
+            <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-semibold">
               {metadata.description}
             </p>
 
@@ -122,7 +129,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
             {metadata.tags && metadata.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {metadata.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1.5 text-sm font-semibold rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                  <span key={tag} className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 uppercase tracking-wider">
                     #{tag}
                   </span>
                 ))}
@@ -130,121 +137,250 @@ export function BlogPostClient({ post }: { post: PostData }) {
             )}
             
             {/* Divider */}
-            <div className="mt-8 h-1 w-20 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full" />
+            <div className="mt-10 h-1 w-24 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 rounded-full" />
           </header>
 
           {/* Article Content */}
           {/* Table of contents */}
           {headings.length > 0 && (
-            <div className="mb-10 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-              <div className="font-bold text-gray-900 dark:text-white mb-2">
-                {language === 'en' ? 'On this page' : 'Sur cette page'}
+            <div className="mb-12 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800/50 sticky top-20 z-10">
+              <div className="flex items-center gap-2 mb-4">
+                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                  {language === 'en' ? 'Contents' : 'Sommaire'}
+                </h3>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {headings.map((h) => (
-                  <a key={h.id} href={`#${h.id}`} className={`text-sm ${h.level === 2 ? 'font-semibold' : ''} text-blue-700 dark:text-blue-300 hover:underline`}>{h.text}</a>
+                  <a 
+                    key={h.id} 
+                    href={`#${h.id}`} 
+                    className={`
+                      transition-all duration-200
+                      ${h.level === 2 
+                        ? 'text-blue-700 dark:text-blue-300 font-semibold text-base' 
+                        : 'text-gray-600 dark:text-gray-400 text-sm ml-4'}
+                      hover:text-blue-900 dark:hover:text-blue-200
+                      border-l-2 pl-3 py-1
+                      ${h.level === 2 
+                        ? 'border-blue-600 dark:border-blue-400' 
+                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'}
+                    `}
+                  >
+                    {h.text}
+                  </a>
                 ))}
               </div>
             </div>
           )}
 
           <style>{`
-            .blog-content h1 {
-              font-size: 2.25rem;
-              font-weight: 700;
-              margin-top: 2.5rem;
-              margin-bottom: 1.5rem;
-              line-height: 1.2;
-              scroll-margin-top: 100px;
+            .blog-content {
+              font-size: 1.0625rem;
+              line-height: 1.8;
             }
-            .blog-content h2 {
-              font-size: 1.875rem;
-              font-weight: 700;
-              margin-top: 3rem;
-              margin-bottom: 1.5rem;
-              padding-bottom: 0.75rem;
-              border-bottom: 2px solid #e5e7eb;
+
+            /* Headings */
+            .blog-content h1 {
+              font-size: 2.5rem;
+              font-weight: 800;
+              margin: 3rem 0 1.5rem;
+              line-height: 1.1;
+              letter-spacing: -0.02em;
               scroll-margin-top: 100px;
+              color: #111827;
+            }
+            .dark .blog-content h1 {
+              color: #f9fafb;
+            }
+
+            .blog-content h2 {
+              font-size: 2rem;
+              font-weight: 700;
+              margin: 2.5rem 0 1.25rem;
+              padding-bottom: 0.75rem;
+              border-bottom: 3px solid #e5e7eb;
+              line-height: 1.2;
+              letter-spacing: -0.01em;
+              scroll-margin-top: 100px;
+              color: #111827;
             }
             .dark .blog-content h2 {
+              color: #f9fafb;
               border-bottom-color: #374151;
             }
+
             .blog-content h3 {
               font-size: 1.5rem;
               font-weight: 700;
-              margin-top: 2rem;
-              margin-bottom: 1rem;
+              margin: 2rem 0 1rem;
+              line-height: 1.3;
               scroll-margin-top: 100px;
-            }
-            .blog-content h1, 
-            .blog-content h2, 
-            .blog-content h3 {
               color: #111827;
             }
-            .dark .blog-content h1,
-            .dark .blog-content h2,
             .dark .blog-content h3 {
               color: #f3f4f6;
             }
+
+            /* Paragraphs */
             .blog-content p {
-              color: #374151;
-              font-size: 1.0625rem;
-              line-height: 1.75;
               margin-bottom: 1.5rem;
+              color: #374151;
+              line-height: 1.8;
             }
             .dark .blog-content p {
               color: #d1d5db;
             }
-            .blog-content ul {
-              list-style: disc;
-              margin: 1.5rem 0;
-              padding-left: 2rem;
+
+            /* Links */
+            .blog-content a {
+              color: #2563eb;
+              font-weight: 600;
+              text-decoration: none;
+              border-bottom: 2px solid transparent;
+              transition: all 0.2s ease;
             }
-            .blog-content ol {
-              list-style: decimal;
-              margin: 1.5rem 0;
-              padding-left: 2rem;
+            .blog-content a:hover {
+              border-bottom-color: #2563eb;
             }
-            .blog-content li {
-              color: #374151;
-              margin-bottom: 0.5rem;
-              line-height: 1.75;
+            .dark .blog-content a {
+              color: #60a5fa;
             }
-            .dark .blog-content li {
-              color: #d1d5db;
+            .dark .blog-content a:hover {
+              border-bottom-color: #60a5fa;
             }
+
+            /* Strong and em */
             .blog-content strong {
               font-weight: 700;
               color: #111827;
             }
             .dark .blog-content strong {
-              color: #f3f4f6;
+              color: #f9fafb;
             }
+
             .blog-content em {
               font-style: italic;
+              color: #1f2937;
             }
+            .dark .blog-content em {
+              color: #e5e7eb;
+            }
+
+            /* Lists */
+            .blog-content ul,
+            .blog-content ol {
+              margin: 1.75rem 0;
+              padding-left: 2rem;
+            }
+
+            .blog-content ul {
+              list-style: disc;
+            }
+
+            .blog-content ol {
+              list-style: decimal;
+            }
+
+            .blog-content li {
+              margin-bottom: 0.75rem;
+              color: #374151;
+              line-height: 1.8;
+            }
+            .dark .blog-content li {
+              color: #d1d5db;
+            }
+
+            .blog-content li strong {
+              color: #111827;
+              font-weight: 700;
+            }
+            .dark .blog-content li strong {
+              color: #f9fafb;
+            }
+
+            /* Inline code */
             .blog-content code {
-              background-color: #f3f4f6;
-              color: #1e40af;
-              padding: 0.25rem 0.5rem;
+              background: #f3f4f6;
+              color: #d946ef;
+              padding: 0.2rem 0.5rem;
               border-radius: 0.375rem;
-              font-family: ui-monospace, monospace;
-              font-size: 0.875rem;
+              font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+              font-size: 0.95rem;
+              font-weight: 500;
             }
             .dark .blog-content code {
-              background-color: #1f2937;
-              color: #60a5fa;
+              background: #1f2937;
+              color: #f472b6;
             }
-            .blog-content a {
-              color: #2563eb;
-              text-decoration: none;
-              font-weight: 600;
+
+            /* Code blocks */
+            .blog-content pre {
+              background: #1f2937;
+              color: #f3f4f6;
+              padding: 1.5rem;
+              border-radius: 0.75rem;
+              margin: 2rem 0;
+              overflow-x: auto;
+              border: 1px solid #374151;
+              line-height: 1.6;
             }
-            .blog-content a:hover {
-              text-decoration: underline;
+
+            .blog-content pre code {
+              background: none;
+              color: inherit;
+              padding: 0;
+              font-size: 0.95rem;
+              font-weight: 400;
             }
-            .dark .blog-content a {
-              color: #60a5fa;
+
+            .dark .blog-content pre {
+              background: #0f172a;
+              border-color: #1e293b;
+            }
+
+            /* Blockquotes */
+            .article-blockquote {
+              border-left: 4px solid #2563eb;
+              background: #eff6ff;
+              padding: 1.25rem 1.5rem;
+              margin: 2rem 0;
+              border-radius: 0.5rem;
+              font-style: italic;
+              color: #1e40af;
+            }
+
+            .dark .article-blockquote {
+              background: #0c2340;
+              border-left-color: #60a5fa;
+              color: #93c5fd;
+            }
+
+            /* Images */
+            .article-img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 0.75rem;
+              margin: 2rem 0;
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+              display: block;
+            }
+
+            .dark .article-img {
+              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Horizontal rules */
+            .blog-content hr {
+              border: none;
+              height: 2px;
+              background: linear-gradient(to right, #e5e7eb, #9ca3af, #e5e7eb);
+              margin: 3rem 0;
+            }
+            .dark .blog-content hr {
+              background: linear-gradient(to right, #374151, #4b5563, #374151);
             }
           `}</style>
           <div
@@ -254,13 +390,18 @@ export function BlogPostClient({ post }: { post: PostData }) {
           />
 
           {/* Share Section */}
-          <div className="mt-16 pt-8 border-t-2 border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-gray-700 dark:text-gray-300 font-semibold">
-                  {language === "en" ? "Share this article:" : "Partager cet article :"}
-                </span>
-                <div className="flex gap-2">
+          <div className="mt-20 pt-12 border-t-2 border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between flex-col sm:flex-row gap-8">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  {language === "en" ? "Found this article valuable?" : "Cet article vous a été utile ?"}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {language === "en" ? "Share it with your network" : "Partagez-le avec votre réseau"}
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
                   <button
                     onClick={() => {
                       if (navigator.share) {
@@ -303,11 +444,13 @@ export function BlogPostClient({ post }: { post: PostData }) {
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                     </svg>
                   </a>
-                </div>
               </div>
+            </div>
+            
+            <div className="mt-8 text-center">
               <Link
                 href="/blog"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-2 group"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-2 group justify-center"
               >
                 {language === "en" ? "Read more articles" : "Lire plus d'articles"}
                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
