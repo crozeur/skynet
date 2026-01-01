@@ -14,16 +14,22 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
     });
 
     if (!response.ok) {
+      console.error(`Failed to fetch blog post: ${params.slug}`, response.status, response.statusText);
       notFound();
     }
 
     const data = await response.json();
     
-    // Create a simple React component from the markdown content
+    if (!data || !data.metadata) {
+      console.error(`Invalid blog data for: ${params.slug}`, data);
+      notFound();
+    }
+
+    // Create a simple React component from the HTML content
     const Content = () => (
       <div 
         className="prose dark:prose-invert max-w-none"
-        dangerouslySetInnerHTML={{ __html: data.content }}
+        dangerouslySetInnerHTML={{ __html: data.content || '<p>No content</p>' }}
       />
     );
 
@@ -32,9 +38,10 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       metadata: data.metadata,
       Content,
     };
+    
     return <BlogPostClient post={post} />;
   } catch (error) {
-    console.error('Error loading blog post:', error);
+    console.error('Error loading blog post:', params.slug, error);
     notFound();
   }
 }
