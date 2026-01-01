@@ -113,7 +113,7 @@ function applyGlossary(text: string): string {
 }
 
 /**
- * Translate text using multiple fallback services
+ * Translate text using backend API (which tries multiple services)
  */
 export async function translateText(
   text: string,
@@ -129,46 +129,32 @@ export async function translateText(
   }
 
   try {
-    const targetCode = targetLang === "fr" ? "fr" : targetLang;
-    
-    // Try MyMemory first (most reliable)
-    try {
-      const params = new URLSearchParams({
-        q: text,
-        langpair: `en|${targetCode}`,
-      });
+    // Call our backend API which tries multiple translation services
+    const response = await fetch("/api/translate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text,
+        targetLang: targetLang === "fr" ? "fr" : targetLang,
+      }),
+    });
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(`https://api.mymemory.translated.net/get?${params.toString()}`, {
-        signal: controller.signal,
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (data.responseStatus === 200 && data.responseData?.translatedText && !data.responseData.translatedText.includes("MYMEMORY WARNING")) {
-          let translated = data.responseData.translatedText;
-          translated = applyGlossary(translated);
-          cache[cacheKey] = translated;
-          return translated;
-        }
+    if (response.ok) {
+      const data = await response.json();
+      if (data.translated && data.translated.trim()) {
+        cache[cacheKey] = data.translated;
+        return data.translated;
       }
-    } catch (e) {
-      // MyMemory failed, try next service
     }
 
-    // Fallback: Use glossary + simple word replacements
-    // This ensures we always return SOMETHING translated, not just the original text
-    const glossaryTranslated = applyGlossary(text);
-    cache[cacheKey] = glossaryTranslated;
-    return glossaryTranslated;
+    // Fallback: Return original text if translation fails
+    cache[cacheKey] = text;
+    return text;
   } catch (error) {
-    console.warn("Translation processing error:", error);
+    console.warn("Translation API call failed:", error);
+    // Return original text on error
     return text;
   }
 }
