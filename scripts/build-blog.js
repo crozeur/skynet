@@ -6,6 +6,9 @@ const path = require("path");
 function markdownToHtml(markdown) {
   let html = markdown;
   
+  // Horizontal rules
+  html = html.replace(/^(-{3,}|\*{3,}|_{3,})$/gm, '<hr />');
+  
   // Code blocks first (before other replacements)
   html = html.replace(/```([a-z]*)\n([\s\S]*?)```/gm, (match, lang, code) => {
     const escaped = code.trim()
@@ -22,8 +25,8 @@ function markdownToHtml(markdown) {
     return `<blockquote class="article-blockquote">${content.trim()}</blockquote>`;
   });
 
-  // Images
-  html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="article-img" />');
+  // Images with loading lazy
+  html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="article-img" loading="lazy" />');
 
   // Links
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
@@ -50,6 +53,9 @@ function markdownToHtml(markdown) {
 
   // Inline code
   html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+
+  // Strikethrough
+  html = html.replace(/~~(.*?)~~/g, '<del>$1</del>');
 
   // Lists (bullets and numbered)
   const lines = html.split('\n');
@@ -104,6 +110,7 @@ function markdownToHtml(markdown) {
         para.includes('<blockquote>') ||
         para.includes('<pre>') ||
         para.includes('<img') ||
+        para.includes('<hr') ||
         para.trim() === ''
       ) {
         return para;

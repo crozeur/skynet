@@ -11,7 +11,12 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
   const { metadata, content } = post;
   const [readingProgress, setReadingProgress] = React.useState(0);
+  const [isScrolled, setIsScrolled] = React.useState(false);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
+  
+  // Calculate reading time
+  const wordCount = content.split(/\s+/).length;
+  const readingTime = Math.ceil(wordCount / 200);
 
   React.useEffect(() => {
     const updateReadingProgress = () => {
@@ -19,6 +24,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (scrollTop / docHeight) * 100;
       setReadingProgress(progress);
+      setIsScrolled(scrollTop > 100);
     };
 
     window.addEventListener("scroll", updateReadingProgress);
@@ -112,6 +118,14 @@ export function BlogPostClient({ post }: { post: PostData }) {
                     day: "numeric",
                   })}
                 </time>
+              </div>
+              
+              {/* Reading Time */}
+              <div className="flex items-center gap-2.5 text-gray-600 dark:text-gray-400 text-sm font-medium">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{readingTime} {language === "en" ? "min read" : "min de lecture"}</span>
               </div>
             </div>
             
@@ -229,6 +243,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               margin-bottom: 1.5rem;
               color: #374151;
               line-height: 1.8;
+              text-align: justify;
             }
             .dark .blog-content p {
               color: #d1d5db;
@@ -267,6 +282,14 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
             .dark .blog-content em {
               color: #e5e7eb;
+            }
+
+            .blog-content del {
+              text-decoration: line-through;
+              color: #9ca3af;
+            }
+            .dark .blog-content del {
+              color: #6b7280;
             }
 
             /* Lists */
@@ -318,7 +341,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             /* Code blocks */
             .blog-content pre {
-              background: #1f2937;
+              background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
               color: #f3f4f6;
               padding: 1.5rem;
               border-radius: 0.75rem;
@@ -326,6 +349,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               overflow-x: auto;
               border: 1px solid #374151;
               line-height: 1.6;
+              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
             }
 
             .blog-content pre code {
@@ -337,8 +361,9 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
 
             .dark .blog-content pre {
-              background: #0f172a;
+              background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
               border-color: #1e293b;
+              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
             }
 
             /* Blockquotes */
@@ -362,25 +387,36 @@ export function BlogPostClient({ post }: { post: PostData }) {
             .article-img {
               max-width: 100%;
               height: auto;
-              border-radius: 0.75rem;
-              margin: 2rem 0;
-              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+              border-radius: 1rem;
+              margin: 2.5rem 0;
+              box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.15);
               display: block;
+              transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .article-img:hover {
+              transform: translateY(-4px);
+              box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.2);
             }
 
             .dark .article-img {
-              box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+              box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.4);
+            }
+
+            .dark .article-img:hover {
+              box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.5);
             }
 
             /* Horizontal rules */
             .blog-content hr {
               border: none;
-              height: 2px;
-              background: linear-gradient(to right, #e5e7eb, #9ca3af, #e5e7eb);
-              margin: 3rem 0;
+              height: 3px;
+              background: linear-gradient(to right, transparent, #3b82f6, transparent);
+              margin: 3.5rem 0;
+              border-radius: 2px;
             }
             .dark .blog-content hr {
-              background: linear-gradient(to right, #374151, #4b5563, #374151);
+              background: linear-gradient(to right, transparent, #60a5fa, transparent);
             }
           `}</style>
           <div
@@ -388,6 +424,19 @@ export function BlogPostClient({ post }: { post: PostData }) {
             className="blog-content max-w-none"
             dangerouslySetInnerHTML={{ __html: content }}
           />
+
+          {/* Back to Top Button */}
+          {isScrolled && (
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="fixed bottom-8 right-8 p-3 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 z-40"
+              title={language === "en" ? "Back to top" : "Retour en haut"}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+              </svg>
+            </button>
+          )}
 
           {/* Share Section */}
           <div className="mt-20 pt-12 border-t-2 border-gray-200 dark:border-gray-700">
@@ -461,7 +510,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </div>
 
           {/* CTA Section */}
-          <div className="mt-16 p-8 sm:p-12 rounded-2xl border-2 border-blue-200 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-indigo-900/20 shadow-xl">
+          <div className="mt-24 p-8 sm:p-12 rounded-3xl border-2 border-blue-200 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 via-cyan-50 to-indigo-50 dark:from-blue-900/20 dark:via-cyan-900/20 dark:to-indigo-900/20 shadow-2xl">
             <div className="text-center max-w-2xl mx-auto">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
