@@ -1,0 +1,147 @@
+## Intro
+Small IT teams don’t lose to attackers because they lack tools—they lose because alerts arrive faster than humans can make good decisions. A simple, consistent triage playbook helps you sort “needs action now” from “can wait” without burning out your team. This post gives you a repeatable workflow you can run with a basic SIEM/EDR plus your existing IT processes. The goal isn’t perfection; it’s faster, safer decisions with clear handoffs.
+
+## Quick take
+- Treat triage as a time-boxed decision: escalate, contain, monitor, or close.
+- Use a consistent severity model based on business impact, exposure, and confidence.
+- Start with context (asset, user, baseline behavior) before deep forensics.
+- Standardize evidence capture and notes so anyone can pick up the case.
+- Reduce noise continuously by tuning rules, enriching data, and fixing root causes.
+
+## 1) Set a clear triage objective and time boxes
+Triage is not the full investigation. It’s a structured, short process to decide what to do next.
+
+Define four possible outcomes for every alert:
+
+1. **Escalate**: This likely represents malicious activity and needs deeper investigation or incident response.
+2. **Contain**: Take immediate action to reduce risk (isolate host, disable account, block hash/IP) while you investigate.
+3. **Monitor**: Not enough evidence yet; keep under watch with specific follow-ups.
+4. **Close**: Benign, duplicate, or explained by known change.
+
+Suggested time boxes (adapt to your capacity):
+
+- **Initial triage (5–15 minutes):** Identify what fired, what asset/user is involved, and whether there’s immediate risk.
+- **Rapid validation (15–45 minutes):** Gather minimal evidence to support a decision and pick the outcome.
+- **Escalation handoff (10 minutes):** If escalating, document what you know and what you already checked.
+
+Practical example (small team reality):
+
+- Alert: “Multiple failed logins followed by successful login” for an employee mailbox.
+- Initial triage: Check if the source IP is unusual, whether MFA was used, and whether the account is privileged.
+- Rapid validation: Look for impossible travel, new inbox rules, unusual OAuth consents, or sign-ins from atypical user agents.
+- Outcome: If high confidence or high impact (executive mailbox, finance), contain (reset password, revoke sessions) and escalate.
+
+Key principle: if you can’t finish triage quickly, that’s a signal to **escalate or contain**, not to spend hours in limbo.
+
+## 2) Use a simple severity model you can apply consistently
+Many alerting systems assign “high/medium/low,” but triage needs a severity model that reflects your business.
+
+Use three inputs:
+
+- **Impact (business harm if true):** privileged account, sensitive system, customer data, financial operations, production uptime.
+- **Exposure (blast radius):** internet-facing, shared accounts, domain admin, widely deployed software, lateral movement potential.
+- **Confidence (how likely it’s real):** strong telemetry + corroboration vs. one weak signal.
+
+A practical scoring approach (no math required):
+
+- **P1 (Urgent):** High impact OR high exposure with moderate/high confidence. Immediate containment or escalation.
+- **P2 (Important):** Moderate impact/exposure with moderate confidence. Investigate within same business day.
+- **P3 (Routine):** Low impact/exposure or low confidence. Monitor, tune, or close with documentation.
+
+Examples:
+
+- **P1:** “EDR reports credential dumping behavior” on a domain controller.
+- **P2:** “New scheduled task created” on a workstation used by IT staff, but no other indicators.
+- **P3:** “Port scan detected” against a non-production host behind VPN with a known vulnerability scan window.
+
+To keep decisions consistent, document “what makes this P1/P2/P3” in two or three sentences in your playbook. Consistency matters more than the perfect model.
+
+## 3) Triage workflow: the minimum evidence set (MES)
+The biggest time sink in small SOC operations is chasing details before you have context. Start with a minimum evidence set you collect for every alert. Make it a template so you’re not improvising.
+
+Minimum Evidence Set (collect what applies):
+
+1. **Alert metadata:** rule name, detection source (SIEM/EDR/email), timestamp, severity, correlation IDs.
+2. **Asset context:** hostname, IP, owner/team, business function, criticality, OS, location/network segment.
+3. **User context:** username, role, department, privilege level, recent changes (new device, password reset, role change).
+4. **Baseline comparison:** is this new for the asset/user? (new process, new country, new admin tool).
+5. **Related activity window:** 30–60 minutes before and after the alert (logins, process creation, network connections).
+6. **Immediate risk check:** signs of persistence, credential access, lateral movement, or data access.
+
+Practical example: suspected malware execution alert
+
+- Start: Identify the process name, parent process, command line, and hash.
+- Context: Is this a server running line-of-business apps? Who owns it? Is it a kiosk?
+- Baseline: Has this binary run before on this device fleet?
+- Corroboration: Any DNS to newly seen domains, unusual outbound connections, or file writes to startup locations?
+- Decision: If it’s a known admin tool executed by IT during a change window, close or monitor with a note. If it’s a user-launched binary from Downloads plus suspicious network calls, contain and escalate.
+
+Tip for small teams: if you can only automate one thing, automate **enrichment** (asset criticality, user privilege, known change windows) so triage has context immediately.
+
+## 4) Containment-first actions that won’t break your environment
+Small IT teams often delay containment because they fear business disruption. The solution is to pre-approve safe containment options by scenario.
+
+Create a “containment menu” with guardrails:
+
+- **Account actions:** force password reset, revoke sessions/tokens, disable account temporarily, require MFA re-registration.
+- **Endpoint actions:** isolate host from network (EDR), block execution by hash, quarantine file, kill process.
+- **Network actions:** block IP/domain temporarily (with expiration), add DNS sinkhole entry, restrict egress for a host segment.
+- **Email actions:** purge message, block sender/domain, remove malicious inbox rules.
+
+Guardrails to reduce accidental outages:
+
+- Time-bound blocks (e.g., 4–24 hours) unless confirmed malicious.
+- Always capture evidence (screenshots/log exports) before destructive steps when feasible.
+- Maintain an emergency contact list for business owners of critical systems.
+- For critical servers, prefer “contain at the account/network layer” before isolating the host.
+
+Example: suspicious OAuth app consent (cloud identity)
+
+- Contain: revoke the app’s permissions, revoke user sessions, reset password if necessary.
+- Validate: check audit logs for consent grant, sign-in anomalies, mailbox rule changes.
+- Escalate: if the app was granted broad scopes or multiple users are affected.
+
+The objective is to reduce risk quickly while you investigate—especially when confidence is high but details are still emerging.
+
+## 5) Close the loop: documentation, tuning, and root-cause fixes
+If your SOC workflow ends at “close alert,” you’ll relive the same noise every week. Use a lightweight closure routine that feeds improvement.
+
+For every closed or resolved alert, capture:
+
+- **Disposition:** true positive, false positive, benign true positive (expected but worth logging), or duplicate.
+- **Why:** one or two sentences referencing the evidence that supported the decision.
+- **Action taken:** containment steps, tickets opened, stakeholder notified.
+- **Follow-up:** tuning request, missing log source, endpoint hardening, user coaching, or policy update.
+
+Noise reduction tactics that work for SMEs:
+
+- **Fix data quality first:** correct time sync, ensure key logs are onboarding properly, standardize hostnames.
+- **Tune with intent:** suppress alerts only with a documented reason and an expiration date.
+- **Reduce duplicates:** deduplicate correlated alerts into a single “case” per asset/user per time window.
+- **Address recurring causes:** if “powershell suspicious” is constant due to IT scripts, sign scripts, use approved admin tooling, or narrow the detection to risky patterns.
+
+Framework alignment (kept generic):
+
+- NIST/ISO/CIS-style programs all benefit from repeatable triage, clear incident categories, evidence handling, and continuous improvement—even if you’re not claiming compliance.
+
+## Checklist
+- [ ] Define triage outcomes (escalate, contain, monitor, close) and make them mandatory for every alert
+- [ ] Establish time boxes for initial triage and rapid validation
+- [ ] Maintain an asset inventory with owner, criticality, and environment (prod/dev) tags for enrichment
+- [ ] Tag privileged users and service accounts so identity-related alerts are prioritized correctly
+- [ ] Create a Minimum Evidence Set template and store it in your ticketing system
+- [ ] Pre-approve a containment menu with guardrails (time-bound blocks, evidence first)
+- [ ] Build a simple P1/P2/P3 severity model using impact, exposure, and confidence
+- [ ] Require a short “why” note for closures (evidence-based) to prevent repeat work
+- [ ] Track top recurring alert types weekly and assign a tuning/root-cause owner
+- [ ] Add escalation paths and after-hours contacts for critical systems and executives
+
+## FAQ
+**1) How do we triage alerts if we only have one person on security?**
+Use strict time boxes and a containment-first approach for high-impact alerts. Standardize your evidence template so another IT teammate can step in when needed.
+
+**2) When should we contain immediately instead of investigating more?**
+Contain when potential impact is high (privileged access, sensitive systems) or when you have multiple corroborating signals. You can always roll back time-bound containment if it’s benign.
+
+**3) What’s the fastest way to reduce alert fatigue?**
+Improve enrichment and close-loop tuning: add asset/user context to every alert, deduplicate into cases, and fix the root causes behind repeat false positives.
