@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:blog": "node scripts/build-blog.js",
+    "build": "npm run build:blog && next build",
     "start": "next start",
     "lint": "next lint"
   },
