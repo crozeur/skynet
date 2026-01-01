@@ -40,22 +40,20 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const [headings, setHeadings] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
 
   React.useEffect(() => {
-    const container = articleRef.current;
-    if (!container) return;
-    const hs = Array.from(container.querySelectorAll('h2, h3')) as HTMLElement[];
+    // Extract headings from the HTML content using regex instead of DOM
+    const headingRegex = /<h([23])\s+id="([^"]+)">([^<]+)<\/h\1>/g;
     const items: Array<{ id: string; text: string; level: number }> = [];
-    hs.forEach((el) => {
-      const text = el.textContent?.trim() || "";
-      const slug = text
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-");
-      if (!el.id) el.id = slug;
-      items.push({ id: el.id, text, level: el.tagName === 'H2' ? 2 : 3 });
-    });
+    let match;
+    
+    while ((match = headingRegex.exec(content)) !== null) {
+      const level = parseInt(match[1]);
+      const id = match[2];
+      const text = match[3];
+      items.push({ id, text, level });
+    }
+    
     setHeadings(items);
-  }, [post]);
+  }, [content]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -150,21 +148,108 @@ export function BlogPostClient({ post }: { post: PostData }) {
             </div>
           )}
 
+          <style>{`
+            .blog-content h1 {
+              font-size: 2.25rem;
+              font-weight: 700;
+              margin-top: 2.5rem;
+              margin-bottom: 1.5rem;
+              line-height: 1.2;
+              scroll-margin-top: 100px;
+            }
+            .blog-content h2 {
+              font-size: 1.875rem;
+              font-weight: 700;
+              margin-top: 3rem;
+              margin-bottom: 1.5rem;
+              padding-bottom: 0.75rem;
+              border-bottom: 2px solid #e5e7eb;
+              scroll-margin-top: 100px;
+            }
+            .dark .blog-content h2 {
+              border-bottom-color: #374151;
+            }
+            .blog-content h3 {
+              font-size: 1.5rem;
+              font-weight: 700;
+              margin-top: 2rem;
+              margin-bottom: 1rem;
+              scroll-margin-top: 100px;
+            }
+            .blog-content h1, 
+            .blog-content h2, 
+            .blog-content h3 {
+              color: #111827;
+            }
+            .dark .blog-content h1,
+            .dark .blog-content h2,
+            .dark .blog-content h3 {
+              color: #f3f4f6;
+            }
+            .blog-content p {
+              color: #374151;
+              font-size: 1.0625rem;
+              line-height: 1.75;
+              margin-bottom: 1.5rem;
+            }
+            .dark .blog-content p {
+              color: #d1d5db;
+            }
+            .blog-content ul {
+              list-style: disc;
+              margin: 1.5rem 0;
+              padding-left: 2rem;
+            }
+            .blog-content ol {
+              list-style: decimal;
+              margin: 1.5rem 0;
+              padding-left: 2rem;
+            }
+            .blog-content li {
+              color: #374151;
+              margin-bottom: 0.5rem;
+              line-height: 1.75;
+            }
+            .dark .blog-content li {
+              color: #d1d5db;
+            }
+            .blog-content strong {
+              font-weight: 700;
+              color: #111827;
+            }
+            .dark .blog-content strong {
+              color: #f3f4f6;
+            }
+            .blog-content em {
+              font-style: italic;
+            }
+            .blog-content code {
+              background-color: #f3f4f6;
+              color: #1e40af;
+              padding: 0.25rem 0.5rem;
+              border-radius: 0.375rem;
+              font-family: ui-monospace, monospace;
+              font-size: 0.875rem;
+            }
+            .dark .blog-content code {
+              background-color: #1f2937;
+              color: #60a5fa;
+            }
+            .blog-content a {
+              color: #2563eb;
+              text-decoration: none;
+              font-weight: 600;
+            }
+            .blog-content a:hover {
+              text-decoration: underline;
+            }
+            .dark .blog-content a {
+              color: #60a5fa;
+            }
+          `}</style>
           <div
             ref={articleRef}
-            className="prose prose-lg dark:prose-invert max-w-none
-              prose-headings:font-bold prose-headings:text-gray-900 dark:prose-headings:text-white
-              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-3 prose-h2:border-b prose-h2:border-gray-200 dark:prose-h2:border-gray-700
-              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-              prose-p:text-gray-700 dark:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-blue-600 dark:text-blue-400 prose-a:no-underline hover:prose-a:underline prose-a:font-semibold
-              prose-strong:text-gray-900 dark:text-white prose-strong:font-bold
-              prose-ul:my-6 prose-ul:list-disc prose-li:text-gray-700 dark:text-gray-300 prose-li:my-2
-              prose-ol:my-6 prose-ol:list-decimal
-              prose-code:text-blue-600 dark:text-blue-400 prose-code:bg-gray-100 dark:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm
-              prose-pre:bg-gray-900 dark:bg-gray-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:border prose-pre:border-gray-700
-              prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:bg-blue-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
-              prose-img:rounded-xl prose-img:shadow-2xl prose-img:my-8"
+            className="blog-content max-w-none"
             dangerouslySetInnerHTML={{ __html: content }}
           />
 

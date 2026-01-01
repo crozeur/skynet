@@ -5,22 +5,48 @@ const path = require("path");
 // Minimal markdown to HTML converter
 function markdownToHtml(markdown) {
   let html = markdown
-    // Headings
-    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.*?)$/gm, "<h2>$1</h2>")
-    .replace(/^# (.*?)$/gm, "<h1>$1</h1>")
+    // Headings with ID generation
+    .replace(/^### (.*?)$/gm, (match, text) => {
+      const id = text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      return `<h3 id="${id}">${text}</h3>`;
+    })
+    .replace(/^## (.*?)$/gm, (match, text) => {
+      const id = text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      return `<h2 id="${id}">${text}</h2>`;
+    })
+    .replace(/^# (.*?)$/gm, (match, text) => {
+      const id = text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+      return `<h1 id="${id}">${text}</h1>`;
+    })
     // Bold
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     // Italic
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     // Code inline
     .replace(/`(.*?)`/g, "<code>$1</code>")
-    // Lists
+    // Lists - wrap in ul/ol
     .replace(/^\- (.*?)$/gm, "<li>$1</li>")
     // Line breaks and paragraphs
     .split("\n\n")
     .map(para => {
-      if (para.includes("<h") || para.includes("<li>")) {
+      // Wrap consecutive <li> items in <ul>
+      if (para.includes("<li>")) {
+        const wrapped = para.replace(/(<li>.*?<\/li>)/gs, "<ul>$1</ul>");
+        return wrapped.replace(/<\/ul>\s*<ul>/g, '');
+      }
+      if (para.includes("<h") || para.includes("<ul>")) {
         return para;
       }
       if (para.trim()) {
