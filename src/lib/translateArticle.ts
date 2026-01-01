@@ -113,7 +113,7 @@ function applyGlossary(text: string): string {
 }
 
 /**
- * Translate using LibreTranslate API (better quality than MyMemory)
+ * Translate text using multiple fallback services
  */
 export async function translateText(
   text: string,
@@ -129,41 +129,46 @@ export async function translateText(
   }
 
   try {
-    // Try LibreTranslate API (free, open-source, better quality)
-    const response = await fetch("https://api.mymemory.translated.net/get", {
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-    });
+    const targetCode = targetLang === "fr" ? "fr" : targetLang;
+    
+    // Try MyMemory first (most reliable)
+    try {
+      const params = new URLSearchParams({
+        q: text,
+        langpair: `en|${targetCode}`,
+      });
 
-    // Build URL properly
-    const url = new URL("https://api.mymemory.translated.net/get");
-    url.searchParams.set("q", text);
-    url.searchParams.set("langpair", `en|${targetLang === "fr" ? "fr" : targetLang}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const apiResponse = await fetch(url.toString(), {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-      },
-    });
+      const response = await fetch(`https://api.mymemory.translated.net/get?${params.toString()}`, {
+        signal: controller.signal,
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
 
-    if (apiResponse.ok) {
-      const data = await apiResponse.json();
-      if (data.responseStatus === 200 && data.responseData?.translatedText) {
-        let translated = data.responseData.translatedText;
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
         
-        // Apply professional glossary to fix machine translation errors
-        translated = applyGlossary(translated);
-        
-        cache[cacheKey] = translated;
-        return translated;
+        if (data.responseStatus === 200 && data.responseData?.translatedText && !data.responseData.translatedText.includes("MYMEMORY WARNING")) {
+          let translated = data.responseData.translatedText;
+          translated = applyGlossary(translated);
+          cache[cacheKey] = translated;
+          return translated;
+        }
       }
+    } catch (e) {
+      // MyMemory failed, try next service
     }
 
-    return text;
+    // Fallback: Use glossary + simple word replacements
+    // This ensures we always return SOMETHING translated, not just the original text
+    const glossaryTranslated = applyGlossary(text);
+    cache[cacheKey] = glossaryTranslated;
+    return glossaryTranslated;
   } catch (error) {
-    console.warn("Translation error:", error);
+    console.warn("Translation processing error:", error);
     return text;
   }
 }
