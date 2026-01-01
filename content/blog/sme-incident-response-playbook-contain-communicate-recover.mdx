@@ -1,0 +1,142 @@
+## Intro
+Most SMEs don’t fail because they lack security tools—they fail because the first hour of a security incident is chaotic. When alerts pile up, people improvise: someone reboots a server, someone emails “we’ve been hacked,” and someone wipes the laptop that contained the evidence you needed. A simple, rehearsed incident response (IR) playbook reduces downtime, limits damage, and keeps decision-making calm. This post gives you a practical IR approach that works for mixed teams (beginners and IT managers) without turning into a compliance project.
+
+## Quick take
+- Define roles and decision rights before an incident (who can isolate systems, who talks externally).
+- Treat the first hour as “stabilize and preserve evidence,” not “fix everything immediately.”
+- Pre-stage secure communication, logging, and backups so you can trust what you see.
+- Use a small set of repeatable playbooks (phishing/BEC, ransomware, lost device, cloud account takeover).
+- Practice with short tabletop drills; improve one weakness each time.
+
+## Build a lightweight incident response structure (so you’re not inventing it mid-crisis)
+An SME-friendly IR structure is less about a big binder and more about clear ownership.
+
+### Core roles (one person can hold multiple roles)
+- Incident Lead: runs the incident, keeps a timeline, assigns tasks, decides severity.
+- Technical Lead: hands-on containment and triage (endpoint/network/cloud).
+- Business Owner: sets priorities (what must stay online, acceptable downtime).
+- Communications Owner: internal updates, customer comms, and coordination with legal/PR if needed.
+- Scribe: records actions, timestamps, and decisions (vital for later review).
+
+### Decision rights you must pre-approve
+- Isolation authority: who can remove a device from the network, disable accounts, or block traffic.
+- Shutdown authority: who can power down a server, stop a cloud workload, or pause integrations.
+- Spend authority: who can approve emergency services (forensics, incident retainer, legal counsel).
+
+### Severity levels (simple is better)
+Use three levels to avoid endless debate:
+- Sev 1: active compromise, sensitive data exposure suspected, widespread disruption, ransomware.
+- Sev 2: contained compromise, limited scope, business impact manageable.
+- Sev 3: suspicious activity or policy breach with minimal impact.
+
+Practical example: A single employee reports a suspicious email and no one clicked → Sev 3. Finance user’s mailbox rules changed and invoices are being diverted → Sev 2. Multiple endpoints encrypting files → Sev 1.
+
+## First-hour actions: contain, preserve, and keep the business running
+In many incidents, the first hour determines whether you have a minor disruption or a multi-day outage.
+
+### 1) Establish a secure channel for coordination
+Don’t coordinate in the potentially compromised system (e.g., corporate email).
+- Use an out-of-band channel: phone bridge, a secure chat not tied to your SSO, or a pre-created “IR-only” workspace with separate admin.
+- Share a single incident doc for timeline and assignments (stored in a controlled location).
+
+### 2) Preserve evidence before “cleaning”
+Beginners often want to wipe or reimage immediately. That can destroy indicators you need to understand scope.
+- Capture volatile data when feasible (running processes, network connections) via your endpoint tooling.
+- Export key logs: identity provider sign-in logs, email audit logs, EDR alerts, firewall/VPN logs, cloud audit logs.
+- If a device is suspicious but stable, isolate it rather than rebooting.
+
+Rule of thumb: isolate first; change passwords later; reimage after you understand entry point and lateral movement.
+
+### 3) Contain with the least disruptive controls first
+Containment should reduce attacker capability while minimizing self-inflicted downtime.
+- Disable or reset compromised accounts; revoke sessions/tokens.
+- Block known malicious IPs/domains (only when confident—avoid blocking critical services by mistake).
+- Quarantine endpoints via EDR, or remove from network.
+- For cloud incidents: restrict risky actions (e.g., disable access keys, rotate secrets, tighten conditional access).
+
+Practical example: If you suspect a compromised Microsoft 365 account, immediately revoke refresh tokens/sessions and enforce MFA before you change every mailbox setting. Then check for forwarding rules, OAuth app consents, and newly created inbox rules.
+
+### 4) Stabilize critical operations
+Work with the business owner to keep “must-run” processes alive.
+- Identify the minimum viable service: payroll, order processing, customer support.
+- Consider temporary workarounds (manual invoicing, alternative comms) but document them.
+- If ransomware is suspected, disconnect backup repositories that could be impacted.
+
+## Common playbooks SMEs should keep ready (with examples)
+Instead of a single “IR plan,” keep 3–5 playbooks that match your most likely incidents.
+
+### Playbook A: Phishing / Business Email Compromise (BEC)
+Typical signs: unexpected invoice changes, mailbox rules, unusual sign-ins.
+- Contain: reset password, revoke sessions, enforce MFA, disable legacy auth if present.
+- Investigate: review sign-in locations, impossible travel, OAuth consents, mailbox forwarding/rules, sent items.
+- Remediate: remove forwarding, notify impacted vendors/customers, verify payment changes out-of-band.
+
+Example: Accounts payable receives “new bank details” from a supplier. You verify by phone, discover it’s fraudulent, and you check the AP mailbox rules—finding an auto-forward to an external address. That becomes your root cause path.
+
+### Playbook B: Ransomware / widespread encryption
+Typical signs: multiple endpoints encrypting, ransom notes, file server spikes.
+- Contain: isolate infected endpoints, segment impacted subnets, disable compromised admin accounts.
+- Preserve: take snapshots of encrypted systems (if safe), preserve ransom note and file extensions.
+- Decide: restore vs rebuild vs limited operations. Avoid rushing into paying; involve legal/insurance if applicable.
+- Recover: restore from known-good backups after confirming the entry point is closed.
+
+Example: You find encryption on a file server and two endpoints. You immediately isolate those systems, disable the user account used to access the file share, and check EDR for the initial execution path (email attachment vs RDP vs exploited service).
+
+### Playbook C: Lost or stolen device
+Typical signs: missing laptop, stolen phone.
+- Contain: remote lock/wipe, disable device tokens, rotate credentials if device had access.
+- Investigate: check for suspicious sign-ins after loss timestamp.
+- Improve: ensure full disk encryption and device compliance policies are enforced.
+
+### Playbook D: Cloud account takeover (IdP / admin compromise)
+Typical signs: new MFA devices added, conditional access changes, unusual admin actions.
+- Contain: remove unknown MFA methods, revoke sessions, rotate break-glass accounts, restore known-good policies.
+- Investigate: audit admin changes, new service principals/apps, role assignments.
+- Harden: require phishing-resistant MFA for admins, enforce admin workstation controls.
+
+## Communications, legal, and learning: make the incident survivable
+The technical work matters, but SMEs often stumble in communications and follow-through.
+
+### Internal communications cadence
+- Start: “We are investigating a security incident. Do not change system settings unless instructed. Use the IR channel.”
+- Every 60–120 minutes for Sev 1: what’s known, what’s being done, what employees should do now.
+- End: summary and next steps.
+
+Avoid vague statements like “we’re secure now.” Instead: “We contained the affected account, reset credentials, and are monitoring for recurrence while restoring services.”
+
+### External communications principles
+- Be accurate, not fast. If you don’t know scope, say so.
+- Use a single spokesperson.
+- Preserve evidence and maintain a timeline of disclosures.
+
+### Post-incident review (PIR) that actually improves security
+Within 1–2 weeks, do a blameless PIR:
+- What happened (timeline).
+- How it was detected.
+- What slowed response.
+- What control would have prevented or limited it.
+- Top 3 improvements with owners and due dates.
+
+If you use frameworks (NIST/ISO/CIS), map improvements loosely to categories like Identify/Protect/Detect/Respond/Recover to keep the plan organized—without claiming compliance.
+
+## Checklist
+- [ ] Define incident roles (lead, technical, business, comms, scribe) and backups.
+- [ ] Pre-approve isolation/shutdown authority and emergency spend thresholds.
+- [ ] Create an out-of-band IR communications channel and test access quarterly.
+- [ ] Centralize and retain key logs (IdP, email, EDR, firewall/VPN, cloud audit).
+- [ ] Document “first hour” steps: isolate, preserve evidence, contain accounts, stabilize services.
+- [ ] Prepare 3–5 playbooks (BEC, ransomware, lost device, cloud takeover, third-party breach).
+- [ ] Maintain an asset and identity inventory (critical systems, admins, service accounts).
+- [ ] Ensure backups are tested, segmented, and have defined restore priorities (RTO/RPO goals).
+- [ ] Run a tabletop exercise twice a year and record action items.
+- [ ] Keep a contacts list (ISP, MSSP, legal, insurance, key vendors) accessible offline.
+
+## FAQ
+### What’s the difference between incident response and disaster recovery?
+Incident response focuses on stopping and understanding an attack; disaster recovery focuses on restoring services and data. They overlap, but IR prioritizes containment and evidence.
+
+### Should we immediately reimage compromised machines?
+Not always. Isolate first and preserve evidence (logs, artifacts) so you can find the entry point and scope; then reimage when you can do it safely and consistently.
+
+### Do SMEs need formal frameworks like NIST or ISO to do IR well?
+No. You can use framework categories as a structure, but a simple, rehearsed playbook with clear roles and logging often delivers the biggest improvement first.
