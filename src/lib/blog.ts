@@ -28,9 +28,29 @@ export interface PostData extends PostSummary {
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
 function extractMetadataFromMDX(source: string): PostMetadata | null {
-  const match = source.match(/export\s+const\s+metadata\s*=\s*({[\s\S]*?})/);
-  if (!match) return null;
-  const objSource = match[1];
+  // Match export const metadata = { ... };
+  // Use a more robust regex that counts braces to find the matching closing brace
+  const startMatch = source.match(/export\s+const\s+metadata\s*=\s*\{/);
+  if (!startMatch) return null;
+  
+  const startIdx = startMatch.index! + startMatch[0].length - 1;
+  let braceCount = 0;
+  let endIdx = -1;
+  
+  for (let i = startIdx; i < source.length; i++) {
+    if (source[i] === '{') braceCount++;
+    if (source[i] === '}') {
+      braceCount--;
+      if (braceCount === 0) {
+        endIdx = i;
+        break;
+      }
+    }
+  }
+  
+  if (endIdx === -1) return null;
+  const objSource = source.substring(startIdx, endIdx + 1);
+  
   try {
     // Evaluate the object literal in a sandboxed Function
     const meta = Function(`return (${objSource})`)();
