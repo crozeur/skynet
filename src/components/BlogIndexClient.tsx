@@ -7,11 +7,19 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { PostSummary } from "@/lib/blog";
 
+interface TranslatedMetadata {
+  title: string;
+  description: string;
+  tags: string[];
+}
+
 export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   const { language } = useLanguage();
   const [filterTag, setFilterTag] = React.useState<string | null>(null);
   const [filterPillar, setFilterPillar] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
+  const [translatedPosts, setTranslatedPosts] = React.useState<Record<string, TranslatedMetadata>>({});
+  const [isTranslating, setIsTranslating] = React.useState(false);
 
   // Highlight matches in titles/descriptions for better search UX
   const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -30,6 +38,71 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
     },
     [searchQuery]
   );
+
+  // Translate posts when language changes
+  React.useEffect(() => {
+    if (language === "en") {
+      // Reset to original when switching to English
+      setTranslatedPosts({});
+      return;
+    }
+
+    // Translate all posts to target language
+    const translateAll = async () => {
+      setIsTranslating(true);
+      const translations: Record<string, TranslatedMetadata> = {};
+
+      for (const { slug, metadata } of posts) {
+        try {
+          // Translate title, description, and tags in parallel
+          const [titleRes, descRes, tagsRes] = await Promise.all([
+            fetch("/api/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: metadata.title, targetLang: language }),
+            }),
+            fetch("/api/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: metadata.description, targetLang: language }),
+            }),
+            Promise.all(
+              (metadata.tags || []).map((tag) =>
+                fetch("/api/translate", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: tag, targetLang: language }),
+                })
+              )
+            ),
+          ]);
+
+          const titleData = await titleRes.json();
+          const descData = await descRes.json();
+          const tagsData = await Promise.all(tagsRes.map((r) => r.json()));
+
+          translations[slug] = {
+            title: titleData.translated || metadata.title,
+            description: descData.translated || metadata.description,
+            tags: tagsData.map((d) => d.translated || "") || metadata.tags || [],
+          };
+        } catch (error) {
+          console.error(`Translation error for ${slug}:`, error);
+          // Keep original if translation fails
+          translations[slug] = {
+            title: metadata.title,
+            description: metadata.description,
+            tags: metadata.tags || [],
+          };
+        }
+      }
+
+      setTranslatedPosts(translations);
+      setIsTranslating(false);
+    };
+
+    translateAll();
+  }, [language, posts]);
 
   const pillarColors: Record<string, string> = {
     SOC: "from-blue-600 to-cyan-500",
@@ -332,17 +405,17 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 mb-3">
-                    {highlight(metadata.title)}
+                    {highlight(translatedPosts[slug]?.title || metadata.title)}
                   </h2>
 
                   <p className="text-gray-600 dark:text-gray-300 line-clamp-3 leading-relaxed mb-6">
-                    {highlight(metadata.description)}
+                    {highlight(translatedPosts[slug]?.description || metadata.description)}
                   </p>
 
                   {/* Tags */}
-                  {metadata.tags && metadata.tags.length > 0 && (
+                  {(translatedPosts[slug]?.tags || metadata.tags) && (translatedPosts[slug]?.tags || metadata.tags).length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {metadata.tags.slice(0, 3).map((tag) => (
+                      {(translatedPosts[slug]?.tags || metadata.tags).slice(0, 3).map((tag) => (
                         <span key={tag} className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                           #{tag}
                         </span>
