@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
 
 export async function GET(
   request: NextRequest,
@@ -8,22 +6,22 @@ export async function GET(
 ) {
   try {
     const slug = params.slug;
-    const jsonPath = path.join(
-      process.cwd(),
-      "public",
-      "blog-data",
-      `${slug}.json`
+    
+    // Try to read from public/blog-data (accessible as static files on Vercel)
+    const response = await fetch(
+      new URL(`/blog-data/${slug}.json`, request.url).href
     );
 
-    if (!fs.existsSync(jsonPath)) {
+    if (!response.ok) {
       return NextResponse.json({ error: "Article not found" }, { status: 404 });
     }
 
-    const data = JSON.parse(fs.readFileSync(jsonPath, "utf8"));
+    const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error('Error loading blog article:', error);
     return NextResponse.json(
-      { error: "Failed to load article" },
+      { error: "Failed to load article", details: String(error) },
       { status: 500 }
     );
   }
