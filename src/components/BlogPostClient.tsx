@@ -6,13 +6,47 @@ import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { PostData } from "@/lib/blog";
 import React from "react";
+import { translateHtmlContent, translateArticleMetadata } from "@/lib/translate";
 
 export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
-  const { metadata, content } = post;
+  const [metadata, setMetadata] = React.useState(post.metadata);
+  const [content, setContent] = React.useState(post.content);
+  const [isTranslating, setIsTranslating] = React.useState(false);
   const [readingProgress, setReadingProgress] = React.useState(0);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
+  
+  // Handle language change and translate article
+  React.useEffect(() => {
+    const translateArticle = async () => {
+      if (language === "en") {
+        // Reset to original content
+        setMetadata(post.metadata);
+        setContent(post.content);
+      } else {
+        // Translate to target language
+        setIsTranslating(true);
+        try {
+          const [translatedMetadata, translatedContent] = await Promise.all([
+            translateArticleMetadata(post.metadata, language),
+            translateHtmlContent(post.content, language),
+          ]);
+          setMetadata(translatedMetadata);
+          setContent(translatedContent);
+        } catch (error) {
+          console.error("Translation error:", error);
+          // Fallback to original content
+          setMetadata(post.metadata);
+          setContent(post.content);
+        } finally {
+          setIsTranslating(false);
+        }
+      }
+    };
+
+    translateArticle();
+  }, [language, post.metadata, post.content]);
   
   // Calculate reading time
   const wordCount = content.split(/\s+/).length;
@@ -71,19 +105,34 @@ export function BlogPostClient({ post }: { post: PostData }) {
         />
       </div>
 
-      <Container className="py-16 sm:py-20 lg:py-24">
-        {/* Back Button */}
-        <Link
-          href="/blog"
-          className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mb-8 transition-colors group"
-        >
-          <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {language === "en" ? "Back to Blog" : "Retour au Blog"}
-        </Link>
+      {/* Translation in progress overlay */}
+      {isTranslating && (
+        <div className="fixed inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-2xl">
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full animate-spin" style={{maskImage: 'radial-gradient(circle, transparent 30%, black 70%)', WebkitMaskImage: 'radial-gradient(circle, transparent 30%, black 70%)'}} />
+            </div>
+            <p className="text-gray-900 dark:text-white font-semibold">
+              {language === "en" ? "Translating article..." : "Traduction en cours..."}
+            </p>
+          </div>
+        </div>
+      )}
 
-        <article className="max-w-4xl mx-auto">
+      <div className="transition-opacity duration-300" style={{opacity: isTranslating ? 0.5 : 1}}>
+        <Container className="py-16 sm:py-20 lg:py-24">
+          {/* Back Button */}
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mb-8 transition-colors group"
+          >
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {language === "en" ? "Back to Blog" : "Retour au Blog"}
+          </Link>
+
+          <article className="max-w-4xl mx-auto">
           {/* Hero cover image */}
           {metadata.coverImage && (
             <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-80 shadow-2xl">
@@ -537,7 +586,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
             </div>
           </div>
         </article>
-      </Container>
+        </Container>
+      </div>
     </main>
   );
 }
