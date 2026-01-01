@@ -1,0 +1,142 @@
+## Intro
+Security audits don’t have to be painful, expensive, or reserved for large enterprises. For SMEs, the goal is simple: quickly verify that the security basics are actually working, and that the riskiest gaps are visible and owned. This post gives you a lightweight approach you can run quarterly (and before major changes) without claiming “compliance.” Use it to gather evidence, spot high-impact fixes, and create a short, trackable action plan.
+
+## Quick take
+- Define scope and “crown jewels” first, or you’ll audit everything and learn nothing.
+- Ask for evidence (screenshots, logs, configs, tickets), not promises.
+- Prioritize identity, patching, backups, and monitoring—most SME incidents start there.
+- Turn findings into owners, due dates, and verification steps.
+- Repeat on a cadence (quarterly) and after major changes (new SaaS, M&A, new firewall).
+
+## 1) Set the audit scope: systems, data, and acceptable risk
+A good SME audit starts with boundaries. If you don’t define what matters most, your checklist becomes a long list of “nice-to-haves” and your team loses momentum.
+
+Practical steps:
+1. List your critical business services (e.g., email, file storage, ERP/finance, customer database, e-commerce, remote access). These are your primary audit targets.
+2. Identify your “crown jewel” data types: customer PII, payment data, credentials/secrets, intellectual property, financial records.
+3. Map where that data lives: endpoints, servers, SaaS apps, cloud storage, on-prem shares.
+4. Define risk tolerance in plain language. Example: “We accept brief outages for internal tools, but not for billing; we can tolerate low-risk data exposure, but not customer PII.”
+
+Example: If your customer database is in a SaaS CRM and your staff authenticate via a single identity provider, your audit should spend more time on identity controls (MFA, conditional access, logging) than on local server hardening.
+
+Deliverable to produce:
+- A one-page scope document: in-scope apps, networks, user groups, and a short “out of scope” list.
+
+## 2) Collect evidence efficiently (and avoid checkbox theater)
+Audits fail when they rely on verbal assurances: “Yes, we do backups.” Your goal is to collect lightweight evidence that a control exists and is effective.
+
+Evidence types that work well for SMEs:
+- Screenshots of key settings (MFA enforced, password policy, device encryption).
+- Exported lists (admin accounts, MFA enrollment report, list of SaaS integrations).
+- Sample logs (sign-in logs, endpoint alerts, firewall denies) covering the last 7–30 days.
+- Tickets or change records showing patching, access approvals, and incidents.
+
+How to sample without boiling the ocean:
+- Pick a representative sample: 10–20 endpoints, 3–5 critical servers, 5–10 key SaaS apps.
+- Sample by risk: executives, finance, IT admins, and remote users first.
+- Validate “control works” by testing. Example: attempt to log in to a test account without MFA; confirm it is blocked.
+
+Example “evidence request” you can send internally:
+- “Provide the list of accounts with global admin privileges and proof of MFA enforcement.”
+- “Provide the last successful restore test record (date, system, result).”
+- “Provide the patch report showing OS and browser patch status for all managed endpoints.”
+
+## 3) Audit the controls that stop real-world SME incidents
+Most SME compromises trace back to a small set of control failures: weak identity hygiene, exposed remote access, unpatched systems, poor backups, and limited detection.
+
+Below are practical audit themes and what “good” looks like—without overcomplicating it.
+
+### Identity and access (especially admins)
+- Ensure MFA is required for all users, and stronger requirements exist for admins.
+- Reduce the number of admin accounts; use separate admin identities for privileged work.
+- Review third-party access and SaaS integrations (OAuth apps, API keys, service accounts).
+
+Example: If a finance mailbox can approve payments, verify that the account has MFA, that sign-ins are logged, and that mailbox forwarding rules are restricted and monitored.
+
+### Patching and configuration
+- Track patch status for OS, browsers, VPN clients, and key apps.
+- Ensure unsupported systems are identified and either upgraded or isolated.
+- Confirm configuration baselines for endpoints/servers: firewall on, disk encryption, secure remote management.
+
+Example: If you use remote access tools, audit whether they’re restricted to corporate-managed devices and whether logs are retained.
+
+### Backups and recovery
+- Validate the “3-2-1” idea (multiple copies, multiple media, one offline/immutable if possible) in principle, even if implementation is simple.
+- Ensure backups include SaaS data you rely on (email, file shares, CRM exports).
+- Run restore tests and document outcomes.
+
+Example: Don’t just confirm that backups run—restore a file and a system image to verify speed and integrity.
+
+### Logging and detection
+- Centralize at least critical logs: identity provider sign-ins, endpoint alerts, firewall/VPN logs.
+- Ensure alerting is actionable and routed to a monitored channel.
+- Define “minimum viable monitoring” for SMEs: account lockouts, impossible travel alerts (if available), new admin creation, suspicious inbox rules, ransomware/EDR high-severity alerts.
+
+Example: If alerts go to an unmonitored mailbox, you effectively have no detection.
+
+## 4) Turn findings into a realistic remediation plan
+The audit is only useful if it drives measurable improvements. Keep the output short and operational.
+
+A practical way to rank findings:
+- Severity: What’s the impact if exploited (data loss, financial fraud, downtime)?
+- Likelihood: Is it exposed to the internet? Is it common attack path? Is it already happening (alerts)?
+- Effort: Low (hours), Medium (days), High (weeks/months).
+
+Write findings in a format your team can execute:
+- “Issue: MFA not enforced for legacy email access.
+  - Risk: Account takeover via password spraying.
+  - Evidence: Legacy protocol enabled; users can sign in without MFA.
+  - Fix: Disable legacy auth; enforce MFA; monitor failed sign-ins.
+  - Owner: IT Manager.
+  - Due: 30 days.
+  - Verify: Test sign-in; review sign-in logs.”
+
+Aim for quick wins first:
+- Disable unused accounts and stale admin privileges.
+- Enforce MFA everywhere.
+- Patch internet-facing systems.
+- Run a restore test.
+
+## Checklist
+Use these 30 questions as your audit runbook. Answer each with evidence and capture an action if the answer is “No” or “Not sure.”
+
+- [ ] Scope: Have you defined the in-scope systems, networks, and critical data stores?
+- [ ] Scope: Do you know your top 5 “crown jewel” datasets and who owns each?
+- [ ] Inventory: Do you have an up-to-date inventory of endpoints, servers, and key SaaS apps?
+- [ ] Inventory: Can you identify all internet-facing services (VPN, remote access, web apps)?
+- [ ] Identity: Is MFA enforced for all users (not just admins) on your primary identity/email platform?
+- [ ] Identity: Are admin privileges minimized and reviewed at least quarterly?
+- [ ] Identity: Do admins use separate accounts for privileged tasks (no daily-driver admin)?
+- [ ] Identity: Are shared accounts avoided, or if unavoidable, controlled with strong compensating controls?
+- [ ] Access: Is there a documented joiner/mover/leaver process with timely deprovisioning?
+- [ ] Access: Are third-party/vendor accounts reviewed and removed when no longer needed?
+- [ ] Email: Are mailbox forwarding rules restricted and periodically reviewed?
+- [ ] Endpoint: Are corporate endpoints encrypted (full disk) and protected with a host firewall?
+- [ ] Endpoint: Do you have a standard build/baseline (secure configuration) for endpoints?
+- [ ] Endpoint: Is there an endpoint protection/detection capability deployed on all managed devices?
+- [ ] Patching: Do you have a patch policy with timelines (e.g., critical within days/weeks) and proof of execution?
+- [ ] Patching: Are unsupported OS/applications identified, tracked, and actively remediated?
+- [ ] Network: Is remote access (VPN/RDP/remote tools) restricted, monitored, and protected by MFA?
+- [ ] Network: Are default passwords removed and device management interfaces not exposed to the internet?
+- [ ] Data: Is sensitive data classified or at least labeled by type and location (even informally)?
+- [ ] Data: Are file shares/cloud storage permissions reviewed for excessive access (e.g., “Everyone”)?
+- [ ] Data: Are secrets (API keys, passwords) stored in approved locations (not spreadsheets/email)?
+- [ ] Backups: Do backups cover critical servers and critical SaaS data (email/files/CRM as applicable)?
+- [ ] Backups: Are backups protected from deletion/tampering (separate credentials, offline/immutable where possible)?
+- [ ] Backups: Have you performed and documented a restore test in the last 90 days?
+- [ ] Logging: Are sign-in logs, admin changes, and endpoint alerts retained and reviewable?
+- [ ] Logging: Do alerts go to a monitored channel with an on-call/backup contact?
+- [ ] Incident readiness: Do you have an incident response checklist with key contacts and steps?
+- [ ] Incident readiness: Have you run a tabletop exercise in the last year (even 30 minutes)?
+- [ ] Change control: Are major changes (new SaaS, new firewall rules, new admins) recorded and approved?
+- [ ] Risk: Do you maintain a simple risk register with owners and remediation dates for top findings?
+
+## FAQ
+**1) How often should an SME run a security audit like this?**
+Quarterly is a practical cadence, plus after major changes (new systems, mergers, big network changes) or after an incident.
+
+**2) What’s the difference between an audit and a vulnerability scan?**
+A vulnerability scan finds technical weaknesses; an audit checks whether key security controls and processes exist, work, and are evidenced.
+
+**3) Do I need to follow NIST, ISO, or CIS to use this checklist?**
+No. You can use this as a baseline; if you later align to NIST/ISO/CIS, this evidence and process will still help without claiming compliance.
