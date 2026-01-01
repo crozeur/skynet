@@ -9,7 +9,7 @@ import React from "react";
 
 export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
-  const { metadata, Content } = post;
+  const { metadata, content } = post;
   const [readingProgress, setReadingProgress] = React.useState(0);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -165,9 +165,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
               prose-pre:bg-gray-900 dark:bg-gray-950 prose-pre:text-gray-100 prose-pre:rounded-xl prose-pre:shadow-xl prose-pre:border prose-pre:border-gray-700
               prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-blue-50 dark:bg-blue-900/10 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:my-8
               prose-img:rounded-xl prose-img:shadow-2xl prose-img:my-8"
-          >
-            <Content />
-          </div>
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
 
           {/* Share Section */}
           <div className="mt-16 pt-8 border-t-2 border-gray-200 dark:border-gray-700">

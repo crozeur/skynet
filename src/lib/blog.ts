@@ -22,7 +22,7 @@ export interface PostSummary {
 }
 
 export interface PostData extends PostSummary {
-  Content: React.ComponentType<any>;
+  content: string; // HTML content
 }
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
