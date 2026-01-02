@@ -47,61 +47,21 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
       return;
     }
 
-    // Translate all posts to target language
-    const translateAll = async () => {
-      setIsTranslating(true);
-      const translations: Record<string, TranslatedMetadata> = {};
+    // Use pre-translated metadata from build time
+    const translations: Record<string, TranslatedMetadata> = {};
 
-      for (const { slug, metadata } of posts) {
-        try {
-          // Translate title, description, and tags in parallel
-          const [titleRes, descRes, tagsRes] = await Promise.all([
-            fetch("/api/translate", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: metadata.title, targetLang: language }),
-            }),
-            fetch("/api/translate", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ text: metadata.description, targetLang: language }),
-            }),
-            Promise.all(
-              (metadata.tags || []).map((tag) =>
-                fetch("/api/translate", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ text: tag, targetLang: language }),
-                })
-              )
-            ),
-          ]);
-
-          const titleData = await titleRes.json();
-          const descData = await descRes.json();
-          const tagsData = await Promise.all(tagsRes.map((r) => r.json()));
-
-          translations[slug] = {
-            title: titleData.translated || metadata.title,
-            description: descData.translated || metadata.description,
-            tags: tagsData.map((d) => d.translated || "") || metadata.tags || [],
-          };
-        } catch (error) {
-          console.error(`Translation error for ${slug}:`, error);
-          // Keep original if translation fails
-          translations[slug] = {
-            title: metadata.title,
-            description: metadata.description,
-            tags: metadata.tags || [],
-          };
-        }
+    for (const { slug, translatedMetadata } of posts) {
+      if (translatedMetadata?.fr) {
+        translations[slug] = {
+          title: translatedMetadata.fr.title,
+          description: translatedMetadata.fr.description,
+          tags: translatedMetadata.fr.tags || [],
+        };
       }
+    }
 
-      setTranslatedPosts(translations);
-      setIsTranslating(false);
-    };
-
-    translateAll();
+    setTranslatedPosts(translations);
+    setIsTranslating(false);
   }, [language, posts]);
 
   const pillarColors: Record<string, string> = {

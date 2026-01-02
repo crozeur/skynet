@@ -2,6 +2,115 @@
 const fs = require("fs");
 const path = require("path");
 
+// Professional French glossary
+const frenchGlossary = {
+  cybersecurity: "cybersécurité",
+  cybersecure: "cybersécurisé",
+  "threat detection": "détection des menaces",
+  "incident response": "réponse aux incidents",
+  incident: "incident",
+  vulnerability: "vulnérabilité",
+  compliance: "conformité",
+  soc: "SOC",
+  siem: "SIEM",
+  phishing: "hameçonnage",
+  ransomware: "rançongiciel",
+  malware: "malveillance",
+  breach: "violation",
+  audit: "audit",
+  monitoring: "surveillance",
+  detection: "détection",
+  alert: "alerte",
+  endpoint: "terminal",
+  network: "réseau",
+  threat: "menace",
+  attack: "attaque",
+  response: "réponse",
+  recovery: "récupération",
+  backup: "sauvegarde",
+  framework: "cadre",
+  assessment: "évaluation",
+  posture: "posture",
+};
+
+// Apply glossary to text
+function applyGlossary(text) {
+  let result = text;
+  const sortedTerms = Object.entries(frenchGlossary).sort(
+    (a, b) => b[0].length - a[0].length
+  );
+
+  for (const [en, fr] of sortedTerms) {
+    const regex = new RegExp(`\\b${en}\\b`, "gi");
+    result = result.replace(regex, fr);
+  }
+
+  return result;
+}
+
+// Translate metadata to French (with Google Translate fallback)
+async function translateMetadata(metadata) {
+  const translated = { ...metadata };
+
+  // Helper function to translate a single text
+  async function translateText(text) {
+    if (!text) return text;
+
+    try {
+      // Try Google Translate
+      const encoded = encodeURIComponent(text);
+      const response = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=fr&dt=t&q=${encoded}`,
+        {
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
+          const translated = data[0].map((chunk) => chunk[0] || "").join("");
+          if (translated) {
+            return applyGlossary(translated);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`  ⚠️  Translation failed for: ${text.substring(0, 30)}...`);
+    }
+
+    // Fallback to glossary only
+    return applyGlossary(text);
+  }
+
+  // Translate title
+  if (metadata.title) {
+    translated.title = await translateText(metadata.title);
+  }
+
+  // Translate description
+  if (metadata.description) {
+    translated.description = await translateText(metadata.description);
+  }
+
+  // Translate tags
+  if (metadata.tags && Array.isArray(metadata.tags)) {
+    translated.tags = await Promise.all(
+      metadata.tags.map((tag) => translateText(tag))
+    );
+  }
+
+  // Translate coverAlt
+  if (metadata.coverAlt) {
+    translated.coverAlt = await translateText(metadata.coverAlt);
+  }
+
+  return translated;
+}
+
 // Professional markdown to HTML converter
 function markdownToHtml(markdown) {
   let html = markdown;
@@ -188,36 +297,45 @@ const files = fs.existsSync(BLOG_DIR)
 
 console.log(`📝 Building ${files.length} blog posts...`);
 
-files.forEach((file) => {
-  const slug = file.replace(/\.mdx$/, "");
-  const filePath = path.join(BLOG_DIR, file);
-  const source = fs.readFileSync(filePath, "utf8");
+// Process files asynchronously
+(async () => {
+  for (const file of files) {
+    const slug = file.replace(/\.mdx$/, "");
+    const filePath = path.join(BLOG_DIR, file);
+    const source = fs.readFileSync(filePath, "utf8");
 
-  const metadata = extractMetadataFromMDX(source);
-  if (!metadata) {
-    console.warn(`⚠️  No metadata found for ${file}`);
-    return;
+    const metadata = extractMetadataFromMDX(source);
+    if (!metadata) {
+      console.warn(`⚠️  No metadata found for ${file}`);
+      continue;
+    }
+
+    const markdownContent = extractContent(source);
+    const htmlContent = markdownToHtml(markdownContent);
+
+    // Translate metadata for French version
+    const translatedMetadata = await translateMetadata(metadata);
+
+    // Write JSON file with both EN and FR translations
+    const jsonPath = path.join(OUTPUT_DIR, `${slug}.json`);
+    fs.writeFileSync(
+      jsonPath,
+      JSON.stringify(
+        {
+          slug,
+          metadata,
+          translatedMetadata: {
+            fr: translatedMetadata,
+          },
+          content: htmlContent,
+        },
+        null,
+        2
+      )
+    );
+
+    console.log(`✓ ${slug}`);
   }
 
-  const markdownContent = extractContent(source);
-  const htmlContent = markdownToHtml(markdownContent);
-
-  // Write JSON file
-  const jsonPath = path.join(OUTPUT_DIR, `${slug}.json`);
-  fs.writeFileSync(
-    jsonPath,
-    JSON.stringify(
-      {
-        slug,
-        metadata,
-        content: htmlContent,
-      },
-      null,
-      2
-    )
-  );
-
-  console.log(`✓ ${slug}`);
-});
-
-console.log(`✅ Blog posts compiled to ${OUTPUT_DIR}`);
+  console.log(`✅ Blog posts compiled to ${OUTPUT_DIR}`);
+})();

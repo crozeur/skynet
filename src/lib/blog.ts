@@ -15,9 +15,14 @@ export interface PostMetadata {
   coverAlt?: string;
 }
 
+export interface TranslatedMetadata {
+  fr?: PostMetadata;
+}
+
 export interface PostSummary {
   slug: string;
   metadata: PostMetadata;
+  translatedMetadata?: TranslatedMetadata;
   readingTimeMinutes?: number;
 }
 
