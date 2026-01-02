@@ -24,22 +24,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid authorization" }, { status: 401 });
     }
 
-    const body: ArticleWebhookPayload = await request.json();
+    const rawBody: unknown = await request.json();
+    const body = rawBody as Partial<ArticleWebhookPayload> & {
+      posts?: Array<Partial<ArticleWebhookPayload>>;
+      Posts?: Array<Partial<ArticleWebhookPayload>>;
+    };
 
-    if (!body.slug) {
+    const firstWrapped =
+      (Array.isArray(body.posts) && body.posts[0]) ||
+      (Array.isArray(body.Posts) && body.Posts[0]) ||
+      undefined;
+
+    const payload: ArticleWebhookPayload = {
+      slug: (body.slug || firstWrapped?.slug || "").trim(),
+      imageUrl: body.imageUrl ?? firstWrapped?.imageUrl,
+      imageAlt: body.imageAlt ?? firstWrapped?.imageAlt,
+      title: body.title ?? firstWrapped?.title,
+      description: body.description ?? firstWrapped?.description,
+    };
+
+    if (!payload.slug) {
       return NextResponse.json(
         { error: "Missing slug parameter" },
         { status: 400 }
       );
     }
 
-    console.log(`🔄 Webhook received for article: ${body.slug}`);
-    if (body.imageUrl) {
-      console.log(`📸 Image URL: ${body.imageUrl}`);
+    console.log(`🔄 Webhook received for article: ${payload.slug}`);
+    if (payload.imageUrl) {
+      console.log(`📸 Image URL: ${payload.imageUrl}`);
     }
 
     // Revalidate the blog post page
-    revalidatePath(`/blog/${body.slug}`);
+    revalidatePath(`/blog/${payload.slug}`);
     
     // Revalidate the blog index
     revalidatePath("/blog");
@@ -49,8 +66,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Article "${body.slug}" revalidated successfully`,
-      slug: body.slug,
+      message: `Article "${payload.slug}" revalidated successfully`,
+      slug: payload.slug,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
