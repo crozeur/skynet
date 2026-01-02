@@ -26,5 +26,8 @@
       "coverAlt": "Image de test"
     }
   },
-  "content": "<h1 id=\"article-de-test\">Article de test</h1>\r\n\r\nCeci est le contenu de l'article de test généré automatiquement pour vérifier le workflow Make + GitHub + Vercel.\r\n\r\n<ul>\n<li>Point 1</li>\n<li>Point 2</li>\n</ul>\n\r\n<blockquote class=\"article-blockquote\">Ceci est une citation de test.</blockquote>\r\n\r\nMerci de vérifier l'apparition sur le site après déploiement."
+  "content": "<h1 id=\"article-de-test\">Article de test</h1>\r\n\r\nCeci est le contenu de l'article de test généré automatiquement pour vérifier le workflow Make + GitHub + Vercel.\r\n\r\n<ul>\n<li>Point 1</li>\n<li>Point 2</li>\n</ul>\n\r\n<blockquote class=\"article-blockquote\">Ceci est une citation de test.</blockquote>\r\n\r\nMerci de vérifier l'apparition sur le site après déploiement.",
+  "translatedContent": {
+    "fr": "<h1 id=\"article-de-test\">Article de test</h1>Ceci est le contenu de l'article de test généré automatiquement pour vérifier le workflow Make + GitHub + Vercel.<ul><li>Point 1</li><li>Point 2</li></ul><blockquote class=\"article-blockquote\">Ceci est une citation de test.</blockquote>Merci de vérifier l'apparition sur le site après déploiement."
+  }
 }

@@ -28,6 +28,9 @@ export interface PostSummary {
 
 export interface PostData extends PostSummary {
   content: string; // HTML content
+  translatedContent?: {
+    fr?: string;
+  };
 }
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");

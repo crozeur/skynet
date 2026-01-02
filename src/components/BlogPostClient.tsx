@@ -17,36 +17,25 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
   
-  // Handle language change and translate article
+  // Handle language change using pre-translated content
   React.useEffect(() => {
-    const translateArticle = async () => {
-      if (language === "en") {
-        // Reset to original content
-        setMetadata(post.metadata);
-        setContent(post.content);
-      } else {
-        // Translate to target language
-        setIsTranslating(true);
-        try {
-          const [translatedMetadata, translatedContent] = await Promise.all([
-            translateArticleMetadata(post.metadata, language),
-            translateHtmlContent(post.content, language),
-          ]);
-          setMetadata(translatedMetadata);
-          setContent(translatedContent);
-        } catch (error) {
-          console.error("Translation error:", error);
-          // Fallback to original content
-          setMetadata(post.metadata);
-          setContent(post.content);
-        } finally {
-          setIsTranslating(false);
-        }
+    if (language === "en") {
+      // Reset to original content
+      setMetadata(post.metadata);
+      setContent(post.content);
+    } else if (language === "fr") {
+      // Use pre-translated content from build time
+      if (post.translatedMetadata?.fr) {
+        setMetadata(post.translatedMetadata.fr);
       }
-    };
-
-    translateArticle();
-  }, [language, post.metadata, post.content]);
+      if (post.translatedContent?.fr) {
+        setContent(post.translatedContent.fr);
+      } else {
+        // Fallback to original if translation not available
+        setContent(post.content);
+      }
+    }
+  }, [language, post]);
   
   // Calculate reading time
   const wordCount = content.split(/\s+/).length;
