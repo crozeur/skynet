@@ -48,6 +48,20 @@ function applyGlossary(text) {
   return result;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // Translate a single text using Google Translate
 async function translateText(text) {
   if (!text) return text;
@@ -55,14 +69,15 @@ async function translateText(text) {
   try {
     // Try Google Translate
     const encoded = encodeURIComponent(text);
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=fr&dt=t&q=${encoded}`,
       {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         },
-      }
+      },
+      12000
     );
 
     if (response.ok) {

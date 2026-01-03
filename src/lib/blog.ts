@@ -34,6 +34,7 @@ export interface PostData extends PostSummary {
 }
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
+const BLOG_DATA_DIR = path.join(process.cwd(), "public", "blog-data");
 
 function extractMetadataFromMDX(source: string): PostMetadata | null {
   // Match export const metadata = { ... };
@@ -83,7 +84,53 @@ function computeReadingTimeMinutes(source: string): number {
   return Math.max(1, Math.round(words / wordsPerMinute));
 }
 
+function computeReadingTimeMinutesFromHtml(html: string): number {
+  const textOnly = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ");
+  const words = textOnly.trim().split(/\s+/).filter(Boolean).length;
+  const wordsPerMinute = 200;
+  return Math.max(1, Math.round(words / wordsPerMinute));
+}
+
+function safeReadJsonFile<T>(filePath: string): T | null {
+  try {
+    const raw = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function getAllBlogPosts(): Promise<PostSummary[]> {
+  // Prefer precompiled JSON (includes translatedMetadata and matches /blog/[slug])
+  const jsonFiles = fs.existsSync(BLOG_DATA_DIR)
+    ? fs.readdirSync(BLOG_DATA_DIR).filter((f) => f.endsWith(".json"))
+    : [];
+
+  if (jsonFiles.length > 0) {
+    const posts: PostSummary[] = [];
+    for (const file of jsonFiles) {
+      const slug = file.replace(/\.json$/i, "");
+      const fullPath = path.join(BLOG_DATA_DIR, file);
+      const data = safeReadJsonFile<PostData>(fullPath);
+      if (!data?.metadata) continue;
+      posts.push({
+        slug,
+        metadata: data.metadata,
+        translatedMetadata: data.translatedMetadata,
+        readingTimeMinutes: data.content
+          ? computeReadingTimeMinutesFromHtml(data.content)
+          : undefined,
+      });
+    }
+
+    return posts.sort((a, b) => (a.metadata.date < b.metadata.date ? 1 : -1));
+  }
+
+  // Fallback: parse MDX directly (e.g., dev without running build:blog)
   const files = fs.existsSync(BLOG_DIR) ? fs.readdirSync(BLOG_DIR) : [];
   const mdxFiles = files.filter((f) => f.endsWith(".mdx"));
 
