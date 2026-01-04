@@ -1,0 +1,169 @@
+## Intro
+Cloud incidents in SMEs often start with a small configuration slip that quietly expands access: a permissive sharing setting, a public storage bucket, or an admin role assigned “just for now.” Microsoft 365 and AWS are powerful, but their flexibility means security depends heavily on your tenant and account settings. The goal isn’t to harden everything at once—it’s to catch the misconfigurations that most often lead to data exposure or account takeover. Below are the first areas to review, why they matter, and what “good” looks like in practical terms.
+
+## Quick take
+- Identity controls (MFA, legacy auth, admin roles) prevent most “easy wins” for attackers.
+- External sharing defaults in Microsoft 365 can leak data without anyone noticing.
+- Public or broadly accessible storage in AWS is still a top source of accidental exposure.
+- Logging without alerting is like installing cameras and never watching the footage.
+- Start with guardrails: defaults, baselines, and change control before deep tuning.
+
+## Identity and admin access: reduce blast radius first
+Identity is your control plane in both Microsoft 365 and AWS. If an attacker gets a high-privilege identity (or a long-lived access key), they can often bypass other controls.
+
+Practical priorities:
+
+1) Enforce multi-factor authentication (MFA) for everyone, with extra emphasis on admins.
+- Microsoft 365: ensure all privileged accounts require MFA and use modern authentication. If you have conditional access capabilities, build policies that require MFA for admin portals and high-risk sign-ins.
+- AWS: require MFA for root and any IAM users that still exist. Prefer AWS SSO/Identity Center (or a federated IdP) over standalone IAM users.
+
+Example misconfiguration:
+- A global administrator account in Microsoft 365 has no MFA “because it’s only used occasionally.”
+Impact:
+- Password spraying or phishing can lead to full tenant compromise.
+Fix:
+- Require MFA for all admin roles; keep admin accounts separate from daily-use accounts; add just-in-time elevation where possible.
+
+2) Disable legacy authentication and reduce password-only sign-ins.
+- Microsoft 365: legacy protocols can bypass MFA in some scenarios. If your environment still needs legacy auth for specific apps or devices, constrain it tightly and create a plan to retire it.
+- AWS: avoid long-lived access keys. If keys are required, rotate them and restrict them by policy.
+
+3) Right-size admin roles and apply least privilege.
+- Microsoft 365: check role assignments for Global Admin, Exchange Admin, SharePoint Admin, and Privileged Role Admin. Remove standing access where possible.
+- AWS: avoid attaching broad policies like AdministratorAccess to roles used by CI/CD or engineers. Create task-specific roles and policies.
+
+A quick sanity check you can do today:
+- List all privileged identities (admins, role holders, break-glass accounts, root). Confirm MFA, confirm usage is monitored, confirm there are at least two break-glass accounts with strong protections, and confirm daily work does not happen in privileged accounts.
+
+## Microsoft 365 data sharing and email controls: stop silent leakage
+Many Microsoft 365 exposures aren’t “hacks” in the dramatic sense—they’re unintended sharing, permissive link settings, or mailbox rules that forward sensitive data externally.
+
+1) External sharing defaults in SharePoint/OneDrive
+Misconfiguration patterns:
+- Anyone links enabled by default.
+- External sharing allowed broadly, with no expiration on links.
+- Users can share with “new and existing guests” without oversight.
+
+Practical guidance:
+- Set stricter default link types (e.g., “specific people” rather than “anyone”).
+- Add link expirations for external sharing.
+- Require authentication for guests; periodically review guest accounts.
+
+Example:
+- A sales user shares a folder with an “anyone with the link” setting. The link gets forwarded, indexed, or reused.
+Fix:
+- Change default sharing to “specific people,” require sign-in, and enable periodic access reviews for guests.
+
+2) Email forwarding and mailbox rules
+Misconfiguration patterns:
+- Automatic external forwarding allowed tenant-wide.
+- Users (or attackers) create inbox rules that forward invoices, payroll, or password reset emails.
+
+Practical guidance:
+- Disable or heavily restrict auto-forwarding to external addresses.
+- Alert on new inbox rules and forwarding configurations—especially rules that hide messages, mark as read, or forward to external domains.
+
+Example:
+- An attacker compromises a user and sets a rule: “If subject contains ‘invoice’, forward to attacker@domain.”
+Fix:
+- Block external forwarding by default; add alerts for new forwarding rules; enforce MFA and phishing-resistant authentication where feasible.
+
+3) Guest access and collaboration sprawl
+Misconfiguration patterns:
+- Guest accounts accumulate indefinitely.
+- Sensitive Teams or SharePoint sites are accessible to broad groups.
+
+Practical guidance:
+- Review guest users regularly and remove inactive guests.
+- Use sensitivity labels (where available) or at least clear site-level permissions and naming conventions for restricted vs. open collaboration.
+
+## AWS storage and network exposure: close the “public by accident” doors
+AWS is often secure by design when you use private defaults and least-privilege networking—but misconfigurations frequently override those safeguards.
+
+1) S3 bucket exposure
+Misconfiguration patterns:
+- Public bucket policies or ACLs.
+- Unrestricted cross-account access.
+- No encryption requirements or no block-public-access settings.
+
+Practical guidance:
+- Turn on S3 Block Public Access at the account level (and validate it’s not overridden).
+- Use bucket policies that explicitly deny public access.
+- Enable default encryption and enforce it via policy.
+
+Example:
+- A “logs” bucket is created for an app and accidentally granted public read during troubleshooting.
+Fix:
+- Re-enable Block Public Access; remove public statements; add a preventive control (policy-as-code or guardrails) so it can’t happen again.
+
+2) Security groups and inbound access
+Misconfiguration patterns:
+- 0.0.0.0/0 inbound allowed to SSH (22) or RDP (3389).
+- Admin ports exposed for databases or internal services.
+
+Practical guidance:
+- Restrict admin access by source IP (or use a VPN / bastion / SSM Session Manager style approach).
+- Prefer private subnets for databases and internal services.
+- Create separate security groups for “admin access” vs. “app traffic” to avoid rule sprawl.
+
+Example:
+- A temporary SSH rule from “anywhere” remains open after an outage.
+Fix:
+- Implement time-bound change procedures and periodic automated checks for overly permissive rules.
+
+3) IAM policies and access keys
+Misconfiguration patterns:
+- Wildcard permissions ("*" actions and resources) in IAM policies.
+- Old access keys for IAM users never rotated.
+
+Practical guidance:
+- Remove unused IAM users; prefer roles with temporary credentials.
+- Use permission boundaries or scoped policies for CI/CD and automation.
+- Review policies for wildcards and replace with specific actions/resources.
+
+## Logging, alerting, and change control: detect and prevent repeat mistakes
+Misconfigurations are inevitable; the difference is how quickly you catch them and how hard it is to reintroduce them.
+
+1) Turn on the logs you will actually use
+- Microsoft 365: ensure you can review sign-in activity and audit events for key services (identity, Exchange, SharePoint). Make sure audit logging is enabled and retained according to your needs.
+- AWS: enable CloudTrail across regions and accounts; send logs to a central location with restricted access.
+
+2) Add alerts for “high-signal” events
+Start with alerts that are actionable and low-noise:
+- New admin role assignment or privilege escalation.
+- MFA disabled or authentication method changes.
+- Creation of external forwarding rules.
+- S3 bucket policy changed or public access setting modified.
+- Security group changed to allow 0.0.0.0/0 on sensitive ports.
+
+3) Establish lightweight change control
+You don’t need heavy bureaucracy to reduce misconfigurations. You need repeatable guardrails:
+- A standard for what “public” vs. “private” resources mean.
+- Mandatory review for changes to identity, external sharing, and internet-facing network rules.
+- Infrastructure-as-code (where possible) so changes are reviewed and traceable.
+
+A practical SME approach:
+- Pick a baseline aligned with a generic framework mindset (NIST/ISO/CIS-style) and treat it as a target posture—not a compliance claim.
+- Run a weekly review of high-risk deltas: new admins, new public endpoints, new external sharing links, new access keys.
+
+## Checklist
+- [ ] Require MFA for all users, and enforce it for all privileged/admin accounts.
+- [ ] Verify legacy authentication is blocked or tightly constrained in Microsoft 365.
+- [ ] Review Microsoft 365 admin roles; remove standing high-privilege access where possible.
+- [ ] Set SharePoint/OneDrive sharing defaults to avoid “anyone” links; require sign-in for external access.
+- [ ] Disable or restrict automatic external email forwarding; alert on new forwarding and inbox rules.
+- [ ] Enable S3 Block Public Access at the AWS account level and confirm buckets are not publicly accessible.
+- [ ] Audit AWS security groups for 0.0.0.0/0 access to admin ports (SSH/RDP) and remove it.
+- [ ] Replace long-lived AWS access keys with roles/temporary credentials; rotate and remove unused keys.
+- [ ] Ensure audit logs are enabled (Microsoft 365 audit/sign-in, AWS CloudTrail) and stored securely.
+- [ ] Create alerts for high-risk configuration changes (admins, public access, forwarding rules, security group changes).
+
+## FAQ
+Q1: Should we start with Microsoft 365 or AWS first?
+Start with whichever hosts your identity and most sensitive data today. In many SMEs, Microsoft 365 identity and email controls are the fastest way to reduce risk.
+
+Q2: Is “no public access” always the right rule for AWS?
+Not always—public web apps exist. The goal is intentional exposure: only the specific services that must be public, with minimal ports, strong authentication, and monitoring.
+
+Q3: How often should we review these settings?
+At minimum, do a monthly configuration review and a weekly check for high-risk changes (new admins, public access, forwarding rules, and new keys).
