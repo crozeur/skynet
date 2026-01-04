@@ -1,0 +1,184 @@
+## Intro
+Small and mid-sized businesses often get the same handful of security alerts, but the difference between “noise” and “incident” comes down to process. A lightweight SOC playbook helps you make consistent decisions under time pressure, even if your team is small or part-time. This post gives you practical triage steps, evidence to collect, and clear escalation triggers for common SME alerts. Use it to reduce panic, cut alert fatigue, and preserve the data you’ll need if something is truly wrong.
+
+## Quick take
+- Triage is a repeatable decision process: confirm, scope, contain, and document before you “fix.”
+- Always capture minimum evidence first (timestamps, affected assets, identities, and relevant logs).
+- Use severity levels tied to business impact and confidence, not just the tool’s “critical” label.
+- Define escalation triggers in advance (e.g., privileged accounts, ransomware indicators, widespread impact).
+- Close the loop: label outcomes, tune detections, and update playbooks after every meaningful case.
+
+## 1) Triage workflow: confirm → scope → contain → decide
+A practical SME-friendly triage loop can be summarized in four phases. Keep it simple enough that any on-call engineer can follow it.
+
+### Step A: Confirm the alert is real (and not misfired)
+Goal: decide whether the alert corresponds to an actual event on your systems.
+
+Actions:
+- Identify the source: endpoint agent, email gateway, firewall, cloud audit logs, identity provider, etc.
+- Validate key fields: affected host/user, time window, detection reason, and raw event IDs if available.
+- Check for obvious false positives: known scanner IPs, scheduled admin scripts, patching activity, vulnerability scans, or legitimate travel.
+
+Example: A “suspicious PowerShell” alert may be legitimate if it matches your known software deployment job. Confirm by comparing the parent process, script path, and the signed publisher (if applicable).
+
+### Step B: Scope the blast radius
+Goal: understand “how big” before you take actions that erase evidence.
+
+Actions:
+- Determine whether it’s one user/host or multiple.
+- Identify related events in the same timeframe: authentication logs, process execution, outbound connections, mailbox rules, file modifications.
+- Look for lateral movement indicators: new admin group membership, remote service creation, repeated failed logons, unusual SMB/RDP activity.
+
+Example: If a user clicked a phishing link, scope includes: the user’s mailbox activity, sign-in logs for that account, and any downloads/executions on their endpoint.
+
+### Step C: Contain safely (don’t destroy evidence)
+Goal: stop ongoing harm while preserving what you may need for response.
+
+Actions (choose the least disruptive option that works):
+- Disable or reset credentials if compromise is likely.
+- Isolate a host from the network rather than powering it off.
+- Block a domain/IP only after verifying it’s not business-critical.
+- Quarantine emails and remove similar messages from inboxes.
+
+Rule of thumb: if you might need forensics later, avoid “cleanup first.” Preserve logs, disk images, and relevant cloud audit trails if feasible.
+
+### Step D: Decide: close, monitor, or escalate
+Your outcome should land in one of these buckets:
+- Close as false positive (with a note explaining why).
+- Close as benign/expected (document the change and consider tuning).
+- Monitor (insufficient confidence; set a time-bound follow-up).
+- Escalate to incident response (meets severity or trigger criteria).
+
+## 2) Severity and escalation model built for SMEs
+Many SMEs struggle because every “high” alert feels like a crisis. Instead, use a severity model based on two dimensions: impact and confidence.
+
+### Suggested severity levels
+- Severity 1 (Informational): No evidence of compromise; policy or hygiene issue.
+- Severity 2 (Low): Suspicious but limited scope; no confirmed compromise.
+- Severity 3 (Medium): Probable compromise or policy breach with limited impact.
+- Severity 4 (High): Confirmed compromise affecting sensitive systems/data or business-critical operations.
+- Severity 5 (Critical): Active ransomware/extortion, widespread compromise, or safety/legal impact.
+
+### Escalation triggers (decide these in advance)
+Escalate immediately (or page on-call) if any of the following are true:
+- Privileged identity involved (admin, finance approver, domain admin, cloud admin).
+- Evidence of credential theft or MFA bypass (impossible travel plus token reuse, multiple MFA push prompts, new device enrollment you can’t explain).
+- Indicators of ransomware activity (rapid mass file changes, shadow copy deletion attempts, suspicious encryption processes).
+- Data access looks abnormal (large exports, new sharing permissions, downloads from sensitive repositories).
+- Multiple systems show related behavior in a short window (suggests worm/lateral movement).
+
+### Who gets escalated to whom
+Define a simple chain:
+- Tier 1/on-call: initial triage and evidence capture.
+- Tier 2/IR lead (internal or MSP/MSSP): containment strategy, deeper investigation.
+- Business owner/operations lead: when downtime, financial risk, or customer impact is likely.
+- Legal/privacy contact: when regulated data exposure is plausible.
+
+The point isn’t “compliance”; it’s fast decision-making under stress.
+
+## 3) Common SME alerts and what to do (with examples)
+Below are frequently seen alerts and practical triage steps. Treat these as templates and adapt to your environment.
+
+### A) Suspicious sign-in (new location, impossible travel, atypical device)
+Triage:
+- Check identity logs: source IP, geo, device identifier, user agent, MFA method used, and whether the sign-in succeeded.
+- Look for follow-on actions: mailbox rule creation, forwarding changes, token grants, unusual file downloads.
+
+Containment:
+- If confidence is medium/high: reset password, revoke sessions/tokens, require MFA re-registration if needed.
+- If user insists it was them: still verify by matching device and IP to known travel/VPN.
+
+Escalate if:
+- Admin account.
+- MFA fatigue behavior (repeated prompts) or new MFA method enrollment.
+
+Example decision:
+- If sign-in succeeded and was followed by new inbox rules: escalate (probable account takeover).
+
+### B) Malware/EDR detection on a workstation
+Triage:
+- Identify detection type: blocked/quarantined vs allowed.
+- Pull basics: process tree (parent/child), file path, hash (if available), network connections, user context.
+- Confirm if it came from email attachment, web download, or removable media.
+
+Containment:
+- Isolate host if execution occurred or network callbacks are present.
+- Preserve the suspicious file and relevant logs.
+
+Escalate if:
+- Malware executed (not just downloaded).
+- Credential access tools suspected.
+- Multiple endpoints show similar detections.
+
+Example decision:
+- A quarantined adware installer with no execution may be low; a suspicious script that ran under a user profile and contacted external IPs is medium/high.
+
+### C) Phishing report or malicious link clicked
+Triage:
+- Retrieve the email headers and message content.
+- Determine if the user clicked, entered credentials, or downloaded a file.
+- Search for similar emails delivered to other users.
+
+Containment:
+- Quarantine/remove the email across mailboxes.
+- If credentials entered: reset password, revoke sessions, review sign-ins, and enforce MFA if not already.
+
+Escalate if:
+- Finance or payroll user.
+- External forwarding rules appear.
+- New OAuth app consent or token grants occur unexpectedly.
+
+Example decision:
+- “User clicked but did not enter credentials” may be monitor + endpoint scan; “entered credentials” is immediate escalation.
+
+### D) Firewall alert: outbound connection to suspicious domain/IP
+Triage:
+- Identify the internal host and process generating the traffic.
+- Check frequency and volume: one-off DNS lookup vs repeated beaconing.
+- Verify whether the destination is part of a legitimate service your business uses.
+
+Containment:
+- Block the destination if safe.
+- Investigate the host for suspicious processes and persistence.
+
+Escalate if:
+- Beaconing pattern (regular intervals).
+- Data exfil indicators (large outbound transfers to uncommon destinations).
+
+Example decision:
+- A single blocked connection might be informational; repeated successful connections plus unknown process is medium/high.
+
+## 4) Evidence pack: what to capture every time
+When escalation happens, teams often lose time re-collecting basics. Build a “minimum evidence pack” that Tier 1 captures before changes.
+
+Capture these items:
+- Timeline: first seen, last seen, and key event timestamps (with time zone).
+- Entities: user(s), host(s), IPs, domains, mailbox IDs, cloud resource IDs.
+- Raw logs: authentication events, email trace, endpoint detection details, firewall/proxy logs.
+- Screenshots or exports (where appropriate) of alert details.
+- Actions taken: password reset, host isolation, blocks added, emails removed.
+- Current status: contained/not contained; ongoing suspicious activity yes/no.
+
+Practical tip: store evidence in a restricted-access incident folder with consistent naming (e.g., `INC-YYYYMMDD-###-short-desc`).
+
+## Checklist
+- [ ] Confirm alert source, affected asset(s), and time window
+- [ ] Verify whether the alert indicates successful action (login succeeded, file executed, connection allowed)
+- [ ] Identify impacted user(s), device(s), and any privileged accounts involved
+- [ ] Collect minimum evidence pack (timeline, entities, raw logs, alert details)
+- [ ] Scope related events in the surrounding timeframe (±24 hours if feasible)
+- [ ] Check for lateral movement or persistence indicators
+- [ ] Apply least-disruptive containment (isolate host, revoke sessions, quarantine email)
+- [ ] Assign severity based on impact and confidence (not tool label)
+- [ ] Escalate if triggers are met (privileged, ransomware indicators, multi-system spread)
+- [ ] Document outcome and tuning opportunities (false positive reason, detection improvements)
+
+## FAQ
+Q1: Should we always isolate a machine when EDR flags malware?
+A: Not always—if it was blocked/quarantined with no execution evidence, you may monitor; if execution or callbacks occurred, isolate and escalate.
+
+Q2: How do we handle “impossible travel” alerts for remote staff using VPNs?
+A: Validate the sign-in with device ID/user agent and known VPN egress IPs; treat successful sign-ins with follow-on suspicious actions as escalation-worthy.
+
+Q3: What’s the single biggest mistake in SME triage?
+A: Fixing first and investigating later—contain and preserve evidence before cleanup so you can confirm scope and prevent recurrence.
