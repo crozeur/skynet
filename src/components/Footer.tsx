@@ -32,7 +32,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li><a href="/#about" className="hover:text-gray-900 dark:hover:text-white transition">{t.about_us}</a></li>
               <li><a href="mailto:skynet.consulting.dz@email.com" className="hover:text-gray-900 dark:hover:text-white transition">{t.contact}</a></li>
-              <li><a href={"https://www.linkedin.com/company/skynet-consulting-dz/about"} className="hover:text-gray-900 dark:hover:text-white transition" target="_blank" rel="noreferrer">LinkedIn</a></li>
+              <li><a href="https://www.linkedin.com/company/skynet-consulting-dz/" className="hover:text-gray-900 dark:hover:text-white transition" target="_blank" rel="noreferrer">LinkedIn</a></li>
               <li><a href="/#contact" className="hover:text-gray-900 dark:hover:text-white transition">{t.careers}</a></li>
             </ul>
           </div>
@@ -53,7 +53,7 @@ export function Footer() {
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <a href="mailto:skynet.consulting.dz@email.com" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm">skynet.consulting.dz@email.com</a>
-              <a href={"https://www.linkedin.com/company/skynet-consulting-dz/about"} className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href="https://www.linkedin.com/company/skynet-consulting-dz/" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm" target="_blank" rel="noreferrer">LinkedIn</a>
             </div>
           </div>
         </div>

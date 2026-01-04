@@ -119,6 +119,9 @@ export const Navbar = () => {
         </div>
         <div className="flex items-center gap-2 md:gap-4">
           <div className="hidden md:block">
+            <ThemeChanger />
+          </div>
+          <div className="hidden md:block">
             <SearchBar />
           </div>
           <div className="hidden md:block">
@@ -128,8 +131,8 @@ export const Navbar = () => {
           {/* Mobile: compact icons with theme switcher and search above */}
           <div className="md:hidden flex flex-col items-end gap-1">
             <div className="flex items-center gap-1.5">
-              <SearchBar />
               <ThemeChanger />
+              <SearchBar />
             </div>
             <div className="flex items-center gap-1.5">
               <LanguageSwitcher />
@@ -156,10 +159,6 @@ export const Navbar = () => {
                 )}
               </button>
             </div>
-          </div>
-
-          <div className="hidden md:block">
-            <ThemeChanger />
           </div>
         </div>
       </Container>
