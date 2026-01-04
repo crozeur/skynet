@@ -1,0 +1,173 @@
+## Intro
+A security audit doesn’t have to be a massive, expensive project to be valuable. For most SMEs, the goal is to quickly find the biggest gaps, reduce obvious risk, and build a repeatable process. This 30-day checklist focuses on practical reviews you can complete with limited time and staff. You’ll end the month with clearer visibility, prioritized fixes, and documentation you can reuse.
+
+## Quick take
+- Focus on visibility first: assets, accounts, and data flows before tools.
+- Fix high-risk basics fast: MFA, patching, backups, and admin access.
+- Use evidence, not assumptions: screenshots, exports, and configuration notes.
+- Review third-party access and data handling as carefully as internal systems.
+- Finish with an action plan: owners, deadlines, and a re-audit cadence.
+
+## Week 1: Set scope, inventory what you have, and map key data
+A 30-day audit succeeds or fails based on scope and inventory. If you don’t know what systems and data exist, you can’t assess risk realistically.
+
+### 1) Define scope and “crown jewels”
+Start with a short scope statement (one page is fine):
+- In-scope: endpoints (laptops/desktops), servers, cloud services (email, file storage, CRM), network gear, and key SaaS apps.
+- Out-of-scope (for now): legacy systems that aren’t business-critical, R&D labs, or any environment you truly can’t access—just note them.
+- Crown jewels: the data and systems that would hurt the most if leaked or unavailable (customer PII, accounting, payroll, email, shared drives, production systems).
+
+Example: If you’re a 50-person professional services firm, email + file sharing + accounting are often higher priority than internal wiki tooling.
+
+### 2) Build a lightweight asset inventory
+You don’t need a perfect CMDB. You need a usable list:
+- Devices: type, owner, OS, location, encryption status, endpoint protection status.
+- Servers/workloads: purpose, OS, patch cadence, who administers them.
+- Cloud/SaaS: what it is, who owns it internally, admin accounts, integrations.
+
+Practical approach:
+- Export device lists from your MDM (if you have one) and directory (e.g., your identity provider).
+- For small shops without tooling, start with purchase records + DHCP leases + a quick staff survey.
+
+### 3) Identify your critical data flows
+Document (even as a simple diagram or bullet list):
+- Where sensitive data is created (e.g., web forms, sales intake).
+- Where it’s stored (cloud drive, CRM, accounting).
+- Who can access it (teams, contractors).
+- How it leaves the company (email, exports, third-party tools).
+
+Example: “Leads captured on website → CRM → exported weekly to spreadsheet → shared via email” is a common risk chain worth tightening.
+
+## Week 2: Review identity, access, and administrative control
+Most SME incidents involve compromised accounts. Week 2 is about controlling who can log in and what they can do.
+
+### 1) Establish access control principles
+Use generic best practices aligned with frameworks like NIST, ISO 27001, or CIS Controls—without claiming compliance:
+- Least privilege: users only get what they need.
+- Separate admin accounts: avoid daily-use accounts being admins.
+- Strong authentication: MFA everywhere it’s supported.
+
+### 2) Audit accounts and privileges
+Do these reviews with evidence (exports, screenshots, or configuration notes):
+- List all users and admins in your identity system.
+- Identify shared accounts (including “info@”, “admin@”, and vendor logins).
+- Check for orphaned accounts (ex-employees, old contractors).
+
+Example findings and fixes:
+- Finding: Two IT staff use their daily accounts as global admins.
+  Fix: Create separate admin accounts and require MFA + conditional access.
+- Finding: A contractor still has access to the shared drive after project end.
+  Fix: Remove access and add an offboarding checklist.
+
+### 3) Confirm MFA coverage and recovery paths
+It’s not enough to “have MFA.” Validate:
+- Which apps enforce MFA (email, VPN, password manager, finance tools).
+- Whether MFA is bypassable (legacy protocols, app passwords).
+- Account recovery process (helpdesk resets, backup codes storage).
+
+Example: If finance systems use email-based password resets, protect email as a top-tier asset and restrict who can reset finance accounts.
+
+### 4) Tighten remote access
+If you use VPN, remote desktop, or admin portals:
+- Restrict access by role and device posture where possible.
+- Disable direct RDP from the internet.
+- Review firewall rules and exposed services.
+
+## Week 3: Patch, harden, and back up for resilience
+Week 3 focuses on reducing “easy wins” for attackers and ensuring you can recover.
+
+### 1) Patch management reality check
+Assess patching for:
+- Operating systems (Windows/macOS/Linux)
+- Browsers and common apps
+- Server OS and key services
+- Network devices (routers, firewalls)
+
+Practical guidance:
+- Define patch SLAs by severity (e.g., critical faster than routine).
+- Track exceptions: if you can’t patch a legacy system, isolate it and document compensating controls.
+
+Example: A line-of-business app can’t run on the latest OS. You keep it, but you segment it, restrict inbound access, and monitor logins.
+
+### 2) Configuration hardening essentials
+You can’t harden everything at once. Prioritize:
+- Endpoint encryption on laptops.
+- Screen lock and inactivity timeouts.
+- Disable local admin where possible.
+- Secure baseline for email (block auto-forwarding externally, review suspicious mailbox rules).
+
+Example: External auto-forwarding is often abused after account compromise. If you must allow it for a few roles, restrict it and review it monthly.
+
+### 3) Backups you can actually restore
+Audit backups with three questions:
+- Are backups complete (all critical systems/data)?
+- Are backups protected (separate credentials, immutable options if available)?
+- Have you tested restore recently?
+
+Minimum viable backup audit steps:
+- Pick 1–2 critical systems and perform a restore test to a safe location.
+- Verify you can restore both data and access (e.g., encryption keys, admin credentials).
+
+Example: A file share backup exists, but the restore requires a departing admin’s personal account. Fix by moving backup access to documented admin roles.
+
+## Week 4: Logging, vendors, and incident readiness
+The final week turns your findings into operational readiness: detect issues, manage supplier risk, and respond quickly.
+
+### 1) Logging and monitoring you can use
+You may not have a full SOC, but you should have:
+- Centralized logs for key systems (identity, email, endpoints, servers).
+- Alerting for high-impact events: admin role changes, multiple failed logins, impossible travel, mailbox forwarding rules, disabled MFA.
+
+Practical example:
+- If someone adds a new global admin at 2:00 AM, you want a notification the same day, not next quarter.
+
+### 2) Review third-party and SaaS risk
+SMEs often outsource important functions. Do a vendor access and data handling review:
+- List vendors with access to your systems or sensitive data.
+- Confirm who approved them and who owns the relationship.
+- Review integrations (OAuth apps, API keys, service accounts).
+- Confirm contract basics: breach notification, data retention, and offboarding.
+
+Example: A marketing tool connected to your email system with broad permissions. If it’s no longer needed, revoke OAuth access and remove API keys.
+
+### 3) Validate incident response basics
+You don’t need a 40-page plan. You need a runnable playbook:
+- Roles: who decides, who communicates, who does technical containment.
+- Contact list: IT, legal, insurer, critical vendors.
+- First-hour steps: disable accounts, reset tokens, isolate devices, preserve logs.
+- Communication: internal updates and customer messaging approval flow.
+
+Example tabletop exercise (30 minutes):
+- Scenario: CFO mailbox compromise.
+- Actions: reset MFA, revoke sessions, review mailbox rules, notify bank if wire fraud is possible, check recent sent items.
+
+### 4) Turn findings into a prioritized remediation plan
+Close the audit with a short plan:
+- Top 5 risks (plain language).
+- Fixes with owners and deadlines.
+- Quick wins (1–2 weeks) vs. projects (30–90 days).
+- Re-audit schedule (monthly for access reviews, quarterly for vendor/integration reviews, and after major changes).
+
+## Checklist
+- [ ] Write a one-page audit scope and list your “crown jewel” systems/data.
+- [ ] Create an asset inventory for devices, servers, and SaaS (owner + admin + purpose).
+- [ ] Map key data flows for customer data, finance, and employee records.
+- [ ] Export user and admin lists; remove orphaned accounts and document exceptions.
+- [ ] Enforce MFA on email, identity, VPN, password manager, and finance tools; verify recovery methods.
+- [ ] Separate daily-use and admin accounts; review shared/service accounts and rotate credentials.
+- [ ] Review patch status for endpoints, servers, and network devices; define severity-based patch timelines.
+- [ ] Confirm laptop encryption, screen-lock policies, and local admin controls.
+- [ ] Verify backups cover critical systems; perform at least one restore test and document steps.
+- [ ] Enable and review key security logs/alerts (identity changes, suspicious logins, forwarding rules).
+- [ ] Inventory vendors/integrations with access to data; remove unused OAuth apps/API keys.
+- [ ] Create a simple incident response playbook and run a short tabletop exercise.
+
+## FAQ
+Q1: How do we do an audit if we don’t have a security team?
+A: Assign a single audit owner, use exports from existing systems (identity, email, MDM), and focus on the checklist items that reduce the most risk quickly.
+
+Q2: Should we run vulnerability scans as part of this 30-day audit?
+A: If you already have a scanning tool, include it, but don’t let scanning replace basics like access control, patching discipline, and tested backups.
+
+Q3: What’s the most common “high impact” fix SMEs can make fast?
+A: Enforce MFA everywhere possible and reduce admin privileges—these two steps significantly cut down account-takeover risk.
