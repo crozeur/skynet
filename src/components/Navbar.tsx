@@ -117,7 +117,7 @@ export const Navbar = () => {
             {language === "en" ? "Contact" : "Nous Contacter"}
           </a>
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 mr-4">
           <div className="hidden md:block">
             <ThemeChanger />
           </div>
