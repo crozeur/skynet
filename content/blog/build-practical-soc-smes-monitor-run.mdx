@@ -1,0 +1,144 @@
+## Intro
+A Security Operations Center (SOC) doesn’t have to be a room full of analysts and big screens. For most SMEs, “SOC” simply means having a repeatable way to collect security signals, spot what matters, respond fast, and learn from incidents. The goal is not perfection—it’s reducing the time between suspicious activity and action. This post lays out a practical SOC you can run with limited staff, using the tools you already have.
+
+## Quick take
+- Start with a small set of high-value logs and alerts; expand only when you can respond.
+- Define triage rules and an escalation path so alerts don’t die in an inbox.
+- Treat identity events (logins, MFA changes, privilege changes) as top-priority signals.
+- Build incident response around a few common scenarios: phishing, ransomware, compromised account.
+- Measure outcomes (time to acknowledge, time to contain) instead of counting alerts.
+
+## Scope your SOC to outcomes (not tools)
+A common SME mistake is to buy or enable “all the logs” and then drown in noise. Your SOC should be scoped to outcomes you can realistically deliver with current people and time.
+
+Practical outcomes to target:
+- Detect suspicious access to email, cloud apps, and admin consoles.
+- Catch malware/ransomware early enough to isolate a device.
+- Identify risky changes (new admin users, disabled logging, new forwarding rules).
+- Ensure incidents trigger consistent containment and recovery steps.
+
+A workable SOC “service catalog” for an SME might be:
+1) Monitoring and alert triage during business hours (with on-call for high severity)
+2) Incident response initiation (containment guidance within a defined time)
+3) Monthly review of trends and tuning
+
+Example: If you only have one IT manager and an MSP, commit to business-hours triage plus “call me anytime” only for two alert types: suspected account takeover and ransomware behavior. Everything else can be queued for next-day review.
+
+Keep frameworks generic and useful. You can map your activities to NIST/ISO/CIS concepts (detect, respond, recover; asset management; logging and monitoring) to ensure coverage, but avoid treating the map as “compliance.”
+
+## Collect the right signals: a minimum viable logging plan
+Think in four signal buckets: identity, endpoints, network, and critical applications. Start with the events most likely to indicate real compromise.
+
+Minimum viable logs for most SMEs:
+- Identity provider / directory: sign-ins, failed sign-ins, MFA enrollment and resets, privilege changes, new user creation, conditional access changes.
+- Email: inbox rule changes, forwarding/redirect rules, suspicious login locations, OAuth app grants (if available).
+- Endpoints: malware detections, tamper protection events, suspicious process behavior, isolation/quarantine actions.
+- Remote access: VPN logins, RDP/remote tool usage, new device registrations.
+- Critical SaaS/admin consoles: admin actions, API key creation, logging configuration changes.
+
+Practical guidance:
+- Centralize logs somewhere searchable (a SIEM is one option, but even a well-structured log store + alerting can work).
+- Normalize time (NTP) across systems; poor time sync ruins investigations.
+- Set retention based on your reality. If you can’t afford long retention, keep at least enough to investigate delayed discovery (often weeks, not hours).
+
+Example alert sources you can enable without overreach:
+- “Impossible travel” or atypical sign-in locations for privileged accounts.
+- New email forwarding rule to an external domain.
+- New local admin group membership on a workstation.
+- Endpoint sees ransomware-like activity (mass file changes, shadow copy deletion attempts).
+
+Avoid the trap: Don’t enable 200 low-confidence detections unless you have staff to review them. A smaller alert set that you consistently handle beats a giant backlog.
+
+## Triage and escalation: how to turn alerts into decisions
+SOC effectiveness depends on consistent triage. Define what happens when an alert arrives, who acts, and how quickly.
+
+A simple triage model:
+- Severity 1 (S1): Likely active compromise or business impact. Immediate action required.
+- Severity 2 (S2): Suspicious; needs investigation within a set window.
+- Severity 3 (S3): Low confidence or informational; review during tuning cycles.
+
+Build a “triage card” for each S1/S2 alert type:
+- What triggered it (signal and context)
+- What to check first (2–5 verification steps)
+- What containment actions are allowed immediately
+- When and how to escalate
+
+Example: “Suspicious email rule creation” triage card
+- Verify: Is the mailbox privileged (finance, exec, IT)? Is the rule forwarding externally? Was the user traveling?
+- Check: Recent sign-ins, MFA reset events, new devices, OAuth grants.
+- Contain: Disable forwarding, revoke sessions, reset password, require MFA re-registration.
+- Escalate: If finance mailbox, notify CFO and freeze outbound payments until validated.
+
+Make escalation unambiguous:
+- If S1 and involves identity or money movement, call the on-call number (not just email).
+- If ransomware suspicion, isolate the endpoint first, then investigate.
+
+Operational tip: Use a ticketing system to record every alert you act on. You need an audit trail for learning, handoffs, and insurance/legal questions, even if it’s lightweight.
+
+## Incident response playbooks you can actually run
+You don’t need dozens of playbooks. Start with three that cover most SME pain.
+
+### 1) Suspected account takeover (email / SaaS)
+Goal: stop attacker access, prevent further abuse, preserve evidence.
+- Contain: Force sign-out/revoke sessions; reset credentials; require MFA reset only through a controlled process.
+- Investigate: Review sign-in history, device registrations, mailbox rules, OAuth app grants, admin changes.
+- Remediate: Remove malicious rules/apps; check for lateral movement (shared drives, CRM access).
+- Communicate: Warn users about expected phishing follow-ups.
+
+Example: A CFO mailbox shows a new forwarding rule to an external address. You revoke sessions immediately, remove the rule, reset credentials, and put a temporary hold on approving wire transfers until you confirm no fraudulent requests were sent.
+
+### 2) Ransomware or destructive malware on an endpoint
+Goal: prevent spread and protect backups.
+- Contain: Isolate the machine from the network; disable affected credentials if needed.
+- Investigate: Determine patient zero (phishing, drive-by, exposed RDP, stolen creds).
+- Recover: Reimage affected systems; restore from known-good backups; validate backup integrity.
+- Improve: Add controls around admin rights, patching, and macro/script execution.
+
+Example: An EDR alert indicates mass file modifications and attempts to delete shadow copies. Your first move is isolation, not forensics. After containment, you confirm backup restore points and begin reimaging.
+
+### 3) Business email compromise (BEC) / payment fraud attempt
+Goal: prevent fraudulent transactions and stop social engineering.
+- Contain: Lock down the account; remove forwarding; verify mailbox access.
+- Verify: Out-of-band confirmation for any payment change requests (call known number, not email reply).
+- Coordinate: Inform finance, bank, and relevant partners quickly.
+- Document: Preserve headers and messages for investigation.
+
+Example: A vendor “changed bank details” email arrives from a known contact. Your SOC process flags it because the sender’s account recently had an unusual login and a forwarding rule change. Finance uses a call-back procedure and avoids a fraudulent transfer.
+
+## Make it sustainable: tuning, metrics, and continuous improvement
+An SME SOC fails when it becomes a stream of interruptions with no feedback loop. Build a lightweight improvement cycle.
+
+Tuning practices that work:
+- Weekly: review S1/S2 alerts, confirm which were true/false positives, and adjust rules.
+- Monthly: identify recurring causes (patch gaps, weak MFA enrollment, excessive admin rights).
+- Quarterly: test one scenario (phishing-to-account takeover, ransomware on a laptop) as a tabletop exercise.
+
+Measure what matters:
+- Time to acknowledge (TTA): how long until someone looks.
+- Time to contain (TTC): how long until access is blocked or device isolated.
+- Repeat incident rate: are the same issues recurring (e.g., forwarding rules)?
+- Coverage confidence: do you have logs for identity, endpoints, and key apps.
+
+Example: If your TTA is good but TTC is poor, you may need pre-approved containment actions (like allowing IT to isolate endpoints immediately) rather than more detection rules.
+
+## Checklist
+- [ ] Inventory critical systems and accounts (email, identity, finance, admin consoles)
+- [ ] Enable centralized collection for identity sign-in logs and admin changes
+- [ ] Enable endpoint security telemetry and ensure devices report consistently
+- [ ] Turn on alerts for MFA resets, privilege changes, and suspicious sign-ins
+- [ ] Add detection for mailbox forwarding/inbox rule changes and OAuth app grants
+- [ ] Define severity levels (S1–S3) and write triage cards for S1/S2 alerts
+- [ ] Establish an on-call/escalation path for identity compromise and ransomware
+- [ ] Pre-approve containment actions (session revocation, account disable, endpoint isolation)
+- [ ] Create three incident playbooks: account takeover, ransomware, BEC/payment fraud
+- [ ] Run a monthly review to tune alerts and fix recurring root causes
+
+## FAQ
+**1) Do we need a 24/7 SOC to be safe?**
+Not always. Many SMEs start with business-hours monitoring plus clear escalation for high-severity events, then expand coverage as risk and resources justify.
+
+**2) What should we monitor first if we can only pick one area?**
+Identity and email. Compromised accounts drive a large share of real-world incidents, and identity signals are often the fastest path to containment.
+
+**3) How do we avoid alert fatigue?**
+Start with a small set of high-confidence alerts tied to actions you can take, and tune monthly based on false positives and missed detections rather than adding more rules.
