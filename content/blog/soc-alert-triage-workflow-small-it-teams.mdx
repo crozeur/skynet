@@ -1,0 +1,202 @@
+## Intro
+Small IT teams don’t fail because they lack tools—they fail because every alert looks urgent at 2 a.m. A simple, repeatable triage workflow helps you separate noise from real risk, respond consistently, and keep operations running. This post outlines a lightweight SOC-style alert triage process you can run with limited staff, whether your alerts come from a SIEM, EDR, email security, cloud logs, or an MSSP. The goal is not perfection; it’s a reliable path from “alert fired” to “handled and learned.”
+
+## Quick take
+- Treat triage as a funnel: reduce many alerts into a few verified incidents.
+- Decide severity using business impact + confidence, not just scary alert names.
+- Use a minimum evidence set so any team member can validate quickly.
+- Contain first when there’s credible risk; investigate deeper after blast radius stops growing.
+- Document every decision with timestamps and artifacts to improve detection and reduce repeat noise.
+
+## 1) Define what “triage” means (and what it doesn’t)
+Triage is the rapid decision step between “an alert happened” and “we’re doing incident response.” In small environments, it’s easy to skip triage and either (a) ignore alerts until something breaks, or (b) treat every alert like a breach. Both approaches burn time and increase risk.
+
+A practical definition:
+- Triage answers three questions fast:
+  1) Is this likely real (or likely noise)?
+  2) If real, how bad could it be for us?
+  3) What is the safest next action right now?
+
+What triage is not:
+- Not a full forensic investigation.
+- Not a compliance exercise.
+- Not a hunt for root cause when the system might still be actively compromised.
+
+Roles for small teams (keep it simple):
+- Triage owner (on duty): makes the initial call, runs the checklist.
+- System owner: confirms business context (is this server critical? is this user traveling?).
+- Approver (optional): if triage suggests a disruptive containment action (disabling accounts, isolating devices), get quick approval unless policy pre-authorizes it.
+
+Tip: If you align with generic guidance like NIST/ISO/CIS, think of triage as a repeatable “detect → analyze → respond” decision point—without claiming compliance.
+
+## 2) Create a severity model your team can apply in 60 seconds
+Small teams need a severity rubric that is easy to memorize and hard to misuse. Avoid complex scoring that requires perfect data.
+
+Use a two-axis model:
+- Business impact (High/Medium/Low)
+- Confidence (High/Medium/Low)
+
+Then map to a simple action:
+- High impact + high confidence: act now (contain immediately, then investigate).
+- High impact + low confidence: gather minimum evidence fast; be ready to contain.
+- Low impact + high confidence: schedule investigation; contain if it’s spreading.
+- Low impact + low confidence: document and tune; don’t burn hours.
+
+Examples of impact (context matters):
+- High impact: domain admin activity, finance system access, backups being modified, privileged cloud roles changed, multiple endpoints showing similar behavior.
+- Medium impact: a single workstation malware detection, suspicious login to an internal app, new service installation on a server that isn’t critical.
+- Low impact: a blocked phishing email, a single failed login burst against a non-privileged account with MFA enabled.
+
+Examples of confidence:
+- High confidence: correlated signals (EDR process + unusual network + user report), known-bad hash from your EDR, verified impossible travel with no VPN.
+- Medium confidence: single strong signal without corroboration (e.g., “suspicious PowerShell” without file/network evidence).
+- Low confidence: generic IDS signature, noisy anomaly alerts without supporting telemetry.
+
+Operational rule: If you can’t explain in one sentence why it’s high severity, it isn’t—yet.
+
+## 3) The triage workflow: from alert to decision in 15–30 minutes
+Here’s a workflow that fits small teams and can be run as a playbook. The steps below assume you have at least basic log access (SIEM queries, cloud audit logs, EDR console, email gateway), but the logic works even if you’re piecing together data manually.
+
+### Step 1: Capture the alert package (2–5 minutes)
+Before clicking around, collect:
+- Alert ID, source, timestamp (and time zone)
+- Affected asset(s): hostname, IP, cloud resource, user account
+- Detection name and raw event details
+- Initial severity from the tool (but don’t trust it blindly)
+
+Create a ticket immediately. Even if it’s noise, you want traceability and a place to store artifacts.
+
+### Step 2: Do the “minimum evidence set” (5–10 minutes)
+Aim for fast validation using the smallest set of checks that reliably increases confidence.
+
+Minimum evidence set (choose what fits the alert type):
+- Identity: last successful login, MFA status, recent password reset, new device/session, geolocation change
+- Endpoint: process tree (parent/child), file path, command line, signer reputation, user context
+- Network: outbound connections (domain/IP), unusual ports, DNS queries, data volume spikes
+- Email: message headers, sender auth results (SPF/DKIM/DMARC outcomes if available), URLs clicked, attachments opened
+- Cloud: audit trail for resource changes (role assignment, key creation, mailbox forwarding rules)
+
+Example: “Suspicious PowerShell” on a workstation
+- Check command line: is it a known admin script path, or an encoded command?
+- Check parent process: launched from Explorer (user click) or from Office (macro), or from a scheduled task?
+- Check network: did it contact an external IP or download a payload?
+- Check user: did the user report opening an unexpected file?
+
+If two or more signals point the same direction, raise confidence.
+
+### Step 3: Classify and decide action (2–5 minutes)
+Put it into one of three buckets:
+- False positive/no action: document why and tune later.
+- Suspicious/needs investigation: assign investigation tasks with a timebox.
+- Likely incident: contain now.
+
+Write a clear decision note:
+- “Classified as Likely Incident because: X, Y, Z.”
+
+### Step 4: Contain when credible risk exists (5–10 minutes)
+Containment should be reversible and targeted where possible.
+
+Common containment actions:
+- Disable or reset a compromised user account; revoke sessions/tokens
+- Isolate an endpoint from the network (EDR isolation if you have it; otherwise VLAN/quarantine)
+- Block a domain/IP temporarily at firewall/DNS security
+- Remove malicious mailbox rules or forwarding; quarantine messages
+- Freeze sensitive changes: stop scheduled tasks, disable newly created service accounts, pause suspicious cloud keys
+
+Rule of thumb: if the alert involves privileged access or lateral movement indicators, containment is usually the right first move.
+
+### Step 5: Handoff to investigation and track SLA
+After containment (or after classification as “suspicious”), define:
+- Owner
+- Next check(s)
+- Deadline (even if it’s “by end of day”)
+- What will close the ticket (evidence of benign cause, or incident declared)
+
+Timeboxing matters. Without it, small teams can spend hours proving a benign event when the real risk is elsewhere.
+
+## 4) Practical examples: three common alert types
+### Example A: Multiple failed logins + one success (possible password spray)
+Triage signals to check:
+- Were failures across many accounts or focused on one?
+- Did success occur from same IP/ASN/location as failures?
+- Was MFA challenged and passed?
+- Any subsequent suspicious actions: mailbox rules, new OAuth consent, privilege changes?
+
+Actions:
+- If many accounts targeted: block source IP (if safe), force password reset for impacted accounts, review conditional access/MFA policies.
+- If one account succeeded with no MFA: disable account, revoke sessions, investigate login history and activity after login.
+
+Outcome notes:
+- If it’s a known internal scanner or misconfigured app: document and suppress (with an allowlist) rather than ignoring globally.
+
+### Example B: EDR detects “credential dumping” behavior
+Triage signals to check:
+- Which process attempted access (process name alone is not enough)
+- Parent process and command line
+- Was LSASS accessed? Were dump files created?
+- Is the machine a server, jump box, or regular workstation?
+
+Actions:
+- Treat as high impact if on a privileged system.
+- Isolate endpoint; reset credentials for accounts used on that device (especially admins).
+- Check for lateral movement: new remote services, RDP sessions, SMB admin shares.
+
+### Example C: Email alert for possible phishing with a clicked link
+Triage signals to check:
+- Who received it (finance/HR/admins get higher impact)
+- Whether credentials were entered (if you have proxy/SASE logs or user report)
+- Whether any mailbox rules were created after the click
+- Whether other users received the same message
+
+Actions:
+- Quarantine similar messages across mailboxes.
+- Reset password and revoke sessions for the user if credential entry is plausible.
+- Add the URL/domain to blocklist temporarily, and watch for subsequent logins.
+
+## 5) Reduce alert fatigue: tuning and hygiene that actually works
+Alert triage is only sustainable if you reduce repeat noise. Build a feedback loop:
+
+1) Track top recurring alerts
+- In your ticketing system, tag alerts by detection name and asset.
+- Review weekly or biweekly: “What consumed the most time?”
+
+2) Tune with guardrails
+- Suppress only when you have a documented benign cause.
+- Prefer narrow exceptions: a specific host, account, script hash/path, or maintenance window.
+- Add compensating detection: if you suppress one noisy rule, ensure you still detect the risky outcome (e.g., suspicious network egress, privilege escalation).
+
+3) Improve asset and identity context
+- Maintain a short “crown jewels” list: critical servers, key SaaS admins, backup systems.
+- Keep an owner map: who is responsible for each critical system.
+- Label devices (server vs workstation; kiosk; shared) so severity is consistent.
+
+4) Pre-authorize containment actions
+- Write a short policy: when can the on-duty person disable an account or isolate a host without approval?
+- This prevents delays when minutes matter.
+
+5) Practice with tabletop drills
+- Pick one common alert type (password spray, malware on endpoint, suspicious mailbox rule).
+- Walk through the triage steps and see what information you actually have.
+- Update the playbook to match reality.
+
+## Checklist
+- [ ] Create a single intake queue (ticket or chat-to-ticket) for all security alerts
+- [ ] Define a 2-axis severity model: business impact and confidence
+- [ ] Maintain a crown jewels list (critical systems, admin accounts, backups)
+- [ ] Document the minimum evidence set for identity, endpoint, network, email, and cloud alerts
+- [ ] Establish timeboxes: triage in 15–30 minutes; investigation tasks with deadlines
+- [ ] Pre-authorize basic containment actions (disable account, isolate host, revoke sessions)
+- [ ] Standardize ticket notes: timestamps, affected assets, evidence, decision rationale
+- [ ] Tag recurring alerts and review them weekly/biweekly for tuning opportunities
+- [ ] Use narrow suppressions (specific host/account/script) and record the benign reason
+- [ ] Run a quarterly tabletop exercise using one real alert from the last month
+
+## FAQ
+**Q1: Should we always contain first if we’re not sure?**
+If impact could be high and confidence is medium or higher, targeted containment (like revoking sessions or isolating one endpoint) is usually safer than waiting.
+
+**Q2: What if we don’t have a SIEM—can we still do this?**
+Yes. The workflow is tool-agnostic; you just collect the minimum evidence from whatever consoles and logs you have, then make a consistent decision.
+
+**Q3: How do we know when to declare an incident?**
+Declare an incident when you have credible evidence of unauthorized access, malware execution with persistence, data exposure risk, or privilege misuse—especially on critical assets or admin accounts.
