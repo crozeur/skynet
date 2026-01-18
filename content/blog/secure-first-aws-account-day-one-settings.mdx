@@ -1,0 +1,139 @@
+## Intro
+Spinning up your first AWS account is exciting—until you realize the default posture is “ready to build,” not “ready for attackers.” Day-one security work is mostly configuration, not code, and it pays off immediately by reducing the blast radius of mistakes. For SMEs, the goal isn’t perfection; it’s creating basic guardrails so teams can move fast without leaving obvious doors open. This post walks through 10 settings to check on day one, with practical examples you can implement in under a few hours.
+
+## Quick take
+- Enable MFA on the root user, then stop using root for daily work.
+- Create an admin role for humans and use least-privilege IAM policies for everything else.
+- Turn on organization-wide logging (CloudTrail) and centralize logs early.
+- Add cost and security guardrails (Budgets + alerts; basic detection services).
+- Enforce encryption and safe defaults (S3 block public access, EBS encryption by default).
+
+## 1) Lock down identity: root, MFA, and an admin role
+Your AWS account’s “root user” is the keys-to-the-kingdom identity. Treat it like a break-glass account.
+
+1) Enable root MFA (hardware key or authenticator app).
+- Action: Sign in as root once, set up MFA, and store recovery codes securely.
+- Example: Put break-glass instructions in your password manager with restricted access (e.g., two IT managers).
+
+2) Stop using root for normal tasks.
+- Action: Create an IAM admin role and use that role for administration.
+- Example: Create an IAM user (or better, federate from your identity provider later), grant it permission to assume an “Admin” role, then enforce MFA on that user.
+
+3) Use roles over long-lived access keys.
+- Why: Access keys leak. Roles reduce key sprawl and make it easier to rotate access.
+- Example: If a CI system needs AWS access, give it a role via AWS-native mechanisms (such as instance roles / task roles) rather than copying keys into environment variables.
+
+4) Set an account password policy (if you use IAM users).
+- Action: Require long passwords and disallow password reuse. Even if you plan to migrate to SSO soon, a password policy helps during the transition.
+
+Practical tip: In SMEs, the biggest identity risk early on is “everyone is an admin forever.” Start with one admin role, then create separate roles for billing-only, read-only, and deployment.
+
+## 2) Establish least privilege with IAM baselines and guardrails
+Once identity is controlled, permissions are the next largest source of risk.
+
+1) Avoid using the default “AdministratorAccess” policy for day-to-day engineering.
+- Action: Create role-based access patterns: Admin, PowerUser/DevOps, ReadOnly, Billing.
+- Example: Developers can be allowed to deploy into specific environments (like “dev”) but not change account-wide settings.
+
+2) Use groups and roles to keep access reviewable.
+- Action: Put users into groups (if using IAM users) or map SSO groups to roles.
+- Example: “IT-Managers” group can assume Admin; “Finance” can assume Billing role.
+
+3) Add a basic permission boundary pattern.
+- Why: Boundaries prevent a mistake where someone creates a policy that accidentally grants overly broad permissions.
+- Example: Apply a boundary that blocks risky actions like disabling CloudTrail, modifying key security services, or making S3 buckets public (even if you later fine-tune it).
+
+4) Turn on IAM Access Analyzer.
+- What it does: Highlights resources that can be accessed from outside your account (e.g., S3 buckets, KMS keys, IAM roles with external trust).
+- Example: If you see an S3 bucket policy allowing “Principal: *” or broad cross-account access, fix it before it becomes a data exposure incident.
+
+Practical tip: Least privilege is a journey. Your day-one goal is to prevent obvious overexposure and to make permissions auditable. You can tighten policies as you learn what workloads actually need.
+
+## 3) Turn on logging and monitoring before you deploy workloads
+When something goes wrong, logs are the difference between “we think…” and “we know.” Enable them now—before the first instance, database, or bucket goes live.
+
+1) Enable AWS CloudTrail across all regions.
+- Action: Create an organization/account-level trail that logs management events and writes to a dedicated S3 bucket.
+- Example: If someone changes a security group to allow 0.0.0.0/0 on port 22, CloudTrail can show who did it and when.
+
+2) Secure the log bucket.
+- Action: Block public access, restrict write permissions to the logging service, and consider a separate “logs” account later.
+- Example: Use S3 bucket policies that only allow CloudTrail to write and your security admins to read.
+
+3) Enable CloudWatch alarms for obvious signals.
+- Examples:
+  - Alarm on root account usage.
+  - Alarm on IAM policy changes.
+  - Alarm on CloudTrail being stopped or altered.
+
+4) Turn on at least one baseline detection service.
+- Options include AWS-native threat detection and configuration monitoring services.
+- Goal: Get actionable findings, not noise. Start with defaults, then tune.
+
+Practical tip: If you can only do one monitoring task today, alert on root usage and changes to logging. Those are high-signal indicators of compromise or risky behavior.
+
+## 4) Protect data by default: S3, encryption, and key management basics
+For many SMEs, the first “real” AWS asset is storage: S3 buckets for files, backups, exports, or logs. Most public cloud data exposures come from misconfigurations—not sophisticated hacks.
+
+1) Set S3 Block Public Access at the account level.
+- Action: Enable it globally unless you have a very explicit business need for public content.
+- Example: If marketing needs a public static website, host it via a controlled pattern (e.g., CDN in front) rather than making random buckets public.
+
+2) Enable EBS encryption by default.
+- Action: Turn on “encryption by default” so any new volumes are encrypted automatically.
+- Example: A developer launches a test server with customer data; encryption is automatic, even if they forget.
+
+3) Decide how you’ll use KMS keys.
+- Day one approach:
+  - Use AWS-managed keys where appropriate for simplicity.
+  - Use customer-managed keys when you need tighter control (e.g., key rotation policies, separation of duties).
+- Example: Use a customer-managed key for sensitive databases and restrict who can administer that key.
+
+4) Set a default S3 bucket policy pattern.
+- Action: Require TLS (deny non-HTTPS) and consider requiring encryption headers for uploads.
+- Example: Deny requests where `aws:SecureTransport` is false.
+
+Practical tip: Encryption doesn’t replace access control. Treat encryption as a safety net; IAM and bucket policies remain your primary gatekeepers.
+
+## 5) Add guardrails for cost, regions, and “oops” moments
+Security incidents aren’t always intrusions—sometimes they’re mistakes that lead to outages or surprise bills.
+
+1) Set up AWS Budgets and billing alerts.
+- Action: Create a monthly budget and alerts at thresholds (e.g., 50%, 80%, 100%).
+- Example: An exposed access key can be used for crypto-mining or high-cost services. A budget alert can be an early warning.
+
+2) Restrict regions (if your business can).
+- Action: Decide which regions you will use and block others via policy.
+- Example: If you operate only in one region, restricting regions reduces the chance of shadow deployments and simplifies monitoring.
+
+3) Define a tagging baseline.
+- Action: Require tags like `Owner`, `Environment`, `CostCenter`, and `DataClassification`.
+- Example: When an alert fires on an S3 bucket, tags tell you who owns it and whether it contains sensitive data.
+
+4) Create a break-glass runbook.
+- Action: Write a simple procedure for suspected compromise: rotate credentials, disable access keys, review CloudTrail, isolate workloads.
+- Example: Include who to call, where logs are, and how to temporarily block outbound traffic if needed.
+
+Practical tip: Guardrails are operational security. They reduce the time between a problem starting and a human noticing.
+
+## Checklist
+- [ ] Enable MFA on the root user and store recovery info securely
+- [ ] Create an admin role for humans; stop using root for daily work
+- [ ] Enforce MFA for privileged roles/users (including any “admin” access)
+- [ ] Turn on CloudTrail for all regions and write logs to a dedicated S3 bucket
+- [ ] Block public S3 access at the account level
+- [ ] Enable EBS encryption by default
+- [ ] Enable IAM Access Analyzer and review external access findings
+- [ ] Set a monthly AWS Budget with multiple alert thresholds
+- [ ] Add CloudWatch alarms for root usage and logging/ IAM changes
+- [ ] Define required tags (Owner, Environment, DataClassification) and apply them early
+
+## FAQ
+Q1: Do we need to do all 10 settings before deploying anything?
+A: Ideally yes, but if you must prioritize: root MFA, admin role, CloudTrail, S3 block public access, and budgets/alerts.
+
+Q2: Should we create IAM users for everyone?
+A: Prefer roles and centralized identity (SSO/federation) when possible; IAM users can work temporarily but increase management overhead.
+
+Q3: Is enabling encryption enough to protect our data?
+A: No. Encryption helps if storage is exposed or copied, but access control (IAM, bucket policies, security groups) is what prevents exposure in the first place.
