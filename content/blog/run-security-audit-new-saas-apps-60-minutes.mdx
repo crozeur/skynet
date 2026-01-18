@@ -1,0 +1,178 @@
+## Intro (3–5 sentences)
+New SaaS apps can solve real problems fast—but they can also create new attack paths just as fast. A lightweight, repeatable security audit helps you catch the biggest risks before data, accounts, and integrations sprawl out of control. The goal of a 60‑minute audit isn’t to “prove compliance”; it’s to make a clear go/no‑go decision and define any required safeguards. This guide gives you a practical, time-boxed workflow that works for both beginners and IT managers.
+
+## Quick take (exactly 5 bullet points)
+- Focus on what data the app touches, where it flows, and who can access it.
+- Require SSO/MFA, least privilege roles, and an offboarding plan before rollout.
+- Review vendor security basics: encryption, logging, vulnerability handling, and incident response.
+- Map integrations and tokens; restrict scopes and rotate secrets.
+- End with a simple decision: approve, approve with conditions, or reject.
+
+## 1) Minute 0–10: Define scope, data, and impact
+A fast audit starts with a clear scope. If you try to evaluate everything, you’ll evaluate nothing.
+
+What to capture in 10 minutes:
+
+1) What problem is this app solving?
+- Example: “Marketing wants a form builder to capture webinar leads.”
+
+2) Who will use it and how many accounts?
+- Example: “25 users in Marketing; 2 admins in IT.”
+
+3) What data will be stored or processed?
+Classify data in simple buckets: public, internal, confidential, regulated. Don’t overthink the labels—use what your organization already uses.
+- Example: Names + business emails + job titles (confidential in many SMEs).
+- Example: Customer support transcripts (confidential; potentially sensitive content).
+- Example: Employee data (often higher sensitivity).
+
+4) What is the “blast radius” if it goes wrong?
+Think through three scenarios:
+- Data exposure: what would be embarrassing, costly, or legally risky?
+- Account takeover: what could an attacker do with one compromised user?
+- Integration compromise: what other systems could be reached from this app?
+
+Practical output to record (one paragraph):
+- “SaaS X will store lead contact info and integrate with email marketing. Risk is moderate due to customer data exposure; requires SSO/MFA and restricted admin access.”
+
+If your team uses a formal framework (NIST/ISO/CIS), you can map this to the idea of asset identification and risk context—without claiming compliance.
+
+## 2) Minute 10–25: Identity, access, and admin controls
+Most SaaS incidents in SMEs are driven by weak access controls: reused passwords, no MFA, too many admins, and no clear offboarding.
+
+What to check quickly:
+
+1) Authentication options
+- Can you enforce MFA for all users?
+- Can you use SSO (SAML/OIDC) with your identity provider?
+- If SSO isn’t available on your plan, is that a deal-breaker for your use case?
+
+2) Role-based access control (RBAC)
+- Are roles clearly defined (viewer/editor/admin) and can you limit who can export data?
+- Does the app support least privilege, or is it “everyone is an admin” by default?
+
+3) Administrative safety
+- Can you restrict admin actions (e.g., only certain people can change security settings)?
+- Is there an approval workflow for sensitive actions (like adding integrations or changing billing owner)?
+
+4) Offboarding and lifecycle
+- Can you disable users quickly?
+- Can you deprovision users automatically via your identity provider?
+- If someone leaves, do their API tokens/integrations remain active?
+
+Example decision pattern:
+- Approve if: SSO + enforced MFA + meaningful roles.
+- Approve with conditions if: MFA exists but cannot be enforced; mitigate via policy + periodic checks and limited rollout.
+- Reject if: No MFA and access is tied to shared accounts.
+
+Mini test you can do in minutes:
+- Create a test user, verify MFA/SSO behavior, and confirm that a non-admin cannot access admin settings or export all data.
+
+## 3) Minute 25–40: Data handling, storage, and tenant controls
+You don’t need a deep cryptography review to make a solid 60‑minute decision. You do need clarity on how data is protected and whether you can control where it goes.
+
+Fast checks:
+
+1) Encryption (at rest and in transit)
+Look for straightforward statements in the vendor’s security documentation or trust page.
+- Acceptable: “Data is encrypted in transit using TLS and encrypted at rest.”
+- Watch-outs: vague language, missing details entirely, or “encryption available” but not enabled.
+
+2) Data retention and deletion
+- Can you delete data permanently?
+- Is there an admin-controlled retention policy?
+- What happens when you cancel the subscription?
+
+3) Export and sharing controls
+- Can users generate public links?
+- Can you restrict external sharing to approved domains?
+- Are file uploads scanned, or can you at least limit upload types and sizes?
+
+4) Tenant isolation and multi-user boundaries
+You may not be able to verify tenant isolation technically in an hour, but you can ask for the vendor’s security overview and look for descriptions of logical separation and access controls.
+
+Example scenario: a document collaboration tool
+- Risk: Users create public share links, leaking internal documents.
+- Mitigation in audit: Require “only logged-in users” sharing, restrict external domains, disable anonymous links, and enable audit logs.
+
+What to document:
+- “Stores confidential internal documents; external sharing must be restricted to company domains; anonymous links disabled; retention set to 90 days after deletion where possible.”
+
+## 4) Minute 40–52: Integrations, APIs, and logging
+Integrations turn a small SaaS adoption into a security event if they’re uncontrolled. In a quick audit, focus on tokens, scopes, and visibility.
+
+1) Inventory the integrations you intend to use
+- Email (Google/Microsoft)
+- CRM
+- Ticketing
+- Slack/Teams
+- Webhooks to internal services
+
+2) Check token and permission scope
+- Does the OAuth consent screen request broad permissions (e.g., full mailbox access) when you only need calendar?
+- Can you limit scopes or choose a narrower integration?
+
+3) Secrets management basics
+- Are API keys visible only once?
+- Can you rotate tokens?
+- Can you restrict API keys by IP allowlist or environment?
+
+4) Logging and audit trail
+In many SMEs, “can we see what happened?” is more important than perfect prevention.
+- Does the app provide audit logs for logins, admin actions, exports, and sharing changes?
+- Can logs be exported to your SIEM/logging tool, or at least downloaded?
+
+5) Alerting
+- Are there alerts for new admins, unusual logins, or mass exports?
+
+Example quick win:
+- If the app supports it, enable alerts for: new admin creation, integration added/changed, and large data export.
+
+## 5) Minute 52–60: Vendor posture and go/no-go decision
+Now you translate what you found into a practical decision. In a short audit you won’t fully assess a vendor’s SDLC, but you can confirm essential signals of maturity.
+
+What to look for (quickly):
+
+1) Security point of contact
+- Is there a security email or intake form?
+- Is there a vulnerability disclosure policy?
+
+2) Incident communication
+- Do they describe how they handle incidents and how customers are notified?
+
+3) Documentation quality
+- Is security information easy to find and consistent?
+- Are administrative security features documented clearly?
+
+4) Subprocessors and hosting
+- Do they list subprocessors and explain what they do?
+- Do they provide region options if you require them?
+
+Make a simple decision with conditions:
+- Approve: meets baseline controls.
+- Approve with conditions: allowed if you enforce specific settings, limit scope to a pilot, or block high-risk features.
+- Reject: missing critical controls (no MFA, no admin controls, unclear data deletion, no way to disable public sharing for sensitive data, etc.).
+
+Example “approve with conditions” write-up:
+- “Approved for pilot with 10 users. Conditions: SSO required; disable public links; restrict integrations to CRM only; enable audit logs; review after 30 days.”
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Define the business purpose, owner, and user count.
+- [ ] Identify data types (public/internal/confidential/regulated) the app will store or process.
+- [ ] Confirm MFA is available and can be enforced; prefer SSO (SAML/OIDC) for all users.
+- [ ] Validate least-privilege roles and limit admin accounts to named individuals.
+- [ ] Ensure offboarding/deprovisioning is feasible (disable user, remove tokens, revoke sessions).
+- [ ] Review encryption statements (in transit and at rest) in vendor security docs.
+- [ ] Check data retention, deletion, and account termination behavior.
+- [ ] Audit sharing/export controls (public links, external sharing restrictions, bulk export permissions).
+- [ ] Map required integrations and confirm minimal scopes; rotate API keys/tokens.
+- [ ] Enable and review audit logs/alerts for admin changes, integrations, and exports.
+
+## FAQ (3 questions with short answers)
+Q1: What if the SaaS app doesn’t support SSO on our plan?
+A: Treat it as higher risk; limit usage to non-sensitive data, enforce MFA, and consider alternatives if the app will become widely used.
+
+Q2: How do we handle a “must-have” app that fails one of the checks?
+A: Approve only with conditions (pilot, limited data, restricted sharing/integrations) and set a deadline to meet the missing control or replace the tool.
+
+Q3: Do we need a full third-party risk questionnaire for every SaaS tool?
+A: Not always—use this 60-minute audit for low-to-moderate risk tools, and reserve deeper reviews for apps handling sensitive or regulated data or broad integrations.
