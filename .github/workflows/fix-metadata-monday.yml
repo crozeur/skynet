@@ -1,0 +1,40 @@
+name: Fix Missing Metadata - Monday & Deploy
+
+on:
+  schedule:
+    # Exécute tous les lundis à 14:00 UTC (15:00 CET, 16:00 CEST)
+    - cron: '0 14 * * 1'
+  workflow_dispatch: # Permet de déclencher manuellement
+
+jobs:
+  fix-metadata:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Fix missing metadata
+        run: node scripts/fix-missing-metadata.js
+      
+      - name: Commit and push changes (if any)
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "Blog Auto-Builder Bot"
+          git add content/blog/
+          if git diff-index --quiet HEAD --; then
+            echo "✅ No metadata changes needed"
+          else
+            git commit -m "🤖 Auto-fixed: Missing metadata added - $(date +'%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✅ Metadata changes pushed"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

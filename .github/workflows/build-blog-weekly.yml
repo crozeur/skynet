@@ -1,0 +1,44 @@
+name: Build Blog & Deploy
+
+on:
+  schedule:
+    # Exécute tous les mardis à 09:00 UTC (10:00 CET, 11:00 CEST)
+    - cron: '0 9 * * 2'
+  workflow_dispatch: # Permet de déclencher manuellement
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run blog build
+        run: npm run build:blog
+      
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "Blog Auto-Builder Bot"
+          git add public/blog-data/
+          if git diff-index --quiet HEAD --; then
+            echo "✅ No changes to commit"
+          else
+            git commit -m "🤖 Auto-generated: Blog articles compiled - $(date +'%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "✅ Changes pushed to GitHub"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
