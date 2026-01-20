@@ -193,37 +193,68 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents */}
+          {/* Table of contents - Enhanced Design */}
           {headings.length > 0 && (
-            <div className="mb-12 p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800/50 sticky top-20 z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg">
-                  {getUIString("Contents", language)}
-                </h3>
-              </div>
-              <div className="flex flex-col gap-3">
-                {headings.map((h) => (
-                  <a 
-                    key={h.id} 
-                    href={`#${h.id}`} 
-                    className={`
-                      transition-all duration-200
-                      ${h.level === 2 
-                        ? 'text-blue-700 dark:text-blue-300 font-semibold text-base' 
-                        : 'text-gray-600 dark:text-gray-400 text-sm ml-4'}
-                      hover:text-blue-900 dark:hover:text-blue-200
-                      border-l-2 pl-3 py-1
-                      ${h.level === 2 
-                        ? 'border-blue-600 dark:border-blue-400' 
-                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'}
-                    `}
-                  >
-                    {h.text}
-                  </a>
-                ))}
+            <div className="mb-12 sticky top-20 z-10">
+              <div className="relative overflow-hidden rounded-2xl shadow-xl">
+                {/* Animated gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-500 opacity-100" />
+                
+                {/* Content */}
+                <div className="relative p-8 backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border border-white/20 dark:border-blue-400/10">
+                  {/* Header with icon */}
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-75" />
+                      <div className="relative bg-white dark:bg-gray-900 p-2.5 rounded-lg">
+                        <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-black text-gray-900 dark:text-white text-xl tracking-tight">
+                        {getUIString("Contents", language)}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                        {getUIString("Quick navigation", language)}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Divider */}
+                  <div className="h-px bg-gradient-to-r from-blue-300 via-cyan-300 to-transparent dark:from-blue-500 dark:via-cyan-500 dark:to-transparent mb-6" />
+                  
+                  {/* TOC List */}
+                  <nav className="space-y-2.5">
+                    {headings.map((h, idx) => (
+                      <a 
+                        key={h.id} 
+                        href={`#${h.id}`} 
+                        className={`
+                          group flex items-start gap-3.5 px-4 py-3 rounded-lg
+                          transition-all duration-300 ease-out
+                          ${h.level === 2 
+                            ? 'text-gray-900 dark:text-white font-bold text-base bg-gradient-to-r from-blue-50/50 to-cyan-50/30 dark:from-blue-500/10 dark:to-cyan-500/10 hover:from-blue-100/80 hover:to-cyan-100/50 dark:hover:from-blue-500/20 dark:hover:to-cyan-500/20 border border-blue-200/30 dark:border-blue-400/20 hover:border-blue-300/60 dark:hover:border-blue-400/40 hover:shadow-md' 
+                            : 'text-gray-700 dark:text-gray-300 font-medium text-sm ml-6 hover:text-gray-900 dark:hover:text-white'}
+                          hover:-translate-x-1 hover:translate-y-0
+                        `}
+                      >
+                        {h.level === 2 && (
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-xs font-bold flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
+                            {idx + 1}
+                          </span>
+                        )}
+                        {h.level === 3 && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex-shrink-0 mt-2" />
+                        )}
+                        <span className="line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
+                          {h.text}
+                        </span>
+                      </a>
+                    ))}
+                  </nav>
+                </div>
               </div>
             </div>
           )}
