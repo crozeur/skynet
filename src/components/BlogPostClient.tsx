@@ -449,8 +449,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
               top: 0;
               width: 1.75rem;
               height: 1.75rem;
-              background: linear-gradient(135deg, #0ea5e9, #06b6d4);
-              color: white;
+              background: #475569;
+              color: #e5e7eb;
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -461,8 +461,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
             
             .blog-content ol li:hover::before {
-              transform: scale(1.05);
-              background: linear-gradient(135deg, #06b6d4, #0891b2);
+              background: #64748b;
+              color: #f3f4f6;
             }
             }
 
