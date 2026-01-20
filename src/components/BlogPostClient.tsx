@@ -137,15 +137,15 @@ export function BlogPostClient({ post }: { post: PostData }) {
           )}
           
           {/* Article Header */}
-          <header className="mb-16">
-            <div className="mb-6 flex flex-wrap items-center gap-3">
+          <header className="mb-12">
+            <div className="mb-5 flex flex-wrap items-center gap-3">
               {/* Pillar Badge */}
-              <span className={`inline-flex items-center px-4 py-2.5 rounded-full text-sm font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-4 ${pillarRings[metadata.pillar]} uppercase tracking-wide`}>
+              <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-md ring-2 ${pillarRings[metadata.pillar]} uppercase tracking-wide`}>
                 {metadata.pillar}
               </span>
               
               {/* Date */}
-              <div className="flex items-center gap-2.5 text-gray-600 dark:text-gray-400 text-sm font-medium">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -159,7 +159,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               </div>
               
               {/* Reading Time */}
-              <div className="flex items-center gap-2.5 text-gray-600 dark:text-gray-400 text-sm font-medium">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm font-medium">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -168,20 +168,20 @@ export function BlogPostClient({ post }: { post: PostData }) {
             </div>
             
             {/* Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent mb-8 leading-tight tracking-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-950 dark:text-white mb-6 leading-tight tracking-tight">
               {metadata.title}
             </h1>
             
             {/* Description */}
-            <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-semibold">
+            <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 leading-relaxed mb-8 font-medium max-w-3xl">
               {metadata.description}
             </p>
 
             {/* Tags */}
             {metadata.tags && metadata.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mb-8">
                 {metadata.tags.map((tag) => (
-                  <span key={tag} className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 uppercase tracking-wider">
+                  <span key={tag} className="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50">
                     #{tag}
                   </span>
                 ))}
@@ -189,7 +189,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
             )}
             
             {/* Divider */}
-            <div className="mt-10 h-1 w-24 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 rounded-full" />
+            <div className="mt-8 h-0.5 w-16 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full" />
           </header>
 
           {/* Article Content */}
