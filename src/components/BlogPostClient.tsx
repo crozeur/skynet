@@ -193,7 +193,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents - Enhanced Design */}
+          {/* Table of contents - Minimal Modern Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
               <div className="relative overflow-hidden rounded-2xl shadow-xl">
@@ -203,7 +203,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 {/* Content */}
                 <div className="relative p-8 backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border border-white/20 dark:border-blue-400/10">
                   {/* Header with icon */}
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-3 mb-5">
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-75" />
                       <div className="relative bg-white dark:bg-gray-900 p-2.5 rounded-lg">
@@ -213,40 +213,34 @@ export function BlogPostClient({ post }: { post: PostData }) {
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-black text-gray-900 dark:text-white text-xl tracking-tight">
+                      <h3 className="font-black text-gray-900 dark:text-white text-lg tracking-tight">
                         {getUIString("Contents", language)}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                        {getUIString("Quick navigation", language)}
-                      </p>
                     </div>
                   </div>
                   
                   {/* Divider */}
                   <div className="h-px bg-gradient-to-r from-blue-300 via-cyan-300 to-transparent dark:from-blue-500 dark:via-cyan-500 dark:to-transparent mb-6" />
                   
-                  {/* TOC List */}
-                  <nav className="space-y-2.5">
-                    {headings.map((h, idx) => (
+                  {/* TOC List - Clean Design */}
+                  <nav className="space-y-2">
+                    {headings.map((h) => (
                       <a 
                         key={h.id} 
                         href={`#${h.id}`} 
                         className={`
-                          group flex items-start gap-3.5 px-4 py-3 rounded-lg
+                          group flex items-center gap-3.5 px-4 py-2.5 rounded-lg
                           transition-all duration-300 ease-out
                           ${h.level === 2 
-                            ? 'text-gray-900 dark:text-white font-bold text-base bg-gradient-to-r from-blue-50/50 to-cyan-50/30 dark:from-blue-500/10 dark:to-cyan-500/10 hover:from-blue-100/80 hover:to-cyan-100/50 dark:hover:from-blue-500/20 dark:hover:to-cyan-500/20 border border-blue-200/30 dark:border-blue-400/20 hover:border-blue-300/60 dark:hover:border-blue-400/40 hover:shadow-md' 
-                            : 'text-gray-700 dark:text-gray-300 font-medium text-sm ml-6 hover:text-gray-900 dark:hover:text-white'}
-                          hover:-translate-x-1 hover:translate-y-0
+                            ? 'text-gray-900 dark:text-white font-bold text-base bg-gradient-to-r from-blue-50/40 to-cyan-50/20 dark:from-blue-500/5 dark:to-cyan-500/5 hover:from-blue-100/60 hover:to-cyan-100/30 dark:hover:from-blue-500/15 dark:hover:to-cyan-500/15 border border-blue-200/30 dark:border-blue-400/10 hover:border-blue-300/50 dark:hover:border-blue-400/30 hover:shadow-md hover:-translate-x-1' 
+                            : 'text-gray-700 dark:text-gray-300 font-medium text-sm ml-2 hover:text-gray-900 dark:hover:text-white hover:-translate-x-0.5'}
                         `}
                       >
                         {h.level === 2 && (
-                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-xs font-bold flex-shrink-0 mt-0.5 group-hover:scale-110 transition-transform">
-                            {idx + 1}
-                          </span>
+                          <span className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500" />
                         )}
                         {h.level === 3 && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400 flex-shrink-0 mt-2" />
+                          <span className="flex-shrink-0 w-0.5 h-0.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400" />
                         )}
                         <span className="line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
                           {h.text}
