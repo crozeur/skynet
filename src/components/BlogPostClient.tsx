@@ -193,60 +193,57 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents - Refined Minimal Design */}
+          {/* Table of contents - Subtle Professional Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
-              <div className="relative overflow-hidden rounded-2xl shadow-lg">
-                {/* Subtle gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-500 opacity-90" />
+              <div className="relative overflow-hidden rounded-xl shadow-md">
+                {/* Minimal gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 opacity-95" />
                 
                 {/* Content */}
-                <div className="relative p-8 backdrop-blur-lg bg-white/98 dark:bg-gray-900/98 border border-white/20 dark:border-blue-400/5">
+                <div className="relative p-6 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
                   {/* Header with icon */}
-                  <div className="flex items-center gap-3 mb-6">
+                  <div className="flex items-center gap-2.5 mb-5">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-lg blur opacity-40" />
-                      <div className="relative bg-white dark:bg-gray-900 p-2.5 rounded-lg">
-                        <svg className="w-5 h-5 text-blue-600 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="relative bg-slate-800 p-1.5 rounded">
+                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
                         </svg>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+                      <h3 className="font-semibold text-slate-100 text-sm">
                         {getUIString("Contents", language)}
                       </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-                        {headings.filter(h => h.level === 2).length} {headings.filter(h => h.level === 2).length === 1 ? 'section' : 'sections'}
-                      </p>
                     </div>
                   </div>
                   
                   {/* Divider */}
-                  <div className="h-px bg-gradient-to-r from-blue-300 to-transparent dark:from-blue-500 dark:to-transparent opacity-50 mb-6" />
+                  <div className="h-px bg-slate-600/20 mb-4" />
                   
-                  {/* TOC List - Subtle Design */}
-                  <nav className="space-y-1.5">
+                  {/* TOC List - Clean Professional */}
+                  <nav className="space-y-1">
                     {headings.map((h) => (
                       <a 
                         key={h.id} 
                         href={`#${h.id}`} 
                         className={`
-                          group flex items-center gap-3 px-3.5 py-2.5 rounded-lg
-                          transition-all duration-300 ease-out
-                          relative
+                          group flex items-center gap-2.5 px-3 py-1.5 rounded
+                          transition-colors duration-200
                           ${h.level === 2 
-                            ? 'text-gray-900 dark:text-white font-bold text-sm bg-gradient-to-r from-blue-50/40 to-cyan-50/10 dark:from-blue-500/5 dark:to-cyan-500/2 hover:from-blue-100/50 hover:to-cyan-100/20 dark:hover:from-blue-500/15 dark:hover:to-cyan-500/8 border border-blue-200/20 dark:border-blue-400/5 hover:border-blue-300/40 dark:hover:border-blue-400/15 hover:shadow-sm hover:-translate-x-0.5' 
-                            : 'text-gray-700 dark:text-gray-300 font-medium text-sm ml-2 hover:text-gray-900 dark:hover:text-white hover:-translate-x-0.5'}
+                            ? 'text-slate-200 font-medium text-xs hover:text-blue-300' 
+                            : 'text-slate-400 font-normal text-xs ml-1 hover:text-slate-300'}
                         `}
                       >
-                        <span className={`flex-shrink-0 transition-all duration-300 ${h.level === 2 ? 'w-1.5 h-1.5' : 'w-1 h-1'} rounded-full ${h.level === 2 ? 'bg-blue-600 dark:bg-blue-400 group-hover:scale-125' : 'bg-blue-400 dark:bg-blue-500 group-hover:scale-110'}`} />
-                        <span className="line-clamp-2 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors flex-1">
+                        {h.level === 2 && (
+                          <span className="flex-shrink-0 w-1 h-1 rounded-full bg-blue-400" />
+                        )}
+                        {h.level === 3 && (
+                          <span className="flex-shrink-0 w-0.5 h-0.5 rounded-full bg-slate-500" />
+                        )}
+                        <span className="line-clamp-2">
                           {h.text}
                         </span>
-                        {h.level === 2 && (
-                          <div className="w-0 h-0.5 bg-blue-600 dark:bg-blue-400 rounded-full group-hover:w-4 transition-all duration-300 opacity-0 group-hover:opacity-40" />
-                        )}
                       </a>
                     ))}
                   </nav>
@@ -364,19 +361,17 @@ export function BlogPostClient({ post }: { post: PostData }) {
             /* Strong and em */
             .blog-content strong {
               font-weight: 700;
-              color: #111827;
-              background: linear-gradient(120deg, #fbbf24, #f59e0b);
-              background-clip: text;
-              -webkit-background-clip: text;
-              -webkit-text-fill-color: transparent;
-              background-attachment: fixed;
+              color: #e5e7eb;
+              border-bottom: 2px solid #0ea5e9;
+              transition: all 0.3s ease;
             }
             .dark .blog-content strong {
-              color: #f9fafb;
-              background: linear-gradient(120deg, #fcd34d, #fbbf24);
-              background-clip: text;
-              -webkit-background-clip: text;
-              -webkit-text-fill-color: transparent;
+              color: #f3f4f6;
+              border-bottom: 2px solid #06b6d4;
+            }
+            
+            .blog-content strong:hover {
+              padding-bottom: 2px;
             }
 
             .blog-content em {
@@ -462,13 +457,13 @@ export function BlogPostClient({ post }: { post: PostData }) {
               display: flex;
               align-items: center;
               justify-content: center;
-              font-weight: bold;
+              font-weight: 600;
               font-size: 0.875rem;
               transition: all 0.3s ease;
             }
             
             .blog-content ol li:hover::before {
-              transform: scale(1.1) rotate(5deg);
+              transform: scale(1.05);
               background: linear-gradient(135deg, #06b6d4, #0891b2);
             }
             }
