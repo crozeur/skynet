@@ -193,58 +193,66 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents - Minimal Modern Design */}
+          {/* Table of contents - Enhanced Minimal Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
-              <div className="relative overflow-hidden rounded-2xl shadow-xl">
+              <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                 {/* Animated gradient background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-500 to-blue-500 opacity-100" />
                 
+                {/* Subtle animated dots background */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-4 right-8 w-2 h-2 bg-white rounded-full animate-pulse" />
+                  <div className="absolute bottom-8 left-8 w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{animationDelay: '0.5s'}} />
+                </div>
+                
                 {/* Content */}
-                <div className="relative p-8 backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border border-white/20 dark:border-blue-400/10">
+                <div className="relative p-8 backdrop-blur-xl bg-white/97 dark:bg-gray-900/97 border border-white/20 dark:border-blue-400/10">
                   {/* Header with icon */}
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-75" />
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition-opacity" />
                       <div className="relative bg-white dark:bg-gray-900 p-2.5 rounded-lg">
-                        <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
                         </svg>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-black text-gray-900 dark:text-white text-lg tracking-tight">
+                      <h3 className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">
                         {getUIString("Contents", language)}
                       </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
+                        {headings.filter(h => h.level === 2).length} {headings.filter(h => h.level === 2).length === 1 ? 'section' : 'sections'}
+                      </p>
                     </div>
                   </div>
                   
                   {/* Divider */}
                   <div className="h-px bg-gradient-to-r from-blue-300 via-cyan-300 to-transparent dark:from-blue-500 dark:via-cyan-500 dark:to-transparent mb-6" />
                   
-                  {/* TOC List - Clean Design */}
-                  <nav className="space-y-2">
+                  {/* TOC List - Enhanced Design */}
+                  <nav className="space-y-1.5">
                     {headings.map((h) => (
                       <a 
                         key={h.id} 
                         href={`#${h.id}`} 
                         className={`
-                          group flex items-center gap-3.5 px-4 py-2.5 rounded-lg
+                          group flex items-center gap-3 px-3.5 py-2.5 rounded-lg
                           transition-all duration-300 ease-out
+                          relative
                           ${h.level === 2 
-                            ? 'text-gray-900 dark:text-white font-bold text-base bg-gradient-to-r from-blue-50/40 to-cyan-50/20 dark:from-blue-500/5 dark:to-cyan-500/5 hover:from-blue-100/60 hover:to-cyan-100/30 dark:hover:from-blue-500/15 dark:hover:to-cyan-500/15 border border-blue-200/30 dark:border-blue-400/10 hover:border-blue-300/50 dark:hover:border-blue-400/30 hover:shadow-md hover:-translate-x-1' 
+                            ? 'text-gray-900 dark:text-white font-bold text-sm bg-gradient-to-r from-blue-50/50 to-cyan-50/20 dark:from-blue-500/8 dark:to-cyan-500/5 hover:from-blue-100/70 hover:to-cyan-100/40 dark:hover:from-blue-500/20 dark:hover:to-cyan-500/15 border border-blue-200/30 dark:border-blue-400/10 hover:border-blue-300/50 dark:hover:border-blue-400/30 hover:shadow-md hover:-translate-x-0.5' 
                             : 'text-gray-700 dark:text-gray-300 font-medium text-sm ml-2 hover:text-gray-900 dark:hover:text-white hover:-translate-x-0.5'}
                         `}
                       >
-                        {h.level === 2 && (
-                          <span className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500" />
-                        )}
-                        {h.level === 3 && (
-                          <span className="flex-shrink-0 w-0.5 h-0.5 rounded-full bg-gradient-to-r from-blue-400 to-cyan-400" />
-                        )}
-                        <span className="line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">
+                        <span className={`flex-shrink-0 transition-all duration-300 ${h.level === 2 ? 'w-2 h-2' : 'w-1 h-1'} rounded-full ${h.level === 2 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 group-hover:scale-150 group-hover:shadow-lg group-hover:shadow-blue-500/50' : 'bg-gradient-to-r from-blue-400 to-cyan-400 group-hover:scale-125'}`} />
+                        <span className="line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors flex-1">
                           {h.text}
                         </span>
+                        {h.level === 2 && (
+                          <div className="w-0 h-0.5 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full group-hover:w-6 transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                        )}
                       </a>
                     ))}
                   </nav>
