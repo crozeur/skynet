@@ -201,18 +201,18 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 opacity-95" />
                 
                 {/* Content */}
-                <div className="relative p-7 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
+                <div className="relative p-8 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
                   {/* Header with icon */}
                   <div className="flex items-center gap-3 mb-6">
                     <div className="relative">
                       <div className="relative bg-slate-800 p-2 rounded">
-                        <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
                         </svg>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-100 text-base">
+                      <h3 className="font-semibold text-slate-100 text-lg">
                         {getUIString("Contents", language)}
                       </h3>
                     </div>
@@ -222,16 +222,16 @@ export function BlogPostClient({ post }: { post: PostData }) {
                   <div className="h-px bg-slate-600/20 mb-5" />
                   
                   {/* TOC List - Clean Professional */}
-                  <nav className="space-y-1.5">
+                  <nav className="space-y-2">
                     {headings.map((h) => (
                       <a 
                         key={h.id} 
                         href={`#${h.id}`} 
                         className={`
-                          group flex items-center gap-2.5 px-3 py-2 rounded
+                          group flex items-center gap-2.5 px-3 py-2.5 rounded
                           transition-colors duration-200
                           ${h.level === 2 
-                            ? 'text-slate-200 font-medium text-sm hover:text-blue-300' 
+                            ? 'text-slate-200 font-medium text-base hover:text-blue-300' 
                             : 'text-slate-400 font-normal text-sm ml-2 hover:text-slate-300'}
                         `}
                       >
@@ -449,8 +449,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
               top: 0;
               width: 1.75rem;
               height: 1.75rem;
-              background: #475569;
-              color: #e5e7eb;
+              background: #3b82f6;
+              color: white;
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -461,8 +461,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
             
             .blog-content ol li:hover::before {
-              background: #64748b;
-              color: #f3f4f6;
+              background: #2563eb;
+              box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
             }
             }
 
