@@ -193,7 +193,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents - Subtle Professional Design */}
+          {/* Table of contents - Professional Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
               <div className="relative overflow-hidden rounded-xl shadow-md">
@@ -201,38 +201,38 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 opacity-95" />
                 
                 {/* Content */}
-                <div className="relative p-6 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
+                <div className="relative p-7 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
                   {/* Header with icon */}
-                  <div className="flex items-center gap-2.5 mb-5">
+                  <div className="flex items-center gap-3 mb-6">
                     <div className="relative">
-                      <div className="relative bg-slate-800 p-1.5 rounded">
-                        <svg className="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="relative bg-slate-800 p-2 rounded">
+                        <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
                         </svg>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-100 text-sm">
+                      <h3 className="font-semibold text-slate-100 text-base">
                         {getUIString("Contents", language)}
                       </h3>
                     </div>
                   </div>
                   
                   {/* Divider */}
-                  <div className="h-px bg-slate-600/20 mb-4" />
+                  <div className="h-px bg-slate-600/20 mb-5" />
                   
                   {/* TOC List - Clean Professional */}
-                  <nav className="space-y-1">
+                  <nav className="space-y-1.5">
                     {headings.map((h) => (
                       <a 
                         key={h.id} 
                         href={`#${h.id}`} 
                         className={`
-                          group flex items-center gap-2.5 px-3 py-1.5 rounded
+                          group flex items-center gap-2.5 px-3 py-2 rounded
                           transition-colors duration-200
                           ${h.level === 2 
-                            ? 'text-slate-200 font-medium text-xs hover:text-blue-300' 
-                            : 'text-slate-400 font-normal text-xs ml-1 hover:text-slate-300'}
+                            ? 'text-slate-200 font-medium text-sm hover:text-blue-300' 
+                            : 'text-slate-400 font-normal text-sm ml-2 hover:text-slate-300'}
                         `}
                       >
                         {h.level === 2 && (
@@ -360,18 +360,17 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             /* Strong and em */
             .blog-content strong {
-              font-weight: 700;
+              font-weight: 600;
               color: #e5e7eb;
-              border-bottom: 2px solid #0ea5e9;
-              transition: all 0.3s ease;
+              opacity: 1;
+              text-decoration: underline;
+              text-decoration-color: #475569;
+              text-decoration-thickness: 1px;
+              text-underline-offset: 2px;
             }
             .dark .blog-content strong {
               color: #f3f4f6;
-              border-bottom: 2px solid #06b6d4;
-            }
-            
-            .blog-content strong:hover {
-              padding-bottom: 2px;
+              text-decoration-color: #334155;
             }
 
             .blog-content em {
@@ -416,16 +415,15 @@ export function BlogPostClient({ post }: { post: PostData }) {
               position: absolute;
               left: 0;
               top: 0.625rem;
-              width: 6px;
-              height: 6px;
+              width: 4px;
+              height: 4px;
               border-radius: 50%;
-              background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+              background: #64748b;
               transition: all 0.3s ease;
             }
             
             .blog-content ul li:hover::before {
-              transform: scale(1.5);
-              background: linear-gradient(135deg, #06b6d4, #0891b2);
+              background: #94a3b8;
             }
 
             .blog-content ol {
