@@ -122,14 +122,22 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
             </span>
           </div>
           
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6">
-            <span className="block bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-100 dark:to-white bg-clip-text text-transparent">
-              {language === "en" ? "Cybersecurity" : "Cybersécurité"}
-            </span>
-            <span className="block bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent">
-              {language === "en" ? "Insights" : "& Expertise"}
-            </span>
-          </h1>
+          <div className="relative mb-8">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-center">
+              <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 dark:from-blue-300 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-lg animate-pulse" style={{
+                textShadow: '0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(168, 85, 247, 0.2)',
+              }}>
+                {language === "en" ? "Cybersecurity" : "Cybersécurité"}
+              </span>
+              <span className="block bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 dark:from-cyan-300 dark:via-blue-400 dark:to-purple-500 bg-clip-text text-transparent mt-2" style={{
+                textShadow: '0 0 40px rgba(34, 211, 238, 0.4), 0 0 80px rgba(59, 130, 246, 0.2)',
+              }}>
+                {language === "en" ? "Insights" : "& Expertise"}
+              </span>
+            </h1>
+            {/* Decorative line */}
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 rounded-full blur-sm"></div>
+          </div>
           
           <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 leading-relaxed mb-10 max-w-3xl mx-auto font-light">
             {language === "en"
