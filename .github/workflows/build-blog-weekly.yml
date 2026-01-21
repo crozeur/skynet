@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Fix h3 formatting in articles
+        run: node scripts/fix-h3-formatting.js
+      
       - name: Run blog build
         run: npm run build:blog
       

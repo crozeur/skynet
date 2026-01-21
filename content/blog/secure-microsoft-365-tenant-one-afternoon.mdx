@@ -21,7 +21,7 @@ Account takeover is the fastest path to business email compromise, data theft, a
 
 Practical steps (in order):
 
-1) Enforce MFA for all users, starting with admins
+### 1) Enforce MFA for all users, starting with admins
 - If you can only do one thing today: ensure every privileged account uses MFA.
 - Expand quickly to all users.
 
@@ -29,14 +29,14 @@ Example approach:
 - Create a security group like “M365-MFA-Required” and add all users.
 - Apply your MFA requirement to that group first, then widen.
 
-2) Block legacy authentication
+### 2) Block legacy authentication
 Legacy protocols (older email clients and basic auth) are commonly abused because they bypass modern controls.
 
 What to do:
 - Disable legacy authentication tenant-wide, or at minimum for all users and all admins.
 - Watch sign-in logs for legacy auth attempts; you’ll often find forgotten devices or old apps.
 
-3) Add conditional access guardrails
+### 3) Add conditional access guardrails
 Conditional access is where you set the “rules of the road” for sign-ins.
 
 Fast wins you can implement in an afternoon:
@@ -54,11 +54,11 @@ Note: If you reference standards internally, this aligns with general guidance i
 ## 2) Reduce admin risk: least privilege, role hygiene, and break-glass
 Many SMEs have too many global admins because it’s convenient during setup. That convenience becomes a high-impact liability.
 
-1) Inventory who has admin roles
+### 1) Inventory who has admin roles
 - List all role assignments (global admin, Exchange admin, SharePoint admin, security admin, etc.).
 - Ask: “Does this person need this role every day?” If not, remove it.
 
-2) Use least privilege roles
+### 2) Use least privilege roles
 Instead of global admin for everything:
 - Exchange Administrator for mail settings
 - SharePoint Administrator for SharePoint/OneDrive settings
@@ -67,7 +67,7 @@ Instead of global admin for everything:
 Practical tip:
 - Create a small “Privileged Admins” group and track changes through a simple approval process (ticket or email trail).
 
-3) Protect “break-glass” accounts
+### 3) Protect “break-glass” accounts
 A break-glass account is an emergency account used when MFA or conditional access is misconfigured and locks everyone out.
 
 Break-glass best practices:
@@ -79,20 +79,20 @@ Break-glass best practices:
 Example:
 - If a break-glass account signs in, trigger an alert to the IT manager and a secondary contact.
 
-4) Consider just-in-time elevation (if available)
+### 4) Consider just-in-time elevation (if available)
 If your tenant supports privileged identity workflows, use time-bound role activation so admins aren’t permanently privileged. If you don’t have that capability, the minimum is to keep daily accounts unprivileged and use separate admin accounts for admin tasks.
 
 ## 3) Harden email and collaboration: stop easy phishing wins
 Email is still the primary initial access vector for SMEs. You can reduce impact quickly by tightening a few settings and making risky behavior harder.
 
-1) Disable or restrict automatic external forwarding
+### 1) Disable or restrict automatic external forwarding
 Attackers who compromise accounts often set up forwarding rules to exfiltrate invoices, bank details, and negotiations.
 
 What to do:
 - Block automatic forwarding to external recipients by default.
 - Allow exceptions only for approved business needs, and review them periodically.
 
-2) Review anti-phishing and impersonation protections
+### 2) Review anti-phishing and impersonation protections
 Even without advanced tuning, you can do a basic hardening pass:
 - Enable anti-phishing policies for high-value users (finance, executives, HR).
 - Add protected users for impersonation checks where supported.
@@ -101,14 +101,14 @@ Even without advanced tuning, you can do a basic hardening pass:
 Example:
 - Put your CFO, AP mailbox, and CEO into a “High Risk Targets” anti-phishing policy.
 
-3) Prevent mailbox rule abuse
+### 3) Prevent mailbox rule abuse
 Mailbox rules can silently move security alerts and invoices to obscure folders.
 
 Practical steps:
 - Audit common “suspicious” inbox rules (auto-delete, auto-forward, move messages with keywords like “invoice,” “payment,” “wire,” “password,” etc.).
 - Alert on creation of forwarding rules for executive and finance mailboxes.
 
-4) Tighten guest and external access
+### 4) Tighten guest and external access
 External collaboration is necessary, but uncontrolled guest access causes data leakage.
 
 Fast controls:
@@ -122,7 +122,7 @@ Example:
 ## 4) Protect data: sharing defaults, labels, and device boundaries
 Your goal in one afternoon isn’t a full data classification program; it’s to prevent accidental oversharing and ensure corporate data isn’t trivially copied out.
 
-1) Fix sharing defaults in SharePoint/OneDrive
+### 1) Fix sharing defaults in SharePoint/OneDrive
 Common issues:
 - “Anyone with the link” sharing enabled broadly
 - Long-lived links
@@ -133,7 +133,7 @@ Practical settings to consider:
 - Set link expiration (e.g., 7–30 days for external links).
 - Disable anonymous sharing unless there’s a clear business case.
 
-2) Use sensitivity labels (lightweight start)
+### 2) Use sensitivity labels (lightweight start)
 If sensitivity labels are available to you, start small:
 - Create 2–3 labels such as “Public,” “Internal,” “Confidential.”
 - Focus on usability: default label for common documents and a clear “Confidential” option.
@@ -141,7 +141,7 @@ If sensitivity labels are available to you, start small:
 Example:
 - Label “Confidential” applies encryption or sharing restrictions for finance and HR files (only if you’ve tested it end-to-end).
 
-3) Reduce data exposure from unmanaged devices
+### 3) Reduce data exposure from unmanaged devices
 If staff access company data from personal or unmanaged devices, consider:
 - Requiring MFA (minimum)
 - Requiring compliant devices for SharePoint/OneDrive (where feasible)
@@ -153,18 +153,18 @@ Rule of thumb:
 ## 5) Make it observable and recoverable: auditing, alerts, and backups
 Hardening without visibility is guessing. A basic telemetry and recovery setup helps you detect attacks early and recover quickly.
 
-1) Enable unified audit logging (and confirm it’s actually capturing events)
+### 1) Enable unified audit logging (and confirm it’s actually capturing events)
 - Ensure audit logging is enabled.
 - Verify you can search for recent events like sign-ins, mailbox rule changes, file sharing, and admin role changes.
 
-2) Turn on security alerts and create a simple triage path
+### 2) Turn on security alerts and create a simple triage path
 - Ensure alerts for risky sign-ins, impossible travel (if available), and admin changes are enabled.
 - Decide who receives alerts (IT manager + backup contact) and where they go (ticket system, shared mailbox, or on-call email).
 
 Example triage playbook (minimal):
 - If an alert indicates a suspicious sign-in: reset password, revoke sessions, review inbox rules, check forwarding, and review sign-in locations.
 
-3) Verify recovery options
+### 3) Verify recovery options
 Two quick checks that save real pain:
 - Confirm you can restore deleted users/mailboxes/files within your retention windows.
 - Confirm you have a plan for ransomware affecting synced files (e.g., versioning, restore procedures).

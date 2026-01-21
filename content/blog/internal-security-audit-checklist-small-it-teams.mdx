@@ -19,16 +19,16 @@ Internal security audits don’t have to be “big company” projects. For smal
 ## Build a lightweight audit plan (scope, timing, evidence)
 A small team can’t audit everything at once. Instead, define a tight scope and rotate.
 
-1) Pick a cadence you can sustain
+### 1) Pick a cadence you can sustain
 - Monthly “mini-audit” (30–60 minutes): one topic (e.g., MFA coverage).
 - Quarterly audit (half-day to one day): identity + patching + backups + endpoints.
 - Annual deeper dive: vendor access, network segmentation, incident response tabletop.
 
-2) Define the audit scope in one paragraph
+### 2) Define the audit scope in one paragraph
 Example scope statement:
 “Review identity controls for Microsoft 365 and VPN, patch status for Windows endpoints and two critical servers, backup restore capability for the file share, and admin access to core systems.”
 
-3) Decide what counts as evidence
+### 3) Decide what counts as evidence
 Avoid long narratives. Use simple, verifiable artifacts:
 - Screenshots of settings pages
 - Exported user lists (admins, MFA status)
@@ -36,7 +36,7 @@ Avoid long narratives. Use simple, verifiable artifacts:
 - Backup job logs plus a restore test record
 - Ticket IDs for remediation actions
 
-4) Use sampling to stay sane
+### 4) Use sampling to stay sane
 If you have 120 endpoints, don’t inspect all 120.
 - Sample 10 endpoints across departments
 - Sample 10 user accounts (including at least 2 executives and 2 contractors)
@@ -48,7 +48,7 @@ Practical tip: Keep an “audit notebook” in a shared folder with dated subfol
 Identity is the control plane for cloud apps, VPN, and admin tools. Small misconfigurations here can undo strong endpoint protection.
 
 What to check
-1) MFA coverage and exceptions
+### 1) MFA coverage and exceptions
 - Verify MFA is enabled for all users, especially email and remote access.
 - List any exceptions (service accounts, break-glass accounts) and confirm compensating controls.
 
@@ -56,7 +56,7 @@ Example evidence
 - Export from your IdP showing MFA status.
 - A short note documenting why a service account can’t use MFA and how it’s protected (e.g., long random password in a vault, restricted sign-in locations).
 
-2) Admin accounts and privilege boundaries
+### 2) Admin accounts and privilege boundaries
 - Ensure admins use separate accounts for administrative tasks.
 - Confirm least privilege: who is global admin, domain admin, local admin?
 
@@ -66,13 +66,13 @@ Example spot check
   - Admin account has MFA
   - Admin sign-in logs show expected behavior
 
-3) Offboarding and contractor access
+### 3) Offboarding and contractor access
 - Validate a recent offboarding case end-to-end: account disabled, tokens revoked, groups removed, mailbox access handled, VPN removed.
 
 Example
 - Choose one terminated user from the last 60 days. Confirm the disable timestamp and last successful login are aligned with policy.
 
-4) Password policy and account recovery
+### 4) Password policy and account recovery
 - Confirm password policy is reasonable and consistent.
 - Review how users reset passwords (helpdesk workflow, identity verification).
 
@@ -83,14 +83,14 @@ If you map to CIS/NIST/ISO later, this identity work aligns with common access c
 Patching is where small teams get overwhelmed. The audit should surface bottlenecks and unmanaged assets.
 
 What to check
-1) Asset inventory accuracy
+### 1) Asset inventory accuracy
 - Can you produce a list of laptops, desktops, servers, and key SaaS admins?
 - Identify unmanaged or unknown devices.
 
 Example
 - Compare your endpoint management list to DHCP leases or your purchasing records. Any “ghost” devices are audit findings.
 
-2) Patch SLAs (service level targets)
+### 2) Patch SLAs (service level targets)
 Define simple targets (internal goals) and audit against them:
 - Critical security updates: within 14 days
 - High: within 30 days
@@ -98,14 +98,14 @@ Define simple targets (internal goals) and audit against them:
 
 No need to cite stats; just pick targets you can meet and improve.
 
-3) Server patching and reboot reality
+### 3) Server patching and reboot reality
 - Confirm servers actually reboot when needed.
 - Validate maintenance windows exist and are used.
 
 Example evidence
 - Update history showing last security update and last reboot time for two critical servers.
 
-4) Vulnerability scanning (optional)
+### 4) Vulnerability scanning (optional)
 If you already have a scanner, use it. If not, focus on patch posture and exposed services.
 - Verify no unnecessary remote management interfaces are internet-exposed.
 - Confirm remote access (VPN/RDP/SSH) is restricted.
@@ -114,21 +114,21 @@ If you already have a scanner, use it. If not, focus on patch posture and expose
 You’re auditing preventative controls (stop attacks) and detective controls (notice them).
 
 What to check
-1) Endpoint protection and disk encryption
+### 1) Endpoint protection and disk encryption
 - Confirm EDR/AV is installed and healthy on the sampled endpoints.
 - Confirm full-disk encryption is enabled on laptops.
 
 Example spot check
 - On 5 sampled laptops: verify protection status is “active,” definitions current, and encryption is on.
 
-2) Email protections and risky settings
+### 2) Email protections and risky settings
 - Confirm anti-phishing and spam filtering are enabled.
 - Check whether auto-forwarding to external addresses is blocked or controlled.
 
 Example
 - Search for mailbox rules that forward externally. Any unapproved forwarding is a high-priority finding.
 
-3) Data classification (simple) and sharing controls
+### 3) Data classification (simple) and sharing controls
 You don’t need a complex scheme. Start with:
 - Public (ok to share)
 - Internal (default)
@@ -138,7 +138,7 @@ Audit actions
 - Confirm restricted data isn’t stored in unmanaged locations.
 - Review sharing links for a sample of sensitive folders.
 
-4) Logging coverage
+### 4) Logging coverage
 - Confirm you can access logs for identity sign-ins, endpoint alerts, and admin actions.
 - Confirm log retention meets your operational needs (even 30–90 days is better than “unknown”).
 
@@ -146,22 +146,22 @@ Audit actions
 Backups that have never been restored are hope, not a control. Your audit should include at least one restore test.
 
 What to check
-1) Backup scope
+### 1) Backup scope
 - Identify your “crown jewel” systems: file shares, finance app, CRM data, email, key databases.
 - Confirm each has a backup method and owner.
 
-2) Restore test
+### 2) Restore test
 - Perform one restore test per quarter (rotate systems).
 - Document: what you restored, where, how long it took, and what broke.
 
 Example restore test record
 - “Restored last night’s backup of the finance shared folder to an isolated location; validated 10 random files opened; restore time 22 minutes; permissions required adjustment.”
 
-3) Ransomware resilience basics
+### 3) Ransomware resilience basics
 - Confirm at least one backup copy is protected from routine admin credentials (separate account, separate system, or immutability if available).
 - Confirm backup delete permissions are limited.
 
-4) Incident response essentials
+### 4) Incident response essentials
 - Verify you have an incident contact list and escalation path.
 - Run a 30-minute tabletop exercise once or twice per year.
 

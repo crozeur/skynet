@@ -21,19 +21,19 @@ A fast audit starts with a clear scope. If you try to evaluate everything, you�
 
 What to capture in 10 minutes:
 
-1) What problem is this app solving?
+### 1) What problem is this app solving?
 - Example: “Marketing wants a form builder to capture webinar leads.”
 
-2) Who will use it and how many accounts?
+### 2) Who will use it and how many accounts?
 - Example: “25 users in Marketing; 2 admins in IT.”
 
-3) What data will be stored or processed?
+### 3) What data will be stored or processed?
 Classify data in simple buckets: public, internal, confidential, regulated. Don’t overthink the labels—use what your organization already uses.
 - Example: Names + business emails + job titles (confidential in many SMEs).
 - Example: Customer support transcripts (confidential; potentially sensitive content).
 - Example: Employee data (often higher sensitivity).
 
-4) What is the “blast radius” if it goes wrong?
+### 4) What is the “blast radius” if it goes wrong?
 Think through three scenarios:
 - Data exposure: what would be embarrassing, costly, or legally risky?
 - Account takeover: what could an attacker do with one compromised user?
@@ -49,20 +49,20 @@ Most SaaS incidents in SMEs are driven by weak access controls: reused passwords
 
 What to check quickly:
 
-1) Authentication options
+### 1) Authentication options
 - Can you enforce MFA for all users?
 - Can you use SSO (SAML/OIDC) with your identity provider?
 - If SSO isn’t available on your plan, is that a deal-breaker for your use case?
 
-2) Role-based access control (RBAC)
+### 2) Role-based access control (RBAC)
 - Are roles clearly defined (viewer/editor/admin) and can you limit who can export data?
 - Does the app support least privilege, or is it “everyone is an admin” by default?
 
-3) Administrative safety
+### 3) Administrative safety
 - Can you restrict admin actions (e.g., only certain people can change security settings)?
 - Is there an approval workflow for sensitive actions (like adding integrations or changing billing owner)?
 
-4) Offboarding and lifecycle
+### 4) Offboarding and lifecycle
 - Can you disable users quickly?
 - Can you deprovision users automatically via your identity provider?
 - If someone leaves, do their API tokens/integrations remain active?
@@ -80,22 +80,22 @@ You don’t need a deep cryptography review to make a solid 60‑minute decision
 
 Fast checks:
 
-1) Encryption (at rest and in transit)
+### 1) Encryption (at rest and in transit)
 Look for straightforward statements in the vendor’s security documentation or trust page.
 - Acceptable: “Data is encrypted in transit using TLS and encrypted at rest.”
 - Watch-outs: vague language, missing details entirely, or “encryption available” but not enabled.
 
-2) Data retention and deletion
+### 2) Data retention and deletion
 - Can you delete data permanently?
 - Is there an admin-controlled retention policy?
 - What happens when you cancel the subscription?
 
-3) Export and sharing controls
+### 3) Export and sharing controls
 - Can users generate public links?
 - Can you restrict external sharing to approved domains?
 - Are file uploads scanned, or can you at least limit upload types and sizes?
 
-4) Tenant isolation and multi-user boundaries
+### 4) Tenant isolation and multi-user boundaries
 You may not be able to verify tenant isolation technically in an hour, but you can ask for the vendor’s security overview and look for descriptions of logical separation and access controls.
 
 Example scenario: a document collaboration tool
@@ -108,28 +108,28 @@ What to document:
 ## 4) Minute 40–52: Integrations, APIs, and logging
 Integrations turn a small SaaS adoption into a security event if they’re uncontrolled. In a quick audit, focus on tokens, scopes, and visibility.
 
-1) Inventory the integrations you intend to use
+### 1) Inventory the integrations you intend to use
 - Email (Google/Microsoft)
 - CRM
 - Ticketing
 - Slack/Teams
 - Webhooks to internal services
 
-2) Check token and permission scope
+### 2) Check token and permission scope
 - Does the OAuth consent screen request broad permissions (e.g., full mailbox access) when you only need calendar?
 - Can you limit scopes or choose a narrower integration?
 
-3) Secrets management basics
+### 3) Secrets management basics
 - Are API keys visible only once?
 - Can you rotate tokens?
 - Can you restrict API keys by IP allowlist or environment?
 
-4) Logging and audit trail
+### 4) Logging and audit trail
 In many SMEs, “can we see what happened?” is more important than perfect prevention.
 - Does the app provide audit logs for logins, admin actions, exports, and sharing changes?
 - Can logs be exported to your SIEM/logging tool, or at least downloaded?
 
-5) Alerting
+### 5) Alerting
 - Are there alerts for new admins, unusual logins, or mass exports?
 
 Example quick win:
@@ -140,18 +140,18 @@ Now you translate what you found into a practical decision. In a short audit you
 
 What to look for (quickly):
 
-1) Security point of contact
+### 1) Security point of contact
 - Is there a security email or intake form?
 - Is there a vulnerability disclosure policy?
 
-2) Incident communication
+### 2) Incident communication
 - Do they describe how they handle incidents and how customers are notified?
 
-3) Documentation quality
+### 3) Documentation quality
 - Is security information easy to find and consistent?
 - Are administrative security features documented clearly?
 
-4) Subprocessors and hosting
+### 4) Subprocessors and hosting
 - Do they list subprocessors and explain what they do?
 - Do they provide region options if you require them?
 

@@ -164,25 +164,25 @@ Actions:
 ## 5) Reduce alert fatigue: tuning and hygiene that actually works
 Alert triage is only sustainable if you reduce repeat noise. Build a feedback loop:
 
-1) Track top recurring alerts
+### 1) Track top recurring alerts
 - In your ticketing system, tag alerts by detection name and asset.
 - Review weekly or biweekly: “What consumed the most time?”
 
-2) Tune with guardrails
+### 2) Tune with guardrails
 - Suppress only when you have a documented benign cause.
 - Prefer narrow exceptions: a specific host, account, script hash/path, or maintenance window.
 - Add compensating detection: if you suppress one noisy rule, ensure you still detect the risky outcome (e.g., suspicious network egress, privilege escalation).
 
-3) Improve asset and identity context
+### 3) Improve asset and identity context
 - Maintain a short “crown jewels” list: critical servers, key SaaS admins, backup systems.
 - Keep an owner map: who is responsible for each critical system.
 - Label devices (server vs workstation; kiosk; shared) so severity is consistent.
 
-4) Pre-authorize containment actions
+### 4) Pre-authorize containment actions
 - Write a short policy: when can the on-duty person disable an account or isolate a host without approval?
 - This prevents delays when minutes matter.
 
-5) Practice with tabletop drills
+### 5) Practice with tabletop drills
 - Pick one common alert type (password spray, malware on endpoint, suspicious mailbox rule).
 - Walk through the triage steps and see what information you actually have.
 - Update the playbook to match reality.
