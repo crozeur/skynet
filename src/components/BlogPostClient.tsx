@@ -286,6 +286,17 @@ export function BlogPostClient({ post }: { post: PostData }) {
               color: #111827;
               background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
               transition: all 0.3s ease;
+              position: relative;
+            }
+            .blog-content h2::after {
+              content: '';
+              position: absolute;
+              bottom: -1rem;
+              left: 0;
+              width: 60px;
+              height: 2px;
+              background: linear-gradient(90deg, #3b82f6, transparent);
+              border-radius: 1px;
             }
             .dark .blog-content h2 {
               color: #f9fafb;
@@ -452,10 +463,11 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
 
             .blog-content ol li {
-              margin-bottom: 0.875rem;
+              margin-bottom: 1rem;
               padding-left: 2.5rem;
               position: relative;
               color: #374151;
+              line-height: 1.7;
             }
             .dark .blog-content ol li {
               color: #d1d5db;
@@ -466,7 +478,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               counter-increment: item;
               position: absolute;
               left: 0;
-              top: 0;
+              top: 0.125rem;
               width: 1.75rem;
               height: 1.75rem;
               background: #3b82f6;
@@ -475,14 +487,15 @@ export function BlogPostClient({ post }: { post: PostData }) {
               display: flex;
               align-items: center;
               justify-content: center;
-              font-weight: 600;
+              font-weight: 700;
               font-size: 0.875rem;
               transition: all 0.3s ease;
             }
             
             .blog-content ol li:hover::before {
               background: #2563eb;
-              box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+              transform: scale(1.08);
             }
             }
 
@@ -505,17 +518,25 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             /* Inline code */
             .blog-content code {
-              background: #f3f4f6;
-              color: #d946ef;
-              padding: 0.2rem 0.5rem;
+              background: #eff6ff;
+              color: #1e40af;
+              padding: 0.25rem 0.5rem;
               border-radius: 0.375rem;
+              border: 1px solid #bfdbfe;
               font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
               font-size: 0.95rem;
               font-weight: 500;
+              transition: all 0.2s ease;
             }
             .dark .blog-content code {
-              background: #1f2937;
-              color: #f472b6;
+              background: #0f172a;
+              color: #60a5fa;
+              border-color: #1e3a8a;
+            }
+            .dark .blog-content code:hover {
+              background: #1e293b;
+              color: #93c5fd;
+              border-color: #3b82f6;
             }
 
             /* Code blocks */
