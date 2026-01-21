@@ -279,6 +279,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               width: 100px;
               height: 2px;
               background: linear-gradient(90deg, #3b82f6, transparent);
+              border-radius: 1px;
             }
             .dark .blog-content h1 {
               color: #f9fafb;
