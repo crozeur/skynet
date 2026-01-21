@@ -511,7 +511,6 @@ export function BlogPostClient({ post }: { post: PostData }) {
               box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
               transform: scale(1.08);
             }
-            }
 
             .blog-content li {
               margin-bottom: 0.75rem;
