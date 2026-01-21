@@ -275,29 +275,45 @@ export function BlogPostClient({ post }: { post: PostData }) {
             .blog-content h2 {
               font-size: 2rem;
               font-weight: 700;
-              margin: 2.5rem 0 1.25rem;
-              padding-bottom: 0.75rem;
-              border-bottom: 3px solid #e5e7eb;
+              margin: 3rem 0 1.5rem;
+              padding-left: 1rem;
+              padding-bottom: 1rem;
+              border-left: 4px solid #3b82f6;
+              border-bottom: 1px solid #e5e7eb;
               line-height: 1.2;
               letter-spacing: -0.01em;
               scroll-margin-top: 100px;
               color: #111827;
+              background: linear-gradient(90deg, rgba(59, 130, 246, 0.05) 0%, transparent 100%);
+              transition: all 0.3s ease;
             }
             .dark .blog-content h2 {
               color: #f9fafb;
+              border-left-color: #60a5fa;
               border-bottom-color: #374151;
+              background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, transparent 100%);
+            }
+            .dark .blog-content h2:hover {
+              border-left-color: #93c5fd;
+              background: linear-gradient(90deg, rgba(59, 130, 246, 0.12) 0%, transparent 100%);
             }
 
             .blog-content h3 {
               font-size: 1.5rem;
               font-weight: 700;
-              margin: 2rem 0 1rem;
+              margin: 2.5rem 0 1.25rem;
+              padding-bottom: 0.75rem;
               line-height: 1.3;
               scroll-margin-top: 100px;
-              color: #111827;
+              color: #1e40af;
+              border-bottom: 2px solid #dbeafe;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
             }
             .dark .blog-content h3 {
-              color: #f3f4f6;
+              color: #93c5fd;
+              border-bottom-color: #1e3a8a;
             }
 
             /* Paragraphs */
@@ -360,17 +376,21 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             /* Strong and em */
             .blog-content strong {
-              font-weight: 600;
-              color: #e5e7eb;
-              opacity: 1;
+              font-weight: 700;
+              color: #1e40af;
               text-decoration: underline;
-              text-decoration-color: #475569;
-              text-decoration-thickness: 1px;
-              text-underline-offset: 2px;
+              text-decoration-color: #3b82f6;
+              text-decoration-thickness: 2px;
+              text-underline-offset: 3px;
+              transition: all 0.2s ease;
             }
             .dark .blog-content strong {
-              color: #f3f4f6;
-              text-decoration-color: #334155;
+              color: #93c5fd;
+              text-decoration-color: #60a5fa;
+            }
+            .dark .blog-content strong:hover {
+              color: #dbeafe;
+              text-decoration-color: #93c5fd;
             }
 
             .blog-content em {
@@ -401,29 +421,29 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }
 
             .blog-content ul li {
-              margin-bottom: 0.875rem;
+              margin-bottom: 1rem;
               padding-left: 1.75rem;
               position: relative;
               color: #374151;
+              line-height: 1.7;
             }
             .dark .blog-content ul li {
               color: #d1d5db;
             }
             
             .blog-content ul li::before {
-              content: '';
+              content: '▪';
               position: absolute;
               left: 0;
-              top: 0.625rem;
-              width: 4px;
-              height: 4px;
-              border-radius: 50%;
-              background: #64748b;
+              top: 0.25rem;
+              color: #3b82f6;
+              font-size: 1rem;
               transition: all 0.3s ease;
             }
             
             .blog-content ul li:hover::before {
-              background: #94a3b8;
+              color: #2563eb;
+              transform: translateX(2px);
             }
 
             .blog-content ol {
@@ -508,7 +528,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               overflow-x: auto;
               border: 1px solid #374151;
               line-height: 1.6;
-              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+              box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.1);
             }
 
             .blog-content pre code {
