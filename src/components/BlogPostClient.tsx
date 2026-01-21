@@ -260,16 +260,29 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             /* Headings */
             .blog-content h1 {
-              font-size: 2.5rem;
+              font-size: 2rem;
               font-weight: 800;
-              margin: 3rem 0 1.5rem;
-              line-height: 1.1;
+              margin: 2rem 0 2.5rem;
+              line-height: 1.3;
               letter-spacing: -0.02em;
               scroll-margin-top: 100px;
               color: #111827;
+              padding-bottom: 1.5rem;
+              border-bottom: 2px solid #e5e7eb;
+              position: relative;
+            }
+            .blog-content h1::after {
+              content: '';
+              position: absolute;
+              bottom: -2px;
+              left: 0;
+              width: 100px;
+              height: 2px;
+              background: linear-gradient(90deg, #3b82f6, transparent);
             }
             .dark .blog-content h1 {
               color: #f9fafb;
+              border-bottom-color: #374151;
             }
 
             .blog-content h2 {
