@@ -110,11 +110,11 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <Container className="py-16 sm:py-20 lg:py-24">
+      <Container className="py-10 sm:py-12 lg:py-14">
         {/* Hero Section */}
-        <div className="text-center max-w-5xl mx-auto mb-20">
-          <div className="mb-8">
-            <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 text-blue-700 dark:text-blue-200 text-sm font-bold tracking-wide hover:border-blue-400/60 transition-all duration-300 cursor-default">
+        <div className="text-center max-w-5xl mx-auto mb-12">
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 text-blue-700 dark:text-blue-200 text-sm font-bold tracking-wide hover:border-blue-400/60 transition-all duration-300 cursor-default">
               <svg className="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
@@ -124,8 +124,8 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
             </span>
           </div>
           
-          <div className="relative mb-8">
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-center">
+          <div className="relative mb-4">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-center">
               <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 dark:from-blue-300 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-lg animate-pulse" style={{
                 textShadow: '0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(168, 85, 247, 0.2)',
               }}>
@@ -141,7 +141,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 rounded-full blur-sm"></div>
           </div>
           
-          <p className="text-lg sm:text-xl lg:text-2xl text-gray-700 dark:text-gray-200 leading-relaxed mb-12 max-w-3xl mx-auto font-medium tracking-tight">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-200 leading-relaxed mb-6 max-w-3xl mx-auto font-medium tracking-tight">
             {language === "en"
               ? "Managed SOC, security audits, and cloud security. Operational best practices and real-world experience."
               : "SOC managés, audits de sécurité et sécurisation cloud. Retours d'expérience et bonnes pratiques opérationnelles."}
@@ -177,7 +177,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 </button>
               )}
             </div>
-            <div className="mt-4 flex items-center justify-center gap-3">
+            <div className="mt-3 flex items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -198,9 +198,9 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
 
         {/* Expertise Filters */}
         {pillars.length > 0 && (
-          <div className="mb-16">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 mb-6 hover:border-blue-400/60 transition-all duration-300">
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 mb-3 hover:border-blue-400/60 transition-all duration-300">
                 <svg className="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -208,10 +208,10 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   {language === "en" ? "Our Expertise" : "Notre expertise"}
                 </span>
               </div>
-              <h2 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent mb-4">
+              <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent mb-2">
                 {language === "en" ? "Explore Our Expertise" : "Découvrez notre expertise"}
               </h2>
-              <p className="text-lg md:text-xl text-gray-700 dark:text-gray-200 max-w-2xl mx-auto font-medium">
+              <p className="text-sm md:text-base text-gray-700 dark:text-gray-200 max-w-2xl mx-auto font-medium">
                 {language === "en"
                   ? "Access specialized content on managed SOC, security audits, and cloud security"
                   : "Accédez à des contenus spécialisés sur le SOC managé, l'audit de sécurité et le cloud"}
