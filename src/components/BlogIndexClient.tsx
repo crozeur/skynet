@@ -110,45 +110,19 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <Container className="py-10 sm:py-12 lg:py-14">
-        {/* Hero Section */}
-        <div className="text-center max-w-5xl mx-auto mb-12">
-          <div className="mb-4">
-            <span className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 text-blue-700 dark:text-blue-200 text-sm font-bold tracking-wide hover:border-blue-400/60 transition-all duration-300 cursor-default">
-              <svg className="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-300 dark:to-purple-300 bg-clip-text text-transparent font-extrabold">
-                {language === "en" ? "Knowledge Base" : "Base de Connaissances"}
-              </span>
+      <Container className="py-6 sm:py-8 lg:py-10">
+        {/* Hero Section - Compact */}
+        <div className="text-center max-w-5xl mx-auto mb-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-center mb-3">
+            <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 dark:from-blue-300 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent" style={{
+              textShadow: '0 0 30px rgba(59, 130, 246, 0.3)',
+            }}>
+              {language === "en" ? "Cybersecurity Insights" : "Cybersécurité & Expertise"}
             </span>
-          </div>
-          
-          <div className="relative mb-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-center">
-              <span className="block bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 dark:from-blue-300 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent drop-shadow-lg animate-pulse" style={{
-                textShadow: '0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(168, 85, 247, 0.2)',
-              }}>
-                {language === "en" ? "Cybersecurity" : "Cybersécurité"}
-              </span>
-              <span className="block bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 dark:from-cyan-300 dark:via-blue-400 dark:to-purple-500 bg-clip-text text-transparent mt-2" style={{
-                textShadow: '0 0 40px rgba(34, 211, 238, 0.4), 0 0 80px rgba(59, 130, 246, 0.2)',
-              }}>
-                {language === "en" ? "Insights" : "& Expertise"}
-              </span>
-            </h1>
-            {/* Decorative line */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 rounded-full blur-sm"></div>
-          </div>
-          
-          <p className="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-200 leading-relaxed mb-6 max-w-3xl mx-auto font-medium tracking-tight">
-            {language === "en"
-              ? "Managed SOC, security audits, and cloud security. Operational best practices and real-world experience."
-              : "SOC managés, audits de sécurité et sécurisation cloud. Retours d'expérience et bonnes pratiques opérationnelles."}
-          </p>
+          </h1>
           
           {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative max-w-2xl mx-auto mb-4">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-300"></div>
               <input
@@ -156,10 +130,10 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={language === "en" ? "Search articles..." : "Rechercher des articles..."}
-                className="relative w-full px-6 py-4 pl-14 text-lg rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/30 dark:focus:ring-blue-400/30 transition-all shadow-lg hover:shadow-xl"
+                className="relative w-full px-5 py-3 pl-12 text-base rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-4 focus:ring-blue-500/30 dark:focus:ring-blue-400/30 transition-all shadow-lg"
               />
               <svg 
-                className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 transition-colors"
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -169,53 +143,24 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 hover:scale-110"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
-            </div>
-            <div className="mt-3 flex items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setFilterPillar(null);
-                  setFilterTag(null);
-                  setSearchQuery("");
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 text-gray-800 dark:text-gray-100 hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-600 dark:hover:to-gray-700 transition-all duration-200 hover:shadow-lg hover:scale-105"
-              >
-                {language === "en" ? "Clear filters" : "Réinitialiser les filtres"}
-                <svg className="w-4 h-4 opacity-70 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.836 0H20V4M4 20v-5h.582m15.836 0H20v5M10 10l4 4m0-4l-4 4" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
 
         {/* Expertise Filters */}
         {pillars.length > 0 && (
-          <div className="mb-12">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-cyan-500/10 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-cyan-500/20 border border-blue-400/30 dark:border-blue-400/50 mb-3 hover:border-blue-400/60 transition-all duration-300">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-sm font-bold text-blue-700 dark:text-blue-200 tracking-wide">
-                  {language === "en" ? "Our Expertise" : "Notre expertise"}
-                </span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent mb-2">
-                {language === "en" ? "Explore Our Expertise" : "Découvrez notre expertise"}
+          <div className="mb-10">
+            <div className="text-center mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                {language === "en" ? "Filter by Expertise" : "Filtrer par expertise"}
               </h2>
-              <p className="text-sm md:text-base text-gray-700 dark:text-gray-200 max-w-2xl mx-auto font-medium">
-                {language === "en"
-                  ? "Access specialized content on managed SOC, security audits, and cloud security"
-                  : "Accédez à des contenus spécialisés sur le SOC managé, l'audit de sécurité et le cloud"}
-              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
               <button
