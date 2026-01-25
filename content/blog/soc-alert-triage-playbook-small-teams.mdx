@@ -1,0 +1,215 @@
+Intro
+
+Small security teams can’t afford to treat every alert like a crisis, but they also can’t ignore signals that matter. Alert triage is the discipline of quickly deciding what an alert means, how risky it is, and what to do next—without burning out your team. This playbook is designed for SMEs running a lean SOC (or “SOC-in-a-box”) with limited hours, mixed tooling, and shared responsibilities. Use it to create consistent decisions, clear handoffs, and measurable improvement over time.
+
+Quick take
+
+- Triage is a repeatable decision process: validate, add context, assess impact, choose an action.
+- Start with “is it real?” then “does it matter?”—don’t reverse the order.
+- Use a small set of severity levels tied to business impact and required response time.
+- Standardize evidence collection so any analyst can pick up where another left off.
+- Reduce noise by fixing the top recurring causes (tuning, asset hygiene, and known-good baselines).
+
+## 1) Define triage goals, roles, and severity levels
+
+Before you touch a single alert, decide what “good triage” means for your organization. For SMEs, the goal is usually: (1) catch real incidents early, (2) avoid wasted time on false positives, and (3) create records that support follow-up actions.
+
+Keep roles simple:
+
+- Triage owner (on-call analyst, IT admin, or MSP): makes the initial decision and documents it.
+- Escalation owner (IT manager / security lead): approves containment actions that might disrupt business.
+- System owner (app owner, endpoint owner, HR, finance): provides business context and confirms whether activity is expected.
+
+Use a severity scheme that maps to business impact, not just technical “scariness.” A practical four-level model works well:
+
+- Sev 1 (Critical): Active compromise likely and immediate business impact possible (e.g., ransomware indicators, confirmed account takeover, data exfiltration in progress). Target response: minutes to 1 hour.
+- Sev 2 (High): Strong indicators of malicious activity with potential impact (e.g., suspicious admin actions, malware blocked but with persistence attempts). Target response: same day.
+- Sev 3 (Medium): Needs investigation but limited impact expected (e.g., single suspicious login, low-confidence IDS hit). Target response: 1–3 business days.
+- Sev 4 (Low): Informational or benign (e.g., policy violations, misconfigurations, routine scans). Target response: backlog / tuning.
+
+Example: An “impossible travel” login alert for a VIP account might be Sev 2 if MFA is absent, but Sev 3 if phishing-resistant MFA is enforced and device posture is known-good.
+
+## 2) Run the triage flow: validate → enrich → decide → act
+
+A good triage flow is short enough to follow under pressure, but thorough enough to avoid mistakes. Use this sequence.
+
+1) Validate the alert (is it a true signal?)
+
+Ask:
+
+- Did the tool fire correctly, or is it a parsing/config issue?
+- Is the timestamp correct and within your detection window?
+- Is the entity (user/host/IP) real and in scope?
+
+Example: A “new admin created” alert may be legitimate but triggered because the directory sync service created a privileged group during onboarding. Validation step: confirm the event exists in the authoritative log source (e.g., directory audit logs), not just a forwarded summary.
+
+2) Enrich with fast context (what does it touch?)
+
+Prioritize the minimum context that changes your decision:
+
+- Asset criticality: Is this a domain controller, finance system, or shared file server?
+- Identity criticality: Is this an admin, service account, or executive?
+- Exposure: Is the host internet-facing? Is the account able to access sensitive data?
+- Recent history: Has this entity triggered related alerts in the last 24–72 hours?
+
+Example enrichment for a suspicious PowerShell alert:
+
+- Which endpoint ran it?
+- Which user context executed it?
+- Was it launched from Office, a browser, or a remote session?
+- Are there follow-on signs: scheduled task creation, credential dumping, unusual outbound connections?
+
+3) Decide severity and category
+
+Classify the alert into a small set of categories so you can trend and tune:
+
+- Authentication / access
+- Malware / suspicious execution
+- Network / data movement
+- Privilege / admin changes
+- Vulnerability / misconfiguration
+
+Then assign severity based on impact and confidence:
+
+- Confidence: How certain is malicious intent?
+- Impact: What would happen if this is real?
+
+4) Act: close, contain, escalate, or monitor
+
+Common actions (choose one primary action and document why):
+
+- Close as false positive (and note what would make it true next time).
+- Close as benign true positive (policy event, expected admin work) and consider tuning.
+- Monitor (set a watch, add to case, or create a follow-up task).
+- Escalate for investigation (create incident ticket/case).
+- Contain (disable account, isolate host, block IP/domain)—only when criteria are met.
+
+Containment criteria should be explicit. Example rule: isolate endpoint when you have both (a) suspicious execution AND (b) suspicious outbound connections or credential access indicators.
+
+## 3) Evidence pack: what to collect every time (so handoffs work)
+
+Small teams lose time when investigations restart from scratch. Create an “evidence pack” template that analysts fill out for every Sev 1–3 alert, and for recurring Sev 4 noise until tuned.
+
+Minimum evidence fields:
+
+- Alert summary in one sentence (who/what/where/when).
+- Entities: user(s), host(s), IP(s), process name/hash (if available).
+- Timeline: first seen, last seen, key events in order.
+- What changed: new account, new process, new connection, new privilege.
+- Environment context: asset criticality, owner, location, internet exposure.
+- Hypothesis: “Most likely explanation is X because Y.”
+- Decision: severity + category + chosen action.
+- Next steps: exactly what you want someone else to do and by when.
+
+Practical example (phishing-suspected login):
+
+- Summary: “User j.smith logged in from new ASN and immediately created inbox rule forwarding to external address.”
+- Entities: j.smith, mailbox, source IP, forwarding address.
+- Timeline: login at 10:14, rule created 10:16, OAuth consent at 10:18 (if present).
+- Decision: Sev 2 Authentication/Access.
+- Action: reset password, revoke sessions/tokens, remove forwarding rule, check for additional rules, review recent sign-ins, notify user and IT manager.
+
+If you operate with limited tooling, focus on consistency rather than perfect completeness. Even partial evidence packs help you compare similar alerts over time.
+
+## 4) Triage playbooks for common SME alerts (with examples)
+
+Below are lightweight playbooks you can adapt.
+
+A) Suspicious login
+
+Triage steps:
+
+- Check whether MFA was satisfied; note method (push vs phishing-resistant).
+- Compare geo/ASN/device to known history.
+- Look for follow-on actions: mailbox rules, new OAuth consents, password changes, privilege changes.
+- Determine if the account is privileged or has access to sensitive systems.
+
+Example decision:
+
+- If MFA absent or bypassed and follow-on actions exist → Sev 2; contain by forcing password reset and revoking sessions.
+- If MFA present, device known-managed, and no follow-on actions → Sev 3; monitor and confirm with user.
+
+B) Endpoint malware blocked
+
+Triage steps:
+
+- Confirm block/quarantine succeeded.
+- Identify execution chain: email attachment, browser download, USB, remote tool.
+- Look for persistence attempts (autoruns, scheduled tasks, services).
+- Look for lateral movement signs: admin shares, unusual RDP/SMB, credential access events.
+
+Example decision:
+
+- Blocked but with persistence attempt → Sev 2; isolate host and run deeper endpoint review.
+- Blocked, no persistence, user downloaded known unwanted software → Sev 3 or Sev 4; remediate and educate.
+
+C) Unusual admin or directory changes
+
+Triage steps:
+
+- Verify change in authoritative admin logs.
+- Identify actor: named admin, service account, automation.
+- Confirm change request exists (ticket/change calendar).
+- Assess blast radius: new global admin, new conditional access bypass, disabled logging.
+
+Example decision:
+
+- New high-privilege account without change record → Sev 1–2 depending on additional indicators; escalate immediately.
+- Planned change with matching ticket and expected timing → Sev 4; consider improving alert logic to include approved change windows.
+
+D) Data movement / exfil suspicion
+
+Triage steps:
+
+- Identify data type and source system (file server, CRM export, email attachments).
+- Determine destination (personal email, unknown cloud storage, external IP).
+- Verify whether activity matches role and business process.
+
+Example decision:
+
+- Large transfer from finance share to unknown external destination at odd hours → Sev 1–2; contain by blocking destination and disabling account pending review.
+- Export to approved partner location during business hours with ticket → Sev 3–4; document and monitor.
+
+## 5) Reduce alert noise: tuning, hygiene, and feedback loops
+
+Triage is not just closing alerts—it’s improving the system so fewer low-value alerts appear.
+
+Focus on the “top 10 repeat offenders” each month:
+
+- Misconfigured log sources (duplicate logs, missing fields, time skew).
+- No asset inventory/ownership, causing slow severity decisions.
+- Service accounts triggering “impossible travel” or “new device” repeatedly.
+- Scheduled admin scripts flagged as suspicious execution.
+- Known vulnerability scanners or IT tools flagged as attack behavior.
+
+Create a simple feedback loop:
+
+- Every closed alert must have a closure reason (false positive vs benign true positive vs resolved incident).
+- For recurring false positives, open a tuning task with an owner and due date.
+- Track whether tuning reduces volume without reducing detection of real events.
+
+If you align with common guidance (NIST/ISO/CIS), treat this as “continuous improvement” rather than a one-time tuning exercise.
+
+Checklist
+
+- [ ] Define 4 severity levels with response targets tied to business impact
+- [ ] Establish who can approve disruptive containment actions (and a backup approver)
+- [ ] Create an evidence pack template and require it for Sev 1–3
+- [ ] Maintain an asset criticality list (at least: crown jewels, tier-0 admins, internet-facing systems)
+- [ ] Maintain an identity list (admins, service accounts, shared accounts, VIP users)
+- [ ] Implement a standard triage flow: validate → enrich → decide → act
+- [ ] Add “follow-on actions” checks for login alerts (rules, token grants, privilege changes)
+- [ ] Define containment criteria for isolating hosts and disabling accounts
+- [ ] Create playbooks for your top 3 alert categories and store them in a shared location
+- [ ] Review top recurring alerts monthly and assign tuning tasks with due dates
+
+FAQ
+
+Q1: How fast should we triage alerts?
+A: Set targets by severity—minutes to an hour for critical, same day for high, and within a few days for medium; low can be tuned and handled in batches.
+
+Q2: What if we don’t have a full SIEM or EDR stack?
+A: You can still triage using whatever authoritative logs you have (identity, email, firewall, endpoints) as long as you document decisions consistently and collect a minimal evidence pack.
+
+Q3: When should we isolate a machine or disable an account?
+A: When confidence and impact are both high—e.g., strong signs of compromise plus evidence of persistence, lateral movement, or sensitive data access—and you have an approved escalation path for business disruption.
