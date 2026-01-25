@@ -1,0 +1,199 @@
+## Intro (3–5 sentences)
+An IT security audit goes smoother when you can produce evidence quickly, consistently, and in a way a third party can verify. For SMEs, the hardest part is rarely “doing security” and more often “proving it happened” with the right artifacts. This post lists 20 evidence items you can gather now and keep current so you’re not scrambling later. The goal isn’t to claim compliance with any framework, but to be audit-ready in a practical, repeatable way.
+
+## Quick take (exactly 5 bullet points)
+- Start with an “evidence folder” structure that maps to people, process, and technology.
+- Prioritize identity, patching, backups, and logging because auditors ask for them early.
+- Evidence should show what you intended (policy), what you did (records), and that it worked (tests).
+- Use exports, screenshots, and ticket links—but time-stamp and label everything.
+- Build a monthly routine so evidence stays current between audits.
+
+## 1) Evidence basics: what auditors actually need
+Before collecting anything, align on what “good evidence” looks like. Regardless of whether an audit is inspired by NIST/ISO/CIS controls, evidence generally needs three qualities:
+
+1) Traceable: It clearly ties to a specific system, control, period of time, and owner.
+2) Verifiable: A reviewer can confirm it without relying on “trust me.”
+3) Complete: It covers the scope (users, endpoints, servers, cloud apps) and the audit window.
+
+A simple way to package evidence is to bundle:
+
+- A short narrative (1–3 paragraphs) describing the process and responsibilities.
+- The actual artifacts (exports, configuration snapshots, tickets).
+- One example showing the process in action (e.g., a completed access removal ticket).
+
+Practical tip: Standardize file names so they sort well:
+
+YYYY-MM-DD_system_control_description_owner.ext
+
+Example: 2026-01-15_google-workspace_mfa-enforcement_itmgr.pdf
+
+## 2) The 20 evidence items to gather now (with examples)
+Below are 20 common evidence items that repeatedly come up in SME audits. If you can produce these quickly, you’re usually ahead of schedule.
+
+### Governance and “how you run security”
+1) Security policy set (current versions)
+   - Example evidence: PDF of policies (acceptable use, password/MFA, device management, incident response).
+   - Good looks like: Version history, approval date, and owner.
+
+2) Asset inventory (systems and data)
+   - Example evidence: Spreadsheet or CMDB export listing laptops, servers, cloud services, owners, and criticality.
+   - Include: “Where sensitive data lives” notes, even if high-level.
+
+3) Risk register or risk notes
+   - Example evidence: A lightweight table of top risks, mitigations, and due dates.
+   - SME-friendly: Even 10 risks is better than none.
+
+4) Security awareness training completion
+   - Example evidence: Training platform export or signed attendance record.
+   - Include: New-hire onboarding evidence for at least one recent hire.
+
+### Identity and access management (IAM)
+5) User list and role mapping
+   - Example evidence: Export of directory users with departments/roles.
+   - Add: A simple mapping of roles to access (e.g., “Finance role -> accounting app”).
+
+6) MFA enforcement and exceptions
+   - Example evidence: Screenshot/export showing MFA enabled for all users; separate list for any exceptions with justification and end date.
+
+7) Joiner/mover/leaver (JML) process + one completed example
+   - Example evidence: Written procedure plus a ticket showing a user offboarded (account disabled, access removed, device recovered).
+
+8) Privileged access list
+   - Example evidence: List of admin accounts (domain admins, cloud admins, application admins) and who owns them.
+   - Bonus: Proof of separate admin accounts (not daily-use accounts).
+
+9) Access reviews (at least quarterly) for key systems
+   - Example evidence: Sign-off record (email, ticket, or document) showing who reviewed access, what changed, and when.
+
+### Endpoint, server, and vulnerability hygiene
+10) Patch management policy + last month’s patch report
+   - Example evidence: Patch cadence description and a report showing patch status by device.
+   - Include: How you handle emergency patches.
+
+11) Endpoint protection status (AV/EDR) coverage report
+   - Example evidence: Export listing devices protected, last check-in time, and any unmanaged endpoints.
+
+12) Vulnerability scan results + remediation tickets
+   - Example evidence: Most recent scan summary, plus 2–3 remediation examples with closure proof.
+   - Keep it practical: Show how you triage “critical/high” findings.
+
+13) Configuration baselines for endpoints/servers
+   - Example evidence: Baseline checklist or configuration profile summary (disk encryption, screen lock, firewall on).
+
+### Backup, recovery, and resilience
+14) Backup policy + backup job status
+   - Example evidence: Backup scope, retention, and a recent job report indicating success/failures.
+
+15) Restore test evidence
+   - Example evidence: A ticket or document proving a restore was tested (what was restored, when, and result).
+   - Strong evidence: Screenshots/log excerpts and the person who performed the test.
+
+16) Business continuity / disaster recovery notes
+   - Example evidence: A short plan describing RTO/RPO targets (even if “best effort”), key dependencies, and who calls whom.
+
+### Logging, monitoring, and incident readiness
+17) Central logging / audit log retention settings
+   - Example evidence: Screenshot/export showing log sources and retention period (e.g., identity provider sign-in logs).
+
+18) Alerting rules and response workflow
+   - Example evidence: List of alert types (impossible travel, malware detection) and where alerts go (ticket queue, email).
+
+19) Incident response plan + one tabletop exercise record
+   - Example evidence: IR playbook (roles, steps, communications) and a short record of a tabletop: scenario, attendees, actions.
+
+20) Incident register (even if “no incidents”)
+   - Example evidence: A simple log with date, description, severity, and outcome. If none occurred, record “no reportable incidents” for the period.
+
+## 3) How to organize and store evidence without chaos
+Audits become painful when evidence is scattered across chats, personal drives, and screenshots with no context. Use a dedicated evidence repository with consistent permissions.
+
+A simple structure that works well for SMEs:
+
+- 00-Readme (scope, contacts, system list)
+- 01-Governance
+- 02-Identity-Access
+- 03-Endpoints-Servers
+- 04-Vulnerability-Patching
+- 05-Backups-Recovery
+- 06-Logging-Monitoring
+- 07-Incidents
+- 08-Vendors
+
+Include a short README that explains:
+
+- Audit period (e.g., “2025-10-01 to 2026-01-15”)
+- Systems in scope
+- Where to find key exports
+- Naming convention
+
+Practical guidance:
+
+- Prefer exports over screenshots when possible (they’re easier to verify).
+- If you must use screenshots, capture the full window including date/time and account context.
+- Store “point-in-time” snapshots. Evidence should represent what was true during the audit period, not what’s true today.
+
+## 4) Make evidence “self-explanatory” (and reduce back-and-forth)
+Reviewers often come back with follow-up questions because evidence lacks context. You can reduce that churn by adding small notes.
+
+For each evidence item, add a one-page “control note” that answers:
+
+- What is the objective? (e.g., “Ensure only authorized users have access.”)
+- Who owns it? (job role + name)
+- What tools/systems are involved?
+- How often is it performed? (daily/weekly/monthly)
+- Where is the record kept? (link/path)
+
+Example (access review control note):
+
+- Objective: Validate that application access matches job roles.
+- Owner: IT Manager; approver: Finance lead for finance apps.
+- Frequency: Quarterly.
+- Evidence: Access export + sign-off ticket in the “02-Identity-Access/Access-Reviews” folder.
+
+Also, link evidence to actions. If a vulnerability scan shows 10 critical issues, include at least a few remediation tickets to show you’re not just collecting reports—you’re closing gaps.
+
+## 5) A simple monthly cadence to stay audit-ready
+Audit prep is much easier when evidence collection is routine. A lightweight cadence:
+
+Monthly (60–90 minutes):
+
+- Export patch and endpoint coverage reports.
+- Export privileged admin list.
+- Review backup job failures and document any corrective actions.
+- Capture log retention settings (or confirm unchanged and record the check).
+
+Quarterly (half day):
+
+- Perform an access review for critical systems.
+- Run a vulnerability scan review and track remediation.
+- Do a short incident tabletop (30–45 minutes) and record it.
+
+Annually:
+
+- Review and update policies.
+- Reassess top risks and update your risk register.
+- Validate business continuity assumptions (contacts, vendors, restore priorities).
+
+Key principle: “Evidence is a byproduct of process.” If the process isn’t happening, no amount of document polishing will save you.
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Create an audit evidence folder with a clear naming convention
+- [ ] Export current user list and privileged admin list
+- [ ] Capture MFA enforcement status and document any exceptions
+- [ ] Document JML (joiner/mover/leaver) process and save one completed offboarding example
+- [ ] Export patch compliance report for the last 30 days
+- [ ] Export endpoint protection coverage report and list unmanaged devices
+- [ ] Save latest vulnerability scan summary plus 2–3 remediation ticket examples
+- [ ] Save backup job success/failure report and complete one restore test record
+- [ ] Capture log retention settings and a sample of high-value alerts
+- [ ] Update incident register and record a brief tabletop exercise
+
+## FAQ (3 questions with short answers)
+Q1: Do we need perfect documentation before scheduling an audit?
+A1: No—focus on the highest-value evidence (identity, patching, backups, logging) and show a repeatable process with real records.
+
+Q2: Are screenshots acceptable evidence?
+A2: Often yes, but exports and time-stamped reports are stronger; if you use screenshots, include context (account, system, date) and label them clearly.
+
+Q3: What if we find gaps while gathering evidence?
+A3: Track them transparently in a risk or remediation log, assign an owner and due date, and save evidence of progress (tickets, configs, test results).
