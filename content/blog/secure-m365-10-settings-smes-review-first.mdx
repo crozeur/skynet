@@ -1,0 +1,155 @@
+## Intro
+Microsoft 365 (M365) is often the “front door” to your business: email, files, chat, and identity. That also makes it the front door attackers try first—usually with phishing, password spraying, and risky app integrations. The good news is that a small set of settings delivers an outsized security lift if you review them early. Below are 10 practical checks you can complete in a day or two, with examples that fit typical SME environments.
+
+## Quick take
+- Prioritize identity protections first: MFA, legacy auth blocks, and admin safeguards.
+- Reduce blast radius with least privilege, role separation, and tighter session controls.
+- Turn on logging and alerts so you can detect and respond, not just “hope.”
+- Protect email and collaboration defaults to limit phishing and data leakage.
+- Treat third-party apps and external sharing as ongoing risk, not one-time setup.
+
+## Identity and admin hardening (start here)
+### 1) Require strong MFA for all users (and enforce it)
+MFA is one of the fastest ways to cut down account takeover risk. For SMEs, the most common failure mode is “MFA enabled for some people” or “enabled but not enforced.”
+
+Practical approach:
+- Require MFA for all users, not only admins.
+- Prefer phishing-resistant methods where possible (e.g., authenticator app with number matching, FIDO2 keys) over SMS.
+- Add a small set of emergency access (“break-glass”) accounts and protect them differently (see below).
+
+Example:
+- A finance mailbox gets phished. With enforced MFA, the attacker’s password alone won’t get them into email or OneDrive. Without MFA, they may immediately set up forwarding rules and begin invoice fraud.
+
+### 2) Block legacy authentication
+Legacy auth (older protocols that don’t support modern controls) is frequently abused because it can bypass MFA in some configurations.
+
+Practical approach:
+- Disable legacy authentication tenant-wide unless you have a documented, time-bound business exception.
+- If something breaks, identify the specific workload and move it to modern auth instead of reopening legacy auth broadly.
+
+Example:
+- An old multifunction printer sending email via basic auth is a common exception request. Instead, use modern alternatives (like authenticated relay via a supported method) or redesign the workflow so a service account isn’t using weak protocols.
+
+### 3) Tighten admin roles and protect admin sessions
+Many SMEs unintentionally run day-to-day work with Global Admin accounts. That’s convenient—and dangerous.
+
+Practical approach:
+- Reduce the number of Global Admins. Aim for the minimum needed.
+- Split roles: separate admin accounts from daily user accounts.
+- Require stronger MFA methods for admins.
+- Limit where admins can sign in from (e.g., trusted locations) and restrict high-risk sign-ins.
+
+Example:
+- If an admin uses the same browser profile for daily work and admin tasks, a malicious browser extension or token theft can expose elevated access. A separate admin account used only for admin work reduces the chance of a single compromise becoming a full tenant compromise.
+
+### 4) Create and safeguard break-glass accounts
+You need a way back in if conditional access or MFA misconfiguration locks everyone out. But break-glass accounts are also a prime target.
+
+Practical approach:
+- Maintain 1–2 break-glass accounts with long, unique passwords stored securely (e.g., password vault with limited access).
+- Exclude them from some policies only when necessary, but add compensating controls:
+  - No mailbox (or tightly restricted)
+  - No licenses unless required
+  - Strong monitoring/alerting on sign-ins
+  - Documented, tested access procedure
+
+Example:
+- During an MFA rollout, a misapplied rule blocks sign-in for all users. Break-glass access lets you fix policies quickly without a support escalation turning into downtime.
+
+## Email, anti-phishing, and collaboration defaults
+### 5) Strengthen phishing defenses and user-visible signals
+SMEs often rely on user training alone. Training helps, but settings that add friction to phishing and improve visibility are critical.
+
+Practical approach:
+- Enable anti-phishing protections appropriate to your plan, focusing on:
+  - Impersonation protection (executive and domain lookalikes)
+  - Links and attachments protections where available
+- Add external sender indicators so staff can see when an email originates outside the organization.
+- Disable automatic forwarding to external addresses by default (or restrict it to approved mailboxes).
+
+Example:
+- A common business email compromise pattern: an attacker gains access to one mailbox, sets an auto-forward to an external address, then monitors invoices and requests payment changes. Blocking or restricting external forwarding reduces this risk.
+
+### 6) Review outbound sharing and guest access
+File and team sharing is one of M365’s biggest productivity wins—and one of its easiest data leakage paths.
+
+Practical approach:
+- Set a clear default: “Only share with people in the organization,” and allow external sharing by exception.
+- Require sign-in for shared links; avoid anonymous “Anyone with the link” where possible.
+- Use expirations on sharing links and access reviews for guests.
+
+Example:
+- Sales shares a proposal deck with a public link. Months later, it’s still valid and may be forwarded outside the intended audience. Signed-in sharing plus expiration limits accidental long-term exposure.
+
+## Device and session controls to reduce token theft
+### 7) Require compliant devices for sensitive access (where it makes sense)
+Not every SME can fully manage every device, but you can still separate “any device” access from “trusted device” access.
+
+Practical approach:
+- For high-risk roles (finance, HR, admins), require:
+  - Device compliance (managed, encrypted, screen lock)
+  - Updated OS and security posture
+- For frontline or BYOD users, consider limited access paths (web-only, app protection policies) rather than full sync.
+
+Example:
+- A stolen laptop with cached tokens can become an immediate data breach if no device controls exist. Requiring compliant devices for SharePoint/OneDrive sync helps prevent unmanaged endpoints from quietly exfiltrating data.
+
+### 8) Set sensible sign-in/session policies
+Attackers increasingly steal session tokens rather than passwords. Session controls help shorten the window of opportunity.
+
+Practical approach:
+- Configure sign-in risk handling (where available) and require re-authentication for suspicious conditions.
+- Limit session duration for high-risk apps or roles.
+- Reduce persistent sessions on shared devices.
+
+Example:
+- If a user signs in from a new country and a risky device within minutes, forcing re-authentication (or blocking) can prevent a compromised session from becoming a full mailbox takeover.
+
+## Visibility and app control (what you can’t see can hurt you)
+### 9) Turn on audit logging and set up alerting you’ll actually read
+A surprising number of SMEs have minimal logging enabled and no clear owner for alerts.
+
+Practical approach:
+- Ensure unified audit logging is enabled.
+- Send critical events to a monitored destination (email distribution list, ticketing system, or SIEM if you have one).
+- Start with a small set of actionable alerts:
+  - Admin role changes
+  - New inbox forwarding rules
+  - Mass file downloads
+  - Suspicious sign-in patterns
+
+Example:
+- If a mailbox gets compromised, audit logs can show when the attacker created forwarding rules or accessed sensitive folders. Without logs, you’re guessing—and remediation becomes broader and more disruptive.
+
+### 10) Review third-party app consent and OAuth integrations
+OAuth app abuse is a growing issue: users (or attackers) grant an app access to mail or files, and that access persists even after password resets.
+
+Practical approach:
+- Restrict user consent so only approved apps can be granted high-privilege permissions.
+- Periodically review enterprise applications and remove unused or suspicious ones.
+- Watch for apps requesting broad permissions like “read all mail” or “access all files.”
+
+Example:
+- A user clicks “Accept” on a fake “PDF viewer” app permission request. The app gains access to their mailbox via OAuth. Changing the password won’t remove that access; you must revoke the app’s permissions and tokens.
+
+## Checklist
+- [ ] Enforce MFA for all users; require stronger methods for admins
+- [ ] Disable legacy authentication tenant-wide and document any exceptions
+- [ ] Minimize Global Admins; use separate admin accounts for administrative work
+- [ ] Create 1–2 break-glass accounts with secure storage and monitored sign-ins
+- [ ] Enable external sender labeling and restrict auto-forwarding to external addresses
+- [ ] Tighten external sharing defaults; require sign-in and set link expirations
+- [ ] Require compliant/managed devices for sensitive roles and data sync
+- [ ] Configure session/sign-in policies to reduce token theft impact
+- [ ] Enable unified audit logging and route critical alerts to an owned inbox/ticket queue
+- [ ] Restrict third-party app consent; review and remove risky OAuth apps regularly
+
+## FAQ
+Q1: If we already have MFA for admins, do we really need it for everyone?
+Yes. Most attacks start with a regular user account; once inside, attackers can pivot through email, Teams, and shared files to reach higher-value targets.
+
+Q2: What’s the quickest “high impact” change if we can only do one thing this week?
+Enforce MFA for all users and block legacy authentication. These two steps reduce common account takeover paths with minimal disruption for most organizations.
+
+Q3: How often should we re-check these settings?
+At least quarterly, and whenever you add a major integration, change licensing/security features, or after any security incident. Settings drift is normal—regular reviews keep your baseline intact.
