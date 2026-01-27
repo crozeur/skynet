@@ -4,7 +4,7 @@
     "title": "Secure First Aws Account Day One Settings",
     "description": "Security insights for small and mid-sized businesses",
     "date": "2026-01-19",
-    "pillar": "SOC",
+    "pillar": "CLOUD",
     "tags": [
       "SME",
       "Security"
@@ -15,7 +15,7 @@
       "title": "Sécurisez les premiers paramètres du premier jour du compte AWS",
       "description": "Informations sur la sécurité pour les petites et moyennes entreprises",
       "date": "2026-01-19",
-      "pillar": "SOC",
+      "pillar": "CLOUD",
       "tags": [
         "PME",
         "Sécurité"

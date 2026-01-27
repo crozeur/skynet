@@ -4,7 +4,7 @@
     "title": "Run Security Audit New Saas Apps 60 Minutes",
     "description": "Security insights for small and mid-sized businesses",
     "date": "2026-01-19",
-    "pillar": "SOC",
+    "pillar": "AUDIT",
     "tags": [
       "SME",
       "Security"
@@ -15,7 +15,7 @@
       "title": "Exécuter un audit de sécurité pour les nouvelles applications Saas 60 minutes",
       "description": "Informations sur la sécurité pour les petites et moyennes entreprises",
       "date": "2026-01-19",
-      "pillar": "SOC",
+      "pillar": "AUDIT",
       "tags": [
         "PME",
         "Sécurité"

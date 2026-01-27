@@ -4,7 +4,7 @@
     "title": "Secure Microsoft 365 Tenant One Afternoon",
     "description": "Security insights for small and mid-sized businesses",
     "date": "2026-01-19",
-    "pillar": "SOC",
+    "pillar": "CLOUD",
     "tags": [
       "SME",
       "Security"
@@ -15,7 +15,7 @@
       "title": "Sécurisez le locataire Microsoft 365 un après-midi",
       "description": "Informations sur la sécurité pour les petites et moyennes entreprises",
       "date": "2026-01-19",
-      "pillar": "SOC",
+      "pillar": "CLOUD",
       "tags": [
         "PME",
         "Sécurité"
