@@ -350,7 +350,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
             /* Paragraphs */
             .blog-content p {
               margin-bottom: 1.5rem;
-              color: #374151;
+              color: inherit;
               line-height: 1.8;
               text-align: justify;
             }
@@ -366,9 +366,6 @@ export function BlogPostClient({ post }: { post: PostData }) {
               padding-bottom: 1rem;
               padding-right: 1rem;
               border-radius: 0 8px 8px 0;
-            }
-            .dark .blog-content p {
-              color: #d1d5db;
             }
             .dark .blog-content p:first-of-type {
               color: #e5e7eb;
@@ -455,11 +452,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
               margin-bottom: 1rem;
               padding-left: 1.75rem;
               position: relative;
-              color: #374151;
+              color: inherit;
               line-height: 1.7;
-            }
-            .dark .blog-content ul li {
-              color: #d1d5db;
             }
             
             .blog-content ul li::before {
@@ -486,11 +480,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
               margin-bottom: 1rem;
               padding-left: 2.5rem;
               position: relative;
-              color: #374151;
+              color: inherit;
               line-height: 1.7;
-            }
-            .dark .blog-content ol li {
-              color: #d1d5db;
             }
             
             .blog-content ol li::before {
@@ -520,11 +511,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
             .blog-content li {
               margin-bottom: 0.75rem;
-              color: #374151;
+              color: inherit;
               line-height: 1.8;
-            }
-            .dark .blog-content li {
-              color: #d1d5db;
             }
 
             .blog-content li strong {
