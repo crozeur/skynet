@@ -51,10 +51,10 @@ export default function RootLayout({
       <head>
         <GoogleAnalytics />
         {/* Force favicon refresh with cache bust */}
-        <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico?v=2" sizes="any" />
-        <link rel="apple-touch-icon" href="/img/skynet-logo.png?v=2" />
-        <meta name="theme-color" content="#3b82f6" />
+        <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+        <link rel="apple-touch-icon" href="/img/skynet-logo.png?v=3" />
+        <meta name="theme-color" content="#e0f2fe" />
       </head>
       <body className={inter.className}>
         <ThemeProviderClient>
