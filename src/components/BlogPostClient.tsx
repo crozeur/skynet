@@ -198,28 +198,28 @@ export function BlogPostClient({ post }: { post: PostData }) {
             <div className="mb-12 sticky top-20 z-10">
               <div className="relative overflow-hidden rounded-xl shadow-md">
                 {/* Minimal gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 opacity-95" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-slate-50 to-blue-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 opacity-95" />
                 
                 {/* Content */}
-                <div className="relative p-8 backdrop-blur-sm bg-slate-900/80 border border-slate-600/30">
+                <div className="relative p-8 backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-600/30">
                   {/* Header with icon */}
                   <div className="flex items-center gap-3 mb-6">
                     <div className="relative">
-                      <div className="relative bg-slate-800 p-2 rounded">
-                        <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                      <div className="relative bg-blue-100 dark:bg-slate-800 p-2 rounded">
+                        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
                         </svg>
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-100 text-lg">
+                      <h3 className="font-semibold text-slate-800 dark:text-slate-100 text-lg">
                         {getUIString("Contents", language)}
                       </h3>
                     </div>
                   </div>
                   
                   {/* Divider */}
-                  <div className="h-px bg-slate-600/20 mb-5" />
+                  <div className="h-px bg-slate-200 dark:bg-slate-600/20 mb-5" />
                   
                   {/* TOC List - Clean Professional */}
                   <nav className="space-y-2">
@@ -231,15 +231,15 @@ export function BlogPostClient({ post }: { post: PostData }) {
                           group flex items-center gap-2.5 px-3 py-2.5 rounded
                           transition-colors duration-200
                           ${h.level === 2 
-                            ? 'text-slate-200 font-medium text-base hover:text-blue-300' 
-                            : 'text-slate-400 font-normal text-sm ml-2 hover:text-slate-300'}
+                            ? 'text-slate-700 dark:text-slate-200 font-medium text-base hover:text-blue-600 dark:hover:text-blue-300' 
+                            : 'text-slate-500 dark:text-slate-400 font-normal text-sm ml-2 hover:text-slate-700 dark:hover:text-slate-300'}
                         `}
                       >
                         {h.level === 2 && (
-                          <span className="flex-shrink-0 w-1 h-1 rounded-full bg-blue-400" />
+                          <span className="flex-shrink-0 w-1 h-1 rounded-full bg-blue-500 dark:bg-blue-400" />
                         )}
                         {h.level === 3 && (
-                          <span className="flex-shrink-0 w-0.5 h-0.5 rounded-full bg-slate-500" />
+                          <span className="flex-shrink-0 w-0.5 h-0.5 rounded-full bg-slate-400 dark:bg-slate-500" />
                         )}
                         <span className="line-clamp-2">
                           {h.text}
