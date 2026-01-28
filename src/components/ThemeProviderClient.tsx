@@ -5,7 +5,15 @@ import { ThemeProvider } from "next-themes";
 
 export function ThemeProviderClient({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class">
+    <ThemeProvider 
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      enableColorScheme={false}
+      storageKey="theme-preference"
+      forcedTheme={undefined}
+      disableTransitionOnChange={false}
+    >
       {children}
     </ThemeProvider>
   );

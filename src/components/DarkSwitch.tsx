@@ -4,19 +4,34 @@ import { useTheme } from "next-themes";
 
 const ThemeChanger = () => {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, systemTheme, themes } = useTheme();
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // When mounted on client, now we can show the UI
   useEffect(() => setMounted(true), []);
 
+  // Get the current theme (considering system preference)
+  const currentTheme = theme === "system" ? systemTheme : theme;
+
+  const handleThemeToggle = async (newTheme: string) => {
+    setIsTransitioning(true);
+    // Small delay to prevent race conditions
+    await new Promise(resolve => setTimeout(resolve, 10));
+    setTheme(newTheme);
+    setIsTransitioning(false);
+  };
+
   if (!mounted) return null;
 
   return (
-    <div className="flex items-center order-last ">
-      {theme === "dark" ? (
+    <div className="flex items-center order-last">
+      {currentTheme === "dark" ? (
         <button
-          onClick={() => setTheme("light")}
-          className="text-gray-200 rounded-full outline-none focus:outline-none p-2 hover:text-white transition-colors">
+          onClick={() => handleThemeToggle("light")}
+          disabled={isTransitioning}
+          className="text-gray-200 rounded-full outline-none focus:outline-none p-2 hover:text-white transition-colors disabled:opacity-50"
+          aria-label="Switch to light mode"
+          title="Switch to light mode">
           <span className="sr-only">Light Mode</span>
 
           <svg
@@ -29,8 +44,11 @@ const ThemeChanger = () => {
         </button>
       ) : (
         <button
-          onClick={() => setTheme("dark")}
-          className="text-gray-600 rounded-full outline-none focus:outline-none focus-visible:ring focus-visible:ring-gray-200 focus:ring-opacity-40 p-2 hover:text-gray-800 transition-colors">
+          onClick={() => handleThemeToggle("dark")}
+          disabled={isTransitioning}
+          className="text-gray-600 rounded-full outline-none focus:outline-none focus-visible:ring focus-visible:ring-gray-200 focus:ring-opacity-40 p-2 hover:text-gray-800 transition-colors disabled:opacity-50"
+          aria-label="Switch to dark mode"
+          title="Switch to dark mode">
           <span className="sr-only">Dark Mode</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
