@@ -23,6 +23,22 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: 'any' }
     ],
   },
+  openGraph: {
+    title: "Skynet Consulting | Cybersecurity Solutions & Managed SOC",
+    description: "Expert cybersecurity services: Managed SOC operations, security audits, and cloud security.",
+    url: "https://skynet-consulting.net",
+    siteName: "Skynet Consulting",
+    images: [
+      {
+        url: "/img/skynet-logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Skynet Consulting Logo"
+      }
+    ],
+    locale: "en_US",
+    type: "website"
+  },
 };
 
 export default function RootLayout({
