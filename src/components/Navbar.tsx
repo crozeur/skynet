@@ -58,15 +58,15 @@ export const Navbar = () => {
   const isActive = (sectionId: string) => activeSection === sectionId;
 
   const navItemClass = (sectionId: string) =>
-    `text-gray-800 dark:text-gray-100 transition font-semibold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
+    `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
       isActive(sectionId)
-        ? "text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/40 border-b-2 border-blue-600 dark:border-blue-300"
-        : "hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+        ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
+        : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
     }`;
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 relative transition-all duration-300 ${
-      scrolled ? "shadow-lg shadow-gray-300/80 dark:shadow-black/50" : "shadow-md shadow-gray-200/40 dark:shadow-black/20"
+    <nav className={`sticky top-0 z-50 bg-white dark:bg-gray-900/90 backdrop-blur-md border-b-2 border-gray-300 dark:border-gray-800 relative transition-all duration-300 ${
+      scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
