@@ -258,6 +258,10 @@ export function BlogPostClient({ post }: { post: PostData }) {
             .blog-content {
               font-size: 1.0625rem;
               line-height: 1.8;
+              color: #374151;
+            }
+            .dark .blog-content {
+              color: #e5e7eb;
             }
 
             /* Headings */
