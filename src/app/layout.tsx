@@ -50,11 +50,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
-        {/* Force favicon refresh with cache bust */}
-        <link rel="icon" href="/favicon.svg?v=3" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-        <link rel="apple-touch-icon" href="/img/skynet-logo.png?v=3" />
-        <meta name="theme-color" content="#e0f2fe" />
+        {/* Favicons for all devices */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/img/skynet-logo.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/img/skynet-logo.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="msapplication-TileColor" content="#0f172a" />
       </head>
       <body className={inter.className}>
         <ThemeProviderClient>
