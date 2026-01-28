@@ -19,7 +19,8 @@ export const metadata: Metadata = {
   description: "Expert cybersecurity services: Managed SOC operations, security audits, and cloud security. Protect your organization with proven expertise.",
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-black.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml', media: '(prefers-color-scheme: dark)' },
       { url: '/favicon.ico', sizes: 'any' }
     ],
   },
@@ -50,9 +51,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
-        {/* Favicons - cache busted with new filename */}
-        <link rel="icon" type="image/svg+xml" href="/favicon-v5.svg" />
-        <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
+        {/* Favicons - light/dark variants */}
+        <link rel="icon" type="image/svg+xml" href="/favicon-black.svg" media="(prefers-color-scheme: light)" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" media="(prefers-color-scheme: dark)" />
         <link rel="icon" type="image/png" sizes="32x32" href="/img/skynet-logo.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg" />
         <link rel="manifest" href="/site.webmanifest" />
