@@ -196,14 +196,14 @@ export function BlogPostClient({ post }: { post: PostData }) {
           {/* Table of contents - Professional Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
-              <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 dark:shadow-[0_20px_50px_-30px_rgba(59,130,246,0.55)] dark:hover:shadow-[0_24px_60px_-30px_rgba(59,130,246,0.7)]">
                 {/* Gradient background with blue accent */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-blue-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 opacity-95" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-blue-50 dark:from-blue-900/35 dark:via-slate-900 dark:to-slate-950 opacity-95" />
                 
                 {/* Content */}
-                <div className="relative p-8 backdrop-blur-sm bg-white/60 dark:bg-slate-900/80 border-2 border-blue-200/70 dark:border-slate-600/30">
+                <div className="relative p-8 backdrop-blur-sm bg-white/60 dark:bg-slate-900/90 border-2 border-blue-200/70 dark:border-blue-500/30">
                   {/* Header with icon and blue accent bar */}
-                  <div className="relative mb-6 pl-4 border-l-4 border-blue-600 dark:border-blue-400 bg-gradient-to-r from-blue-50/80 to-transparent dark:from-blue-900/20 dark:to-transparent py-3 -ml-4 pr-4 rounded-r">
+                  <div className="relative mb-6 pl-4 border-l-4 border-blue-600 dark:border-blue-400 bg-gradient-to-r from-blue-50/80 to-transparent dark:from-blue-900/35 dark:to-transparent py-3 -ml-4 pr-4 rounded-r dark:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]">
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <div className="relative bg-blue-500 dark:bg-blue-600 p-2.5 rounded-lg shadow-md">
@@ -221,7 +221,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
                   </div>
                   
                   {/* Divider with gradient */}
-                  <div className="h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent dark:from-blue-600 dark:via-blue-700 dark:to-transparent mb-5" />
+                  <div className="h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent dark:from-blue-400/80 dark:via-blue-600/60 dark:to-transparent mb-5" />
                   
                   {/* TOC List - Clean Professional */}
                   <nav className="space-y-2">
@@ -233,8 +233,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
                           group flex items-center gap-2.5 px-3 py-2.5 rounded-lg
                           transition-all duration-200
                           ${h.level === 2 
-                            ? 'text-slate-800 dark:text-slate-200 font-semibold text-base hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:pl-4' 
-                            : 'text-slate-600 dark:text-slate-400 font-medium text-sm ml-2 hover:text-slate-800 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:ml-3'}
+                            ? 'text-slate-800 dark:text-slate-200 font-semibold text-base hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/25 hover:pl-4' 
+                            : 'text-slate-600 dark:text-slate-400 font-medium text-sm ml-2 hover:text-slate-800 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-blue-900/15 hover:ml-3'}
                         `}
                       >
                         {h.level === 2 && (
