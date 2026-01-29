@@ -1,0 +1,169 @@
+## Intro (3–5 sentences)
+Most cloud breaches in SMEs don’t start with “advanced hacking”—they start with a setting that was never meant to be permanent. A storage bucket left public for a quick test, an admin account used for daily work, or an API key that never gets rotated can quietly turn into a real incident. The good news: the most common storage and IAM misconfigurations are also among the easiest to prevent with a few repeatable habits. This post focuses on practical fixes you can apply regardless of your cloud provider.
+
+## Quick take (exactly 5 bullet points)
+- Treat “public” storage as an exception that requires explicit approval and continuous checks.
+- Make least privilege real by designing roles around tasks, not people.
+- Replace long-lived access keys with short-lived sessions wherever possible.
+- Separate admin activities from day-to-day operations with dedicated admin roles and accounts.
+- Log, alert, and periodically validate: controls you don’t test will drift.
+
+## Storage exposure: stop accidental public access
+Object storage (buckets/containers) is designed to be easy to share—which is why it’s frequently exposed. SMEs often get tripped up by multiple policy layers: an object might be private, but the bucket is public; or the bucket is private, but a CDN or shared link makes it reachable.
+
+Practical steps that work across providers:
+
+1) Default-deny public access
+- Establish an “org default” of no public object storage.
+- If your platform supports it, enable an account/tenant-level setting that blocks public access broadly (then explicitly allow known exceptions).
+
+2) Separate “public website” storage from “internal data” storage
+- If you host public assets (images, downloads), create dedicated buckets/containers with a naming convention that makes intent obvious (e.g., `public-assets-...` vs `internal-data-...`).
+- Apply different guardrails: public assets can be readable but should still prevent listing where possible, deny writes from anonymous users, and restrict upload paths.
+
+3) Use presigned/temporary URLs for sharing internal files
+Instead of making a bucket public to share a file with a customer or contractor, generate time-limited links.
+
+Example: a sales team needs to share a proposal archive for 48 hours.
+- Store the archive in a private bucket.
+- Generate a link that expires in 48 hours.
+- Log access and disable the link early if needed.
+
+4) Watch for “shadow exposure” via replication, backups, and analytics exports
+Common mistake: production data is private, but a replicated copy or exported report is stored in a different bucket with weaker controls.
+
+Example: application logs exported nightly to object storage.
+- Ensure the export destination inherits the same encryption and access controls.
+- Deny public access explicitly on the destination.
+- Limit access to the smallest set of roles that needs it (e.g., a security/ops role, not every developer).
+
+5) Encrypt, but don’t confuse encryption with access control
+Encryption at rest is important, but it doesn’t prevent misuse if everyone has permission to read the objects. Treat encryption as a baseline, and focus on who can access keys/data paths.
+
+## IAM fundamentals: least privilege without breaking work
+“IAM” misconfigurations usually aren’t a single bad policy—they’re a collection of small shortcuts that accumulate. SMEs often move quickly, grant broad permissions “temporarily,” then forget to tighten them.
+
+1) Design roles around tasks (job functions), not individuals
+Create roles like:
+- `app-runtime-read-secrets`
+- `billing-readonly`
+- `incident-responder`
+- `storage-uploader-public-assets`
+
+Avoid roles like:
+- `john-admin`
+
+Why it matters: task-based roles remain stable when people change jobs, teams, or leave.
+
+2) Prefer allow-lists over broad wildcards
+If a policy reads like “allow all actions on all resources,” it’s almost always too broad.
+
+Practical approach:
+- Start with the minimum set of actions the workflow needs.
+- Scope to specific resources (a single bucket, a specific secret path, a specific project).
+- Add actions iteratively based on audit logs (“deny then permit with evidence”).
+
+3) Keep human admins separate from service identities
+Humans should not deploy production workloads with the same identity they use to check email and browse the web.
+
+Example pattern:
+- A normal user account has no admin rights.
+- When admin tasks are required, the user “assumes” an admin role for a limited time.
+- All admin actions are logged separately.
+
+4) Avoid shared accounts and shared credentials
+Shared credentials destroy accountability and make offboarding unreliable.
+
+Replace:
+- One “devops@company” admin account
+- One SSH key used by the whole team
+
+With:
+- Individual accounts
+- Centralized role assumption
+- Short-lived access where possible
+
+5) Use guardrails for high-risk permissions
+Even if you don’t use advanced tooling, you can still enforce common-sense boundaries:
+- Only a small group can change IAM policies.
+- Only a small group can disable logging.
+- Only designated roles can create internet-facing resources.
+
+## Keys, tokens, and secrets: reduce long-lived access
+Credential sprawl is a quiet risk in growing SMEs: old API keys, CI/CD tokens, and developer laptops that keep access long after it’s needed.
+
+1) Prefer short-lived sessions over long-lived keys
+Where supported:
+- Use role-based access with temporary session credentials.
+- For automation, use workload identity or federation rather than embedding keys in pipelines.
+
+2) If you must use access keys, treat them like perishable goods
+Minimum baseline:
+- Unique key per app/service (not shared).
+- Rotation schedule (and a tested rotation process).
+- Store keys in a secret manager (not in code, not in CI variables long-term, not in shared documents).
+
+Example: rotating a CI/CD deploy key
+- Create a second key and deploy it to the secret manager.
+- Update the pipeline to use the new key.
+- Validate a deployment.
+- Disable and delete the old key.
+
+3) Scope secrets access to the service, not the entire environment
+A common mistake is letting an application read “all secrets” because it’s easier. Instead:
+- Separate secrets by environment (dev/test/prod).
+- Restrict each service to only its own secret paths.
+
+4) Detect exposed secrets early
+Without inventing stats: it’s common for credentials to land in chat logs, tickets, or repositories.
+- Enable repository scanning features if available.
+- Add pre-commit checks to prevent obvious key patterns.
+- Have a playbook: revoke, rotate, and search for reuse.
+
+## Logging and drift control: make misconfigurations harder to reintroduce
+Fixing a misconfiguration once isn’t enough; it tends to reappear during a rushed change.
+
+1) Turn on audit logs and keep them protected
+Minimum baseline:
+- Log IAM policy changes.
+- Log object storage access and permission changes.
+- Store logs in a location with restricted deletion permissions.
+
+2) Alert on the changes that matter
+Start small. Alerts that are too noisy get ignored.
+Useful low-noise alerts:
+- Bucket/container becomes public.
+- IAM policy updated (especially if it grants admin-like permissions).
+- Logging disabled or retention reduced.
+- New access keys created.
+
+3) Use periodic validation (a lightweight “configuration review”)
+You don’t need heavy process to start:
+- Weekly: check for new public storage.
+- Monthly: review admin role membership.
+- Quarterly: validate key rotation and offboarding outcomes.
+
+4) Keep frameworks generic, use them as checklists
+If you align with common guidance (e.g., CIS benchmarks, NIST, ISO-style controls), treat it as a way to structure improvements—not as a claim of compliance.
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Block public access to object storage by default; document any approved exceptions.
+- [ ] Separate public assets storage from internal data storage with clear naming conventions.
+- [ ] Use time-limited sharing links for internal files instead of making buckets public.
+- [ ] Review storage policies at all layers (bucket/container, object, CDN/link sharing).
+- [ ] Replace broad IAM permissions with task-based roles scoped to specific resources.
+- [ ] Require role assumption for admin actions; avoid daily use of permanent admin accounts.
+- [ ] Eliminate shared accounts and shared credentials; ensure individual accountability.
+- [ ] Prefer short-lived credentials (sessions/federation) over long-lived access keys.
+- [ ] Store secrets in a dedicated secret manager; remove secrets from code and CI logs.
+- [ ] Enable audit logging for IAM and storage; restrict who can disable logs or reduce retention.
+
+## FAQ (3 questions with short answers)
+Q1: “We need public files—does that mean we’re insecure?”
+A1: Not necessarily. Put public assets in dedicated storage, restrict writes, avoid listing if possible, and monitor changes so public access doesn’t spread to internal data.
+
+Q2: “Least privilege sounds time-consuming—how can we start fast?”
+A2: Start with two steps: remove permanent admin from daily accounts and create a small set of task-based roles for your most common workflows (deploy, read logs, manage billing).
+
+Q3: “Is encryption enough to protect a public bucket?”
+A3: No. Encryption helps protect data at rest, but if access permissions allow reads (or objects are public), the data can still be accessed. Access control and monitoring are the primary fixes.
