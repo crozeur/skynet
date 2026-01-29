@@ -4,8 +4,10 @@
   "description": "Nextly Landing Page Template",
   "private": true,
   "scripts": {
+    "predev": "npm run fix:blog-metadata",
     "dev": "next dev",
-    "build:blog": "node scripts/build-blog.js",
+    "fix:blog-metadata": "node scripts/fix-missing-metadata.js",
+    "build:blog": "npm run fix:blog-metadata && node scripts/build-blog.js",
     "build": "npm run build:blog && next build",
     "start": "next start",
     "lint": "next lint"

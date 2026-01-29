@@ -9,6 +9,79 @@ function slugFromFilename(filename) {
   return filename.replace(/\.mdx$/, "");
 }
 
+function slugToTitle(slug) {
+  return slug
+    .split("-")
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function collapseWhitespace(text) {
+  return String(text || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function stripMarkdown(text) {
+  return collapseWhitespace(
+    String(text || "")
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/_([^_]+)_/g, "$1")
+      .replace(/\[(.*?)\]\((.*?)\)/g, "$1")
+      .replace(/^>\s+/gm, "")
+      .replace(/^[-*+]\s+/gm, "")
+  );
+}
+
+function escapeJsString(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\r/g, "\\r")
+    .replace(/\n/g, "\\n")
+    .replace(/\t/g, "\\t")
+    .replace(/"/g, '\\"');
+}
+
+function inferTitleFromContent(content, fallbackSlug) {
+  const lines = String(content || "").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
+    if (heading && heading[1]) return stripMarkdown(heading[1]);
+  }
+  return slugToTitle(fallbackSlug);
+}
+
+function inferDescriptionFromContent(content) {
+  const blocks = String(content || "")
+    .split(/\r?\n\s*\r?\n/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+
+  for (const block of blocks) {
+    if (/^#{1,6}\s+/.test(block)) continue;
+    if (/^export\s+const\s+metadata\s*=/.test(block)) continue;
+
+    const cleaned = stripMarkdown(block);
+    if (cleaned.length >= 40) return cleaned.slice(0, 160);
+  }
+
+  return "Security insights for small and mid-sized businesses";
+}
+
+function inferPillarFromSlug(slug) {
+  const s = String(slug || "").toLowerCase();
+  if (s.includes("audit")) return "AUDIT";
+  if (s.includes("soc") || s.includes("alert") || s.includes("triage")) return "SOC";
+  if (s.includes("cloud") || s.includes("aws") || s.includes("m365") || s.includes("microsoft-365")) return "CLOUD";
+  return "SOC";
+}
+
 // Génération des métadonnées basée sur le slug et le contenu
 function generateMetadata(filename, content) {
   const slug = slugFromFilename(filename);
@@ -33,20 +106,14 @@ function generateMetadata(filename, content) {
   };
 
   const config = articleConfig[slug] || {
-    title: slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "),
-    description: "Security insights for small and mid-sized businesses",
-    pillar: "SOC"
+    title: inferTitleFromContent(content, slug),
+    description: inferDescriptionFromContent(content),
+    pillar: inferPillarFromSlug(slug),
   };
-
-  // Extraire le premier paragraphe comme description si nécessaire
-  const paragraphs = content.split("\n\n").filter(p => p.trim());
-  const firstParagraph = paragraphs
-    .find(p => !p.startsWith("##") && !p.startsWith("#"))
-    ?.slice(0, 160) || config.description;
 
   return {
     title: config.title,
-    description: firstParagraph,
+    description: config.description,
     date: new Date().toISOString().split("T")[0],
     pillar: config.pillar,
     tags: ["SME", "Security"]
@@ -70,17 +137,15 @@ function addMetadataToFile(filePath, filename) {
 
     const metadata = generateMetadata(filename, content);
     const metadataString = `export const metadata = {
-  title: "${metadata.title}",
-  description: "${metadata.description}",
-  date: "${metadata.date}",
-  pillar: "${metadata.pillar}",
+  title: "${escapeJsString(metadata.title)}",
+  description: "${escapeJsString(metadata.description)}",
+  date: "${escapeJsString(metadata.date)}",
+  pillar: "${escapeJsString(metadata.pillar)}",
   tags: ${JSON.stringify(metadata.tags)},
-};
-
-`;
+};\n\n`;
 
     const newContent = metadataString + content;
-    fs.writeFileSync(filePath, newContent, "utf-8");
+    fs.writeFileSync(filePath, newContent.endsWith("\n") ? newContent : newContent + "\n", "utf-8");
     console.log(`✅ ${filename} - métadonnées ajoutées`);
   } catch (err) {
     console.error(`❌ Erreur pour ${filename}:`, err.message);
