@@ -1,0 +1,168 @@
+## Intro
+Security consultants can move faster—and give you more useful findings—when you’ve already gathered the basics. A “pre-audit” review doesn’t require deep security expertise; it’s mostly about organizing evidence, validating assumptions, and identifying obvious gaps. This post walks through what to review before you call a consultant so your engagement starts with clarity instead of confusion. Use it to reduce billable discovery time, avoid surprises, and ensure the audit focuses on real risk.
+
+## Quick take
+- Define the audit goal and scope in plain language before talking tools or frameworks.
+- Build an accurate inventory of systems, accounts, and data flows (even if imperfect).
+- Verify identity and access basics: who has admin, how access is granted, and how it’s revoked.
+- Confirm you can produce logs, backup proof, and incident-response contacts on request.
+- Collect policies and “how it actually works” notes to close the gap between paperwork and reality.
+
+## Set the scope and success criteria (before you gather evidence)
+A security audit can mean many things: a control review, a technical assessment, a gap analysis against a framework (like NIST, ISO, or CIS), or preparation for a customer questionnaire. If you don’t define the “why,” you risk paying for thoroughness in the wrong places.
+
+Practical steps:
+
+1) Write the goal in one sentence.
+- Example: “Identify the top risks to customer data in our cloud apps and create a prioritized remediation plan.”
+- Example: “Validate our baseline security controls for a new insurance requirement (without claiming compliance).”
+
+2) Define what’s in scope.
+- Systems: email, endpoints, cloud tenancy, ERP/CRM, remote access, on-prem servers, websites, third parties.
+- Locations: HQ only vs. all sites; employee-owned devices vs. corporate-managed devices.
+- People: employees, contractors, managed service providers (MSPs).
+
+3) Define what “done” looks like.
+- Deliverables: a written report, risk register, executive summary, remediation roadmap, or a re-test.
+- Format: severity ratings, evidence-based findings, ownership mapping, timelines.
+
+4) List non-goals.
+- Example: “This is not a penetration test.”
+- Example: “We are not seeking a compliance attestation.”
+
+Tip for IT managers: create a short “audit brief” (one page) and share it internally. It reduces friction when the consultant asks for access, logs, or documentation.
+
+## Build an asset and data inventory that’s “good enough”
+Consultants can’t assess risk if they don’t know what exists. SMEs often discover “shadow IT” (tools bought by teams) or forgotten systems during an audit. You don’t need perfection—just a defensible starting point.
+
+What to inventory:
+
+1) Systems and services
+- Cloud platforms and tenants/subscriptions (e.g., productivity suite, cloud hosting).
+- Business apps (accounting, CRM, HR/payroll, helpdesk, e-commerce).
+- Network components: firewalls, VPN, Wi‑Fi, switches, DNS, remote access.
+- Endpoint management and security tools (if any): MDM, EDR/AV, patching.
+
+2) Accounts and identity stores
+- Your primary identity provider (IdP) or directory service.
+- Admin portals for SaaS tools.
+- “Shared” accounts and service accounts (often overlooked).
+
+3) Data locations and flows
+- Where sensitive data lives: customer data, employee data, financial data, intellectual property.
+- How data moves: integrations, exports to spreadsheets, email forwarding, SFTP, APIs.
+
+Examples that commonly matter in audits:
+- A marketing form that pushes leads into a CRM, which then syncs to email marketing.
+- A finance team downloading monthly reports to local laptops.
+- A helpdesk tool with attachments containing PII.
+
+How to make this easier:
+- Export application lists from your SSO/IdP (if you use one).
+- Pull device lists from MDM or endpoint management.
+- Ask department heads: “What tools do you pay for monthly that IT didn’t set up?”
+
+## Check identity, access, and admin privileges (the fastest risk reducer)
+Many high-impact findings come down to who can access what—and how easily an attacker could take over an account. Before a consultant arrives, verify your access basics and document what you find.
+
+Key areas to review:
+
+1) Admin accounts
+- How many global/admin accounts exist across critical systems?
+- Are admin accounts separate from daily-use accounts?
+- Is admin access time-limited or permanently assigned?
+
+Example:
+- If your IT lead uses the same account for email and global admin, a successful phishing attempt could become a full environment takeover.
+
+2) Joiner/mover/leaver (JML) process
+- Who requests access for new hires?
+- How are permissions changed when roles change?
+- How quickly is access removed when someone leaves?
+
+Practical check:
+- Pick two recently departed employees and confirm their accounts are disabled everywhere (email, SaaS apps, VPN, shared folders). Document how you verified it.
+
+3) Multi-factor authentication (MFA)
+- Is MFA enabled for all users or just admins?
+- Are there exceptions (service accounts, legacy protocols)?
+- Is there a recovery process that can be abused (e.g., SMS-only resets, shared inbox approvals)?
+
+4) Password and session controls
+- Do you allow long-lived sessions on admin portals?
+- Do you have password managers or are passwords shared in spreadsheets/chats?
+
+If you want a consultant to be effective, be ready to provide:
+- A list of privileged roles per system.
+- A description of how access requests are approved.
+- Evidence screenshots or exports showing MFA and admin role assignments.
+
+## Validate logging, backups, and incident readiness (so findings are actionable)
+An audit is not only about prevention. Consultants will likely ask, “Can you detect problems, recover quickly, and respond in a coordinated way?” If you can’t produce evidence for these areas, the audit may stall.
+
+1) Logging and monitoring
+- What logs do you retain (authentication, admin actions, endpoint alerts, firewall/VPN, SaaS audit logs)?
+- Where are they stored, and for how long?
+- Who reviews alerts, and what triggers escalation?
+
+Example of a practical test:
+- Attempt a controlled login from a test account, then confirm the event appears in your logs and you can find it within 10 minutes.
+
+2) Backups and restore proof
+- Do you back up critical SaaS data (or only endpoints/servers)?
+- Are backups isolated from normal admin accounts?
+- When was your last successful restore test?
+
+Important nuance:
+- “We have backups” is not evidence. A restore test (even a small one) is much more convincing to an auditor and more useful to you.
+
+3) Incident response basics
+- Who is the incident lead and the technical lead?
+- Do you have an out-of-band contact list (not only email)?
+- Do you know who to call for legal, cyber insurance, forensics, and PR (if needed)?
+
+You don’t need a perfect incident response plan, but you should be able to answer:
+- “If we suspect ransomware at 9 a.m., who makes the decision to shut down systems?”
+
+## Gather core documents and “how it actually works” notes
+Consultants will ask for policies and procedures—but SMEs often have a gap between documented policy and real operations. You can help by assembling both: what’s written, and what’s true.
+
+Documents worth gathering:
+- Acceptable use policy and basic security policy (even if simple).
+- Onboarding/offboarding steps (JML).
+- Asset inventory and network diagrams (even rough).
+- Vendor list and contracts for critical providers (MSP, payroll, hosting, email).
+- Security training approach (what you do, how often).
+- Patch/vulnerability management notes (who patches what, cadence).
+- Change management notes (how changes are approved and tracked).
+
+Operational “truth notes” to include:
+- “We intend MFA for all users, but the warehouse tablets don’t support it.”
+- “Patches are monthly for laptops, but servers are ad-hoc.”
+- “The MSP manages firewall rules; IT approves changes by email.”
+
+Why this helps:
+- It lets the consultant focus on risk-based recommendations instead of debating whether the policy is real.
+- It reduces “unknown unknowns” that drive scope creep.
+
+## Checklist
+- [ ] Write a one-sentence audit goal and list 3–5 priority concerns (e.g., ransomware, customer data exposure, business email compromise).
+- [ ] Define scope: systems, locations, users (employees/contractors), and any exclusions.
+- [ ] Create an application inventory (SaaS + on-prem) with owners and business purpose.
+- [ ] Export a device list (laptops/desktops/servers/mobile) and note management status (managed vs. unmanaged).
+- [ ] List privileged/admin accounts per critical system and confirm MFA status.
+- [ ] Document the joiner/mover/leaver process and verify two recent leavers are fully deprovisioned.
+- [ ] Confirm where logs exist, retention period, and who reviews alerts (or note that nobody does yet).
+- [ ] Verify backups for critical systems and record the last restore test date and result.
+- [ ] List critical third parties (MSP, hosting, payroll, payment processors) and how access is granted/revoked.
+- [ ] Assemble key policies/procedures and add “how it actually works” notes for known exceptions.
+
+## FAQ
+Q1: Do we need to follow a framework like NIST, ISO, or CIS for an audit?
+A: Not necessarily; you can use them as a reference structure, but the audit should be driven by your risks and business needs.
+
+Q2: What’s the most common thing that slows down a security audit?
+A: Missing inventories and unclear access ownership—if nobody can say who owns a system or who approves admin access, evidence collection drags.
+
+Q3: Should we fix issues before the consultant arrives?
+A: Fix obvious, low-risk-to-change items (like enabling MFA for admins), but avoid major changes without tracking them—auditors need stable evidence and a clear before/after trail.
