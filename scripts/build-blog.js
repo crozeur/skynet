@@ -309,6 +309,18 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
+// Clean previously generated JSON files so deleted posts don't linger
+try {
+  const existing = fs.readdirSync(OUTPUT_DIR);
+  for (const file of existing) {
+    if (file.endsWith(".json")) {
+      fs.unlinkSync(path.join(OUTPUT_DIR, file));
+    }
+  }
+} catch (err) {
+  console.warn(`  ⚠️  Could not clean ${OUTPUT_DIR}: ${err.message}`);
+}
+
 function extractMetadataFromMDX(source) {
   const startMatch = source.match(/export\s+const\s+metadata\s*=\s*\{/);
   if (!startMatch) return null;
