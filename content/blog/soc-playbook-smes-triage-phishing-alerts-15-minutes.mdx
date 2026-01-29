@@ -1,0 +1,185 @@
+## Intro (3–5 sentences)
+Phishing alerts can pile up fast, especially in an SME where one person may be the SOC, the helpdesk, and the security team. The goal of triage isn’t to “solve phishing” in 15 minutes—it’s to decide, with defensible reasoning, whether an alert is benign, suspicious, or an active incident. This playbook gives you a repeatable, time-boxed workflow you can run even when you’re short on staff or tooling. Use it to reduce false positives, contain real threats quickly, and document your decisions for later review.
+
+## Quick take (exactly 5 bullet points)
+- Time-box triage to 15 minutes: classify, contain if needed, and hand off deeper analysis.
+- Start with user impact: who clicked, who replied, and what credentials or payments might be at risk.
+- Validate the message using headers, links, and authentication signals (SPF/DKIM/DMARC) without relying on a single indicator.
+- Contain with the least disruption: quarantine, block, reset sessions, and notify targeted users.
+- Document decisions and evidence so you can improve rules and train users without blame.
+
+## 1) The 15-minute triage clock: decide, don’t investigate forever
+Treat triage like an emergency-room intake: quick classification and immediate stabilization.
+
+Time budget (suggested):
+- Minutes 0–3: Confirm alert context and scope
+- Minutes 3–8: Validate key indicators (sender, links, attachments, authentication)
+- Minutes 8–12: Check user actions and potential impact
+- Minutes 12–15: Contain and/or escalate with a clear ticket update
+
+Define three outcomes before you start:
+1) Benign / false positive: evidence supports legitimate email or harmless content.
+2) Suspicious: cannot confirm maliciousness yet, but risk is non-trivial.
+3) Confirmed incident: indicators plus user action suggest compromise or attempted fraud.
+
+Practical example:
+- Benign: A supplier changed domains and your filter flags it; headers show clean alignment, and the user confirms an expected invoice.
+- Suspicious: A “SharePoint” login link with URL shortener and mismatched display text; no clicks observed yet.
+- Confirmed incident: Multiple users received the same message, and one user entered credentials; you see unusual sign-in events afterward.
+
+What to record in the ticket (minimum):
+- Alert source and timestamp
+- Message ID(s) and recipient list (scope)
+- Key indicators you checked (headers/authentication, link destination, attachment type)
+- User action (clicked/replied/entered credentials/sent payment)
+- Your classification and rationale
+- Containment steps taken (or why none)
+
+## 2) Rapid validation: a small set of high-signal checks
+You don’t need a full forensic workup to make a safe triage decision. Use a consistent set of checks that work across mail platforms and security tools.
+
+### A. Sender and identity checks
+- Display name vs. actual address: “CEO Name” from a free mailbox or lookalike domain is a common lure.
+- Domain lookalikes: swapped letters (rn vs m), added hyphens, or extra words (e.g., “-billing”).
+- Reply-To mismatch: message appears from a known domain but replies go elsewhere.
+
+Example:
+- From: finance@acme-co.com
+- Reply-To: acme.finance.department@outlook.example
+This mismatch alone doesn’t prove malice, but it raises risk—especially paired with urgency or payment requests.
+
+### B. Authentication signals (SPF/DKIM/DMARC)
+If you can view message headers, check whether authentication aligns with the sending domain. A fail doesn’t always mean phishing (forwarders and misconfigurations happen), and a pass doesn’t guarantee safety (compromised accounts exist). Use these signals as part of the overall picture, not a single “yes/no.”
+
+### C. Link checks (fast and safe)
+- Do not click links on a production workstation.
+- Hover/preview the destination in your email client or security console.
+- Look for mismatched display text vs destination.
+- Watch for:
+  - URL shorteners
+  - punycode or odd subdomains
+  - “login” pages hosted on unrelated domains
+
+Practical example:
+- Displayed: https://microsoft.com
+- Actual: https://micros0ft-login.example/verify
+That mismatch is high-signal.
+
+### D. Attachment checks
+- Risky types: macro-enabled docs, archives (zip/rar), password-protected files, and unexpected “secure” PDFs.
+- If your environment supports it, submit the file to an internal sandbox or detonation environment. If not, treat unexpected attachments as suspicious and contain first.
+
+### E. Content and intent
+The fastest way to assess impact is to identify intent:
+- Credential theft (fake login)
+- Malware delivery (attachments, drive-by links)
+- Business email compromise (BEC) / payment redirection
+- Data collection (forms)
+
+If the email requests money, gift cards, or bank changes, prioritize containment even if technical indicators are mixed.
+
+## 3) Impact-first triage: find the “clicked/replied/paid” signal
+A phishing email with no interaction is often a manageable cleanup. A phishing email with user action can become an incident.
+
+In your first pass, answer these questions:
+- Who received it? (count + business role)
+- Did anyone click the link?
+- Did anyone reply?
+- Did anyone enter credentials or MFA codes?
+- Was any payment initiated or account details changed?
+
+How to get the answers quickly:
+- Search for the message by subject, sender, and message ID; identify all recipients.
+- Check your email gateway or SOC tool for click tracking (if available) and message disposition.
+- Contact impacted users with a neutral, non-blaming prompt: “Did you click or enter credentials? If yes, what page did you see?”
+
+Practical example: “invoice overdue” campaign
+- Recipients: Accounts payable + one shared mailbox
+- One user clicked but did not sign in
+- Next step: contain (quarantine message, block domain), and run endpoint checks for that user. Mark as “suspicious” unless you have evidence of malware execution.
+
+Practical example: “shared document” credential lure
+- User entered credentials on a fake login page
+- Next step: treat as “confirmed incident”: reset credentials, revoke sessions/tokens (where possible), enforce MFA re-registration if needed, and review recent sign-ins.
+
+Framework alignment note (generic):
+This impact-first approach maps well to common guidance in NIST/ISO/CIS practices: identify, protect/contain, detect/assess, respond, and then improve—but you are not “compliant” just by following a checklist.
+
+## 4) Containment actions that fit SMEs (minimum viable, high value)
+Containment should be proportional and reversible where possible.
+
+### A. Email-side containment
+- Quarantine or purge the message from mailboxes (all recipients).
+- Block the sender domain/address and known malicious URLs.
+- Add temporary detections for the campaign pattern (subject line, attachment hash, link domain).
+
+### B. Identity containment (when credentials may be exposed)
+- Force password reset for the affected account(s).
+- Revoke active sessions/tokens where your identity provider supports it.
+- Check and remove suspicious inbox rules (auto-forwarding, hidden rules).
+- Verify MFA settings weren’t altered.
+
+### C. Endpoint containment (when malware is plausible)
+- If a user opened an attachment or executed a file, isolate the endpoint using your EDR (or disconnect from network as a last resort).
+- Run a targeted scan and collect basic triage artifacts (running processes, autoruns, recent downloads) if you have the capability.
+
+### D. Business process containment (for BEC/payment fraud)
+- Pause payments and vendor bank-detail changes until verified out-of-band.
+- Require a call-back to a known number (not the number in the email).
+- Notify finance leadership early; time matters more than perfect evidence.
+
+Escalation criteria (fast rules):
+- Any confirmed credential entry or MFA code sharing
+- Any payment initiated or banking details changed
+- Any evidence of malware execution
+- Any privileged account targeted (IT admin, finance, executives)
+
+## 5) Close the loop: improve detections and reduce repeat incidents
+After triage and containment, spend a small, consistent block of time improving your environment.
+
+### A. Turn triage notes into detections
+- Add or tune rules for recurring patterns (lookalike domains, specific lures, common URL paths).
+- Create an allowlist process with approvals for legitimate recurring false positives (avoid “just allow anything from this domain” without checks).
+
+### B. Build a “known good” communication map
+For critical processes (payroll, invoices, HR docs), document:
+- Expected sending domains
+- Normal attachment types
+- Standard approval steps
+This reduces decision time during triage and helps train non-security staff.
+
+### C. Create a short user feedback loop
+Send a short internal note (two or three sentences) that:
+- Describes the lure in plain language
+- Advises what to do if they interacted
+- Reinforces reporting
+Avoid naming/shaming. The goal is faster reporting next time.
+
+### D. Track outcomes, not vanity metrics
+Instead of invented “phishing rates,” track what you can verify:
+- Time to classify (triage time)
+- Number of recipients purged
+- Number of confirmed interactions (click/reply/credential entry)
+- Recurrence of the same lure after tuning
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Capture message ID, sender, subject, timestamp, and alert source in the ticket
+- [ ] Identify all recipients (including shared mailboxes and distribution lists)
+- [ ] Check display name, From domain, and Reply-To for mismatches
+- [ ] Review header authentication signals (SPF/DKIM/DMARC alignment when available)
+- [ ] Safely inspect links (preview/expand; no clicking on production workstation)
+- [ ] Assess attachment risk (type, unexpected archive/password protection, macro-capable files)
+- [ ] Determine user action: clicked, replied, entered credentials, shared MFA, or initiated payment
+- [ ] Quarantine/purge the message across mailboxes and block known indicators
+- [ ] If credentials may be exposed, reset password and revoke sessions; check for malicious inbox rules
+- [ ] Escalate immediately if privileged accounts, finance actions, or malware execution are suspected
+
+## FAQ (3 questions with short answers)
+**1) Can I mark it “safe” if SPF/DKIM pass?**
+No. Authentication passing reduces certain spoofing risks, but compromised accounts and legitimate services can still send malicious content.
+
+**2) What if I can’t tell whether anyone clicked?**
+Treat it as suspicious: purge/quarantine the email, notify recipients to report interaction, and prioritize checks for high-risk users (finance, admins).
+
+**3) When should I involve management?**
+Involve management early if there’s potential credential compromise, any payment/fraud risk, or if containment actions could disrupt business operations.
