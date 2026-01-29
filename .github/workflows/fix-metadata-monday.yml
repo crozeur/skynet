@@ -1,6 +1,14 @@
-name: Fix Missing Metadata - Monday & Deploy
+name: Fix Missing Blog Metadata
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/blog/**/*.mdx'
+  pull_request:
+    paths:
+      - 'content/blog/**/*.mdx'
   schedule:
     # Exécute tous les lundis à 14:00 UTC (15:00 CET, 16:00 CEST)
     - cron: '0 14 * * 1'
@@ -15,27 +23,40 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
       
       - name: Fix missing metadata
         run: node scripts/fix-missing-metadata.js
       
-      - name: Commit and push changes (if any)
+      - name: Validate metadata on PR (no push)
+        if: github.event_name == 'pull_request'
         run: |
-          git config --local user.email "bot@github.com"
-          git config --local user.name "Blog Auto-Builder Bot"
+          git add content/blog/
+          if git diff-index --quiet HEAD --; then
+            echo "✅ Metadata OK"
+          else
+            echo "❌ Missing metadata detected. Run: node scripts/fix-missing-metadata.js"
+            git --no-pager diff --name-only
+            exit 1
+          fi
+
+      - name: Commit and push changes (push to main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add content/blog/
           if git diff-index --quiet HEAD --; then
             echo "✅ No metadata changes needed"
           else
-            git commit -m "🤖 Auto-fixed: Missing metadata added - $(date +'%Y-%m-%d %H:%M UTC')"
+            git commit -m "chore: auto-add missing blog metadata [skip ci]"
             git push origin HEAD:main
             echo "✅ Metadata changes pushed"
           fi
