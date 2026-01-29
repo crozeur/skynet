@@ -35,3 +35,6 @@ yarn-error.log*
 
 # local test helpers
 /public/test-api.html
+
+# generated blog artifacts (created by scripts/build-blog.js)
+/public/blog-data/*.json
