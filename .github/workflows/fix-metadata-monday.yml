@@ -34,6 +34,9 @@ jobs:
       
       - name: Fix missing metadata
         run: node scripts/fix-missing-metadata.js
+
+      - name: Validate blog metadata
+        run: node scripts/validate-blog-metadata.js
       
       - name: Validate metadata on PR (no push)
         if: github.event_name == 'pull_request'

@@ -10,10 +10,32 @@ function slugFromFilename(filename) {
 }
 
 function slugToTitle(slug) {
+  const acronyms = new Map([
+    ["soc", "SOC"],
+    ["sme", "SME"],
+    ["smes", "SMEs"],
+    ["m365", "M365"],
+    ["aws", "AWS"],
+    ["it", "IT"],
+    ["saas", "SaaS"],
+    ["iam", "IAM"],
+    ["vpn", "VPN"],
+    ["edr", "EDR"],
+    ["mdm", "MDM"],
+    ["siem", "SIEM"],
+    ["api", "API"],
+    ["sso", "SSO"],
+  ]);
+
   return slug
     .split("-")
     .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => {
+      const lower = String(w).toLowerCase();
+      if (acronyms.has(lower)) return acronyms.get(lower);
+      if (/^\d+$/.test(w)) return w;
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    })
     .join(" ");
 }
 
@@ -49,11 +71,43 @@ function escapeJsString(value) {
 
 function inferTitleFromContent(content, fallbackSlug) {
   const lines = String(content || "").split(/\r?\n/);
+  const badStarts = [
+    "intro",
+    "introduction",
+    "quick take",
+    "quick takeaways",
+    "overview",
+    "summary",
+    "conclusion",
+    "faq",
+  ];
+
+  function isBadHeadingTitle(title) {
+    const t = collapseWhitespace(stripMarkdown(title)).toLowerCase();
+    if (!t) return true;
+    return badStarts.some((prefix) => t === prefix || t.startsWith(prefix + " ") || t.startsWith(prefix + "("));
+  }
+
+  // Prefer a real H1 as the article title.
   for (const line of lines) {
     const trimmed = line.trim();
-    const heading = trimmed.match(/^#{1,3}\s+(.+)$/);
-    if (heading && heading[1]) return stripMarkdown(heading[1]);
+    const h1 = trimmed.match(/^#\s+(.+)$/);
+    if (h1 && h1[1] && !isBadHeadingTitle(h1[1])) return stripMarkdown(h1[1]);
   }
+
+  // If the author used H2/H3 as a title at the very top, accept it only if it's not generic.
+  for (let i = 0; i < Math.min(lines.length, 8); i++) {
+    const trimmed = String(lines[i] || "").trim();
+    if (!trimmed) continue;
+    const heading = trimmed.match(/^#{2,3}\s+(.+)$/);
+    if (heading && heading[1] && !isBadHeadingTitle(heading[1])) {
+      const candidate = stripMarkdown(heading[1]);
+      if (candidate.split(/\s+/).filter(Boolean).length >= 3) return candidate;
+    }
+    // Stop early once we hit normal text.
+    if (!/^#{1,6}\s+/.test(trimmed)) break;
+  }
+
   return slugToTitle(fallbackSlug);
 }
 
@@ -77,8 +131,19 @@ function inferDescriptionFromContent(content) {
 function inferPillarFromSlug(slug) {
   const s = String(slug || "").toLowerCase();
   if (s.includes("audit")) return "AUDIT";
-  if (s.includes("soc") || s.includes("alert") || s.includes("triage")) return "SOC";
-  if (s.includes("cloud") || s.includes("aws") || s.includes("m365") || s.includes("microsoft-365")) return "CLOUD";
+  // Cloud keywords must win even if the slug also contains SOC-related terms.
+  if (
+    s.includes("cloud") ||
+    s.includes("aws") ||
+    s.includes("azure") ||
+    s.includes("gcp") ||
+    s.includes("m365") ||
+    s.includes("microsoft-365") ||
+    s.includes("iam") ||
+    s.includes("storage")
+  )
+    return "CLOUD";
+  if (s.includes("soc") || s.includes("alert") || s.includes("triage") || s.includes("playbook")) return "SOC";
   return "SOC";
 }
 
