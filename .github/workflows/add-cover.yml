@@ -1,0 +1,28 @@
+name: Add Cover Image from Webhook
+
+on:
+  repository_dispatch:
+    types: [add_cover_image]
+
+jobs:
+  add-cover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Add coverImage to metadata
+        run: |
+          FILE="${{ github.event.client_payload.file_path }}"
+          URL="${{ github.event.client_payload.image_url }}"
+          TITLE="${{ github.event.client_payload.cover_alt }}"
+          
+          # Ajoute coverImage et coverAlt juste après title
+          sed -i "/title:/a\  coverImage: \"$URL\",\n  coverAlt: \"$TITLE\"," "$FILE"
+          
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add "$FILE"
+          git commit -m "✨ Add cover image to article"
+          git push
