@@ -32,47 +32,46 @@ jobs:
         run: |
           set -euo pipefail
 
-          python3 - << 'PY'
-import json
-import os
-import re
+          python3 - <<'PY'
+          import json
+          import os
+          import re
 
-event_path = os.environ.get("GITHUB_EVENT_PATH")
-if not event_path:
-    raise SystemExit("❌ Missing GITHUB_EVENT_PATH")
+          event_path = os.environ.get("GITHUB_EVENT_PATH")
+          if not event_path:
+            raise SystemExit("❌ Missing GITHUB_EVENT_PATH")
 
-with open(event_path, "r", encoding="utf-8") as f:
-    event = json.load(f)
+          with open(event_path, "r", encoding="utf-8") as f:
+            event = json.load(f)
 
-inputs = event.get("inputs") or {}
-payload = event.get("client_payload") or {}
+          inputs = event.get("inputs") or {}
+          payload = event.get("client_payload") or {}
 
-file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
-url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
-alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
+          file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
+          url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
+          alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
 
-if not file_path or not url or not alt:
-    raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
+          if not file_path or not url or not alt:
+            raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
 
-if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
-    raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
+          if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
+            raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
 
-if not os.path.isfile(file_path):
-    raise SystemExit(f"❌ File not found: {file_path}")
+          if not os.path.isfile(file_path):
+            raise SystemExit(f"❌ File not found: {file_path}")
 
-slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
-
-print(f"ℹ️  Target file: {file_path}")
-print(f"ℹ️  Slug: {slug}")
-print(f"ℹ️  Image URL: {url}")
+          slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
+          print(f"ℹ️  Target file: {file_path}")
+          print(f"ℹ️  Slug: {slug}")
+          print(f"ℹ️  Image URL: {url}")
 
           with open(file_path, "r", encoding="utf-8") as f:
-              src = f.read()
+            src = f.read()
 
           start_re = re.compile(r"export\s+const\s+metadata\s*=\s*\{")
           m = start_re.search(src)
           if not m:
-              raise SystemExit(f"No `export const metadata = {{` block found in {file_path}")
+            raise SystemExit(f"No `export const metadata = {{` block found in {file_path}")
 
           brace_start = m.end() - 1  # index at '{'
           brace_count = 0
@@ -82,33 +81,33 @@ print(f"ℹ️  Image URL: {url}")
           end_idx = -1
 
           for i in range(brace_start, len(src)):
-              ch = src[i]
-              if in_str:
-                  if escape:
-                      escape = False
-                      continue
-                  if ch == "\\":
-                      escape = True
-                      continue
-                  if ch == str_ch:
-                      in_str = False
-                      str_ch = ""
-                  continue
-              else:
-                  if ch in ("\"", "'"):
-                      in_str = True
-                      str_ch = ch
-                      continue
-                  if ch == "{":
-                      brace_count += 1
-                  elif ch == "}":
-                      brace_count -= 1
-                      if brace_count == 0:
-                          end_idx = i
-                          break
+            ch = src[i]
+            if in_str:
+              if escape:
+                escape = False
+                continue
+              if ch == "\\":
+                escape = True
+                continue
+              if ch == str_ch:
+                in_str = False
+                str_ch = ""
+              continue
+            else:
+              if ch in ('"', "'"):
+                in_str = True
+                str_ch = ch
+                continue
+              if ch == "{":
+                brace_count += 1
+              elif ch == "}":
+                brace_count -= 1
+                if brace_count == 0:
+                  end_idx = i
+                  break
 
           if end_idx == -1:
-              raise SystemExit(f"Could not find end of metadata object in {file_path}")
+            raise SystemExit(f"Could not find end of metadata object in {file_path}")
 
           meta_obj = src[brace_start : end_idx + 1]
           meta_lines = meta_obj.splitlines(True)
@@ -117,25 +116,25 @@ print(f"ℹ️  Image URL: {url}")
           title_line_re = re.compile(r"^(\s*)title\s*:\s*([\"']).*\2\s*,?\s*$")
           indent = "  "
           for idx, line in enumerate(meta_lines):
-              mm = title_line_re.match(line)
-              if mm:
-                  title_line_idx = idx
-                  indent = mm.group(1)
-                  break
+            mm = title_line_re.match(line)
+            if mm:
+              title_line_idx = idx
+              indent = mm.group(1)
+              break
 
           if title_line_idx is None:
-              raise SystemExit(f"No `title:` field found inside metadata object in {file_path}")
+            raise SystemExit(f"No `title:` field found inside metadata object in {file_path}")
 
           def make_field_line(key: str, value: str) -> str:
-              return f"{indent}{key}: {json.dumps(value)},\n"
+            return f"{indent}{key}: {json.dumps(value)},\n"
 
           def upsert_field(key: str, value: str):
-              field_re = re.compile(rf"^(\s*){re.escape(key)}\s*:\s*")
-              for i, line in enumerate(meta_lines):
-                  if field_re.match(line):
-                      meta_lines[i] = make_field_line(key, value)
-                      return
-              meta_lines.insert(title_line_idx + 1, make_field_line(key, value))
+            field_re = re.compile(rf"^(\s*){re.escape(key)}\s*:\s*")
+            for i, line in enumerate(meta_lines):
+              if field_re.match(line):
+                meta_lines[i] = make_field_line(key, value)
+                return
+            meta_lines.insert(title_line_idx + 1, make_field_line(key, value))
 
           upsert_field("coverImage", url)
           upsert_field("coverAlt", alt)
@@ -144,13 +143,13 @@ print(f"ℹ️  Image URL: {url}")
           out = src[:brace_start] + new_meta_obj + src[end_idx + 1 :]
 
           with open(file_path, "w", encoding="utf-8") as f:
-              f.write(out)
+            f.write(out)
 
           github_output = os.environ.get("GITHUB_OUTPUT")
           if github_output:
-              with open(github_output, "a", encoding="utf-8") as f:
-                  f.write(f"file_path={file_path}\n")
-                  f.write(f"slug={slug}\n")
+            with open(github_output, "a", encoding="utf-8") as f:
+              f.write(f"file_path={file_path}\n")
+              f.write(f"slug={slug}\n")
 
           print(f"✅ Updated coverImage/coverAlt in {file_path}")
           PY
@@ -165,8 +164,8 @@ print(f"ℹ️  Image URL: {url}")
           fi
 
           echo "ℹ️  Staging: ${FILE_PATH}"
-
           git add "$FILE_PATH"
+
           if git diff --cached --quiet; then
             echo "✅ No changes to commit"
             exit 0
