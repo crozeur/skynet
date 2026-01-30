@@ -333,14 +333,32 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   
                   {/* Cover image/gradient section */}
                   {metadata.coverImage ? (
-                    <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-gray-200 dark:bg-gray-800">
-                      <Image 
-                        src={metadata.coverImage} 
-                        alt={metadata.coverAlt ?? 'Blog cover'} 
-                        fill 
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40 group-hover:to-black/50 transition-colors duration-500" />
+                    <div className="relative w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      {/* Use a stable aspect ratio (less cropping than a short fixed height) */}
+                      <div className="relative aspect-[16/9] sm:aspect-[16/8]">
+                        {/* Blurred background so the image always looks full + premium */}
+                        <Image
+                          src={metadata.coverImage}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                          className="object-cover scale-110 blur-2xl opacity-60"
+                        />
+                        {/* Foreground image (contain = minimal crop) */}
+                        <div className="absolute inset-0 p-3 sm:p-4">
+                          <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 shadow-inner">
+                            <Image
+                              src={metadata.coverImage}
+                              alt={metadata.coverAlt ?? "Blog cover"}
+                              fill
+                              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                              className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                            />
+                          </div>
+                        </div>
+                        {/* Contrast overlay for text readability in hover states */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 group-hover:to-black/40 transition-colors duration-500" />
+                      </div>
                     </div>
                   ) : (
                     <div className={`h-48 sm:h-52 w-full bg-gradient-to-br ${pillarColors[metadata.pillar]} relative overflow-hidden`}>

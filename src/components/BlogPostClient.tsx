@@ -124,15 +124,34 @@ export function BlogPostClient({ post }: { post: PostData }) {
           <article className="max-w-4xl mx-auto">
           {/* Hero cover image */}
           {metadata.coverImage && (
-            <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 h-80 shadow-2xl">
-              <Image
-                src={metadata.coverImage}
-                alt={metadata.coverAlt ?? "Article cover"}
-                fill
-                sizes="(min-width: 1024px) 896px, 100vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl bg-gray-100 dark:bg-gray-800">
+              <div className="relative aspect-[16/9] sm:aspect-[16/8]">
+                {/* Blurred background fill */}
+                <Image
+                  src={metadata.coverImage}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 896px, 100vw"
+                  className="object-cover scale-110 blur-2xl opacity-60"
+                  priority
+                />
+
+                {/* Foreground image (minimal crop) */}
+                <div className="absolute inset-0 p-4 sm:p-6">
+                  <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 shadow-inner">
+                    <Image
+                      src={metadata.coverImage}
+                      alt={metadata.coverAlt ?? "Article cover"}
+                      fill
+                      sizes="(min-width: 1024px) 896px, 100vw"
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10" />
+              </div>
             </div>
           )}
           
