@@ -87,7 +87,15 @@ export function BlogPostClient({ post }: { post: PostData }) {
   }, [content]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Subtle background effects (light mode) */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(59,130,246,0.14),transparent_38%),radial-gradient(circle_at_86%_8%,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_55%_92%,rgba(99,102,241,0.10),transparent_40%)] dark:bg-[radial-gradient(circle_at_18%_14%,rgba(59,130,246,0.20),transparent_38%),radial-gradient(circle_at_86%_8%,rgba(56,189,248,0.16),transparent_34%),radial-gradient(circle_at_55%_92%,rgba(99,102,241,0.14),transparent_40%)]" />
+        <div className="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-blue-500/10 blur-3xl dark:bg-blue-500/0" />
+        <div className="absolute -bottom-48 -left-48 h-[30rem] w-[30rem] rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-400/0" />
+        <div className="absolute inset-0 opacity-[0.18] dark:opacity-0 [background-image:linear-gradient(to_right,rgba(59,130,246,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.10)_1px,transparent_1px)] [background-size:88px_88px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_78%)]" />
+      </div>
+
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-800 z-50">
         <div 
@@ -110,8 +118,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
         </div>
       )}
 
-      <div className="transition-opacity duration-300" style={{opacity: isTranslating ? 0.5 : 1}}>
-        <Container className="py-16 sm:py-20 lg:py-24">
+      <div className="relative transition-opacity duration-300" style={{opacity: isTranslating ? 0.5 : 1}}>
+        <Container className="relative py-16 sm:py-20 lg:py-24">
           {/* Back Button */}
           <Link
             href="/blog"

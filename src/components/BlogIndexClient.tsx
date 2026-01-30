@@ -109,8 +109,20 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
   }, [filterPillar, filterTag, searchQuery]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      <Container className="py-8 sm:py-12 lg:py-16">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Subtle background effects (light mode) */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(59,130,246,0.14),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_45%_85%,rgba(99,102,241,0.10),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_18%,rgba(59,130,246,0.20),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(56,189,248,0.16),transparent_34%),radial-gradient(circle_at_45%_85%,rgba(99,102,241,0.14),transparent_40%)]" />
+
+        {/* Soft blobs */}
+        <div className="absolute -top-36 -right-36 h-[26rem] w-[26rem] rounded-full bg-blue-500/10 blur-3xl dark:bg-blue-500/0" />
+        <div className="absolute -bottom-44 -left-44 h-[28rem] w-[28rem] rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-400/0" />
+
+        {/* Faint grid for depth (only really visible in light mode) */}
+        <div className="absolute inset-0 opacity-[0.22] dark:opacity-0 [background-image:linear-gradient(to_right,rgba(59,130,246,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.10)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_75%)]" />
+      </div>
+
+      <Container className="relative py-8 sm:py-12 lg:py-16">
         {/* Modern Hero Section */}
         <div className="relative mb-16 overflow-hidden">
           {/* Background gradient */}
