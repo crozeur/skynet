@@ -2,6 +2,78 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Professional French glossary
 const frenchGlossary: Record<string, string> = {
+  // Keep common acronyms / product names as-is
+  "mfa": "MFA",
+  "2fa": "2FA",
+  "sso": "SSO",
+  "iam": "IAM",
+  "siem": "SIEM",
+  "soc": "SOC",
+  "edr": "EDR",
+  "xdr": "XDR",
+  "mdr": "MDR",
+  "dspm": "DSPM",
+  "dmarc": "DMARC",
+  "dkim": "DKIM",
+  "spf": "SPF",
+  "cve": "CVE",
+  "cisa": "CISA",
+  "nist": "NIST",
+  "iso": "ISO",
+  "cis": "CIS",
+
+  // Cloud / vendors
+  "microsoft 365": "Microsoft 365",
+  "m365": "Microsoft 365",
+  "office 365": "Microsoft 365",
+  "azure": "Azure",
+  "azure ad": "Microsoft Entra ID",
+  "entra id": "Microsoft Entra ID",
+  "aws": "AWS",
+  "amazon web services": "AWS",
+  "gcp": "GCP",
+  "google cloud": "Google Cloud",
+  "cloudflare": "Cloudflare",
+  "github": "GitHub",
+
+  // Microsoft security stack
+  "microsoft defender": "Microsoft Defender",
+  "defender for endpoint": "Microsoft Defender for Endpoint",
+  "defender for office 365": "Microsoft Defender for Office 365",
+  "microsoft sentinel": "Microsoft Sentinel",
+  "intune": "Intune",
+  "powershell": "PowerShell",
+
+  // Common IT/security phrases
+  "identity and access management": "gestion des identités et des accès",
+  "endpoint detection and response": "détection et réponse sur les terminaux",
+  "security information and event management": "gestion des informations et des événements de sécurité",
+  "single sign-on": "authentification unique",
+  "multi-factor authentication": "authentification multifacteur",
+  "conditional access": "accès conditionnel",
+  "zero trust": "Zero Trust",
+  "attack surface": "surface d'attaque",
+  "attack chain": "chaîne d'attaque",
+  "threat actor": "acteur malveillant",
+  "kill chain": "kill chain",
+  "lateral movement": "mouvement latéral",
+  "privilege escalation": "élévation de privilèges",
+  "account takeover": "prise de contrôle de compte",
+  "data exfiltration": "exfiltration de données",
+  "incident ticket": "ticket d'incident",
+  "false positive": "faux positif",
+  "true positive": "vrai positif",
+  "baseline": "ligne de base",
+  "hardening": "durcissement",
+  "logging": "journalisation",
+  "audit logs": "journaux d'audit",
+  "audit trail": "piste d'audit",
+  "threat hunting": "chasse aux menaces",
+  "alert triage": "triage des alertes",
+  "playbook": "playbook",
+  "runbook": "runbook",
+  "tabletop exercise": "exercice sur table",
+
   cybersecurity: "cybersécurité",
   cybersecure: "cybersécurisé",
   "threat detection": "détection des menaces",
@@ -9,8 +81,6 @@ const frenchGlossary: Record<string, string> = {
   incident: "incident",
   vulnerability: "vulnérabilité",
   compliance: "conformité",
-  soc: "SOC",
-  siem: "SIEM",
   phishing: "hameçonnage",
   ransomware: "rançongiciel",
   malware: "malveillance",
@@ -30,6 +100,82 @@ const frenchGlossary: Record<string, string> = {
   assessment: "évaluation",
   posture: "posture",
 };
+
+function protectTechnicalTokens(input: string): { text: string; restore: (s: string) => string } {
+  const replacements: Array<{ key: string; value: string }> = [];
+  let text = input;
+
+  // Protect URLs, emails, IPs, hashes, CVEs, Windows Event IDs, code-ish tokens
+  const patterns: RegExp[] = [
+    /https?:\/\/[^\s)\]]+/gi,
+    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+    /\b\d{1,3}(?:\.\d{1,3}){3}\b/g,
+    /\b(?:[A-Fa-f0-9]{32}|[A-Fa-f0-9]{40}|[A-Fa-f0-9]{64})\b/g,
+    /\bCVE-\d{4}-\d{4,7}\b/gi,
+    /\bEvent\s*ID\s*\d{1,6}\b/gi,
+    /\bKB\d{4,8}\b/gi,
+    /\b[Tt]enant\s*ID\b/gi,
+    /\b[A-Z]{2,10}-\d{2,}\b/g,
+    /`[^`]+`/g,
+  ];
+
+  const protectMatch = (m: string) => {
+    const key = `__SKY_TOK_${replacements.length}__`;
+    replacements.push({ key, value: m });
+    return key;
+  };
+
+  for (const re of patterns) {
+    text = text.replace(re, protectMatch);
+  }
+
+  // Protect common product names / acronyms in running text (avoid weird declensions)
+  const protectedLiterals = [
+    "Microsoft 365",
+    "Office 365",
+    "Microsoft Entra ID",
+    "Azure AD",
+    "Azure",
+    "AWS",
+    "GCP",
+    "Google Cloud",
+    "Cloudflare",
+    "GitHub",
+    "PowerShell",
+    "SIEM",
+    "SOC",
+    "EDR",
+    "XDR",
+    "MDR",
+    "MFA",
+    "2FA",
+    "SSO",
+    "IAM",
+    "SPF",
+    "DKIM",
+    "DMARC",
+    "NIST",
+    "CIS",
+    "ISO",
+    "CISA",
+  ].sort((a, b) => b.length - a.length);
+
+  for (const lit of protectedLiterals) {
+    const escaped = lit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`\\b${escaped}\\b`, "g");
+    text = text.replace(re, protectMatch);
+  }
+
+  const restore = (s: string) => {
+    let out = s;
+    for (const { key, value } of replacements) {
+      out = out.split(key).join(value);
+    }
+    return out;
+  };
+
+  return { text, restore };
+}
 
 async function translateWithGoogle(text: string, targetLang: string): Promise<string | null> {
   try {
@@ -121,21 +267,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid text" }, { status: 400 });
     }
 
+    // Protect technical tokens so translators don't mangle them
+    const { text: protectedText, restore } = protectTechnicalTokens(text);
+
     // Try Google Translate first (most reliable)
-    let translated = await translateWithGoogle(text, targetLang);
+    let translated = await translateWithGoogle(protectedText, targetLang);
 
     // If Google fails, try MyMemory
     if (!translated) {
-      translated = await translateWithMyMemory(text, targetLang);
+      translated = await translateWithMyMemory(protectedText, targetLang);
     }
 
     // If both fail, use glossary only
     if (!translated) {
-      translated = applyGlossary(text);
+      translated = applyGlossary(protectedText);
     } else {
       // Apply glossary to improve translation quality
       translated = applyGlossary(translated);
     }
+
+    // Restore protected tokens
+    translated = restore(translated);
 
     return NextResponse.json({ translated });
   } catch (error) {
