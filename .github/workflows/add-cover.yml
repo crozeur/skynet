@@ -162,7 +162,6 @@ jobs:
           git push
 
       - name: Revalidate site cache (optional)
-        if: ${{ secrets.REVALIDATE_SECRET != '' }}
         continue-on-error: true
         env:
           SITE_URL: ${{ secrets.SITE_URL || 'https://skynet-consulting.net' }}
@@ -170,6 +169,11 @@ jobs:
           SLUG: ${{ steps.add_cover.outputs.slug }}
         run: |
           set -euo pipefail
+
+          if [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "ℹ️  No REVALIDATE_SECRET set; skipping revalidate"
+            exit 0
+          fi
 
           if [ -z "${SLUG:-}" ]; then
             echo "ℹ️  No slug output; skipping revalidate"
