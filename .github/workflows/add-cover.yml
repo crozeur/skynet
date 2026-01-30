@@ -5,13 +5,9 @@ on:
     types: [add_cover_image]
   workflow_dispatch:
     inputs:
-      slug:
-        description: "Blog slug (e.g. cloud-misconfigurations-smes-storage-iam-basics)"
-        required: false
-        type: string
       file_path:
         description: "MDX file path (e.g. content/blog/my-slug.mdx)"
-        required: false
+        required: true
         type: string
       image_url:
         description: "Cover image URL"
@@ -37,51 +33,38 @@ jobs:
           set -euo pipefail
 
           python3 - << 'PY'
-          import json
-          import os
-          import re
+import json
+import os
+import re
 
-          event_path = os.environ.get("GITHUB_EVENT_PATH")
-          with open(event_path, "r", encoding="utf-8") as f:
-              event = json.load(f)
+event_path = os.environ.get("GITHUB_EVENT_PATH")
+if not event_path:
+    raise SystemExit("❌ Missing GITHUB_EVENT_PATH")
 
-          inputs = event.get("inputs") or {}
-          payload = event.get("client_payload") or {}
+with open(event_path, "r", encoding="utf-8") as f:
+    event = json.load(f)
 
-            slug_in = (inputs.get("slug") or payload.get("slug") or "").strip()
-            file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
-          url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
-          alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
+inputs = event.get("inputs") or {}
+payload = event.get("client_payload") or {}
 
-            if not url or not alt:
-              raise SystemExit("❌ Missing payload. Expecting image_url and cover_alt")
+file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
+url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
+alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
 
-              if not file_path:
-                if not slug_in:
-                raise SystemExit("❌ Missing target. Provide either slug or file_path")
-                if not re.match(r"^[a-z0-9-]+$", slug_in):
-                  raise SystemExit(f"❌ Invalid slug format: {slug_in}")
-                file_path = f"content/blog/{slug_in}.mdx"
+if not file_path or not url or not alt:
+    raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
 
-          if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
-              raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
+if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
+    raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
 
-          if not os.path.isfile(file_path):
-              raise SystemExit(f"❌ File not found: {file_path}")
+if not os.path.isfile(file_path):
+    raise SystemExit(f"❌ File not found: {file_path}")
 
-              # Derive slug from file_path (source of truth)
-              slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
+slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
 
-              # Safety: if caller provided BOTH slug and file_path, they must match.
-              if slug_in and slug_in != slug:
-                raise SystemExit(
-                  f"❌ Payload mismatch: slug='{slug_in}' but file_path points to '{slug}'. "
-                  "Send only slug (recommended) or ensure file_path matches."
-                )
-
-            print(f"ℹ️  Target file: {file_path}")
-            print(f"ℹ️  Slug: {slug}")
-            print(f"ℹ️  Image URL: {url}")
+print(f"ℹ️  Target file: {file_path}")
+print(f"ℹ️  Slug: {slug}")
+print(f"ℹ️  Image URL: {url}")
 
           with open(file_path, "r", encoding="utf-8") as f:
               src = f.read()
@@ -176,6 +159,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           FILE_PATH=$(python3 -c "import json,os; d=json.load(open(os.environ['GITHUB_EVENT_PATH'])); i=d.get('inputs') or {}; p=d.get('client_payload') or {}; print((i.get('file_path') or p.get('file_path') or '').strip())")
+          if [ -z "${FILE_PATH:-}" ]; then
+            echo "❌ Missing file_path in event payload"
+            exit 1
+          fi
+
+          echo "ℹ️  Staging: ${FILE_PATH}"
 
           git add "$FILE_PATH"
           if git diff --cached --quiet; then
