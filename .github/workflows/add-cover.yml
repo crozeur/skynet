@@ -164,7 +164,7 @@ jobs:
       - name: Revalidate site cache (optional)
         if: ${{ secrets.REVALIDATE_SECRET != '' }}
         env:
-          SITE_URL: ${{ secrets.SITE_URL || 'https://www.skynet-consulting.net' }}
+          SITE_URL: ${{ secrets.SITE_URL || 'https://skynet-consulting.net' }}
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
           SLUG: ${{ steps.add_cover.outputs.slug }}
         run: |
@@ -175,8 +175,11 @@ jobs:
             exit 0
           fi
 
+          SITE_URL="${SITE_URL/https:\/\/www.skynet-consulting.net/https:\/\/skynet-consulting.net}"
+          SITE_URL="${SITE_URL/http:\/\/www.skynet-consulting.net/http:\/\/skynet-consulting.net}"
+
           echo "ℹ️  Revalidating /blog and /blog/${SLUG}"
-          curl -sS -X POST "${SITE_URL}/api/revalidate" \
+          curl -sS -L -X POST "${SITE_URL}/api/revalidate" \
             -H "Content-Type: application/json" \
             -H "x-revalidate-secret: ${REVALIDATE_SECRET}" \
             --data "{\"slug\":\"${SLUG}\"}" \

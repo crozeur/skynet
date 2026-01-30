@@ -10,7 +10,7 @@ on:
       site_url:
         description: "Base site URL"
         required: false
-        default: "https://www.skynet-consulting.net"
+        default: "https://skynet-consulting.net"
         type: string
 
 jobs:
@@ -31,9 +31,13 @@ jobs:
             exit 1
           fi
 
+          # Avoid www -> apex redirect (drops or delays headers depending on client)
+          SITE_URL="${SITE_URL/https:\/\/www.skynet-consulting.net/https:\/\/skynet-consulting.net}"
+          SITE_URL="${SITE_URL/http:\/\/www.skynet-consulting.net/http:\/\/skynet-consulting.net}"
+
           echo "ℹ️  Calling ${SITE_URL}/api/revalidate for slug=${SLUG}"
 
-          http_code=$(curl -sS -o response.json -w "%{http_code}" \
+          http_code=$(curl -sS -L -o response.json -w "%{http_code}" \
             -X POST "${SITE_URL}/api/revalidate" \
             -H "Content-Type: application/json" \
             -H "x-revalidate-secret: ${REVALIDATE_SECRET}" \
