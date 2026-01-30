@@ -24,8 +24,13 @@ permissions:
 jobs:
   add-cover:
     runs-on: ubuntu-latest
+    concurrency:
+      group: add-cover-image
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Add cover image to MDX metadata (commit & push)
         id: add_cover
@@ -172,7 +177,28 @@ jobs:
           fi
 
           git commit -m "✨ Add cover image to article"
-          git push
+
+          # Prevent occasional non-fast-forward failures when multiple dispatches land close together.
+          # We serialize runs via `concurrency`, but still rebase+retry defensively.
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          echo "ℹ️  Syncing with origin/${BRANCH} before push"
+          git pull --rebase origin "${BRANCH}" || true
+
+          for attempt in 1 2 3; do
+            echo "ℹ️  Push attempt ${attempt}/3"
+            if git push origin "HEAD:${BRANCH}"; then
+              echo "✅ Pushed successfully"
+              break
+            fi
+
+            if [ "${attempt}" -eq 3 ]; then
+              echo "❌ Push failed after 3 attempts (likely concurrent updates to the same file)."
+              exit 1
+            fi
+
+            echo "⚠️  Push failed; rebasing and retrying..."
+            git pull --rebase origin "${BRANCH}"
+          done
 
       - name: Revalidate site cache (optional)
         continue-on-error: true
