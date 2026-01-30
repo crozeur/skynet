@@ -4,25 +4,136 @@ on:
   repository_dispatch:
     types: [add_cover_image]
 
+permissions:
+  contents: write
+
 jobs:
   add-cover:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Add coverImage to metadata
+      - uses: actions/checkout@v4
+
+      - name: Add cover image to MDX metadata (commit & push)
+        env:
+          FILE: ${{ github.event.client_payload.file_path }}
+          URL: ${{ github.event.client_payload.image_url }}
+          TITLE: ${{ github.event.client_payload.cover_alt }}
         run: |
-          FILE="${{ github.event.client_payload.file_path }}"
-          URL="${{ github.event.client_payload.image_url }}"
-          TITLE="${{ github.event.client_payload.cover_alt }}"
-          
-          # Ajoute coverImage et coverAlt juste après title
-          sed -i "/title:/a\  coverImage: \"$URL\",\n  coverAlt: \"$TITLE\"," "$FILE"
-          
-      - name: Commit changes
-        run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
+          set -euo pipefail
+
+          if [ -z "${FILE:-}" ] || [ -z "${URL:-}" ] || [ -z "${TITLE:-}" ]; then
+            echo "❌ Missing payload. Expecting client_payload.file_path, image_url, cover_alt"
+            exit 1
+          fi
+
+          if [ ! -f "$FILE" ]; then
+            echo "❌ File not found: $FILE"
+            exit 1
+          fi
+
+          python3 - << 'PY'
+import json
+import os
+import re
+
+file_path = os.environ["FILE"]
+url = os.environ["URL"]
+title = os.environ["TITLE"]
+
+with open(file_path, "r", encoding="utf-8") as f:
+    src = f.read()
+
+start_re = re.compile(r"export\s+const\s+metadata\s*=\s*\{")
+m = start_re.search(src)
+if not m:
+    raise SystemExit(f"No `export const metadata = {{` block found in {file_path}")
+
+brace_start = m.end() - 1  # index at '{'
+brace_count = 0
+in_str = False
+str_ch = ""
+escape = False
+end_idx = -1
+
+for i in range(brace_start, len(src)):
+    ch = src[i]
+    if in_str:
+        if escape:
+            escape = False
+            continue
+        if ch == "\\":
+            escape = True
+            continue
+        if ch == str_ch:
+            in_str = False
+            str_ch = ""
+        continue
+    else:
+        if ch in ("\"", "'"):
+            in_str = True
+            str_ch = ch
+            continue
+        if ch == "{":
+            brace_count += 1
+        elif ch == "}":
+            brace_count -= 1
+            if brace_count == 0:
+                end_idx = i
+                break
+
+if end_idx == -1:
+    raise SystemExit(f"Could not find end of metadata object in {file_path}")
+
+meta_obj = src[brace_start : end_idx + 1]
+meta_lines = meta_obj.splitlines(True)
+
+# Find title line inside metadata object
+title_line_idx = None
+title_line_re = re.compile(r"^(\s*)title\s*:\s*([\"']).*\2\s*,?\s*$")
+for idx, line in enumerate(meta_lines):
+    mm = title_line_re.match(line)
+    if mm:
+        title_line_idx = idx
+        indent = mm.group(1)
+        break
+
+if title_line_idx is None:
+    raise SystemExit(f"No `title:` field found inside metadata object in {file_path}")
+
+def make_field_line(key: str, value: str) -> str:
+    return f"{indent}{key}: {json.dumps(value)},\n"
+
+# Update or insert coverImage / coverAlt in metadata lines
+def upsert_field(key: str, value: str):
+    field_re = re.compile(rf"^(\s*){re.escape(key)}\s*:\s*")
+    for i, line in enumerate(meta_lines):
+        if field_re.match(line):
+            meta_lines[i] = make_field_line(key, value)
+            return
+    # insert right after title line
+    insert_at = title_line_idx + 1
+    meta_lines.insert(insert_at, make_field_line(key, value))
+
+upsert_field("coverImage", url)
+upsert_field("coverAlt", title)
+
+new_meta_obj = "".join(meta_lines)
+out = src[:brace_start] + new_meta_obj + src[end_idx + 1 :]
+
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(out)
+
+print(f"✅ Updated coverImage/coverAlt in {file_path}")
+PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
           git add "$FILE"
+          if git diff --cached --quiet; then
+            echo "✅ No changes to commit"
+            exit 0
+          fi
+
           git commit -m "✨ Add cover image to article"
           git push
