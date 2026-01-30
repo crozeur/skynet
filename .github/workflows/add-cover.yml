@@ -5,9 +5,13 @@ on:
     types: [add_cover_image]
   workflow_dispatch:
     inputs:
+      slug:
+        description: "Blog slug (e.g. cloud-misconfigurations-smes-storage-iam-basics)"
+        required: false
+        type: string
       file_path:
         description: "MDX file path (e.g. content/blog/my-slug.mdx)"
-        required: true
+        required: false
         type: string
       image_url:
         description: "Cover image URL"
@@ -44,18 +48,33 @@ jobs:
           inputs = event.get("inputs") or {}
           payload = event.get("client_payload") or {}
 
-          file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
+            slug = (inputs.get("slug") or payload.get("slug") or "").strip()
+            file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
           url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
           alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
 
-          if not file_path or not url or not alt:
-              raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
+            if not url or not alt:
+              raise SystemExit("❌ Missing payload. Expecting image_url and cover_alt")
+
+            if not file_path:
+              if not slug:
+                raise SystemExit("❌ Missing target. Provide either slug or file_path")
+              if not re.match(r"^[a-z0-9-]+$", slug):
+                raise SystemExit(f"❌ Invalid slug format: {slug}")
+              file_path = f"content/blog/{slug}.mdx"
 
           if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
               raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
 
           if not os.path.isfile(file_path):
               raise SystemExit(f"❌ File not found: {file_path}")
+
+            # Derive slug from file_path (source of truth)
+            slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
+
+            print(f"ℹ️  Target file: {file_path}")
+            print(f"ℹ️  Slug: {slug}")
+            print(f"ℹ️  Image URL: {url}")
 
           with open(file_path, "r", encoding="utf-8") as f:
               src = f.read()
@@ -137,7 +156,6 @@ jobs:
           with open(file_path, "w", encoding="utf-8") as f:
               f.write(out)
 
-          slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
           github_output = os.environ.get("GITHUB_OUTPUT")
           if github_output:
               with open(github_output, "a", encoding="utf-8") as f:
