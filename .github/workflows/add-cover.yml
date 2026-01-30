@@ -159,6 +159,60 @@ jobs:
           print(f"✅ Updated coverImage/coverAlt in {file_path}")
           PY
 
+          # Keep precompiled blog JSON in sync (site reads from public/blog-data/*.json)
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+
+          event_path = os.environ.get("GITHUB_EVENT_PATH")
+          if not event_path:
+            raise SystemExit("❌ Missing GITHUB_EVENT_PATH")
+
+          with open(event_path, "r", encoding="utf-8") as f:
+            event = json.load(f)
+
+          inputs = event.get("inputs") or {}
+          payload = event.get("client_payload") or {}
+
+          file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
+          url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
+          alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
+
+          if not file_path or not url or not alt:
+            raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
+
+          if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
+            raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
+
+          slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
+          json_path = os.path.join("public", "blog-data", f"{slug}.json")
+
+          if not os.path.isfile(json_path):
+            print(f"ℹ️  JSON not found (skipping): {json_path}")
+            raise SystemExit(0)
+
+          with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+          data.setdefault("metadata", {})
+          data["metadata"]["coverImage"] = url
+          data["metadata"]["coverAlt"] = alt
+
+          tm = data.get("translatedMetadata")
+          if isinstance(tm, dict) and isinstance(tm.get("fr"), dict):
+            tm["fr"]["coverImage"] = url
+            # Prefer keeping an existing translated coverAlt if present
+            if not tm["fr"].get("coverAlt"):
+              tm["fr"]["coverAlt"] = alt
+
+          with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+
+          print(f"✅ Updated coverImage/coverAlt in {json_path}")
+          PY
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -170,6 +224,12 @@ jobs:
 
           echo "ℹ️  Staging: ${FILE_PATH}"
           git add "$FILE_PATH"
+
+          SLUG=$(python3 -c "import json,os; d=json.load(open(os.environ['GITHUB_EVENT_PATH'])); i=d.get('inputs') or {}; p=d.get('client_payload') or {}; fp=(i.get('file_path') or p.get('file_path') or '').strip(); print(fp.replace('content/blog/','').replace('.mdx',''))")
+          if [ -n "${SLUG:-}" ] && [ -f "public/blog-data/${SLUG}.json" ]; then
+            echo "ℹ️  Staging: public/blog-data/${SLUG}.json"
+            git add "public/blog-data/${SLUG}.json"
+          fi
 
           if git diff --cached --quiet; then
             echo "✅ No changes to commit"
