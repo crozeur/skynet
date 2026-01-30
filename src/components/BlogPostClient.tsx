@@ -26,7 +26,9 @@ export function BlogPostClient({ post }: { post: PostData }) {
     } else if (language === "fr") {
       // Use pre-translated content from build time
       if (post.translatedMetadata?.fr) {
-        setMetadata(post.translatedMetadata.fr);
+        // Merge so optional fields (e.g. coverImage/coverAlt) don't disappear
+        // if the translated metadata doesn't include them.
+        setMetadata({ ...post.metadata, ...post.translatedMetadata.fr });
       }
       if (post.translatedContent?.fr) {
         setContent(post.translatedContent.fr);
