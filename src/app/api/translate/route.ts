@@ -74,6 +74,45 @@ const frenchGlossary: Record<string, string> = {
   "runbook": "runbook",
   "tabletop exercise": "exercice sur table",
 
+  // Identity / auth / access wording
+  "sign-in": "connexion",
+  "login": "connexion",
+  "failed login": "échec de connexion",
+  "password reset": "réinitialisation de mot de passe",
+  "session": "session",
+  "sessions": "sessions",
+  "token": "jeton",
+  "tokens": "jetons",
+  "revoke": "révoquer",
+  "revocation": "révocation",
+  "role": "rôle",
+  "roles": "rôles",
+  "role assignment": "attribution de rôles",
+  "privileged": "privilégié",
+  "privileged access": "accès privilégié",
+  "admin": "admin",
+  "administrator": "administrateur",
+
+  // Operations wording
+  "query": "requête",
+  "queries": "requêtes",
+  "rule": "règle",
+  "rules": "règles",
+  "inbox rule": "règle de boîte de réception",
+  "forwarding": "transfert",
+  "mailbox": "boîte mail",
+  "mailbox rule": "règle de boîte mail",
+  "telemetry": "télémétrie",
+  "timeline": "chronologie",
+  "artifact": "artefact",
+  "artifacts": "artefacts",
+  "root cause": "cause racine",
+  "follow-on": "suite",
+  "blast radius": "rayon d'impact",
+  "tuning": "tuning",
+  "noise": "bruit",
+  "signal": "signal",
+
   cybersecurity: "cybersécurité",
   cybersecure: "cybersécurisé",
   "threat detection": "détection des menaces",
@@ -100,6 +139,47 @@ const frenchGlossary: Record<string, string> = {
   assessment: "évaluation",
   posture: "posture",
 };
+
+function looksLikeFrench(text: string): boolean {
+  // Heuristic: avoid translating text that is already in French.
+  const sample = text.slice(0, 1200).toLowerCase();
+  const tokens = [
+    " le ",
+    " la ",
+    " les ",
+    " des ",
+    " une ",
+    " un ",
+    " et ",
+    " pour ",
+    " avec ",
+    " sur ",
+    " dans ",
+    " que ",
+    " est ",
+    " sont ",
+    " d'",
+    " l'",
+    " sécurité",
+    " alerte",
+  ];
+
+  const hits = tokens.reduce((acc, t) => acc + (sample.includes(t) ? 1 : 0), 0);
+  const hasFrenchDiacritics = /[àâäçéèêëîïôöùûüÿœæ]/i.test(sample);
+  return hits >= 5 || (hits >= 3 && hasFrenchDiacritics);
+}
+
+function postProcessFrenchTypography(text: string): string {
+  // Conservative cleanup of common spacing artifacts.
+  let out = text;
+  out = out.replace(/\s+,/g, ",");
+  out = out.replace(/\s+\./g, ".");
+  out = out.replace(/\(\s+/g, "(");
+  out = out.replace(/\s+\)/g, ")");
+  out = out.replace(/([.!?])([A-Za-zÀ-ÖØ-öø-ÿ])/g, "$1 $2");
+  out = out.replace(/\s{2,}/g, " ");
+  return out;
+}
 
 function protectTechnicalTokens(input: string): { text: string; restore: (s: string) => string } {
   const replacements: Array<{ key: string; value: string }> = [];
@@ -182,7 +262,7 @@ async function translateWithGoogle(text: string, targetLang: string): Promise<st
     // Google Translate via gtx endpoint
     const encoded = encodeURIComponent(text);
     const response = await fetch(
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encoded}`,
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encoded}`,
       {
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -209,6 +289,63 @@ async function translateWithGoogle(text: string, targetLang: string): Promise<st
     console.error("Google Translate error:", error);
     return null;
   }
+}
+
+function splitIntoSafeChunks(text: string, maxLen = 1800): string[] {
+  if (text.length <= maxLen) return [text];
+
+  const parts = text.split(/\n\s*\n/g);
+  const chunks: string[] = [];
+  let current = "";
+
+  const flush = () => {
+    if (current.trim()) chunks.push(current);
+    current = "";
+  };
+
+  for (const part of parts) {
+    const candidate = current ? `${current}\n\n${part}` : part;
+    if (candidate.length <= maxLen) {
+      current = candidate;
+      continue;
+    }
+
+    flush();
+
+    if (part.length <= maxLen) {
+      current = part;
+      continue;
+    }
+
+    const sentences = part.split(/(?<=[.!?])\s+/g);
+    let buf = "";
+    for (const s of sentences) {
+      const c = buf ? `${buf} ${s}` : s;
+      if (c.length <= maxLen) {
+        buf = c;
+      } else {
+        if (buf) chunks.push(buf);
+        buf = s;
+      }
+    }
+    if (buf) chunks.push(buf);
+  }
+
+  flush();
+  return chunks.length ? chunks : [text];
+}
+
+async function translatePossiblyLongText(text: string, targetLang: string): Promise<string | null> {
+  const chunks = splitIntoSafeChunks(text);
+  if (chunks.length === 1) return translateWithGoogle(text, targetLang);
+
+  const translatedChunks: string[] = [];
+  for (const chunk of chunks) {
+    const t = await translateWithGoogle(chunk, targetLang);
+    if (!t) return null;
+    translatedChunks.push(t);
+  }
+  return translatedChunks.join("\n\n");
 }
 
 async function translateWithMyMemory(text: string, targetLang: string): Promise<string | null> {
@@ -267,11 +404,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid text" }, { status: 400 });
     }
 
+    if (targetLang === "fr" && looksLikeFrench(text)) {
+      return NextResponse.json({ translated: text });
+    }
+
     // Protect technical tokens so translators don't mangle them
     const { text: protectedText, restore } = protectTechnicalTokens(text);
 
     // Try Google Translate first (most reliable)
-    let translated = await translateWithGoogle(protectedText, targetLang);
+    let translated = await translatePossiblyLongText(protectedText, targetLang);
 
     // If Google fails, try MyMemory
     if (!translated) {
@@ -288,6 +429,10 @@ export async function POST(request: NextRequest) {
 
     // Restore protected tokens
     translated = restore(translated);
+
+    if (targetLang === "fr") {
+      translated = postProcessFrenchTypography(translated);
+    }
 
     return NextResponse.json({ translated });
   } catch (error) {
