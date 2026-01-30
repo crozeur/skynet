@@ -17,6 +17,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
   const translateAbortRef = React.useRef<AbortController | null>(null);
+  const [activeHeadingId, setActiveHeadingId] = React.useState<string | null>(null);
   
   // Handle language change using pre-translated content
   React.useEffect(() => {
@@ -105,20 +106,100 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const [headings, setHeadings] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
 
   React.useEffect(() => {
-    // Extract headings from the HTML content using regex instead of DOM
-    const headingRegex = /<h([23])\s+id="([^"]+)">([^<]+)<\/h\1>/g;
-    const items: Array<{ id: string; text: string; level: number }> = [];
-    let match;
-    
-    while ((match = headingRegex.exec(content)) !== null) {
-      const level = parseInt(match[1]);
-      const id = match[2];
-      const text = match[3];
-      items.push({ id, text, level });
+    // Extract headings from the HTML content.
+    // Regex is too fragile here (headings may contain nested HTML like <code>/<a>,
+    // or have extra attributes), so we parse and read textContent.
+    try {
+      const doc = new DOMParser().parseFromString(content, "text/html");
+      const els = Array.from(doc.querySelectorAll("h2[id], h3[id]"));
+
+      const items = els
+        .map((el) => {
+          const id = el.getAttribute("id")?.trim() ?? "";
+          const level = Number.parseInt(el.tagName.slice(1), 10);
+          const text = (el.textContent ?? "").replace(/\s+/g, " ").trim();
+          return { id, text, level };
+        })
+        .filter((h) => (h.level === 2 || h.level === 3) && Boolean(h.id) && Boolean(h.text));
+
+      setHeadings(items);
+    } catch {
+      setHeadings([]);
     }
-    
-    setHeadings(items);
   }, [content]);
+
+  // Scroll spy: highlight current section in TOC
+  React.useEffect(() => {
+    if (!headings.length) {
+      setActiveHeadingId(null);
+      return;
+    }
+
+    const container = articleRef.current;
+    if (!container) return;
+
+    // Best-effort CSS.escape for querySelector
+    const escapeId = (id: string) => {
+      const cssAny = (globalThis as unknown as { CSS?: { escape?: (value: string) => string } }).CSS;
+      if (cssAny?.escape) return cssAny.escape(id);
+      return id.replace(/([ #;?%&,.+*~\\:'"!^$\[\]()=>|\/])/g, "\\$1");
+    };
+
+    const elements = headings
+      .map((h) => container.querySelector(`#${escapeId(h.id)}`) as HTMLElement | null)
+      .filter((el): el is HTMLElement => Boolean(el));
+
+    if (!elements.length) {
+      setActiveHeadingId(headings[0]?.id ?? null);
+      return;
+    }
+
+    const visible = new Set<string>();
+    let raf: number | null = null;
+
+    const pickActive = () => {
+      // Choose the last visible heading in document order
+      for (let i = headings.length - 1; i >= 0; i--) {
+        const id = headings[i]?.id;
+        if (id && visible.has(id)) {
+          setActiveHeadingId(id);
+          return;
+        }
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const target = entry.target as HTMLElement;
+          const id = target.id;
+          if (!id) continue;
+          if (entry.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        }
+
+        // Batch state updates to animation frames to avoid jitter
+        if (raf != null) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(pickActive);
+      },
+      {
+        // Activate slightly below the top so it matches scroll-margin-top / sticky UI
+        root: null,
+        rootMargin: "-120px 0px -70% 0px",
+        threshold: 0,
+      }
+    );
+
+    for (const el of elements) observer.observe(el);
+
+    // Default active: first heading
+    setActiveHeadingId((prev) => prev ?? headings[0]?.id ?? null);
+
+    return () => {
+      if (raf != null) cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
+  }, [headings]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
@@ -260,16 +341,23 @@ export function BlogPostClient({ post }: { post: PostData }) {
           {/* Table of contents - Professional Design */}
           {headings.length > 0 && (
             <div className="mb-12 sticky top-20 z-10">
-              <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 dark:shadow-[0_20px_50px_-30px_rgba(59,130,246,0.55)] dark:hover:shadow-[0_24px_60px_-30px_rgba(59,130,246,0.7)]">
+              <div className="relative overflow-hidden rounded-xl border border-blue-200/70 shadow-[0_18px_70px_-42px_rgba(59,130,246,0.45)] hover:shadow-[0_26px_90px_-44px_rgba(59,130,246,0.55)] transition-shadow duration-300 dark:border-blue-500/30 dark:shadow-[0_20px_50px_-30px_rgba(59,130,246,0.55)] dark:hover:shadow-[0_24px_60px_-30px_rgba(59,130,246,0.7)]">
+                {/* Light-mode glow */}
+                <div className="pointer-events-none absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500/25 via-cyan-400/20 to-indigo-500/20 blur-2xl opacity-60 dark:hidden" aria-hidden />
+
                 {/* Gradient background with blue accent */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-white to-blue-50 dark:from-blue-900/35 dark:via-slate-900 dark:to-slate-950 opacity-95" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-100/90 via-white to-cyan-50/70 dark:from-blue-900/35 dark:via-slate-900 dark:to-slate-950 opacity-95" />
+
+                {/* Top accent line */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-80 dark:opacity-60" aria-hidden />
                 
                 {/* Content */}
-                <div className="relative p-8 backdrop-blur-sm bg-white/60 dark:bg-slate-900/90 border-2 border-blue-200/70 dark:border-blue-500/30">
+                <div className="relative p-8 backdrop-blur-xl bg-white/80 dark:bg-slate-900/90 border-2 border-white/60 dark:border-blue-500/30 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.10)] dark:shadow-none">
                   {/* Header with icon and blue accent bar */}
-                  <div className="relative mb-6 pl-4 border-l-4 border-blue-600 dark:border-blue-400 bg-gradient-to-r from-blue-50/80 to-transparent dark:from-blue-900/35 dark:to-transparent py-3 -ml-4 pr-4 rounded-r dark:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]">
+                  <div className="relative mb-6 pl-4 border-l-4 border-blue-600 dark:border-blue-400 bg-gradient-to-r from-blue-50/90 via-blue-50/40 to-transparent dark:from-blue-900/35 dark:to-transparent py-3 -ml-4 pr-4 rounded-r shadow-[0_10px_30px_-18px_rgba(59,130,246,0.45)] dark:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]">
                     <div className="flex items-center gap-3">
                       <div className="relative">
+                        <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 blur opacity-35 dark:opacity-0" aria-hidden />
                         <div className="relative bg-blue-500 dark:bg-blue-600 p-2.5 rounded-lg shadow-md">
                           <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
@@ -289,29 +377,46 @@ export function BlogPostClient({ post }: { post: PostData }) {
                   
                   {/* TOC List - Clean Professional */}
                   <nav className="space-y-2">
-                    {headings.map((h) => (
-                      <a 
-                        key={h.id} 
-                        href={`#${h.id}`} 
-                        className={`
-                          group flex items-center gap-2.5 px-3 py-2.5 rounded-lg
-                          transition-all duration-200
-                          ${h.level === 2 
-                            ? 'text-slate-800 dark:text-slate-200 font-semibold text-base hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/25 hover:pl-4' 
-                            : 'text-slate-600 dark:text-slate-400 font-medium text-sm ml-2 hover:text-slate-800 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-blue-900/15 hover:ml-3'}
-                        `}
-                      >
-                        {h.level === 2 && (
-                          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shadow-sm" />
-                        )}
-                        {h.level === 3 && (
-                          <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500" />
-                        )}
-                        <span className="line-clamp-2">
-                          {h.text}
-                        </span>
-                      </a>
-                    ))}
+                    {headings.map((h) => {
+                      const isActive = activeHeadingId === h.id;
+                      const isH2 = h.level === 2;
+                      const isH3 = h.level === 3;
+
+                      return (
+                        <a
+                          key={h.id}
+                          href={`#${h.id}`}
+                          aria-current={isActive ? "true" : undefined}
+                          className={`
+                            group flex items-center gap-2.5 rounded-lg
+                            transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950
+                            ${isActive ? 'bg-blue-100/70 shadow-[0_10px_24px_-18px_rgba(59,130,246,0.55)] dark:bg-transparent dark:shadow-none' : ''}
+                            ${isH2
+                              ? 'px-3 py-2.5 text-slate-900 dark:text-slate-200 font-semibold text-base hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50/80 dark:hover:bg-blue-900/25 hover:pl-4 hover:shadow-[0_10px_24px_-18px_rgba(59,130,246,0.55)]'
+                              : 'px-3 py-2 text-slate-800 dark:text-slate-400 font-medium text-sm hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-50/80 dark:hover:bg-blue-900/15'}
+                            ${isH3 ? 'pl-8' : ''}
+                          `}
+                          onClick={() => setActiveHeadingId(h.id)}
+                        >
+                          {isH2 && (
+                            <span
+                              className={`flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shadow-sm ${isActive ? 'ring-2 ring-blue-500/20 dark:ring-0' : ''}`}
+                            />
+                          )}
+
+                          {isH3 && (
+                            <span className="flex items-center gap-2">
+                              <span className="flex-shrink-0 w-4 h-px bg-blue-300/90 dark:bg-blue-500/40" />
+                              <span
+                                className={`flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 ${isActive ? 'ring-2 ring-blue-500/15 dark:ring-0' : ''}`}
+                              />
+                            </span>
+                          )}
+
+                          <span className="line-clamp-2">{h.text}</span>
+                        </a>
+                      );
+                    })}
                   </nav>
                 </div>
               </div>
@@ -363,7 +468,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
               padding-left: 1rem;
               padding-bottom: 1rem;
               border-left: 4px solid #3b82f6;
-              border-bottom: 1px solid #e5e7eb;
+              border-bottom: 0;
               line-height: 1.2;
               letter-spacing: -0.01em;
               scroll-margin-top: 100px;
@@ -377,10 +482,11 @@ export function BlogPostClient({ post }: { post: PostData }) {
               position: absolute;
               bottom: -1rem;
               left: 0;
-              width: 60px;
-              height: 2px;
-              background: linear-gradient(90deg, #3b82f6, transparent);
-              border-radius: 1px;
+              width: min(520px, 100%);
+              height: 4px;
+              background: linear-gradient(90deg, #2563eb 0%, #06b6d4 45%, rgba(6,182,212,0.0) 100%);
+              border-radius: 999px;
+              opacity: 0.95;
             }
             .dark .blog-content h2 {
               color: #f9fafb;
@@ -401,14 +507,30 @@ export function BlogPostClient({ post }: { post: PostData }) {
               line-height: 1.3;
               scroll-margin-top: 100px;
               color: #1e40af;
-              border-bottom: 2px solid #dbeafe;
+              border-bottom: 0;
               display: flex;
               align-items: center;
               gap: 0.5rem;
+              position: relative;
+            }
+            .blog-content h3::after {
+              content: '';
+              position: absolute;
+              bottom: -3px;
+              left: 0;
+              width: min(360px, 100%);
+              height: 3px;
+              background: linear-gradient(90deg, #3b82f6 0%, #22d3ee 55%, rgba(34,211,238,0.0) 100%);
+              border-radius: 999px;
+              opacity: 0.95;
             }
             .dark .blog-content h3 {
               color: #93c5fd;
-              border-bottom-color: #1e3a8a;
+              border-bottom: 0;
+            }
+            .dark .blog-content h3::after {
+              opacity: 0.55;
+              background: linear-gradient(90deg, rgba(96,165,250,0.9) 0%, rgba(34,211,238,0.55) 55%, rgba(34,211,238,0.0) 100%);
             }
 
             /* Paragraphs */
