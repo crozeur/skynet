@@ -342,22 +342,24 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                           alt=""
                           fill
                           sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                          className="object-cover scale-110 blur-2xl opacity-60"
+                          className="object-cover scale-110 blur-2xl opacity-70 saturate-150 contrast-110 transition-transform duration-700 group-hover:scale-[1.15]"
                         />
-                        {/* Foreground image (contain = minimal crop) */}
+                        {/* Foreground image (contain = minimal crop). No solid frame: leftover area shows blurred background. */}
                         <div className="absolute inset-0 p-3 sm:p-4">
-                          <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 shadow-inner">
+                          <div className="relative h-full w-full">
                             <Image
                               src={metadata.coverImage}
                               alt={metadata.coverAlt ?? "Blog cover"}
                               fill
                               sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                              className="object-contain transition-transform duration-500 group-hover:scale-[1.03]"
+                              className="object-contain drop-shadow-[0_30px_90px_rgba(0,0,0,0.40)] transition-transform duration-500 group-hover:scale-[1.04]"
                             />
                           </div>
                         </div>
-                        {/* Contrast overlay for text readability in hover states */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/30 group-hover:to-black/40 transition-colors duration-500" />
+                        {/* Subtle vignette + contrast overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/40 group-hover:to-black/55 transition-colors duration-500" />
+                        <div className="pointer-events-none absolute inset-0 [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+                        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.12),transparent_60%)] opacity-70" />
                       </div>
                     </div>
                   ) : (

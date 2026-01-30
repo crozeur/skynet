@@ -138,19 +138,20 @@ export function BlogPostClient({ post }: { post: PostData }) {
 
                 {/* Foreground image (minimal crop) */}
                 <div className="absolute inset-0 p-4 sm:p-6">
-                  <div className="relative h-full w-full overflow-hidden rounded-xl bg-black/5 dark:bg-white/5 shadow-inner">
+                  <div className="relative h-full w-full">
                     <Image
                       src={metadata.coverImage}
                       alt={metadata.coverAlt ?? "Article cover"}
                       fill
                       sizes="(min-width: 1024px) 896px, 100vw"
-                      className="object-contain"
+                      className="object-contain drop-shadow-[0_30px_90px_rgba(0,0,0,0.40)]"
                       priority
                     />
                   </div>
                 </div>
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-black/10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
+                <div className="pointer-events-none absolute inset-0 [box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
               </div>
             </div>
           )}
