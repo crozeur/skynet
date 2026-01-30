@@ -1,0 +1,51 @@
+name: Test Revalidate Endpoint
+
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "Blog slug to revalidate (e.g. 30-question-security-audit-checklist-sme-it-managers)"
+        required: true
+        type: string
+      site_url:
+        description: "Base site URL"
+        required: false
+        default: "https://www.skynet-consulting.net"
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /api/revalidate
+        env:
+          SITE_URL: ${{ inputs.site_url }}
+          SLUG: ${{ inputs.slug }}
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "❌ Missing GitHub secret: REVALIDATE_SECRET"
+            echo "Add it in: Repo Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+
+          echo "ℹ️  Calling ${SITE_URL}/api/revalidate for slug=${SLUG}"
+
+          http_code=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "${SITE_URL}/api/revalidate" \
+            -H "Content-Type: application/json" \
+            -H "x-revalidate-secret: ${REVALIDATE_SECRET}" \
+            --data "{\"slug\":\"${SLUG}\"}")
+
+          echo "HTTP ${http_code}"
+          cat response.json || true
+          echo
+
+          if [ "${http_code}" != "200" ]; then
+            echo "❌ Revalidate failed"
+            exit 1
+          fi
+
+          echo "✅ Revalidate OK"

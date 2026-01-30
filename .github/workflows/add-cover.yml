@@ -3,20 +3,20 @@ name: Add Cover Image from Webhook
 on:
   repository_dispatch:
     types: [add_cover_image]
-    workflow_dispatch:
-        inputs:
-            file_path:
-                description: "MDX file path (e.g. content/blog/my-slug.mdx)"
-                required: true
-                type: string
-            image_url:
-                description: "Cover image URL"
-                required: true
-                type: string
-            cover_alt:
-                description: "Alt text for the cover image"
-                required: true
-                type: string
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: "MDX file path (e.g. content/blog/my-slug.mdx)"
+        required: true
+        type: string
+      image_url:
+        description: "Cover image URL"
+        required: true
+        type: string
+      cover_alt:
+        description: "Alt text for the cover image"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -28,42 +28,34 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Add cover image to MDX metadata (commit & push)
-        env:
-                    FILE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.file_path || github.event.client_payload.file_path }}
-                    URL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_url || github.event.client_payload.image_url }}
-                    TITLE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.cover_alt || github.event.client_payload.cover_alt }}
+        id: add_cover
         run: |
           set -euo pipefail
-
-                    echo "ℹ️  Event: ${{ github.event_name }}"
-                    echo "ℹ️  File: ${FILE:-}"
-
-          if [ -z "${FILE:-}" ] || [ -z "${URL:-}" ] || [ -z "${TITLE:-}" ]; then
-            echo "❌ Missing payload. Expecting client_payload.file_path, image_url, cover_alt"
-            exit 1
-          fi
-
-                    case "$FILE" in
-                        content/blog/*.mdx) ;;
-                        *)
-                            echo "❌ Refusing to edit unexpected path: $FILE"
-                            exit 1
-                            ;;
-                    esac
-
-          if [ ! -f "$FILE" ]; then
-            echo "❌ File not found: $FILE"
-            exit 1
-          fi
 
           python3 - << 'PY'
           import json
           import os
           import re
 
-          file_path = os.environ["FILE"]
-          url = os.environ["URL"]
-          title = os.environ["TITLE"]
+          event_path = os.environ.get("GITHUB_EVENT_PATH")
+          with open(event_path, "r", encoding="utf-8") as f:
+              event = json.load(f)
+
+          inputs = event.get("inputs") or {}
+          payload = event.get("client_payload") or {}
+
+          file_path = (inputs.get("file_path") or payload.get("file_path") or "").strip()
+          url = (inputs.get("image_url") or payload.get("image_url") or "").strip()
+          alt = (inputs.get("cover_alt") or payload.get("cover_alt") or "").strip()
+
+          if not file_path or not url or not alt:
+              raise SystemExit("❌ Missing payload. Expecting file_path, image_url, cover_alt")
+
+          if not re.match(r"^content/blog/[^/]+\.mdx$", file_path):
+              raise SystemExit(f"❌ Refusing to edit unexpected path: {file_path}")
+
+          if not os.path.isfile(file_path):
+              raise SystemExit(f"❌ File not found: {file_path}")
 
           with open(file_path, "r", encoding="utf-8") as f:
               src = f.read()
@@ -112,9 +104,9 @@ jobs:
           meta_obj = src[brace_start : end_idx + 1]
           meta_lines = meta_obj.splitlines(True)
 
-          # Find title line inside metadata object
           title_line_idx = None
           title_line_re = re.compile(r"^(\s*)title\s*:\s*([\"']).*\2\s*,?\s*$")
+          indent = "  "
           for idx, line in enumerate(meta_lines):
               mm = title_line_re.match(line)
               if mm:
@@ -128,19 +120,16 @@ jobs:
           def make_field_line(key: str, value: str) -> str:
               return f"{indent}{key}: {json.dumps(value)},\n"
 
-          # Update or insert coverImage / coverAlt in metadata lines
           def upsert_field(key: str, value: str):
               field_re = re.compile(rf"^(\s*){re.escape(key)}\s*:\s*")
               for i, line in enumerate(meta_lines):
                   if field_re.match(line):
                       meta_lines[i] = make_field_line(key, value)
                       return
-              # insert right after title line
-              insert_at = title_line_idx + 1
-              meta_lines.insert(insert_at, make_field_line(key, value))
+              meta_lines.insert(title_line_idx + 1, make_field_line(key, value))
 
           upsert_field("coverImage", url)
-          upsert_field("coverAlt", title)
+          upsert_field("coverAlt", alt)
 
           new_meta_obj = "".join(meta_lines)
           out = src[:brace_start] + new_meta_obj + src[end_idx + 1 :]
@@ -148,13 +137,22 @@ jobs:
           with open(file_path, "w", encoding="utf-8") as f:
               f.write(out)
 
+          slug = file_path.removeprefix("content/blog/").removesuffix(".mdx")
+          github_output = os.environ.get("GITHUB_OUTPUT")
+          if github_output:
+              with open(github_output, "a", encoding="utf-8") as f:
+                  f.write(f"file_path={file_path}\n")
+                  f.write(f"slug={slug}\n")
+
           print(f"✅ Updated coverImage/coverAlt in {file_path}")
           PY
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add "$FILE"
+          FILE_PATH=$(python3 -c "import json,os; d=json.load(open(os.environ['GITHUB_EVENT_PATH'])); i=d.get('inputs') or {}; p=d.get('client_payload') or {}; print((i.get('file_path') or p.get('file_path') or '').strip())")
+
+          git add "$FILE_PATH"
           if git diff --cached --quiet; then
             echo "✅ No changes to commit"
             exit 0
@@ -162,3 +160,24 @@ jobs:
 
           git commit -m "✨ Add cover image to article"
           git push
+
+      - name: Revalidate site cache (optional)
+        if: ${{ secrets.REVALIDATE_SECRET != '' }}
+        env:
+          SITE_URL: ${{ secrets.SITE_URL || 'https://www.skynet-consulting.net' }}
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+          SLUG: ${{ steps.add_cover.outputs.slug }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SLUG:-}" ]; then
+            echo "ℹ️  No slug output; skipping revalidate"
+            exit 0
+          fi
+
+          echo "ℹ️  Revalidating /blog and /blog/${SLUG}"
+          curl -sS -X POST "${SITE_URL}/api/revalidate" \
+            -H "Content-Type: application/json" \
+            -H "x-revalidate-secret: ${REVALIDATE_SECRET}" \
+            --data "{\"slug\":\"${SLUG}\"}" \
+            | cat

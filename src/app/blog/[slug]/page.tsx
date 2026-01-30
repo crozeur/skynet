@@ -4,6 +4,8 @@ import type { PostData } from "@/lib/blog";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+export const dynamic = "force-dynamic";
+
 export default async function BlogPostPage({ params }: { params: { slug: string } }) {
   try {
     // Read blog data directly from the compiled JSON files

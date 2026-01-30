@@ -10,6 +10,7 @@
     "validate:blog-metadata": "node scripts/validate-blog-metadata.js",
     "build:blog": "npm run fix:blog-metadata && npm run validate:blog-metadata && node scripts/build-blog.js",
     "build": "npm run build:blog && next build",
+    "revalidate:test": "node scripts/test-revalidate.js",
     "start": "next start",
     "lint": "next lint"
   },
