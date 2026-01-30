@@ -16,26 +16,60 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const [readingProgress, setReadingProgress] = React.useState(0);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const articleRef = React.useRef<HTMLDivElement | null>(null);
+  const translateAbortRef = React.useRef<AbortController | null>(null);
   
   // Handle language change using pre-translated content
   React.useEffect(() => {
+    // Cancel any in-flight translation when switching language/article
+    translateAbortRef.current?.abort();
+    translateAbortRef.current = null;
+
     if (language === "en") {
       // Reset to original content
       setMetadata(post.metadata);
       setContent(post.content);
+      setIsTranslating(false);
     } else if (language === "fr") {
-      // Use pre-translated content from build time
-      if (post.translatedMetadata?.fr) {
-        // Merge so optional fields (e.g. coverImage/coverAlt) don't disappear
-        // if the translated metadata doesn't include them.
-        setMetadata({ ...post.metadata, ...post.translatedMetadata.fr });
+      const hasPretranslated = Boolean(post.translatedMetadata?.fr || post.translatedContent?.fr);
+
+      if (hasPretranslated) {
+        // Use build-time translation when available (fast and cached)
+        if (post.translatedMetadata?.fr) {
+          // Merge so optional fields (e.g. coverImage/coverAlt) don't disappear
+          setMetadata({ ...post.metadata, ...post.translatedMetadata.fr });
+        } else {
+          setMetadata(post.metadata);
+        }
+        setContent(post.translatedContent?.fr ?? post.content);
+        setIsTranslating(false);
+        return;
       }
-      if (post.translatedContent?.fr) {
-        setContent(post.translatedContent.fr);
-      } else {
-        // Fallback to original if translation not available
-        setContent(post.content);
-      }
+
+      // Fallback: translate on demand via /api/translate (Google first)
+      const controller = new AbortController();
+      translateAbortRef.current = controller;
+
+      setIsTranslating(true);
+      (async () => {
+        try {
+          const [translatedMeta, translatedHtml] = await Promise.all([
+            translateArticleMetadata(post.metadata, "fr"),
+            translateHtmlContent(post.content, "fr"),
+          ]);
+
+          if (controller.signal.aborted) return;
+
+          setMetadata({ ...post.metadata, ...translatedMeta });
+          setContent(translatedHtml);
+        } catch {
+          if (controller.signal.aborted) return;
+          // Keep EN content on failure
+          setMetadata(post.metadata);
+          setContent(post.content);
+        } finally {
+          if (!controller.signal.aborted) setIsTranslating(false);
+        }
+      })();
     }
   }, [language, post]);
   
@@ -90,9 +124,9 @@ export function BlogPostClient({ post }: { post: PostData }) {
     <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Subtle background effects (light mode) */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(59,130,246,0.14),transparent_38%),radial-gradient(circle_at_86%_8%,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_55%_92%,rgba(99,102,241,0.10),transparent_40%)] dark:bg-[radial-gradient(circle_at_18%_14%,rgba(59,130,246,0.20),transparent_38%),radial-gradient(circle_at_86%_8%,rgba(56,189,248,0.16),transparent_34%),radial-gradient(circle_at_55%_92%,rgba(99,102,241,0.14),transparent_40%)]" />
-        <div className="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-blue-500/10 blur-3xl dark:bg-blue-500/0" />
-        <div className="absolute -bottom-48 -left-48 h-[30rem] w-[30rem] rounded-full bg-cyan-400/10 blur-3xl dark:bg-cyan-400/0" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_14%,rgba(59,130,246,0.14),transparent_38%),radial-gradient(circle_at_86%_8%,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_55%_92%,rgba(99,102,241,0.10),transparent_40%)] dark:hidden" />
+        <div className="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-blue-500/10 blur-3xl dark:hidden" />
+        <div className="absolute -bottom-48 -left-48 h-[30rem] w-[30rem] rounded-full bg-cyan-400/10 blur-3xl dark:hidden" />
         <div className="absolute inset-0 opacity-[0.18] dark:opacity-0 [background-image:linear-gradient(to_right,rgba(59,130,246,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.10)_1px,transparent_1px)] [background-size:88px_88px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_78%)]" />
       </div>
 
