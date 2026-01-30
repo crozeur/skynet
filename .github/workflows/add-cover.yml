@@ -3,6 +3,20 @@ name: Add Cover Image from Webhook
 on:
   repository_dispatch:
     types: [add_cover_image]
+    workflow_dispatch:
+        inputs:
+            file_path:
+                description: "MDX file path (e.g. content/blog/my-slug.mdx)"
+                required: true
+                type: string
+            image_url:
+                description: "Cover image URL"
+                required: true
+                type: string
+            cover_alt:
+                description: "Alt text for the cover image"
+                required: true
+                type: string
 
 permissions:
   contents: write
@@ -15,16 +29,27 @@ jobs:
 
       - name: Add cover image to MDX metadata (commit & push)
         env:
-          FILE: ${{ github.event.client_payload.file_path }}
-          URL: ${{ github.event.client_payload.image_url }}
-          TITLE: ${{ github.event.client_payload.cover_alt }}
+                    FILE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.file_path || github.event.client_payload.file_path }}
+                    URL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_url || github.event.client_payload.image_url }}
+                    TITLE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.cover_alt || github.event.client_payload.cover_alt }}
         run: |
           set -euo pipefail
+
+                    echo "ℹ️  Event: ${{ github.event_name }}"
+                    echo "ℹ️  File: ${FILE:-}"
 
           if [ -z "${FILE:-}" ] || [ -z "${URL:-}" ] || [ -z "${TITLE:-}" ]; then
             echo "❌ Missing payload. Expecting client_payload.file_path, image_url, cover_alt"
             exit 1
           fi
+
+                    case "$FILE" in
+                        content/blog/*.mdx) ;;
+                        *)
+                            echo "❌ Refusing to edit unexpected path: $FILE"
+                            exit 1
+                            ;;
+                    esac
 
           if [ ! -f "$FILE" ]; then
             echo "❌ File not found: $FILE"
