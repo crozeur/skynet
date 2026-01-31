@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLeadInAirtable } from "@/lib/airtable";
 import { notifyNewLead } from "@/lib/slack";
-import { getClientIp, rateLimit, readJsonWithLimit, sameOriginOnly } from "@/lib/requestSecurity";
+import { rateLimitByIp, readJsonWithLimit, sameOriginOnly } from "@/lib/requestSecurity";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,8 +9,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const ip = getClientIp(request);
-    const rl = rateLimit(`lead:${ip}`, { windowMs: 60_000, max: 5 });
+    const rl = await rateLimitByIp(request, "lead", { windowMs: 60_000, max: 5 });
     if (!rl.ok) {
       const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
       return NextResponse.json(

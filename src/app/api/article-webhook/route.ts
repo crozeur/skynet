@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { getClientIp, rateLimit, readJsonWithLimit } from "@/lib/requestSecurity";
+import { rateLimitByIp, readJsonWithLimit } from "@/lib/requestSecurity";
 
 interface ArticleWebhookPayload {
   slug: string;
@@ -18,8 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing ARTICLE_WEBHOOK_SECRET" }, { status: 500 });
     }
 
-    const ip = getClientIp(request);
-    const rl = rateLimit(`article-webhook:${ip}`, { windowMs: 60_000, max: 30 });
+    const rl = await rateLimitByIp(request, "article-webhook", { windowMs: 60_000, max: 30 });
     if (!rl.ok) {
       const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
       return NextResponse.json(

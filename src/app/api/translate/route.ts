@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientIp, rateLimit, readJsonWithLimit, sameOriginOnly } from "@/lib/requestSecurity";
+import { rateLimitByIp, readJsonWithLimit, sameOriginOnly } from "@/lib/requestSecurity";
 
 // Professional French glossary
 const frenchGlossary: Record<string, string> = {
@@ -402,8 +402,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const ip = getClientIp(request);
-    const rl = rateLimit(`translate:${ip}`, { windowMs: 60_000, max: 20 });
+    const rl = await rateLimitByIp(request, "translate", { windowMs: 60_000, max: 20 });
     if (!rl.ok) {
       const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
       return NextResponse.json(

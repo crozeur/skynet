@@ -66,6 +66,85 @@ export function rateLimit(key: string, opts: RateLimitOptions): RateLimitResult 
   };
 }
 
+function getUpstashConfig(): { url: string; token: string } | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+  if (!url || !token) return null;
+  return { url, token };
+}
+
+async function upstashGetNumber(endpoint: string, cfg: { url: string; token: string }): Promise<number | null> {
+  const res = await fetch(`${cfg.url}${endpoint}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+    },
+    cache: "no-store",
+  });
+
+  if (!res.ok) return null;
+  const data = (await res.json()) as { result?: unknown };
+  const n = typeof data.result === "number" ? data.result : Number(data.result);
+  return Number.isFinite(n) ? n : null;
+}
+
+function safeKey(key: string): string {
+  return encodeURIComponent(key);
+}
+
+export async function rateLimitDistributed(key: string, opts: RateLimitOptions): Promise<RateLimitResult> {
+  const now = Date.now();
+  const cfg = getUpstashConfig();
+
+  // Safe fallback if Upstash is not configured.
+  if (!cfg) return rateLimit(key, opts);
+
+  try {
+    const k = safeKey(key);
+    const count = await upstashGetNumber(`/incr/${k}`, cfg);
+
+    // If Upstash errors, fallback instead of breaking.
+    if (count == null) return rateLimit(key, opts);
+
+    // Set expiry only when the key is first created.
+    if (count === 1) {
+      await upstashGetNumber(`/expire/${k}/${Math.ceil(opts.windowMs / 1000)}`, cfg);
+    }
+
+    const ok = count <= opts.max;
+
+    if (ok) {
+      return {
+        ok: true,
+        remaining: Math.max(0, opts.max - count),
+        resetAt: now + opts.windowMs,
+      };
+    }
+
+    // Only compute TTL when blocked (to set Retry-After).
+    const ttlSeconds = await upstashGetNumber(`/ttl/${k}`, cfg);
+    const ttlMs = ttlSeconds != null && ttlSeconds > 0 ? ttlSeconds * 1000 : opts.windowMs;
+
+    return {
+      ok: false,
+      remaining: 0,
+      resetAt: now + ttlMs,
+    };
+  } catch {
+    // Never block the site if rate limit infra fails.
+    return rateLimit(key, opts);
+  }
+}
+
+export async function rateLimitByIp(
+  req: NextRequest,
+  prefix: string,
+  opts: RateLimitOptions
+): Promise<RateLimitResult> {
+  const ip = getClientIp(req);
+  return rateLimitDistributed(`skynet:${prefix}:${ip}`, opts);
+}
+
 export async function readJsonWithLimit<T>(req: NextRequest, maxBytes: number): Promise<T> {
   const contentLength = req.headers.get("content-length");
   if (contentLength) {
