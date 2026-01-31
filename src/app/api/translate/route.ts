@@ -402,12 +402,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const rl = await rateLimitByIp(request, "translate", { windowMs: 60_000, max: 20 });
-    if (!rl.ok) {
-      const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+    // Translate can be called repeatedly from the UI (typing, retries). Use burst + sustained.
+    const rlBurst = await rateLimitByIp(request, "translate:burst", { windowMs: 60_000, max: 90 });
+    const rlSustained = await rateLimitByIp(request, "translate:sustained", { windowMs: 60 * 60_000, max: 900 });
+    if (!rlBurst.ok || !rlSustained.ok) {
+      const resetAt = Math.max(rlBurst.ok ? 0 : rlBurst.resetAt, rlSustained.ok ? 0 : rlSustained.resetAt);
+      const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
       return NextResponse.json(
-        { error: "Too many requests" },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        { error: "Too many requests", retryAfter },
+        { status: 429, headers: { "Retry-After": String(retryAfter), "Cache-Control": "no-store" } }
       );
     }
 

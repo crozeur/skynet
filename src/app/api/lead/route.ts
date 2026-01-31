@@ -9,12 +9,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const rl = await rateLimitByIp(request, "lead", { windowMs: 60_000, max: 5 });
-    if (!rl.ok) {
-      const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+    // Two-tier rate limit to reduce false positives (burst + sustained).
+    const rlBurst = await rateLimitByIp(request, "lead:burst", { windowMs: 60_000, max: 12 });
+    const rlSustained = await rateLimitByIp(request, "lead:sustained", { windowMs: 60 * 60_000, max: 60 });
+    if (!rlBurst.ok || !rlSustained.ok) {
+      const resetAt = Math.max(rlBurst.ok ? 0 : rlBurst.resetAt, rlSustained.ok ? 0 : rlSustained.resetAt);
+      const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
       return NextResponse.json(
-        { error: "Too many requests" },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        { error: "Too many requests", retryAfter },
+        { status: 429, headers: { "Retry-After": String(retryAfter), "Cache-Control": "no-store" } }
       );
     }
 

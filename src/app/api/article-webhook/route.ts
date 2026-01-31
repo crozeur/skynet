@@ -18,12 +18,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing ARTICLE_WEBHOOK_SECRET" }, { status: 500 });
     }
 
-    const rl = await rateLimitByIp(request, "article-webhook", { windowMs: 60_000, max: 30 });
-    if (!rl.ok) {
-      const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+    // Webhook is authenticated; keep a high limit mainly to dampen accidental loops.
+    const rlBurst = await rateLimitByIp(request, "article-webhook:burst", { windowMs: 60_000, max: 300 });
+    const rlSustained = await rateLimitByIp(request, "article-webhook:sustained", { windowMs: 60 * 60_000, max: 3000 });
+    if (!rlBurst.ok || !rlSustained.ok) {
+      const resetAt = Math.max(rlBurst.ok ? 0 : rlBurst.resetAt, rlSustained.ok ? 0 : rlSustained.resetAt);
+      const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
       return NextResponse.json(
-        { error: "Too many requests" },
-        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        { error: "Too many requests", retryAfter },
+        { status: 429, headers: { "Retry-After": String(retryAfter), "Cache-Control": "no-store" } }
       );
     }
 
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Webhook error:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: String(error) },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
