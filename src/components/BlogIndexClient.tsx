@@ -338,7 +338,9 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 className="group relative h-full rounded-2xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-3"
               >
                 {/* Background with gradient overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${pillarColors[metadata.pillar]} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${pillarColors[metadata.pillar]} opacity-20 dark:opacity-0 group-hover:opacity-35 dark:group-hover:opacity-100 transition-opacity duration-500`}
+                />
                 
                 {/* Card container */}
                 <div className="relative h-full flex flex-col bg-gradient-to-br from-white via-slate-50 to-blue-50/70 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:border-transparent overflow-hidden">
@@ -410,7 +412,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   {/* Content section */}
-                  <div className="flex-1 flex flex-col p-6 sm:p-7 bg-white/65 dark:bg-gray-900 group-hover:bg-gradient-to-br group-hover:from-white/80 group-hover:to-blue-50/50 dark:group-hover:from-gray-900/95 dark:group-hover:to-gray-800/95 transition-all duration-500">
+                  <div className="flex-1 flex flex-col p-6 sm:p-7 bg-gradient-to-br from-white/75 via-white/60 to-blue-50/55 dark:bg-gray-900 group-hover:from-white/85 group-hover:to-blue-50/65 dark:group-hover:from-gray-900/95 dark:group-hover:to-gray-800/95 transition-all duration-500">
                     
                     {/* Date and reading time */}
                     <div className="flex items-center gap-4 mb-4 text-sm text-gray-500 dark:text-gray-400">
@@ -466,7 +468,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   {/* Glossy overlay on hover */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-35 dark:opacity-0 group-hover:opacity-60 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
               </Link>
             ))}
