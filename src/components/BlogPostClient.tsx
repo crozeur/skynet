@@ -18,6 +18,13 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const articleRef = React.useRef<HTMLDivElement | null>(null);
   const translateAbortRef = React.useRef<AbortController | null>(null);
   const [activeHeadingId, setActiveHeadingId] = React.useState<string | null>(null);
+
+  const shouldAllowCopyOrContextMenu = React.useCallback((target: EventTarget | null) => {
+    const el = target instanceof Element ? target : null;
+    if (!el) return false;
+    // Allow copy/context menu in code blocks (useful for readers) and inputs.
+    return Boolean(el.closest("pre, code, input, textarea"));
+  }, []);
   
   // Handle language change using pre-translated content
   React.useEffect(() => {
@@ -428,9 +435,17 @@ export function BlogPostClient({ post }: { post: PostData }) {
               font-size: 1.0625rem;
               line-height: 1.8;
               color: #374151;
+              -webkit-user-select: none;
+              user-select: none;
             }
             .dark .blog-content {
               color: #e5e7eb;
+            }
+
+            .blog-content pre,
+            .blog-content code {
+              -webkit-user-select: text;
+              user-select: text;
             }
 
             /* Headings */
@@ -815,6 +830,18 @@ export function BlogPostClient({ post }: { post: PostData }) {
           <div
             ref={articleRef}
             className="blog-content max-w-none"
+            onCopy={(e) => {
+              if (shouldAllowCopyOrContextMenu(e.target)) return;
+              e.preventDefault();
+            }}
+            onCut={(e) => {
+              if (shouldAllowCopyOrContextMenu(e.target)) return;
+              e.preventDefault();
+            }}
+            onContextMenu={(e) => {
+              if (shouldAllowCopyOrContextMenu(e.target)) return;
+              e.preventDefault();
+            }}
             dangerouslySetInnerHTML={{ __html: content }}
           />
 
