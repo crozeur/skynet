@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { getClientIp, rateLimit, readJsonWithLimit } from "@/lib/requestSecurity";
 
 interface ArticleWebhookPayload {
   slug: string;
@@ -9,10 +10,24 @@ interface ArticleWebhookPayload {
   description?: string;
 }
 
-const WEBHOOK_SECRET = process.env.ARTICLE_WEBHOOK_SECRET || "default-secret";
+const WEBHOOK_SECRET = process.env.ARTICLE_WEBHOOK_SECRET?.trim();
 
 export async function POST(request: NextRequest) {
   try {
+    if (!WEBHOOK_SECRET) {
+      return NextResponse.json({ error: "Missing ARTICLE_WEBHOOK_SECRET" }, { status: 500 });
+    }
+
+    const ip = getClientIp(request);
+    const rl = rateLimit(`article-webhook:${ip}`, { windowMs: 60_000, max: 30 });
+    if (!rl.ok) {
+      const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     // Validate secret
     const authHeader = request.headers.get("authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid authorization" }, { status: 401 });
     }
 
-    const rawBody: unknown = await request.json();
+    const rawBody: unknown = await readJsonWithLimit(request, 24_000);
     const body = rawBody as Partial<ArticleWebhookPayload> & {
       posts?: Array<Partial<ArticleWebhookPayload>>;
       Posts?: Array<Partial<ArticleWebhookPayload>>;
@@ -48,6 +63,10 @@ export async function POST(request: NextRequest) {
         { error: "Missing slug parameter" },
         { status: 400 }
       );
+    }
+
+    if (!/^[a-z0-9-]+$/i.test(payload.slug)) {
+      return NextResponse.json({ error: "Invalid slug format" }, { status: 400 });
     }
 
     console.log(`🔄 Webhook received for article: ${payload.slug}`);
@@ -81,6 +100,9 @@ export async function POST(request: NextRequest) {
 
 // Health check
 export async function GET(request: NextRequest) {
+  if (!WEBHOOK_SECRET) {
+    return NextResponse.json({ status: "error", message: "Missing ARTICLE_WEBHOOK_SECRET" }, { status: 500 });
+  }
   return NextResponse.json({
     status: "ok",
     message: "Article webhook endpoint is active",

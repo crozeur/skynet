@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp, rateLimit, readJsonWithLimit, sameOriginOnly } from "@/lib/requestSecurity";
 
 // Professional French glossary
 const frenchGlossary: Record<string, string> = {
@@ -397,11 +398,35 @@ function applyGlossary(text: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { text, targetLang = "fr" } = body;
+    if (!sameOriginOnly(request)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const ip = getClientIp(request);
+    const rl = rateLimit(`translate:${ip}`, { windowMs: 60_000, max: 20 });
+    if (!rl.ok) {
+      const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
+    const body = await readJsonWithLimit<{ text?: unknown; targetLang?: unknown }>(request, 180_000);
+    const text = typeof body.text === "string" ? body.text : "";
+    const targetLang = typeof body.targetLang === "string" ? body.targetLang : "fr";
 
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Missing or invalid text" }, { status: 400 });
+    }
+
+    // Reduce abuse surface: this endpoint is only intended for FR on this site.
+    if (targetLang !== "fr") {
+      return NextResponse.json({ error: "Unsupported target language" }, { status: 400 });
+    }
+
+    if (text.length > 24_000) {
+      return NextResponse.json({ error: "Text too long" }, { status: 413 });
     }
 
     if (targetLang === "fr" && looksLikeFrench(text)) {

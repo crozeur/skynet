@@ -7,6 +7,10 @@ export async function GET(
   try {
     const slug = params.slug;
     console.log(`[API] Loading blog article: ${slug}`);
+
+    if (!/^[a-z0-9-]+$/i.test(slug)) {
+      return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
+    }
     
     // Build URL using the request origin for proper base URL
     const baseUrl = new URL(request.url).origin;
@@ -23,7 +27,11 @@ export async function GET(
 
     const data = await response.json();
     console.log(`[API] Successfully loaded article: ${slug}`);
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: {
+        "Cache-Control": "public, max-age=60, s-maxage=600, stale-while-revalidate=86400",
+      },
+    });
   } catch (error) {
     console.error('[API] Error loading blog article:', error);
     return NextResponse.json(
