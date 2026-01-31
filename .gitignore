@@ -38,3 +38,6 @@ yarn-error.log*
 
 # generated blog artifacts (created by scripts/build-blog.js)
 /public/blog-data/*.json
+
+# local temp logs (created by scripts/test-api-local.ps1)
+/.tmp/
