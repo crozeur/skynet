@@ -343,7 +343,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 />
                 
                 {/* Card container */}
-                <div className="relative h-full flex flex-col bg-gradient-to-br from-white via-slate-50 to-blue-50/70 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:border-transparent overflow-hidden">
+                <div className="relative h-full flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/70 to-cyan-50/60 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:border-transparent overflow-hidden">
                   
                   {/* Cover image/gradient section */}
                   {metadata.coverImage ? (
@@ -412,7 +412,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   {/* Content section */}
-                  <div className="flex-1 flex flex-col p-6 sm:p-7 bg-gradient-to-br from-white/75 via-white/60 to-blue-50/55 dark:bg-gray-900 group-hover:from-white/85 group-hover:to-blue-50/65 dark:group-hover:from-gray-900/95 dark:group-hover:to-gray-800/95 transition-all duration-500">
+                  <div className="flex-1 flex flex-col p-6 sm:p-7 bg-gradient-to-br from-slate-50/95 via-blue-50/75 to-cyan-50/60 dark:bg-gray-900 group-hover:from-slate-50/95 group-hover:to-cyan-50/70 dark:group-hover:from-gray-900/95 dark:group-hover:to-gray-800/95 transition-all duration-500">
                     
                     {/* Date and reading time */}
                     <div className="flex items-center gap-4 mb-4 text-sm text-gray-500 dark:text-gray-400">
