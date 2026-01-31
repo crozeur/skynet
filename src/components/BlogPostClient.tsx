@@ -18,12 +18,18 @@ export function BlogPostClient({ post }: { post: PostData }) {
   const articleRef = React.useRef<HTMLDivElement | null>(null);
   const translateAbortRef = React.useRef<AbortController | null>(null);
   const [activeHeadingId, setActiveHeadingId] = React.useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = React.useState<string>("");
 
   const shouldAllowCopyOrContextMenu = React.useCallback((target: EventTarget | null) => {
     const el = target instanceof Element ? target : null;
     if (!el) return false;
     // Allow copy/context menu in code blocks (useful for readers) and inputs.
     return Boolean(el.closest("pre, code, input, textarea"));
+  }, []);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    setCurrentUrl(window.location.href);
   }, []);
   
   // Handle language change using pre-translated content
@@ -437,9 +443,34 @@ export function BlogPostClient({ post }: { post: PostData }) {
               color: #374151;
               -webkit-user-select: none;
               user-select: none;
+              position: relative;
+              isolation: isolate;
             }
             .dark .blog-content {
               color: #e5e7eb;
+            }
+
+            /* Subtle watermark to discourage copy/paste screenshots and casual scraping */
+            .blog-content::before {
+              content: '';
+              position: absolute;
+              inset: -40px;
+              z-index: 0;
+              pointer-events: none;
+              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='220'%3E%3Cg transform='rotate(-18 190 110)'%3E%3Ctext x='16' y='96' font-family='ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto' font-size='22' font-weight='700' fill='rgba(2,6,23,0.09)'%3ESKYNET CONSULTING%3C/text%3E%3Ctext x='16' y='140' font-family='ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto' font-size='14' font-weight='600' fill='rgba(2,6,23,0.07)'%3E%20%20%20%20www.skynet-consulting.net%3C/text%3E%3C/g%3E%3C/svg%3E");
+              background-repeat: repeat;
+              background-size: 360px 220px;
+              opacity: 0.35;
+            }
+
+            .dark .blog-content::before {
+              opacity: 0.18;
+              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='220'%3E%3Cg transform='rotate(-18 190 110)'%3E%3Ctext x='16' y='96' font-family='ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto' font-size='22' font-weight='700' fill='rgba(148,163,184,0.10)'%3ESKYNET CONSULTING%3C/text%3E%3Ctext x='16' y='140' font-family='ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto' font-size='14' font-weight='600' fill='rgba(148,163,184,0.08)'%3E%20%20%20%20www.skynet-consulting.net%3C/text%3E%3C/g%3E%3C/svg%3E");
+            }
+
+            .blog-content > * {
+              position: relative;
+              z-index: 1;
             }
 
             .blog-content pre,
@@ -844,6 +875,41 @@ export function BlogPostClient({ post }: { post: PostData }) {
             }}
             dangerouslySetInnerHTML={{ __html: content }}
           />
+
+          {/* Citation box (encourage attribution instead of copying blocks) */}
+          <div className="mt-10 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Citation</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                  © {new Date(metadata.date).getFullYear()} Skynet Consulting. Merci de citer la source si vous reprenez des extraits.
+                </p>
+                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                  <div className="truncate">
+                    {metadata.title} — Skynet Consulting{currentUrl ? ` — ${currentUrl}` : ""}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 gap-2 sm:pt-0.5">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const citation = `${metadata.title} — Skynet Consulting${currentUrl ? ` — ${currentUrl}` : ""}`;
+                    try {
+                      await navigator.clipboard.writeText(citation);
+                      alert(getUIString("Link copied!", language));
+                    } catch {
+                      // noop
+                    }
+                  }}
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:hover:bg-slate-900"
+                >
+                  Copier la citation
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Back to Top Button */}
           {isScrolled && (
