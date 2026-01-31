@@ -339,7 +339,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               >
                 {/* Background with gradient overlay */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${pillarColors[metadata.pillar]} opacity-20 dark:opacity-0 group-hover:opacity-35 dark:group-hover:opacity-100 transition-opacity duration-500`}
+                  className={`absolute inset-0 bg-gradient-to-br ${pillarColors[metadata.pillar]} opacity-25 dark:opacity-0 group-hover:opacity-40 dark:group-hover:opacity-100 transition-opacity duration-500`}
                 />
                 
                 {/* Card container */}
@@ -468,7 +468,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   </div>
 
                   {/* Glossy overlay on hover */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-35 dark:opacity-0 group-hover:opacity-60 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-45 dark:opacity-0 group-hover:opacity-70 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
               </Link>
             ))}
