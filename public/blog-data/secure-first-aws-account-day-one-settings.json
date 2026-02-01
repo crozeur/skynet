@@ -2,6 +2,8 @@
   "slug": "secure-first-aws-account-day-one-settings",
   "metadata": {
     "title": "Secure First Aws Account Day One Settings",
+    "coverAlt": "Secure AWS account dashboard with MFA token, IAM shield icon, and CloudTrail log stream on a dark interface",
+    "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768674/jviujvcylihgvltzansv.png",
     "description": "Security insights for small and mid-sized businesses",
     "date": "2026-01-19",
     "pillar": "CLOUD",
@@ -13,6 +15,8 @@
   "translatedMetadata": {
     "fr": {
       "title": "Sécurisez les premiers paramètres du premier jour du compte AWS",
+      "coverAlt": "Tableau de bord de compte AWS sécurisé avec jeton MFA, icône de bouclier IAM et flux de journaux CloudTrail sur une interface sombre",
+      "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768674/jviujvcylihgvltzansv.png",
       "description": "Informations sur la sécurité pour les petites et moyennes entreprises",
       "date": "2026-01-19",
       "pillar": "CLOUD",

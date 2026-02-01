@@ -2,6 +2,8 @@
   "slug": "cloud-misconfigurations-catch-first-microsoft-365-aws",
   "metadata": {
     "title": "Cloud Misconfigurations: Catch the First Microsoft 365 & AWS Incidents",
+    "coverAlt": "Dark cybersecurity scene with a cloud server icon and a single warning shield, subtle network lines, high-contrast lighting",
+    "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768570/xvlwwrjp6sz7z5zsoq7n.png",
     "description": "Learn to identify and fix the most common cloud misconfigurations in Microsoft 365 and AWS before they lead to security breaches.",
     "date": "2026-01-19",
     "pillar": "CLOUD",
@@ -13,6 +15,8 @@
   "translatedMetadata": {
     "fr": {
       "title": "Mauvaises configurations du cloud : détectez les premiers incidents Microsoft 365 et AWS",
+      "coverAlt": "Scène sombre de cybersécurité avec une icône de serveur cloud et un seul bouclier d'avertissement, des lignes de réseau subtiles, un éclairage à contraste élevé",
+      "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768570/xvlwwrjp6sz7z5zsoq7n.png",
       "description": "Apprenez à identifier et à corriger les erreurs de configuration cloud les plus courantes dans Microsoft 365 et AWS avant qu'elles n'entraînent des failles de sécurité.",
       "date": "2026-01-19",
       "pillar": "CLOUD",

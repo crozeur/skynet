@@ -2,6 +2,8 @@
   "slug": "build-practical-soc-smes-monitor-run",
   "metadata": {
     "title": "Build Practical Soc Smes Monitor Run",
+    "coverAlt": "Cybersecurity analyst reviewing SOC alerts on a laptop in a dark operations setting with subtle network graphics",
+    "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768573/qtt1qsws1ratnt60fmys.png",
     "description": "Security insights for small and mid-sized businesses",
     "date": "2026-01-19",
     "pillar": "SOC",
@@ -13,6 +15,8 @@
   "translatedMetadata": {
     "fr": {
       "title": "Créer une exécution pratique du moniteur SOC PME",
+      "coverAlt": "Un analyste en cybersécurité examine les alertes SOC sur un ordinateur portable dans un environnement d'opérations sombre avec des graphiques réseau subtils",
+      "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768573/qtt1qsws1ratnt60fmys.png",
       "description": "Informations sur la sécurité pour les petites et moyennes entreprises",
       "date": "2026-01-19",
       "pillar": "SOC",

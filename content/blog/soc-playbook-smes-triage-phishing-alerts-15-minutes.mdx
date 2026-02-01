@@ -8,10 +8,10 @@ export const metadata = {
   tags: ["SME", "Security"],
 };
 
-## Intro (3–5 sentences)
+## Intro
 Phishing alerts can pile up fast, especially in an SME where one person may be the SOC, the helpdesk, and the security team. The goal of triage isn’t to “solve phishing” in 15 minutes—it’s to decide, with defensible reasoning, whether an alert is benign, suspicious, or an active incident. This playbook gives you a repeatable, time-boxed workflow you can run even when you’re short on staff or tooling. Use it to reduce false positives, contain real threats quickly, and document your decisions for later review.
 
-## Quick take (exactly 5 bullet points)
+## Quick take
 - Time-box triage to 15 minutes: classify, contain if needed, and hand off deeper analysis.
 - Start with user impact: who clicked, who replied, and what credentials or payments might be at risk.
 - Validate the message using headers, links, and authentication signals (SPF/DKIM/DMARC) without relying on a single indicator.
@@ -172,7 +172,7 @@ Instead of invented “phishing rates,” track what you can verify:
 - Number of confirmed interactions (click/reply/credential entry)
 - Recurrence of the same lure after tuning
 
-## Checklist (8–12 checkbox items using "- [ ]")
+## Checklist
 - [ ] Capture message ID, sender, subject, timestamp, and alert source in the ticket
 - [ ] Identify all recipients (including shared mailboxes and distribution lists)
 - [ ] Check display name, From domain, and Reply-To for mismatches
@@ -184,7 +184,7 @@ Instead of invented “phishing rates,” track what you can verify:
 - [ ] If credentials may be exposed, reset password and revoke sessions; check for malicious inbox rules
 - [ ] Escalate immediately if privileged accounts, finance actions, or malware execution are suspected
 
-## FAQ (3 questions with short answers)
+## FAQ
 **1) Can I mark it “safe” if SPF/DKIM pass?**
 No. Authentication passing reduces certain spoofing risks, but compromised accounts and legitimate services can still send malicious content.
 

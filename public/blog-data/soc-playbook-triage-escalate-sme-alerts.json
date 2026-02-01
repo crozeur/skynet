@@ -2,6 +2,8 @@
   "slug": "soc-playbook-triage-escalate-sme-alerts",
   "metadata": {
     "title": "SOC Playbook: Triage and Escalate SME Security Alerts",
+    "coverAlt": "SOC analyst reviewing security alerts on a laptop with incident timeline and warning icons on a dark dashboard",
+    "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769766461/fdzk0fkac0pwvdhpadi7.png",
     "description": "Reduce alert fatigue and improve incident response with a lightweight SOC triage playbook tailored for small security teams.",
     "date": "2026-01-19",
     "pillar": "SOC",
@@ -13,6 +15,8 @@
   "translatedMetadata": {
     "fr": {
       "title": "Playbook SOC : Trier et transmettre les alertes de sécurité des PME",
+      "coverAlt": "Un analyste SOC examine les alertes de sécurité sur un ordinateur portable avec une chronologie des incidents et des icônes d'avertissement sur un tableau de bord sombre",
+      "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769766461/fdzk0fkac0pwvdhpadi7.png",
       "description": "Réduisez la fatigue liée aux alertes et améliorez la réponse aux incidents grâce à un manuel de triage SOC léger conçu pour les petites équipes de sécurité.",
       "date": "2026-01-19",
       "pillar": "SOC",

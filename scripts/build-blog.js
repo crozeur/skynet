@@ -357,7 +357,46 @@ function extractContent(source) {
     /export\s+const\s+metadata[\s\S]*?};\s*/m,
     ""
   );
-  return cleaned.trim();
+
+  // Normalize generated section headings so UI doesn't show prompt instructions
+  // (e.g. "Intro (3–5 sentences)" in the Contents box)
+  const normalized = cleaned
+    // With markdown heading
+    .replace(/^##\s+Intro\s*\(\s*3\s*[–-]\s*5\s+sentences\s*\)\s*$/gmi, "## Intro")
+    .replace(
+      /^##\s+Quick\s+take\s*\(\s*exactly\s+5\s+bullet\s+points\s*\)\s*$/gmi,
+      "## Quick take"
+    )
+    .replace(
+      /^##\s+Checklist\s*\(\s*8\s*[–-]\s*12\s+checkbox\s+items\s+using\s+"-\s*\[\s*\]\"\s*\)\s*$/gmi,
+      "## Checklist"
+    )
+    .replace(
+      /^##\s+FAQ\s*\(\s*3\s+questions\s+with\s+short\s+answers\s*\)\s*$/gmi,
+      "## FAQ"
+    )
+
+    // Convert generated numbered subsection lines into proper H3 headings so they
+    // appear in the article TOC (e.g. "1) Topic" -> "### 1) Topic").
+    // This is done at build-time to avoid mutating source MDX files.
+    .replace(/^(\d+)\)\s+(.+)$/gm, "### $1) $2")
+
+    // Without markdown heading (some older posts)
+    .replace(/^Intro\s*\(\s*3\s*[–-]\s*5\s+sentences\s*\)\s*$/gmi, "Intro")
+    .replace(
+      /^Quick\s+take\s*\(\s*exactly\s+5\s+bullet\s+points\s*\)\s*$/gmi,
+      "Quick take"
+    )
+    .replace(
+      /^Checklist\s*\(\s*8\s*[–-]\s*12\s+checkbox\s+items\s+using\s+"-\s*\[\s*\]\"\s*\)\s*$/gmi,
+      "Checklist"
+    )
+    .replace(
+      /^FAQ\s*\(\s*3\s+questions\s+with\s+short\s+answers\s*\)\s*$/gmi,
+      "FAQ"
+    );
+
+  return normalized.trim();
 }
 
 // Get all MDX files

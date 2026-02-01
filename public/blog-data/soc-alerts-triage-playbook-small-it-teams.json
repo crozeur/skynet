@@ -2,6 +2,8 @@
   "slug": "soc-alerts-triage-playbook-small-it-teams",
   "metadata": {
     "title": "SOC Alerts Triage Playbook for Small IT Teams",
+    "coverAlt": "Analyst reviewing SOC alerts on a laptop with SIEM dashboard glow in a dark operations room",
+    "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768524/ygvbslqgmemgno4hirl5.png",
     "description": "How small teams can triage security alerts efficiently without burning out on noise.",
     "date": "2026-01-01",
     "pillar": "SOC",
@@ -15,6 +17,8 @@
   "translatedMetadata": {
     "fr": {
       "title": "Manuel de triage des alertes SOC pour les petites équipes informatiques",
+      "coverAlt": "Un analyste examine les alertes SOC sur un ordinateur portable avec un tableau de bord SIEM qui brille dans une salle d'opérations sombre",
+      "coverImage": "https://res.cloudinary.com/dqmdwljit/image/upload/v1769768524/ygvbslqgmemgno4hirl5.png",
       "description": "Comment les petites équipes peuvent trier efficacement les alertes de sécurité sans se fatiguer du bruit.",
       "date": "2026-01-01",
       "pillar": "SOC",

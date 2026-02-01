@@ -8,10 +8,10 @@ export const metadata = {
   tags: ["SME","Security"],
 };
 
-## Intro (3–5 sentences)
+## Intro
 Most Microsoft 365 tenants start “good enough” and slowly drift into risky defaults: too many admins, weak sign-in controls, permissive sharing, and no one watching the logs. The good news is you can materially reduce your risk in a single afternoon if you focus on the controls that block the most common attacks: account takeover, malicious email, and accidental data exposure. This post gives you a practical sequence you can complete quickly, with examples you can adapt to your environment. It’s not about perfection—it’s about fast, meaningful hardening.
 
-## Quick take (exactly 5 bullet points)
+## Quick take
 - Turn on strong sign-in protection first: MFA, block legacy auth, and require compliant devices where possible.
 - Reduce blast radius: minimize global admins, use least privilege, and protect break-glass accounts.
 - Lock down email entry points: tighten anti-phishing controls and external forwarding.
@@ -174,7 +174,7 @@ Two quick checks that save real pain:
 Important note:
 - Microsoft 365 has retention and restore features, but many organizations still choose additional third-party backups. If you do, document what is covered and test a restore. Don’t assume.
 
-## Checklist (8–12 checkbox items using "- [ ]")
+## Checklist
 - [ ] Require MFA for all admins and all users (with a tested break-glass exclusion)
 - [ ] Block legacy authentication tenant-wide (or at least for all users)
 - [ ] Create and enforce a baseline conditional access policy (MFA + basic location/device rules)
@@ -186,7 +186,7 @@ Important note:
 - [ ] Enable unified audit logging; verify you can search key events
 - [ ] Document an incident quick-response for account takeover (reset, revoke sessions, rule audit)
 
-## FAQ (3 questions with short answers)
+## FAQ
 Q1: Will enforcing MFA break apps or shared mailboxes?
 A: It can affect older clients and some integrations; start by blocking legacy auth, test key workflows, and use app-specific modern auth where supported.
 

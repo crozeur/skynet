@@ -8,10 +8,10 @@ export const metadata = {
 	tags: ["SME", "Security"],
 };
 
-## Intro (3–5 sentences)
+## Intro
 Most cloud breaches in SMEs don’t start with “advanced hacking”—they start with a setting that was never meant to be permanent. A storage bucket left public for a quick test, an admin account used for daily work, or an API key that never gets rotated can quietly turn into a real incident. The good news: the most common storage and IAM misconfigurations are also among the easiest to prevent with a few repeatable habits. This post focuses on practical fixes you can apply regardless of your cloud provider.
 
-## Quick take (exactly 5 bullet points)
+## Quick take
 - Treat “public” storage as an exception that requires explicit approval and continuous checks.
 - Make least privilege real by designing roles around tasks, not people.
 - Replace long-lived access keys with short-lived sessions wherever possible.
@@ -156,7 +156,7 @@ You don’t need heavy process to start:
 4) Keep frameworks generic, use them as checklists
 If you align with common guidance (e.g., CIS benchmarks, NIST, ISO-style controls), treat it as a way to structure improvements—not as a claim of compliance.
 
-## Checklist (8–12 checkbox items using "- [ ]")
+## Checklist
 - [ ] Block public access to object storage by default; document any approved exceptions.
 - [ ] Separate public assets storage from internal data storage with clear naming conventions.
 - [ ] Use time-limited sharing links for internal files instead of making buckets public.
@@ -168,7 +168,7 @@ If you align with common guidance (e.g., CIS benchmarks, NIST, ISO-style control
 - [ ] Store secrets in a dedicated secret manager; remove secrets from code and CI logs.
 - [ ] Enable audit logging for IAM and storage; restrict who can disable logs or reduce retention.
 
-## FAQ (3 questions with short answers)
+## FAQ
 Q1: “We need public files—does that mean we’re insecure?”
 A1: Not necessarily. Put public assets in dedicated storage, restrict writes, avoid listing if possible, and monitor changes so public access doesn’t spread to internal data.
 

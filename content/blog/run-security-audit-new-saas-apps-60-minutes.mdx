@@ -8,10 +8,10 @@ export const metadata = {
   tags: ["SME","Security"],
 };
 
-## Intro (3–5 sentences)
+## Intro
 New SaaS apps can solve real problems fast—but they can also create new attack paths just as fast. A lightweight, repeatable security audit helps you catch the biggest risks before data, accounts, and integrations sprawl out of control. The goal of a 60‑minute audit isn’t to “prove compliance”; it’s to make a clear go/no‑go decision and define any required safeguards. This guide gives you a practical, time-boxed workflow that works for both beginners and IT managers.
 
-## Quick take (exactly 5 bullet points)
+## Quick take
 - Focus on what data the app touches, where it flows, and who can access it.
 - Require SSO/MFA, least privilege roles, and an offboarding plan before rollout.
 - Review vendor security basics: encryption, logging, vulnerability handling, and incident response.
@@ -165,7 +165,7 @@ Make a simple decision with conditions:
 Example “approve with conditions” write-up:
 - “Approved for pilot with 10 users. Conditions: SSO required; disable public links; restrict integrations to CRM only; enable audit logs; review after 30 days.”
 
-## Checklist (8–12 checkbox items using "- [ ]")
+## Checklist
 - [ ] Define the business purpose, owner, and user count.
 - [ ] Identify data types (public/internal/confidential/regulated) the app will store or process.
 - [ ] Confirm MFA is available and can be enforced; prefer SSO (SAML/OIDC) for all users.
@@ -177,7 +177,7 @@ Example “approve with conditions” write-up:
 - [ ] Map required integrations and confirm minimal scopes; rotate API keys/tokens.
 - [ ] Enable and review audit logs/alerts for admin changes, integrations, and exports.
 
-## FAQ (3 questions with short answers)
+## FAQ
 Q1: What if the SaaS app doesn’t support SSO on our plan?
 A: Treat it as higher risk; limit usage to non-sensitive data, enforce MFA, and consider alternatives if the app will become widely used.
 

@@ -20,6 +20,57 @@ export const Services = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
+  const splitAudienceText = (text: string) => {
+    const raw = String(text || "").trim();
+    if (!raw) return { chips: [] as string[], rest: "" };
+
+    const dashIdx = raw.search(/\s[–—-]\s/);
+    if (dashIdx !== -1) {
+      const left = raw.slice(0, dashIdx).trim();
+      const right = raw.slice(dashIdx).replace(/^\s*[–—-]\s*/, "").trim();
+      const chips = left
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .slice(0, 6);
+      return { chips, rest: right || raw };
+    }
+
+    return { chips: [] as string[], rest: raw };
+  };
+
+  const extractBadges = (text: string) => {
+    const raw = String(text || "");
+    const badges: string[] = [];
+    if (/ISO\s*27001/i.test(raw)) badges.push("ISO 27001");
+    if (/PCI\s*-?\s*DSS/i.test(raw)) badges.push("PCI-DSS");
+    if (/GDPR/i.test(raw)) badges.push("GDPR");
+    if (/RGPD/i.test(raw) && !badges.includes("GDPR")) badges.push("RGPD");
+    if (/NIS\s*2/i.test(raw)) badges.push("NIS2");
+    return badges;
+  };
+
+  const splitIntoSentences = (text: string) => {
+    const raw = String(text || "").replace(/\s+/g, " ").trim();
+    if (!raw) return [] as string[];
+
+    // Avoid lookbehind for broad browser compatibility
+    const parts = raw.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [raw];
+    return parts.map((s) => s.trim()).filter(Boolean);
+  };
+
+  const toReadableBlocks = (text: string) => {
+    const sentences = splitIntoSentences(text);
+    if (sentences.length >= 2 && String(text || "").length >= 140) {
+      return {
+        lead: sentences[0] ?? "",
+        bullets: sentences.slice(1).slice(0, 4),
+      };
+    }
+
+    return { lead: String(text || "").trim(), bullets: [] as string[] };
+  };
+
   // Auto-scroll to content when tab changes (mobile only), skip first render
   useEffect(() => {
     if (isFirstRender.current) {
@@ -216,11 +267,40 @@ export const Services = () => {
                       {language === "en" ? "Target Audience" : "Public Cible"}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
-                    <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
-                      {activeService.for}
-                    </p>
-                  </div>
+                  {(() => {
+                    const { chips, rest } = splitAudienceText(activeService.for);
+                    const blocks = toReadableBlocks(rest);
+                    return (
+                      <div className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 p-4 dark:border-white/10 dark:from-white/5 dark:via-white/3 dark:to-blue-500/10">
+                        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-blue-400/20 to-cyan-300/10 blur-2xl dark:from-blue-400/10 dark:to-cyan-300/10" aria-hidden />
+                        {chips.length > 0 && (
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            {chips.map((c) => (
+                              <span
+                                key={c}
+                                className="inline-flex items-center rounded-full border border-blue-200/70 bg-white/70 px-2.5 py-1 text-xs font-semibold text-blue-800 shadow-sm backdrop-blur dark:border-blue-400/20 dark:bg-white/5 dark:text-blue-200"
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                          {blocks.lead}
+                        </p>
+                        {blocks.bullets.length > 0 && (
+                          <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
+                            {blocks.bullets.map((b) => (
+                              <li key={b} className="flex gap-2 leading-relaxed">
+                                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500/70" />
+                                <span className="break-words">{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Divider */}
@@ -236,11 +316,44 @@ export const Services = () => {
                       {language === "en" ? "Challenge" : "Défi"}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-red-200/70 bg-red-50/70 p-4 dark:border-red-500/20 dark:bg-red-500/10">
-                    <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed break-words dark:text-white">
-                      {activeService.problem}
-                    </p>
-                  </div>
+                  {(() => {
+                    const badges = extractBadges(activeService.problem);
+                    const blocks = toReadableBlocks(activeService.problem);
+                    return (
+                      <div className="relative overflow-hidden rounded-2xl border border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50/60 p-4 dark:border-red-500/20 dark:from-red-500/10 dark:via-white/3 dark:to-orange-500/10">
+                        <div className="pointer-events-none absolute -left-6 top-0 h-full w-1 bg-gradient-to-b from-red-500/70 via-orange-500/40 to-transparent" aria-hidden />
+                        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-red-400/15 to-orange-300/10 blur-2xl dark:from-red-400/10 dark:to-orange-300/10" aria-hidden />
+                        {badges.length > 0 && (
+                          <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-red-700/90 dark:text-red-200/90">
+                              {language === "en" ? "Frameworks" : "Référentiels"}
+                            </span>
+                            {badges.map((b) => (
+                              <span
+                                key={b}
+                                className="inline-flex items-center rounded-full border border-red-200/70 bg-white/70 px-2.5 py-1 text-xs font-semibold text-red-800 shadow-sm backdrop-blur dark:border-red-400/20 dark:bg-white/5 dark:text-red-200"
+                              >
+                                {b}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                          {blocks.lead}
+                        </p>
+                        {blocks.bullets.length > 0 && (
+                          <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
+                            {blocks.bullets.map((b) => (
+                              <li key={b} className="flex gap-2 leading-relaxed">
+                                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500/70" />
+                                <span className="break-words">{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -376,11 +489,40 @@ export const Services = () => {
                       {language === "en" ? "Target Audience" : "Public Cible"}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
-                    <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
-                      {activeService.for}
-                    </p>
-                  </div>
+                  {(() => {
+                    const { chips, rest } = splitAudienceText(activeService.for);
+                    const blocks = toReadableBlocks(rest);
+                    return (
+                      <div className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-gradient-to-br from-slate-50 via-white to-blue-50/40 p-4 dark:border-white/10 dark:from-white/5 dark:via-white/3 dark:to-blue-500/10">
+                        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-blue-400/20 to-cyan-300/10 blur-2xl dark:from-blue-400/10 dark:to-cyan-300/10" aria-hidden />
+                        {chips.length > 0 && (
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            {chips.map((c) => (
+                              <span
+                                key={c}
+                                className="inline-flex items-center rounded-full border border-blue-200/70 bg-white/70 px-2.5 py-1 text-xs font-semibold text-blue-800 shadow-sm backdrop-blur dark:border-blue-400/20 dark:bg-white/5 dark:text-blue-200"
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                          {blocks.lead}
+                        </p>
+                        {blocks.bullets.length > 0 && (
+                          <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
+                            {blocks.bullets.map((b) => (
+                              <li key={b} className="flex gap-2 leading-relaxed">
+                                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500/70" />
+                                <span className="break-words">{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Divider */}
@@ -396,11 +538,44 @@ export const Services = () => {
                       {language === "en" ? "Challenge" : "Défi"}
                     </span>
                   </div>
-                  <div className="rounded-xl border border-red-200/70 bg-red-50/70 p-4 dark:border-red-500/20 dark:bg-red-500/10">
-                    <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed break-words dark:text-white">
-                      {activeService.problem}
-                    </p>
-                  </div>
+                  {(() => {
+                    const badges = extractBadges(activeService.problem);
+                    const blocks = toReadableBlocks(activeService.problem);
+                    return (
+                      <div className="relative overflow-hidden rounded-2xl border border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50/60 p-4 dark:border-red-500/20 dark:from-red-500/10 dark:via-white/3 dark:to-orange-500/10">
+                        <div className="pointer-events-none absolute -left-6 top-0 h-full w-1 bg-gradient-to-b from-red-500/70 via-orange-500/40 to-transparent" aria-hidden />
+                        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-gradient-to-br from-red-400/15 to-orange-300/10 blur-2xl dark:from-red-400/10 dark:to-orange-300/10" aria-hidden />
+                        {badges.length > 0 && (
+                          <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-red-700/90 dark:text-red-200/90">
+                              {language === "en" ? "Frameworks" : "Référentiels"}
+                            </span>
+                            {badges.map((b) => (
+                              <span
+                                key={b}
+                                className="inline-flex items-center rounded-full border border-red-200/70 bg-white/70 px-2.5 py-1 text-xs font-semibold text-red-800 shadow-sm backdrop-blur dark:border-red-400/20 dark:bg-white/5 dark:text-red-200"
+                              >
+                                {b}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                          {blocks.lead}
+                        </p>
+                        {blocks.bullets.length > 0 && (
+                          <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
+                            {blocks.bullets.map((b) => (
+                              <li key={b} className="flex gap-2 leading-relaxed">
+                                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500/70" />
+                                <span className="break-words">{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
