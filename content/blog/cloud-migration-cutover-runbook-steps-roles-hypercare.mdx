@@ -1,0 +1,190 @@
+## Intro (3–5 sentences)
+Cloud migrations often fail at the same point: cutover day. Not because the cloud platform is “hard,” but because coordination, decision rights, and operational readiness are unclear when pressure is highest. A cutover runbook is the single document that turns a migration plan into an executable, timed set of steps with owners and rollback paths. This post lays out a practical runbook structure for SMEs, including roles, go/no-go gates, security checks, and a hypercare plan that stabilizes the first days after the switch.
+
+## Quick take (exactly 5 bullet points)
+- Define a cutover window, success criteria, and a rollback trigger before anyone touches production.
+- Assign clear roles (incident lead, change manager, security, app owners) and set a single source of truth for updates.
+- Use go/no-go gates with objective checks: backups verified, monitoring live, access validated, and DNS/app config ready.
+- Script and time-box technical steps (freeze, sync, switch, validate) and practice them in a dress rehearsal.
+- Run hypercare for 3–14 days with tighter monitoring, faster approvals, and a clear handoff to steady-state operations.
+
+## Cutover runbook essentials: what it is and what it is not
+A cutover runbook is an operational playbook for the final transition from your current environment to the cloud environment. It should be usable under stress: short steps, owners, timestamps, and decision points. For SMEs, the most effective runbooks are usually 6–15 pages, not 60.
+
+Include these core elements:
+
+1) Scope and systems
+- What is in the cutover (applications, databases, integrations, identity, endpoints)?
+- What is explicitly out of scope (e.g., “email migration occurs next quarter”)?
+
+2) Definitions and success criteria
+- “Cutover complete” needs a measurable definition: e.g., new traffic routed to cloud, data sync completed, and business validation tests passed.
+- Include RTO/RPO targets as planning inputs (don’t claim compliance; use them as internal goals).
+
+3) Timing and dependencies
+- Cutover window start/end in one time zone.
+- Dependencies (ISP changes, certificate issuance, third-party allowlists, payment gateways, MFA policies).
+
+4) Risk controls and security checks
+Keep it generic and aligned with recognized good practices (e.g., NIST/ISO/CIS) without claiming compliance:
+- Access control review (least privilege, admin accounts, break-glass procedure).
+- Logging and monitoring enabled (central logs, alerts for auth failures, privilege changes).
+- Vulnerability exposure check (public endpoints, open ports, misconfigured storage).
+- Backup and restore verification (prove you can restore, not just that backups exist).
+
+5) Rollback plan and trigger
+A rollback plan isn’t “we can go back.” It is a set of steps that are feasible within the cutover window.
+- Rollback trigger examples: data validation fails, authentication outage exceeds X minutes, or key business flow fails twice after remediation.
+- Rollback steps: revert DNS, re-enable old scheduler/jobs, disable cloud ingress, confirm old environment integrity.
+
+Practical example (SME SaaS application):
+- Success = users authenticate via the new identity integration, can create orders, and the order queue processes within 2 minutes.
+- Rollback trigger = order processing queue backlog grows for 30 minutes with no clear mitigation.
+
+## Roles and communications: decision rights beat heroics
+Cutover problems are usually communication problems wearing technical clothing. Your runbook should assign owners to every task and make decision rights explicit.
+
+Recommended roles (some people may wear multiple hats in an SME):
+
+- Cutover Lead (overall conductor)
+  Owns the timeline, calls the go/no-go gates, and coordinates all teams.
+
+- Change Manager (process + audit trail)
+  Ensures approvals are documented, the change window is respected, and updates are consistent.
+
+- Platform/Cloud Engineer (infrastructure)
+  Owns network, compute, storage, IAM basics, and platform automation.
+
+- Application Owner(s) (business logic)
+  Owns app config, feature flags, startup/shutdown procedures, and functional tests.
+
+- Database Owner (data integrity)
+  Owns replication, final sync, schema checks, and data validation queries.
+
+- Security Lead (risk controls)
+  Owns access reviews, log readiness, and emergency containment actions.
+
+- Service Desk/IT Ops (front door)
+  Owns user comms, ticket triage, and escalation to the cutover bridge.
+
+Set your communications plan:
+- A single “cutover bridge” (conference call/chat channel) and a single status page/thread.
+- Update cadence (e.g., every 15 minutes during cutover, hourly during hypercare).
+- Standard message templates: start, checkpoint passed, issue, mitigation, rollback, completion.
+
+Example update format:
+- Time (UTC), status (green/amber/red), what changed, current impact, next checkpoint, owner.
+
+Decision-making tip:
+Write down who can authorize (a) extending the window, (b) initiating rollback, and (c) temporarily relaxing controls (for example, a short-lived firewall rule). If these aren’t explicit, you will lose time negotiating during an outage.
+
+## Execution timeline: phases, go/no-go gates, and validation
+A good runbook is sequenced into phases with clear entry/exit criteria. Below is a practical template you can adapt.
+
+### Phase 0: Preparation (days to weeks before)
+- Complete a dress rehearsal in a staging environment that mirrors production as closely as you can.
+- Pre-provision access: named admin accounts, just-in-time elevation if available, and break-glass credentials stored securely.
+- Confirm observability: logs shipped, dashboards built, alerts tested (including “no data” alerts).
+- Establish a change freeze policy: what changes are allowed in the final 48–72 hours.
+
+### Phase 1: Go/No-Go Gate (T-60 to T-0 minutes)
+Objective checks (examples):
+- Backups: latest backup present and restore test completed within an acceptable time.
+- Monitoring: key alerts active (CPU/memory, error rates, auth failures, database replication lag).
+- Access: admins can log in, MFA enforced, and least privilege reviewed for cutover accounts.
+- Network/DNS: TTL lowered earlier, new endpoints ready, certificates validated.
+- Business: business owner confirms acceptable user impact and communications sent.
+
+If any check fails, you either delay (most common) or proceed with documented risk acceptance. The runbook should include the exact phrasing for the decision record.
+
+### Phase 2: Freeze and final sync
+Typical steps:
+- Put the application into maintenance mode (or disable write paths).
+- Stop background jobs and schedulers that would create divergent data.
+- Final data sync: replication catch-up or one-time export/import.
+
+Data validation examples (pick what fits):
+- Record counts for critical tables.
+- Spot checks: recent transactions exist and are consistent.
+- Integrity checks: foreign key consistency or application-level invariants.
+
+### Phase 3: Switch traffic
+Common patterns:
+- DNS cutover to cloud load balancer.
+- Reverse proxy update.
+- VPN/firewall route change.
+
+Security-minded steps:
+- Ensure only required ports are exposed.
+- Confirm WAF/reverse proxy rules (if used) are active before opening traffic.
+- Confirm logs are being ingested from the new endpoints.
+
+### Phase 4: Verify and stabilize (first 30–120 minutes)
+Run short, high-value tests:
+- Authentication: login/logout, MFA flows, password reset.
+- Core business flows: create/update critical records, run a report, export a file.
+- Performance sanity: page load times, API latency, queue depth.
+- Integration checks: payment provider callbacks, email/SMS delivery, SSO.
+
+Define “done” for this phase: e.g., all smoke tests passed, error rate below agreed threshold, and no priority-1 incidents open.
+
+### Phase 5: Decide: complete, extend, or rollback
+Don’t wait for the cutover window to end to make the call. Set a checkpoint: “If X is not true by T+90, we rollback.” This prevents a slow drift into an all-night incident.
+
+## Hypercare: turning the first week into a controlled operation
+Hypercare is a short period after cutover where you run operations in a more controlled, higher-touch mode. SMEs benefit because it reduces time-to-detect and time-to-recover while users adapt.
+
+A practical hypercare plan includes:
+
+1) Enhanced monitoring and alerting
+- Tighten alert thresholds temporarily (especially for auth failures, error spikes, and latency).
+- Add synthetic checks for key user journeys (login, critical transaction).
+- Review dashboards at set times (e.g., start of day, midday, end of day).
+
+2) Fast change control with guardrails
+- Pre-approve a limited set of low-risk fixes (config tweaks, scaling adjustments).
+- Require explicit approval for higher-risk changes (schema changes, identity policy changes).
+- Keep an audit trail: who changed what, when, and why.
+
+3) Incident response readiness
+- Define severity levels and response times.
+- Keep a short on-call roster for the first 3–14 days.
+- Use a single incident channel and require concise timelines.
+
+4) User support and communications
+- Brief the service desk on known issues and workarounds.
+- Publish a simple “what changed” note for end users (new login URL, MFA prompt changes, new VPN behavior).
+
+5) Hypercare exit criteria
+End hypercare when:
+- Error rates and latency are stable.
+- No repeated incidents in the same area.
+- Backups/restores are verified in the new environment.
+- Ownership is handed to steady-state operations with updated runbooks.
+
+Example hypercare rhythm:
+- Day 1–2: twice-daily checkpoint calls, rapid triage, frequent updates.
+- Day 3–7: daily checkpoint call, reduced cadence, prioritize permanent fixes.
+- Day 8–14: finalize documentation, post-incident reviews, and backlog grooming.
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Cutover window approved and communicated to stakeholders and end users
+- [ ] Runbook steps reviewed in a dress rehearsal with timings recorded
+- [ ] Go/no-go criteria documented (including explicit rollback triggers)
+- [ ] Backups confirmed and a restore test completed for critical data
+- [ ] Monitoring/logging validated for the new environment (including alert delivery)
+- [ ] Access controls verified (admin accounts, MFA, least privilege, break-glass)
+- [ ] Maintenance mode and job freeze procedures tested and ready
+- [ ] DNS/routing plan confirmed (TTL lowered, certificates valid, endpoints reachable)
+- [ ] Smoke tests defined with owners (auth, core workflows, integrations)
+- [ ] Hypercare plan scheduled with on-call coverage and escalation paths
+
+## FAQ (3 questions with short answers)
+Q1: How long should a cutover runbook be?
+A: Long enough to be executable under pressure—usually 6–15 pages for SMEs, with clear steps, owners, and decision points.
+
+Q2: What’s the most common cutover failure point?
+A: Unclear decision rights and missing validation steps (especially for identity, DNS/routing, and data sync), which delays rollback or remediation.
+
+Q3: Do we need hypercare if everything looks fine after cutover?
+A: Yes—many issues appear only under real user load or at daily/weekly cycles (batch jobs, reports, integrations), and hypercare keeps detection and response tight until stability is proven.
