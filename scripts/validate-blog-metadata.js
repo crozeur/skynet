@@ -11,10 +11,36 @@ function extractMetadataFromMDX(source) {
   const startIdx = startMatch.index + startMatch[0].length - 1;
   let braceCount = 0;
   let endIdx = -1;
+  let inStr = false;
+  let strCh = "";
+  let escape = false;
 
   for (let i = startIdx; i < source.length; i++) {
-    if (source[i] === "{") braceCount++;
-    if (source[i] === "}") {
+    const ch = source[i];
+    if (inStr) {
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escape = true;
+        continue;
+      }
+      if (ch === strCh) {
+        inStr = false;
+        strCh = "";
+      }
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      inStr = true;
+      strCh = ch;
+      continue;
+    }
+
+    if (ch === "{") braceCount++;
+    if (ch === "}") {
       braceCount--;
       if (braceCount === 0) {
         endIdx = i;

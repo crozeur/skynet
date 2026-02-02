@@ -4,6 +4,136 @@ const path = require("path");
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
+function findMetadataBlock(source) {
+  const m = source.match(/export\s+const\s+metadata\s*=\s*\{/);
+  if (!m || typeof m.index !== "number") return null;
+
+  const blockStart = m.index;
+  const braceStart = blockStart + m[0].length - 1; // points at '{'
+
+  let braceCount = 0;
+  let inStr = false;
+  let strCh = "";
+  let escape = false;
+  let endBraceIdx = -1;
+
+  for (let i = braceStart; i < source.length; i++) {
+    const ch = source[i];
+    if (inStr) {
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escape = true;
+        continue;
+      }
+      if (ch === strCh) {
+        inStr = false;
+        strCh = "";
+      }
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      inStr = true;
+      strCh = ch;
+      continue;
+    }
+
+    if (ch === "{") braceCount++;
+    if (ch === "}") {
+      braceCount--;
+      if (braceCount === 0) {
+        endBraceIdx = i;
+        break;
+      }
+    }
+  }
+
+  if (endBraceIdx === -1) return null;
+
+  let blockEnd = endBraceIdx + 1;
+  if (source[blockEnd] === ";") blockEnd++;
+
+  // Include trailing blank space/newlines after the metadata block so we don't
+  // rewrite on every run due to newline range mismatch.
+  while (
+    blockEnd < source.length &&
+    (source[blockEnd] === "\n" ||
+      source[blockEnd] === "\r" ||
+      source[blockEnd] === " " ||
+      source[blockEnd] === "\t")
+  ) {
+    blockEnd++;
+  }
+
+  return {
+    blockStart,
+    blockEnd,
+    objSource: source.slice(braceStart, endBraceIdx + 1),
+  };
+}
+
+function tryParseMetadataObject(objSource) {
+  try {
+    // eslint-disable-next-line no-new-func
+    return Function(`return (${objSource})`)();
+  } catch {
+    return null;
+  }
+}
+
+function toJsValue(value, indentLevel = 0) {
+  const indent = "  ".repeat(indentLevel);
+  const indentNext = "  ".repeat(indentLevel + 1);
+
+  if (value === null) return "null";
+  if (typeof value === "string") return `"${escapeJsString(value)}"`;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return "[]";
+    const simple = value.every((v) => v === null || ["string", "number", "boolean"].includes(typeof v));
+    if (simple) return `[${value.map((v) => toJsValue(v, 0)).join(", ")}]`;
+
+    const items = value.map((v) => `${indentNext}${toJsValue(v, indentLevel + 1)}`).join(",\n");
+    return `[\n${items}\n${indent}]`;
+  }
+
+  if (typeof value === "object") {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return "{}";
+    const lines = entries
+      .map(([k, v]) => {
+        const key = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k) ? k : JSON.stringify(k);
+        return `${indentNext}${key}: ${toJsValue(v, indentLevel + 1)}`;
+      })
+      .join(",\n");
+    return `{\n${lines}\n${indent}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function renderMetadataBlock(metadataObj, newline = "\n") {
+  const { title, description, date, pillar, tags, ...rest } = metadataObj || {};
+  const ordered = { title, description, date, pillar, tags, ...rest };
+
+  const lines = Object.entries(ordered)
+    .filter(([, v]) => typeof v !== "undefined")
+    .map(([k, v]) => `  ${k}: ${toJsValue(v, 1)},`);
+
+  return `export const metadata = {${newline}${lines.join(newline)}${newline}};${newline}${newline}`;
+}
+
+function normalizeForCompare(text) {
+  return String(text || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .trimEnd();
+}
+
 // Extraction du slug depuis le nom du fichier
 function slugFromFilename(filename) {
   return filename.replace(/\.mdx$/, "");
@@ -185,36 +315,66 @@ function generateMetadata(filename, content) {
   };
 }
 
-// Vérifier si le fichier a déjà des métadonnées
-function hasMetadata(content) {
-  return /export\s+const\s+metadata\s*=\s*\{/.test(content);
+function isBadTitle(title) {
+  const t = String(title || "").trim().toLowerCase();
+  if (!t) return true;
+  if (t === "intro" || t.startsWith("intro ") || t.startsWith("intro(") || t.startsWith("intro-") || t.startsWith("intro–")) return true;
+  if (t === "introduction" || t.startsWith("introduction ") || t.startsWith("introduction(")) return true;
+  return false;
 }
 
-// Ajouter les métadonnées au début du fichier
-function addMetadataToFile(filePath, filename) {
-  try {
-    const content = fs.readFileSync(filePath, "utf-8");
+function normalizeMetadata(existing, filename, content) {
+  const slug = slugFromFilename(filename);
+  const expectedPillar = inferPillarFromSlug(slug);
+  const inferred = generateMetadata(filename, content);
 
-    if (hasMetadata(content)) {
-      console.log(`✓ ${filename} - métadonnées déjà présentes`);
-      return;
-    }
+  const meta = (existing && typeof existing === "object") ? { ...existing } : {};
 
-    const metadata = generateMetadata(filename, content);
-    const metadataString = `export const metadata = {
-  title: "${escapeJsString(metadata.title)}",
-  description: "${escapeJsString(metadata.description)}",
-  date: "${escapeJsString(metadata.date)}",
-  pillar: "${escapeJsString(metadata.pillar)}",
-  tags: ${JSON.stringify(metadata.tags)},
-};\n\n`;
+  const title = typeof meta.title === "string" ? meta.title.trim() : "";
+  if (title.length < 10 || isBadTitle(title)) meta.title = inferred.title;
 
-    const newContent = metadataString + content;
+  const desc = typeof meta.description === "string" ? meta.description.trim() : "";
+  if (desc.length < 20) meta.description = inferred.description;
+
+  const date = typeof meta.date === "string" ? meta.date.trim() : "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) meta.date = inferred.date;
+
+  if (meta.pillar !== expectedPillar) meta.pillar = expectedPillar;
+
+  if (!Array.isArray(meta.tags) || meta.tags.filter((t) => typeof t === "string" && t.trim()).length === 0) {
+    meta.tags = inferred.tags;
+  }
+
+  return meta;
+}
+
+function upsertMetadataInFile(filePath, filename) {
+  const content = fs.readFileSync(filePath, "utf-8");
+  const block = findMetadataBlock(content);
+  const newline = content.includes("\r\n") ? "\r\n" : "\n";
+
+  if (!block) {
+    const normalized = normalizeMetadata(null, filename, content);
+    const newContent = renderMetadataBlock(normalized, newline) + content;
     fs.writeFileSync(filePath, newContent.endsWith("\n") ? newContent : newContent + "\n", "utf-8");
     console.log(`✅ ${filename} - métadonnées ajoutées`);
-  } catch (err) {
-    console.error(`❌ Erreur pour ${filename}:`, err.message);
+    return true;
   }
+
+  const existingObj = tryParseMetadataObject(block.objSource);
+  const normalized = normalizeMetadata(existingObj, filename, content);
+  const newBlock = renderMetadataBlock(normalized, newline);
+  const currentBlock = content.slice(block.blockStart, block.blockEnd);
+
+  if (normalizeForCompare(currentBlock) === normalizeForCompare(newBlock)) {
+    console.log(`✓ ${filename} - métadonnées OK`);
+    return false;
+  }
+
+  const out = content.slice(0, block.blockStart) + newBlock + content.slice(block.blockEnd);
+  fs.writeFileSync(filePath, out.endsWith("\n") ? out : out + "\n", "utf-8");
+  console.log(`✅ ${filename} - métadonnées normalisées`);
+  return true;
 }
 
 // Traiter tous les fichiers MDX
@@ -224,12 +384,21 @@ async function fixAllMetadata() {
     
     console.log(`🔍 Vérification de ${files.length} fichiers MDX...\n`);
 
-    files.forEach(file => {
+    let changed = 0;
+    let failed = 0;
+    for (const file of files) {
       const filePath = path.join(BLOG_DIR, file);
-      addMetadataToFile(filePath, file);
-    });
+      try {
+        if (upsertMetadataInFile(filePath, file)) changed++;
+      } catch (err) {
+        failed++;
+        console.error(`❌ Erreur pour ${file}:`, err && err.message ? err.message : String(err));
+      }
+    }
 
-    console.log(`\n✨ Vérification des métadonnées terminée!`);
+    if (failed > 0) process.exit(1);
+
+    console.log(`\n✨ Vérification des métadonnées terminée (${changed} modifié(s)).`);
   } catch (err) {
     console.error("❌ Erreur:", err.message);
     process.exit(1);
