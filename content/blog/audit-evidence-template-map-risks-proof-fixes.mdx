@@ -1,0 +1,168 @@
+## Intro (3–5 sentences)
+Security audits often fail for small and mid-sized businesses because evidence is gathered as screenshots and spreadsheets with no clear link to risk, control intent, or remediation. The result is a binder of “proof” that doesn’t help you decide what to fix next. An audit evidence template solves this by forcing every artifact to answer a simple question: what risk does this reduce, and how do we know? Below is a practical way to map risks to proof and fixes so your next audit improves security operations—not just documentation.
+
+## Quick take (exactly 5 bullet points)
+- Start with a small set of risks, not a long list of controls.
+- For each risk, define the control objective and the exact evidence that proves it.
+- Prefer repeatable evidence (logs, reports, exports) over one-off screenshots.
+- Record evidence quality: freshness, source of truth, and how it’s generated.
+- Pair every gap with a fix, owner, due date, and re-test plan.
+
+## Build the “risk → control objective → evidence” chain
+An evidence library is useful only when it is organized around outcomes. A simple chain works well for SMEs:
+
+1) Risk statement: what could go wrong and why it matters.
+2) Control objective: what you’re trying to ensure (not how you do it).
+3) Evidence: the artifact(s) that demonstrate the objective is met.
+4) Test method: how an auditor (or you) verifies the evidence.
+5) Result and remediation: pass/fail/partial, plus what changes if it’s not sufficient.
+
+If you align your template to common control families (e.g., access control, logging, vulnerability management), you can later map it to NIST/ISO/CIS categories without claiming compliance.
+
+Example (short and concrete):
+
+- Risk: “Ex-employees retain access to email and file storage.”
+- Control objective: “Access is removed promptly when employment ends.”
+- Evidence:
+  - HR termination list for the last 90 days (or a sample period)
+  - Identity directory export showing account status and disable date
+  - Ticketing/workflow record for offboarding tasks
+- Test method: reconcile a sample of terminated users to directory status and timestamps.
+- Result/remediation: if disable dates lag termination dates, implement an offboarding trigger and measure the lag weekly.
+
+Practical guidance:
+- Keep risk statements in plain language and include scope (systems, business units).
+- Separate “policy exists” evidence from “control operates” evidence. A policy can support intent; operational artifacts support reality.
+- Use sampling rules. For SMEs, a 10–20 item sample (users, servers, endpoints) often provides enough signal to drive improvements.
+
+## Use an audit evidence template (fields that actually help)
+Below is a template structure that works well in a spreadsheet, GRC-lite tool, or ticket system. The key is making it easy to answer “what proof exists, where is it, and is it good?”
+
+Suggested fields:
+
+- Evidence ID: unique, stable identifier (e.g., AC-01-EV-003)
+- Risk: reference to a risk register item (or a simple label)
+- Control objective: one sentence; avoid product names
+- System scope: apps, environments, locations
+- Evidence description: what the artifact is
+- Evidence source of truth: where it comes from (directory, SIEM, MDM, ticketing, code repo)
+- Collection method: manual export, scheduled report, API pull
+- Frequency/freshness: daily/weekly/monthly; date range covered
+- Evidence location: link/path; access requirements
+- Owner: person/team responsible for producing it
+- Reviewer: person/team that checks it
+- Test method: reconciliation, configuration review, log query, sampling
+- Pass criteria: what “good” looks like
+- Result: pass/fail/partial + notes
+- Gap/finding: what’s missing or weak
+- Remediation action: what will change
+- Due date and status: not optional—this is how audits create outcomes
+- Re-test evidence: what will be produced after the fix
+
+Example row (vulnerability management):
+
+- Risk: “Known exploitable vulnerabilities remain unpatched on internet-facing systems.”
+- Control objective: “Critical vulnerabilities on exposed assets are identified and remediated within defined timelines.”
+- Evidence:
+  - Vulnerability scan report for external IP range (date-stamped)
+  - Patch tracking report or ticket export showing remediation status
+  - Exception register for deferred items with approval and expiry
+- Pass criteria: critical items are either remediated within the chosen window or have approved, time-bounded exceptions.
+
+Tips for evidence quality (simple scoring):
+- Freshness: is it current for the audit period?
+- Integrity: does it come from the system of record, with timestamps?
+- Repeatability: can you regenerate it the same way next month?
+- Coverage: does it represent the full scope, or a small subset?
+
+If a piece of evidence scores poorly, it may still be useful—but you should record its limitations explicitly.
+
+## Choose evidence that’s repeatable (and reduces audit pain)
+Audits become painful when evidence relies on one person taking screenshots at the last minute. Instead, design evidence collection as a routine operational output.
+
+Good evidence patterns:
+
+1) Exports and reports with timestamps
+- Directory user list exports (status, last login, MFA flags)
+- MDM compliance reports (encryption, OS version, jailbreak/root status)
+- Ticket exports showing approvals, timestamps, and assignments
+
+2) Configuration baselines and diffs
+- Approved standard configurations stored in version control
+- Change records linking configuration updates to tickets
+
+3) Log-derived proof
+- Authentication logs showing MFA challenges and outcomes
+- Admin activity logs and alerts for privileged changes
+
+4) Reconciliation artifacts
+- A monthly access review worksheet that ties users to roles and approvals
+- A joiner/mover/leaver reconciliation between HR and directory
+
+Concrete example: access reviews
+- Risk: “Excess privileges lead to data exposure.”
+- Evidence set:
+  - Current role/group membership export
+  - Access review sign-off record (who reviewed, when, decisions)
+  - Tickets for removals with completion timestamps
+- Better than: a single PDF stating “access was reviewed.”
+
+Concrete example: backups
+- Risk: “Ransomware causes extended outage or data loss.”
+- Evidence set:
+  - Backup job status report for the period
+  - Restore test record (what was restored, when, outcome)
+  - Immutable storage / retention configuration screenshot may support—but should not be the only proof
+- Fix orientation: if you don’t test restores, the remediation is not “write a policy,” it’s “schedule restore tests and store results as evidence.”
+
+## Turn findings into fixes you can re-test
+An audit finding is only useful if it changes operations. Your template should make that inevitable by requiring an owner, due date, and re-test evidence.
+
+A practical “finding-to-fix” workflow:
+
+1) Classify the weakness
+- Design gap: the control doesn’t exist.
+- Implementation gap: control exists but not configured correctly.
+- Operating gap: control exists but isn’t consistently followed.
+- Monitoring gap: you can’t tell if the control is working.
+
+2) Write remediation actions that create new evidence
+Bad remediation action: “Improve patching.”
+Good remediation action: “Create a weekly patch report covering all servers; auto-create tickets for critical patches; track SLA; store the weekly report in the evidence folder.”
+
+3) Define re-test evidence before you implement
+This prevents “we fixed it” with no proof. For example:
+- For MFA rollout: “directory report showing MFA enabled for all users in scope, plus sign-in logs confirming MFA prompts.”
+- For logging: “log source inventory, SIEM ingestion health report, and an alert test record.”
+
+4) Keep exceptions explicit and time-bounded
+Sometimes you can’t fix immediately (legacy app, business constraints). Track exceptions with:
+- business justification
+- compensating controls
+- approval
+- expiration date
+- planned replacement/remediation
+
+This keeps risk visible without pretending it’s solved.
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] List your top 10–15 cybersecurity risks in plain language with clear scope.
+- [ ] For each risk, write a one-sentence control objective (what must be true).
+- [ ] Define 2–4 evidence artifacts per objective (prefer exports/reports over screenshots).
+- [ ] Record the source of truth and the exact steps to generate each artifact.
+- [ ] Set an evidence frequency (monthly/quarterly) aligned to how fast the risk changes.
+- [ ] Add pass criteria that a reviewer can apply consistently.
+- [ ] Assign an evidence owner and a reviewer for every item.
+- [ ] Store evidence in a controlled location with naming conventions and access limits.
+- [ ] Log findings with owner, due date, and the re-test evidence you expect to see.
+- [ ] Review exceptions quarterly and remove or renew them explicitly.
+
+## FAQ (3 questions with short answers)
+Q1: Do we need a formal framework to use an evidence template?
+A1: No. You can organize by risks and later map to generic families like NIST/ISO/CIS categories if helpful.
+
+Q2: Are screenshots ever acceptable audit evidence?
+A2: Sometimes, but they’re weakest when they’re the only proof. Pair screenshots with exports, logs, or reports you can reproduce.
+
+Q3: How long should we keep audit evidence?
+A3: Keep it long enough to cover your audit cycle and business needs (often 12–24 months), and align retention with legal and privacy requirements.
