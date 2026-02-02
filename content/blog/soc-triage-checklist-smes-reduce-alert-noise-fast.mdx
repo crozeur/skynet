@@ -1,0 +1,166 @@
+## Intro
+Most SMEs don’t suffer from “too few alerts”—they suffer from too many that are low value, poorly explained, or duplicates. When every notification looks urgent, real incidents blend into the background and response becomes inconsistent. A simple, repeatable triage checklist reduces noise without lowering your guard. This post focuses on practical steps you can run with a small team, limited tooling, and limited time.
+
+## Quick take
+- Treat triage as a fast decision pipeline: ignore, enrich, escalate, contain.
+- Reduce duplicates by grouping alerts into “cases” tied to an asset and time window.
+- Prioritize by business impact (critical assets + credible attacker behavior), not raw severity.
+- Use a short enrichment routine (who/what/when/where/how) before paging anyone.
+- Capture outcomes and tune rules weekly so the same noise doesn’t return.
+
+## Build a lightweight triage pipeline (so every alert has a home)
+Alert triage works best when everyone follows the same sequence. For SMEs, the goal isn’t perfect classification—it’s consistent, fast sorting with minimal rework.
+
+1) Intake → normalize
+- Ensure every alert lands in one queue (ticketing system, shared mailbox, or case tool).
+- Normalize the minimum fields you’ll need later: timestamp, source, alert name, impacted asset/user, and raw evidence link.
+
+2) De-duplicate → create a “case”
+A common noise source is receiving multiple alerts about the same underlying event (for example: “Impossible travel,” “MFA push denied,” and “New device login” for the same account within minutes). Instead of treating these as separate emergencies:
+- Create one case per identity/host per time window (e.g., 30–120 minutes).
+- Attach all related alerts to that case.
+
+Example:
+- 09:12 “Suspicious sign-in” for user j.smith
+- 09:13 “MFA challenge failed” for user j.smith
+- 09:15 “Mailbox forwarding rule created” for user j.smith
+These should form one case: “Potential account compromise – j.smith.”
+
+3) Classify → four outcomes
+Use simple categories that lead to action:
+- False positive (prove it’s benign)
+- Benign true positive (real event, no action required)
+- Needs more info (enrichment required)
+- Likely incident (escalate/contain)
+
+4) Escalate/contain with a timer
+Set a maximum time you’ll spend on triage before escalating. SMEs often stall because triage becomes a research project.
+- Suggested: 10–15 minutes of enrichment before escalation for high-risk cases.
+- If evidence is insufficient but risk is high, escalate anyway with what you have.
+
+## Prioritize alerts by business risk (not by how scary the message sounds)
+Most tools assign a severity level. Keep it—but don’t let it be the only driver. A “medium” alert on your payroll system can be more urgent than a “high” alert on a lab workstation.
+
+Use a simple risk lens:
+
+1) Asset criticality
+Maintain a short list of critical systems and identities:
+- Email admin accounts
+- Finance and payroll systems
+- Customer data stores
+- Domain controllers / identity providers
+- Remote access infrastructure (VPN, RDP gateways)
+
+If the alert involves a critical asset or privileged identity, it automatically moves up.
+
+2) Credible attacker behavior (TTP-like signals)
+Prioritize alerts that match common attack behaviors, even without “proof”:
+- New MFA device registration or changes to recovery methods
+- Mailbox forwarding rules or OAuth consent to unknown apps
+- Multiple failed logins followed by a success from new location/device
+- New scheduled task/service creation on servers
+- Large outbound data transfers or unusual admin tool use
+
+3) Blast radius and propagation potential
+One compromised laptop is bad; one compromised admin account is worse.
+- Any lateral movement indicators (new remote logins, new admin group membership) raise priority.
+- Any sign of persistence (new startup items, new cloud app tokens) raises priority.
+
+Practical scoring (SME-friendly)
+Instead of complicated scoring models, use a 3-question gate:
+- Is a critical asset/identity involved?
+- Is there a strong sign of attacker behavior (not just “anomaly”)?
+- Is there potential for rapid spread or data exposure?
+If 2 out of 3 are “yes,” treat it as “Likely incident.”
+
+## Do fast enrichment with a repeatable “minimum evidence” routine
+Enrichment is where triage either becomes efficient—or collapses into endless investigation. The trick is to standardize what “enough context” looks like.
+
+Minimum evidence questions (aim to answer in 10–15 minutes)
+1) Who is affected?
+- User: role, department, privilege level, recent password/MFA changes
+- Host: owner, purpose, whether it’s a server/workstation, last patch date (if available)
+
+2) What happened?
+- Exact event type (login, process execution, email rule change, firewall deny/allow)
+- What changed (new rule, new token, new admin membership)
+
+3) When and where?
+- Timeline: first seen, last seen, frequency
+- Location/IP/ASN (if available), device fingerprint, geo anomalies
+
+4) How confident is the signal?
+- Is it rule-based (known bad) or anomaly-based (unusual)?
+- Does the alert include concrete indicators (hash, domain, process path)?
+
+5) What’s the expected legitimate explanation?
+- Planned maintenance, travel, new device rollout, HR onboarding
+- Known business apps that create similar patterns
+
+Example: suspicious sign-in
+Fast enrichment steps:
+- Check if the user is privileged or in finance.
+- Review sign-in history: new device? new country? multiple failures?
+- Confirm if MFA was challenged and whether it succeeded.
+- Look for follow-on actions: mailbox rules, OAuth grants, file downloads.
+Outcome:
+- If privileged + new device + follow-on mailbox rule → escalate and contain.
+- If non-privileged + user confirms travel + no follow-on actions → benign true positive (document).
+
+Example: endpoint malware alert
+Fast enrichment steps:
+- Identify the process path and parent process (installer? browser? office macro?).
+- Check if it’s quarantined/blocked or executed.
+- Look for persistence or lateral movement indicators (new services, remote logins).
+Outcome:
+- Executed + persistence signs → escalate and isolate host.
+- Blocked + no further indicators → monitor and close with notes.
+
+## Close the loop: tune noisy detections without weakening security
+Noise doesn’t go away by itself. SMEs can steadily reduce it by treating every closed case as feedback for detection tuning.
+
+1) Track closure reasons
+Use a few standardized closure codes:
+- Known business behavior
+- Misconfigured asset (e.g., time skew, agent issues)
+- Duplicate of existing case
+- Detection too broad (needs scope)
+- True positive (incident)
+
+2) Create “allow with guardrails,” not blanket exclusions
+If a legitimate tool triggers alerts, avoid excluding it globally. Prefer scoped tuning:
+- Limit to specific host groups, service accounts, or signed binaries.
+- Add conditions (time window, expected source network).
+- Keep an exception expiry date and review monthly.
+
+3) Establish a weekly 30-minute tuning review
+Even a tiny SOC function can improve quickly with a short routine:
+- Top 5 recurring alerts by volume
+- Which ones were always benign? Why?
+- What enrichment data was repeatedly missing?
+- Which rules should be tightened, scoped, or supplemented with context?
+
+4) Align with generic best-practice frameworks (without overcomplicating)
+If you use references like NIST, ISO, or CIS, treat them as guidance for building repeatable processes: detection, response, documentation, and continual improvement. Don’t chase “compliance” in triage—chase consistency and measurable reduction in rework.
+
+## Checklist
+- [ ] Confirm the alert is in the central queue and contains timestamp, source, asset/user, and evidence link.
+- [ ] Check for duplicates; group related alerts into a single case (same asset/identity, close time window).
+- [ ] Identify asset criticality (critical system, privileged account, finance/payroll, customer data).
+- [ ] Determine whether the signal is rule-based (strong) or anomaly-based (needs more corroboration).
+- [ ] Perform minimum enrichment: user role/privilege, host owner/purpose, timeline, IP/location/device, and any follow-on actions.
+- [ ] Look for attacker-like behaviors (MFA changes, mailbox rules, token grants, persistence, lateral movement).
+- [ ] Decide outcome: false positive, benign true positive, needs more info, or likely incident.
+- [ ] If likely incident: escalate within the triage timebox and start first containment (disable account, isolate host, revoke sessions) per your playbook.
+- [ ] Document what evidence drove the decision and what would have changed the outcome.
+- [ ] Assign a closure reason code and create a tuning task if the alert was noisy or lacked context.
+
+## FAQ
+Q1: How fast should triage be?
+A: For high-risk cases, aim for a 10–15 minute triage timebox before escalating; for low-risk items, batch review is fine.
+
+Q2: Should we auto-close “common” alerts?
+A: Only if you can clearly define safe conditions (specific assets/accounts/time windows) and you review exceptions regularly.
+
+Q3: What’s the biggest triage mistake in SMEs?
+A: Treating every alert as a standalone event instead of building cases and focusing on business impact plus credible attacker behavior.
