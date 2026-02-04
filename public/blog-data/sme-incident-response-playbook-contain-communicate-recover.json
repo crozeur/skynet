@@ -1,7 +1,7 @@
 {
   "slug": "sme-incident-response-playbook-contain-communicate-recover",
   "slugEn": "sme-incident-response-playbook-contain-communicate-recover",
-  "slugFr": "pme-soc-playbook-reponse-incidents-contenir-communiquer-recuperer",
+  "slugFr": "pme-soc-guide-reponse-incidents-contenir-communiquer-recuperer",
   "metadata": {
     "title": "SME Incident Response Playbook: Contain, Communicate, Recover",
     "description": "Practical playbook for SMEs to respond to security incidents with speed and clarity.",

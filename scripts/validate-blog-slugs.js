@@ -47,6 +47,15 @@ const SEO_FR_STOPWORDS = new Set([
   "une",
 ]);
 
+// SEO strict: avoid obvious EN tokens leaking into FR slugs.
+// Keep this list short and high-signal; add terms only when a clear FR equivalent is expected.
+const SEO_FR_FORBIDDEN_EN_TOKENS = new Set([
+  "phishing",
+  "monitoring",
+  "workflow",
+  "playbook",
+]);
+
 function slugTokens(slug) {
   return String(slug || "")
     .split("-")
@@ -154,6 +163,14 @@ function okWith(warnings) {
     for (const t of slugTokens(slugFr)) {
       if (SEO_FR_STOPWORDS.has(t)) {
         errors.push(`slugFr contains stopword "${t}" for ${file}: "${slugFr}"`);
+        break;
+      }
+    }
+
+    // SEO strict: disallow certain EN tokens in FR slugs
+    for (const t of slugTokens(slugFr)) {
+      if (SEO_FR_FORBIDDEN_EN_TOKENS.has(t)) {
+        errors.push(`slugFr contains EN token "${t}" for ${file}: "${slugFr}"`);
         break;
       }
     }
@@ -281,6 +298,13 @@ function okWith(warnings) {
       for (const t of slugTokens(slugFr)) {
         if (SEO_FR_STOPWORDS.has(t)) {
           errors.push(`Override slugFr contains stopword "${t}" for ${slugEn}: "${slugFr}"`);
+          break;
+        }
+      }
+
+      for (const t of slugTokens(slugFr)) {
+        if (SEO_FR_FORBIDDEN_EN_TOKENS.has(t)) {
+          errors.push(`Override slugFr contains EN token "${t}" for ${slugEn}: "${slugFr}"`);
           break;
         }
       }

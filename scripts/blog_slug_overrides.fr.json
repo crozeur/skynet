@@ -1,7 +1,7 @@
 {
   "30-question-security-audit-checklist-sme-it-managers": "checklist-audit-securite-30-questions-pme-it",
   "audit-evidence-template-map-risks-proof-fixes": "modele-preuves-audit-carte-risques-correctifs",
-  "build-practical-soc-smes-monitor-run": "soc-pratique-pme-monitoring-reponse",
+  "build-practical-soc-smes-monitor-run": "soc-pratique-pme-surveillance-reponse",
   "cloud-migration-cutover-runbook-steps-roles-hypercare": "migration-cloud-runbook-bascule-etapes-roles-hypercare",
   "cloud-misconfigurations-catch-first-microsoft-365-aws": "mauvaises-configurations-cloud-detecter-m365-aws",
   "cloud-misconfigurations-smes-storage-iam-basics": "mauvaises-configurations-cloud-pme-stockage-iam-bases",
@@ -12,12 +12,12 @@
   "secure-m365-10-settings-smes-review-first": "m365-10-parametres-securite-verifier-pme",
   "secure-microsoft-365-tenant-one-afternoon": "m365-securiser-tenant-apres-midi",
   "security-audit-checklist-review-before-consultant": "checklist-audit-securite-revoir-avant-consultant",
-  "sme-incident-response-playbook-contain-communicate-recover": "pme-playbook-reponse-incidents-contenir-communiquer-recuperer",
+  "sme-incident-response-playbook-contain-communicate-recover": "pme-guide-reponse-incidents-contenir-communiquer-recuperer",
   "sme-security-audit-checklist-30-days": "pme-checklist-audit-securite-30-jours",
-  "soc-alert-triage-playbook-small-teams": "soc-triage-alertes-playbook-petites-equipes",
-  "soc-alert-triage-workflow-small-it-teams": "soc-triage-alertes-workflow-petite-equipe-it",
-  "soc-alerts-triage-playbook-small-it-teams": "soc-triage-alertes-playbook-petite-equipe-it",
-  "soc-playbook-smes-triage-phishing-alerts-15-minutes": "pme-soc-triage-alertes-phishing-15-min",
+  "soc-alert-triage-playbook-small-teams": "soc-triage-alertes-guide-petites-equipes",
+  "soc-alert-triage-workflow-small-it-teams": "soc-triage-alertes-processus-petite-equipe-it",
+  "soc-alerts-triage-playbook-small-it-teams": "soc-triage-alertes-guide-petite-equipe-it",
+  "soc-playbook-smes-triage-phishing-alerts-15-minutes": "pme-soc-triage-alertes-hameconnage-15-min",
   "soc-playbook-triage-escalate-sme-alerts": "pme-soc-triage-escalade-alertes-securite",
   "soc-triage-checklist-smes-reduce-alert-noise-fast": "pme-checklist-triage-soc-reduire-bruit-alertes"
 }

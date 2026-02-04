@@ -1,7 +1,7 @@
 {
   "slug": "soc-alerts-triage-playbook-small-it-teams",
   "slugEn": "soc-alerts-triage-playbook-small-it-teams",
-  "slugFr": "pme-soc-triage-alertes-playbook-petite-equipe-it",
+  "slugFr": "pme-soc-triage-alertes-guide-petite-equipe-it",
   "metadata": {
     "title": "SOC Alerts Triage Playbook for Small IT Teams",
     "description": "How small teams can triage security alerts efficiently without burning out on noise.",
