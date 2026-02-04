@@ -30,10 +30,35 @@ export const Services = () => {
       const right = raw.slice(dashIdx).replace(/^\s*[–—-]\s*/, "").trim();
       const chips = left
         .split(",")
-        .map((s) => s.trim())
+        .map((s, idx) => {
+          const cleaned = String(s || "").trim();
+          if (!cleaned) return "";
+          return idx === 0 ? cleaned : cleaned.replace(/^(and|et)\s+/i, "").trim();
+        })
         .filter(Boolean)
         .slice(0, 6);
       return { chips, rest: right || raw };
+    }
+
+    // Fallback: if the whole string is a comma-separated list of audiences,
+    // show them as chips (SOC offer uses this format).
+    const commaParts = raw
+      .split(",")
+      .map((s, idx) => {
+        const cleaned = String(s || "").trim();
+        if (!cleaned) return "";
+        return idx === 0 ? cleaned : cleaned.replace(/^(and|et)\s+/i, "").trim();
+      })
+      .filter(Boolean);
+
+    const looksLikeList =
+      commaParts.length >= 2 &&
+      commaParts.length <= 6 &&
+      commaParts.every((p) => p.length <= 60) &&
+      raw.length <= 220;
+
+    if (looksLikeList) {
+      return { chips: commaParts, rest: "" };
     }
 
     return { chips: [] as string[], rest: raw };
@@ -285,9 +310,11 @@ export const Services = () => {
                             ))}
                           </div>
                         )}
-                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
-                          {blocks.lead}
-                        </p>
+                        {blocks.lead && (
+                          <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                            {blocks.lead}
+                          </p>
+                        )}
                         {blocks.bullets.length > 0 && (
                           <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
                             {blocks.bullets.map((b) => (
@@ -507,9 +534,11 @@ export const Services = () => {
                             ))}
                           </div>
                         )}
-                        <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
-                          {blocks.lead}
-                        </p>
+                        {blocks.lead && (
+                          <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed break-words dark:text-white">
+                            {blocks.lead}
+                          </p>
+                        )}
                         {blocks.bullets.length > 0 && (
                           <ul className="mt-3 space-y-2 text-sm text-slate-800/90 dark:text-slate-100/90">
                             {blocks.bullets.map((b) => (

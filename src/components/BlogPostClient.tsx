@@ -12,6 +12,7 @@ import { polishFrenchITMetadata } from "@/lib/polishFrenchIT";
 
 export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
+  const blogHomeHref = language === "fr" ? "/fr/blog" : "/blog";
   const [metadata, setMetadata] = React.useState(post.metadata);
   const [content, setContent] = React.useState(post.content);
   const [isTranslating, setIsTranslating] = React.useState(false);
@@ -262,7 +263,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
         <Container className="relative py-16 sm:py-20 lg:py-24">
           {/* Back Button */}
           <Link
-            href="/blog"
+            href={blogHomeHref}
             className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mb-8 transition-colors group"
           >
             <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1003,7 +1004,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
             
             <div className="mt-8 text-center">
               <Link
-                href="/blog"
+                href={blogHomeHref}
                 className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold flex items-center gap-2 group justify-center"
               >
                 {language === "en" ? "Read more articles" : "Lire plus d'articles"}

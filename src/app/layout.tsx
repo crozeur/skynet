@@ -15,6 +15,7 @@ import { StickyCta } from "@/components/StickyCta";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://skynet-consulting.net"),
   title: "Skynet Consulting | Cybersecurity Solutions & Managed SOC",
   description: "Expert cybersecurity services: Managed SOC operations, security audits, and cloud security. Protect your organization with proven expertise.",
   icons: {

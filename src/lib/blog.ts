@@ -22,6 +22,8 @@ export interface TranslatedMetadata {
 
 export interface PostSummary {
   slug: string;
+  slugEn?: string;
+  slugFr?: string;
   metadata: PostMetadata;
   translatedMetadata?: TranslatedMetadata;
   readingTimeMinutes?: number;
@@ -113,13 +115,15 @@ export async function getAllBlogPosts(): Promise<PostSummary[]> {
 
   if (jsonFiles.length > 0) {
     const posts: PostSummary[] = [];
-    for (const file of jsonFiles) {
+    for (const file of jsonFiles.filter((f) => !f.startsWith("_"))) {
       const slug = file.replace(/\.json$/i, "");
       const fullPath = path.join(BLOG_DATA_DIR, file);
       const data = safeReadJsonFile<PostData>(fullPath);
       if (!data?.metadata) continue;
       posts.push({
         slug,
+        slugEn: (data as any).slugEn || slug,
+        slugFr: (data as any).slugFr || undefined,
         metadata: data.metadata,
         translatedMetadata: data.translatedMetadata,
         readingTimeMinutes: data.content

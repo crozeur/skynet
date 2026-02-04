@@ -325,6 +325,19 @@ function generateId(text) {
 // This script pre-compiles all blog posts to JSON for Vercel deployment
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
+const SLUG_OVERRIDES_PATH = path.join(process.cwd(), "scripts", "blog_slug_overrides.fr.json");
+
+function readJsonFileSafe(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) return fallback;
+    const raw = fs.readFileSync(filePath, "utf8");
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+const slugOverridesFr = readJsonFileSafe(SLUG_OVERRIDES_PATH, {});
 
 // Create output directory
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -335,12 +348,252 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 try {
   const existing = fs.readdirSync(OUTPUT_DIR);
   for (const file of existing) {
-    if (file.endsWith(".json")) {
+    // Keep index files (prefixed with _) that aren't per-post artifacts
+    if (file.endsWith(".json") && !file.startsWith("_")) {
       fs.unlinkSync(path.join(OUTPUT_DIR, file));
     }
   }
 } catch (err) {
   console.warn(`  ⚠️  Could not clean ${OUTPUT_DIR}: ${err.message}`);
+}
+
+function slugify(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+  return raw
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function makeUniqueSlug(base, used, fallback) {
+  const normalizedBase = String(base || "").trim();
+  const normalizedFallback = String(fallback || "").trim();
+  let candidate = normalizedBase || normalizedFallback;
+  if (!candidate) return "";
+
+  // If already used, append -2/-3...
+  if (!used.has(candidate)) {
+    used.add(candidate);
+    return candidate;
+  }
+  for (let i = 2; i < 1000; i++) {
+    const next = `${candidate}-${i}`;
+    if (!used.has(next)) {
+      used.add(next);
+      return next;
+    }
+  }
+  // Very unlikely; give up.
+  return candidate;
+}
+
+const SEO_FR_STOPWORDS = new Set([
+  // Low-value French connector words commonly removed from slugs
+  "a",
+  "au",
+  "aux",
+  "de",
+  "des",
+  "du",
+  "et",
+  "la",
+  "le",
+  "les",
+  "ou",
+  "un",
+  "une",
+]);
+
+function normalizeFrenchSlugTokens(slug) {
+  const raw = String(slug || "").trim();
+  if (!raw) return "";
+  const tokens = raw.split("-").filter(Boolean);
+  const cleaned = tokens.filter((t) => {
+    const x = String(t || "").toLowerCase();
+    return x && !SEO_FR_STOPWORDS.has(x);
+  });
+  return cleaned.join("-");
+}
+
+function getRequiredFrTokens(metadata, slugEn) {
+  const required = [];
+  const en = String(slugEn || "").toLowerCase();
+
+  const pillar = String(metadata?.pillar || "").toLowerCase();
+  if (pillar.includes("soc")) required.push("soc");
+  if (pillar.includes("audit")) required.push("audit");
+  if (pillar.includes("cloud")) required.push("cloud");
+
+  // Audience cue
+  const tags = Array.isArray(metadata?.tags) ? metadata.tags : [];
+  const hasSmeTag = tags.some((t) => String(t || "").toLowerCase() === "sme");
+  const mentionsSme = /(^|-)smes?(-|$)/.test(en);
+  if (hasSmeTag || mentionsSme) required.push("pme");
+
+  // Platform cues
+  if (/(^|-)aws(-|$)/.test(en)) required.push("aws");
+  if (/(^|-)m365(-|$)/.test(en) || en.includes("microsoft-365")) required.push("m365");
+
+  // Stable order: audience first, then pillar/platform keywords
+  const priority = ["pme", "soc", "audit", "cloud", "m365", "aws"];
+  const uniq = Array.from(new Set(required));
+  uniq.sort((a, b) => priority.indexOf(a) - priority.indexOf(b));
+  return uniq;
+}
+
+function ensureRequiredTokensInSlug(slug, requiredTokens) {
+  const raw = String(slug || "").trim();
+  if (!raw) return "";
+  const tokens = raw.split("-").filter(Boolean);
+  const set = new Set(tokens);
+
+  for (const req of requiredTokens || []) {
+    if (!req) continue;
+    if (set.has(req)) continue;
+
+    // If slug starts with pme, insert SOC/Audit/Cloud right after it for readability.
+    if (tokens[0] === "pme" && req !== "pme") {
+      tokens.splice(1, 0, req);
+    } else {
+      tokens.unshift(req);
+    }
+    set.add(req);
+  }
+
+  return tokens.join("-");
+}
+
+function autoFrenchSlugFromEnSlug(slugEn) {
+  const raw = String(slugEn || "").trim();
+  if (!raw) return "";
+
+  const tokens = raw.split("-").filter(Boolean);
+  const out = [];
+
+  const mapToken = (t) => {
+    const x = String(t || "").toLowerCase();
+    const dict = {
+      // Audience
+      sme: "pme",
+      smes: "pme",
+
+      // Cyber / IT keywords
+      security: "securite",
+      secure: "securiser",
+      cybersecurity: "cybersecurite",
+      audit: "audit",
+      checklist: "checklist",
+      evidence: "preuves",
+      template: "modele",
+      risks: "risques",
+      risk: "risque",
+      fixes: "correctifs",
+      fix: "corriger",
+
+      soc: "soc",
+      triage: "triage",
+      alert: "alertes",
+      alerts: "alertes",
+      phishing: "phishing",
+      escalation: "escalade",
+      escalate: "escalade",
+      response: "reponse",
+      recover: "recuperer",
+      recovery: "recuperation",
+      contain: "contenir",
+      communicate: "communiquer",
+
+      cloud: "cloud",
+      migration: "migration",
+      cutover: "bascule",
+      runbook: "runbook",
+      steps: "etapes",
+      roles: "roles",
+      hypercare: "hypercare",
+      misconfigurations: "mauvaises-configurations",
+      misconfiguration: "mauvaise-configuration",
+      storage: "stockage",
+      iam: "iam",
+      basics: "bases",
+
+      m365: "m365",
+      microsoft: "microsoft",
+      aws: "aws",
+      tenant: "tenant",
+
+      minutes: "min",
+      minute: "min",
+      days: "jours",
+      day: "jour",
+    };
+
+    if (dict[x]) return dict[x];
+    return x;
+  };
+
+  const stop = new Set([
+    "build",
+    "practical",
+    "monitor",
+    "run",
+    "review",
+    "first",
+    "before",
+    "now",
+    "new",
+    "apps",
+    "app",
+    "reduce",
+    "noise",
+    "fast",
+    "one",
+    "items",
+    "gather",
+    "prep",
+    "internal",
+    "small",
+    "teams",
+    "team",
+    "it",
+    "managers",
+  ]);
+
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (!t) continue;
+
+    // Special: microsoft-365 -> m365
+    if (t.toLowerCase() === "microsoft" && tokens[i + 1] === "365") {
+      out.push("m365");
+      i++;
+      continue;
+    }
+    if (stop.has(t.toLowerCase())) continue;
+
+    const mapped = mapToken(t);
+    if (!mapped) continue;
+    if (stop.has(mapped)) continue;
+    out.push(mapped);
+  }
+
+  // Put the most meaningful tokens first when possible
+  const prioritized = ["soc", "audit", "cloud", "m365", "aws", "checklist", "playbook", "runbook"];
+  const uniq = Array.from(new Set(out));
+  uniq.sort((a, b) => {
+    const ia = prioritized.indexOf(a);
+    const ib = prioritized.indexOf(b);
+    const pa = ia === -1 ? 999 : ia;
+    const pb = ib === -1 ? 999 : ib;
+    if (pa !== pb) return pa - pb;
+    return 0;
+  });
+
+  return uniq.join("-");
 }
 
 function extractMetadataFromMDX(source) {
@@ -430,6 +683,15 @@ console.log(`📝 Building ${files.length} blog posts...`);
 
 // Process files asynchronously
 (async () => {
+  const slugIndex = [];
+  const usedFrSlugs = new Set();
+
+  const indexPath = path.join(OUTPUT_DIR, "_index.json");
+  const aliasesPath = path.join(OUTPUT_DIR, "_aliases_fr.json");
+  const prevIndex = readJsonFileSafe(indexPath, []);
+  const prevAliases = readJsonFileSafe(aliasesPath, {});
+  const aliases = { ...prevAliases };
+
   for (const file of files) {
     const slug = file.replace(/\.mdx$/, "");
     const filePath = path.join(BLOG_DIR, file);
@@ -449,13 +711,27 @@ console.log(`📝 Building ${files.length} blog posts...`);
     const translatedMetadata = await translateMetadata(metadata);
     const translatedContent = await translateHtmlContent(htmlContent);
 
+    const slugEn = slug;
+    const manualFr = typeof metadata?.slugFr === "string" ? metadata.slugFr : "";
+    const overrideFr = typeof slugOverridesFr?.[slugEn] === "string" ? slugOverridesFr[slugEn] : "";
+    const frTitle = translatedMetadata?.title || metadata?.title || slug;
+
+    const autoFromEn = autoFrenchSlugFromEnSlug(slugEn);
+    const requiredTokens = getRequiredFrTokens(metadata, slugEn);
+    const rawBase = slugify(manualFr || overrideFr || autoFromEn || frTitle);
+    const cleanedBase = normalizeFrenchSlugTokens(rawBase);
+    const withRequired = ensureRequiredTokensInSlug(cleanedBase, requiredTokens);
+    const slugFr = makeUniqueSlug(withRequired || slugEn, usedFrSlugs, slugEn);
+
     // Write JSON file with both EN and FR translations
     const jsonPath = path.join(OUTPUT_DIR, `${slug}.json`);
     fs.writeFileSync(
       jsonPath,
       JSON.stringify(
         {
-          slug,
+          slug: slugEn,
+          slugEn,
+          slugFr,
           metadata,
           translatedMetadata: {
             fr: translatedMetadata,
@@ -470,7 +746,35 @@ console.log(`📝 Building ${files.length} blog posts...`);
       )
     );
 
+    slugIndex.push({ slugEn, slugFr });
+
+    // Keep aliases so old FR URLs don't break
+    aliases[slugFr] = slugEn;
+    const old = Array.isArray(prevIndex)
+      ? prevIndex.find((e) => e && e.slugEn === slugEn)
+      : null;
+    if (old && typeof old.slugFr === "string" && old.slugFr && old.slugFr !== slugFr) {
+      aliases[old.slugFr] = slugEn;
+    }
+
     console.log(`✓ ${slug}`);
+  }
+
+  // Write slug index used by language switch + localized routes
+  try {
+    fs.writeFileSync(indexPath, JSON.stringify(slugIndex, null, 2));
+  } catch (err) {
+    console.warn(`  ⚠️  Could not write slug index: ${err.message}`);
+  }
+
+  // Write FR aliases map (frSlug -> slugEn) for backwards-compatible routing
+  try {
+    const sorted = Object.fromEntries(
+      Object.entries(aliases).sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+    );
+    fs.writeFileSync(aliasesPath, JSON.stringify(sorted, null, 2));
+  } catch (err) {
+    console.warn(`  ⚠️  Could not write FR aliases: ${err.message}`);
   }
 
   console.log(`✅ Blog posts compiled to ${OUTPUT_DIR}`);

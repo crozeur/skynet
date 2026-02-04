@@ -17,6 +17,12 @@ interface TranslatedMetadata {
   tags: string[];
 }
 
+const PILLAR_COLORS: Record<string, string> = {
+  SOC: "from-blue-600 to-cyan-500",
+  AUDIT: "from-purple-600 to-pink-500",
+  CLOUD: "from-green-600 to-teal-500",
+};
+
 export function BlogIndexClient({
   posts,
   initialPillar,
@@ -78,12 +84,6 @@ export function BlogIndexClient({
     setIsTranslating(false);
   }, [language, posts]);
 
-  const pillarColors: Record<string, string> = {
-    SOC: "from-blue-600 to-cyan-500",
-    AUDIT: "from-purple-600 to-pink-500",
-    CLOUD: "from-green-600 to-teal-500",
-  };
-
   const topicChipAccent = React.useMemo(() => {
     if (!filterPillar) {
       return {
@@ -95,7 +95,7 @@ export function BlogIndexClient({
       };
     }
 
-    const gradient = `bg-gradient-to-r ${pillarColors[filterPillar]}`;
+    const gradient = `bg-gradient-to-r ${PILLAR_COLORS[filterPillar]}`;
     const ring =
       filterPillar === "SOC"
         ? "ring-blue-500/20 dark:ring-blue-400/20"
@@ -121,7 +121,7 @@ export function BlogIndexClient({
       hoverBorder,
       softPanel,
     };
-  }, [filterPillar, pillarColors]);
+  }, [filterPillar]);
 
   const topicBadgeTone = React.useCallback(
     (pillar: string) => {
@@ -574,10 +574,14 @@ export function BlogIndexClient({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {pagedPosts.map(({ slug, metadata, readingTimeMinutes }) => (
+            {pagedPosts.map(({ slug, slugEn, slugFr, metadata, readingTimeMinutes }) => (
               <Link
                 key={slug}
-                href={`/blog/${slug}`}
+                href={
+                  language === "fr"
+                    ? `/fr/blog/${slugFr || slug}`
+                    : `/blog/${slugEn || slug}`
+                }
                 className="group relative h-full rounded-2xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-3"
               >
                 {/* Background with gradient overlay */}

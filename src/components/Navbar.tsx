@@ -49,6 +49,8 @@ export const Navbar = () => {
     } else {
       if (pathname && pathname.startsWith("/blog")) {
         setActiveSection("blog");
+      } else if (pathname && (pathname.startsWith("/fr/blog") || pathname.startsWith("/en/blog"))) {
+        setActiveSection("blog");
       } else {
         setActiveSection("");
       }
@@ -99,7 +101,7 @@ export const Navbar = () => {
             {language === "en" ? "Compliance" : "Conformité & Risques"}
           </a>
           <a
-            href="/blog"
+            href={language === "fr" ? "/fr/blog" : "/blog"}
             className={navItemClass("blog")}
           >
             {language === "en" ? "Blog" : "Blog"}
@@ -183,7 +185,7 @@ export const Navbar = () => {
             <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Compliance" : "Conformité & Risques"}
             </a>
-            <a href="/blog" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+            <a href={language === "fr" ? "/fr/blog" : "/blog"} className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               Blog
             </a>
             <a href="/#about" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>

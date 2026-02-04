@@ -1,0 +1,53 @@
+name: Validate Blog Slugs
+
+on:
+  pull_request:
+    paths:
+      - 'content/blog/**/*.mdx'
+      - 'public/blog-data/**'
+      - 'scripts/build-blog.js'
+      - 'scripts/blog_slug_overrides.fr.json'
+      - 'scripts/validate-blog-slugs.js'
+      - 'scripts/validate-blog-metadata.js'
+      - 'src/app/**/blog/**'
+      - 'src/lib/blog.ts'
+      - 'src/lib/blogSlugIndexServer.ts'
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/blog/**/*.mdx'
+      - 'public/blog-data/**'
+      - 'scripts/build-blog.js'
+      - 'scripts/blog_slug_overrides.fr.json'
+      - 'scripts/validate-blog-slugs.js'
+      - 'scripts/validate-blog-metadata.js'
+      - 'src/app/**/blog/**'
+      - 'src/lib/blog.ts'
+      - 'src/lib/blogSlugIndexServer.ts'
+
+jobs:
+  validate-slugs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate blog metadata
+        run: node scripts/validate-blog-metadata.js
+
+      - name: Build blog artifacts (skip translation)
+        run: node scripts/build-blog.js --skip-translation
+
+      - name: Validate blog slugs + mappings
+        run: node scripts/validate-blog-slugs.js
