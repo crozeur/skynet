@@ -427,7 +427,7 @@ export function BlogIndexClient({
                     </span>
                   </div>
                   {filterPillar !== pillar && (
-                    <div className={`absolute inset-0 bg-gradient-to-br ${pillarColors[pillar]} opacity-0 group-hover:opacity-15 transition-opacity duration-300`} />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${PILLAR_COLORS[pillar]} opacity-0 group-hover:opacity-15 transition-opacity duration-300`} />
                   )}
                 </button>
               ))}
@@ -451,7 +451,7 @@ export function BlogIndexClient({
                     <div className="flex items-center justify-between gap-4 mb-3">
                   <h3 className="text-sm font-bold tracking-wide text-gray-800 dark:text-gray-200">
                     <span className="inline-flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${pillarColors[filterPillar]} shadow-sm`} aria-hidden />
+                      <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${PILLAR_COLORS[filterPillar]} shadow-sm`} aria-hidden />
                       {language === "en" ? "Topics" : "Sous-thèmes"}
                     </span>
                   </h3>
@@ -586,7 +586,7 @@ export function BlogIndexClient({
               >
                 {/* Background with gradient overlay */}
                 <div
-                  className={`absolute inset-0 bg-gradient-to-br ${pillarColors[metadata.pillar]} opacity-25 dark:opacity-0 group-hover:opacity-40 dark:group-hover:opacity-100 transition-opacity duration-500`}
+                  className={`absolute inset-0 bg-gradient-to-br ${PILLAR_COLORS[metadata.pillar]} opacity-25 dark:opacity-0 group-hover:opacity-40 dark:group-hover:opacity-100 transition-opacity duration-500`}
                 />
                 
                 {/* Card container */}
@@ -624,7 +624,7 @@ export function BlogIndexClient({
                       </div>
                     </div>
                   ) : (
-                    <div className={`h-48 sm:h-52 w-full bg-gradient-to-br ${pillarColors[metadata.pillar]} relative overflow-hidden`}>
+                    <div className={`h-48 sm:h-52 w-full bg-gradient-to-br ${PILLAR_COLORS[metadata.pillar]} relative overflow-hidden`}>
                       <div className="absolute inset-0 opacity-20">
                         <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full mix-blend-overlay blur-3xl" />
                         <div className="absolute bottom-0 left-0 w-40 h-40 bg-white rounded-full mix-blend-overlay blur-3xl" />
@@ -653,7 +653,7 @@ export function BlogIndexClient({
                   
                   {/* Pillar badge */}
                   <div className="absolute top-5 right-5 z-10 flex flex-col items-end gap-2">
-                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-2 ring-white/30 backdrop-blur-sm group-hover:ring-white/50 transition-all duration-500`}>
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${PILLAR_COLORS[metadata.pillar]} shadow-lg ring-2 ring-white/30 backdrop-blur-sm group-hover:ring-white/50 transition-all duration-500`}>
                       {metadata.pillar}
                     </span>
                     {metadata.topic && (

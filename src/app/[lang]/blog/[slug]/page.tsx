@@ -33,29 +33,30 @@ export default async function LocalizedBlogPostPage({
     redirect(`/blog/${slugEn}`);
   }
 
+  let data: any;
   try {
-    const data = loadPostJsonBySlugEn(slugEn);
-    if (!data || !data.metadata) notFound();
-
-    const canonicalFr = String(data.slugFr || getBlogSlugForLang(slugEn, "fr"));
-    if (lang === "fr" && params.slug !== canonicalFr) {
-      redirect(`/fr/blog/${canonicalFr}`);
-    }
-
-    const post: PostData = {
-      slug: slugEn,
-      slugEn: data.slugEn ?? slugEn,
-      slugFr: data.slugFr ?? undefined,
-      metadata: data.metadata,
-      translatedMetadata: data.translatedMetadata,
-      content: data.content || "<p>No content</p>",
-      translatedContent: data.translatedContent,
-    };
-
-    return <BlogPostClient post={post} />;
+    data = loadPostJsonBySlugEn(slugEn);
   } catch {
     notFound();
   }
+  if (!data || !data.metadata) notFound();
+
+  const canonicalFr = String(data.slugFr || getBlogSlugForLang(slugEn, "fr"));
+  if (lang === "fr" && params.slug !== canonicalFr) {
+    redirect(`/fr/blog/${canonicalFr}`);
+  }
+
+  const post: PostData = {
+    slug: slugEn,
+    slugEn: data.slugEn ?? slugEn,
+    slugFr: data.slugFr ?? undefined,
+    metadata: data.metadata,
+    translatedMetadata: data.translatedMetadata,
+    content: data.content || "<p>No content</p>",
+    translatedContent: data.translatedContent,
+  };
+
+  return <BlogPostClient post={post} />;
 }
 
 export async function generateMetadata({

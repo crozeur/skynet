@@ -6,8 +6,33 @@ export type BlogSlugIndexEntry = {
   slugFr: string;
 };
 
-const INDEX_PATH = path.join(process.cwd(), "public", "blog-data", "_index.json");
-const ALIASES_FR_PATH = path.join(process.cwd(), "public", "blog-data", "_aliases_fr.json");
+function resolveBlogDataPath(fileName: string): string {
+  const rel = path.join("public", "blog-data", fileName);
+
+  // Different deploy modes can have different working directories.
+  // Try a few sensible bases so server-side slug resolution never silently breaks.
+  const candidates = [
+    path.join(process.cwd(), rel),
+    path.join(process.cwd(), "..", rel),
+    path.join(process.cwd(), "..", "..", rel),
+    // Fallback relative to this compiled file location
+    path.join(__dirname, "..", "..", "..", rel),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) return candidate;
+    } catch {
+      // continue
+    }
+  }
+
+  // Default to the cwd-based path even if it doesn't exist.
+  return candidates[0];
+}
+
+const INDEX_PATH = resolveBlogDataPath("_index.json");
+const ALIASES_FR_PATH = resolveBlogDataPath("_aliases_fr.json");
 
 let cache: BlogSlugIndexEntry[] | null = null;
 let aliasesFrCache: Record<string, string> | null = null;
@@ -23,7 +48,7 @@ export function getBlogSlugIndexServer(): BlogSlugIndexEntry[] {
     const parsed = JSON.parse(raw);
     cache = Array.isArray(parsed) ? (parsed as BlogSlugIndexEntry[]) : [];
     return cache;
-  } catch {
+  } catch (err) {
     cache = [];
     return cache;
   }
@@ -40,7 +65,7 @@ export function getBlogFrAliasesServer(): Record<string, string> {
     const parsed = JSON.parse(raw);
     aliasesFrCache = parsed && typeof parsed === "object" ? (parsed as Record<string, string>) : {};
     return aliasesFrCache;
-  } catch {
+  } catch (err) {
     aliasesFrCache = {};
     return aliasesFrCache;
   }
