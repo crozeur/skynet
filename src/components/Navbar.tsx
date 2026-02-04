@@ -61,17 +61,17 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
-    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
+    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-base lg:text-lg xl:text-xl px-2.5 lg:px-3 py-2 rounded-md ${
       isActive(sectionId)
         ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
         : promoted
-          ? "text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30"
+          ? "text-blue-700 dark:text-blue-300 bg-blue-50/40 dark:bg-blue-900/10 border border-blue-200/80 dark:border-blue-700/40 hover:bg-blue-100/60 dark:hover:bg-blue-900/20"
           : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
     }`;
   };
 
   const blogBadge = (
-    <span className="ml-2 inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm">
+    <span className="ml-2 inline-flex items-center rounded-full bg-gray-900/5 dark:bg-white/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-gray-700 dark:text-gray-200 ring-1 ring-gray-300/60 dark:ring-white/15">
       {language === "en" ? "Guides" : "Guides"}
     </span>
   );
@@ -80,12 +80,12 @@ export const Navbar = () => {
     <nav className={`sticky top-0 z-50 bg-white dark:bg-gray-900/90 backdrop-blur-md border-b-2 border-gray-300 dark:border-gray-800 relative transition-all duration-300 ${
       scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
     }`}>
-      <Container className="flex items-center justify-between py-1.5 md:py-2 relative">
+      <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
           <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={144} height={144} className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden md:flex flex-1 min-w-0 items-center justify-center gap-3 lg:gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1">
           <a
             href="/#hero"
             className={navItemClass("hero")}
@@ -132,7 +132,7 @@ export const Navbar = () => {
             {language === "en" ? "Contact" : "Nous Contacter"}
           </a>
         </div>
-        <div className="flex items-center gap-2 md:gap-4 mr-4">
+        <div className="flex flex-shrink-0 items-center gap-2 md:gap-3">
           <div className="hidden md:block">
             <ThemeChanger />
           </div>
