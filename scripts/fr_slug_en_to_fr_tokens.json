@@ -1,0 +1,11 @@
+{
+  "phishing": "hameconnage",
+  "monitoring": "surveillance",
+  "workflow": "processus",
+  "playbook": "guide",
+  "ransomware": "rancongiciel",
+  "malware": "logiciel-malveillant",
+  "endpoint": "terminal",
+  "breach": "compromission",
+  "backup": "sauvegarde"
+}

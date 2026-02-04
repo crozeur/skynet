@@ -6,6 +6,7 @@ const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
 const INDEX_PATH = path.join(OUTPUT_DIR, "_index.json");
 const ALIASES_PATH = path.join(OUTPUT_DIR, "_aliases_fr.json");
 const OVERRIDES_PATH = path.join(process.cwd(), "scripts", "blog_slug_overrides.fr.json");
+const FR_EN_TOKEN_MAP_PATH = path.join(process.cwd(), "scripts", "fr_slug_en_to_fr_tokens.json");
 
 function readJsonFileSafe(filePath, fallback) {
   try {
@@ -47,14 +48,28 @@ const SEO_FR_STOPWORDS = new Set([
   "une",
 ]);
 
+function loadForbiddenEnTokenMap() {
+  const raw = readJsonFileSafe(FR_EN_TOKEN_MAP_PATH, null);
+  if (raw === null) return {};
+  if (!isPlainObject(raw)) return {};
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const key = String(k || "").trim().toLowerCase();
+    const val = String(v || "").trim();
+    if (!key) continue;
+    out[key] = val;
+  }
+  return out;
+}
+
 // SEO strict: avoid obvious EN tokens leaking into FR slugs.
-// Keep this list short and high-signal; add terms only when a clear FR equivalent is expected.
-const SEO_FR_FORBIDDEN_EN_TOKENS = new Set([
-  "phishing",
-  "monitoring",
-  "workflow",
-  "playbook",
-]);
+// Mapping provides a suggested replacement for error messages.
+const FORBIDDEN_EN_TOKEN_MAP = loadForbiddenEnTokenMap();
+const SEO_FR_FORBIDDEN_EN_TOKENS = new Set(
+  Object.keys(FORBIDDEN_EN_TOKEN_MAP).length > 0
+    ? Object.keys(FORBIDDEN_EN_TOKEN_MAP)
+    : ["phishing", "monitoring", "workflow", "playbook"]
+);
 
 function slugTokens(slug) {
   return String(slug || "")
@@ -170,7 +185,10 @@ function okWith(warnings) {
     // SEO strict: disallow certain EN tokens in FR slugs
     for (const t of slugTokens(slugFr)) {
       if (SEO_FR_FORBIDDEN_EN_TOKENS.has(t)) {
-        errors.push(`slugFr contains EN token "${t}" for ${file}: "${slugFr}"`);
+        const suggestion = FORBIDDEN_EN_TOKEN_MAP[t]
+          ? ` (use "${FORBIDDEN_EN_TOKEN_MAP[t]}")`
+          : "";
+        errors.push(`slugFr contains EN token "${t}"${suggestion} for ${file}: "${slugFr}"`);
         break;
       }
     }
@@ -304,7 +322,10 @@ function okWith(warnings) {
 
       for (const t of slugTokens(slugFr)) {
         if (SEO_FR_FORBIDDEN_EN_TOKENS.has(t)) {
-          errors.push(`Override slugFr contains EN token "${t}" for ${slugEn}: "${slugFr}"`);
+          const suggestion = FORBIDDEN_EN_TOKEN_MAP[t]
+            ? ` (use "${FORBIDDEN_EN_TOKEN_MAP[t]}")`
+            : "";
+          errors.push(`Override slugFr contains EN token "${t}"${suggestion} for ${slugEn}: "${slugFr}"`);
           break;
         }
       }
