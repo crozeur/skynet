@@ -337,6 +337,7 @@ const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
 const SLUG_OVERRIDES_PATH = path.join(process.cwd(), "scripts", "blog_slug_overrides.fr.json");
 const SLUG_ALIASES_SEED_PATH = path.join(process.cwd(), "scripts", "blog_slug_aliases.fr.json");
+const TITLE_OVERRIDES_FR_PATH = path.join(process.cwd(), "scripts", "blog_title_overrides.fr.json");
 
 function readJsonFileSafe(filePath, fallback) {
   try {
@@ -350,6 +351,7 @@ function readJsonFileSafe(filePath, fallback) {
 
 const slugOverridesFr = readJsonFileSafe(SLUG_OVERRIDES_PATH, {});
 const slugAliasesFrSeed = readJsonFileSafe(SLUG_ALIASES_SEED_PATH, {});
+const titleOverridesFr = readJsonFileSafe(TITLE_OVERRIDES_FR_PATH, {});
 
 // Create output directory
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -761,6 +763,13 @@ console.log(`📝 Building ${files.length} blog posts...`);
     console.log(`  🔄 Translating ${slug}...`);
     const translatedMetadata = await translateMetadata(metadata);
     const translatedContent = await translateHtmlContent(htmlContent);
+
+    // Optional: deterministic FR title overrides for awkward machine translations.
+    const overrideTitleFr =
+      typeof titleOverridesFr?.[slug] === "string" ? titleOverridesFr[slug].trim() : "";
+    if (overrideTitleFr) {
+      translatedMetadata.title = overrideTitleFr;
+    }
 
     const slugEn = slug;
     const manualFr = typeof metadata?.slugFr === "string" ? metadata.slugFr : "";
