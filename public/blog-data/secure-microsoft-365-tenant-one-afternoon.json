@@ -1,7 +1,7 @@
 {
   "slug": "secure-microsoft-365-tenant-one-afternoon",
   "slugEn": "secure-microsoft-365-tenant-one-afternoon",
-  "slugFr": "pme-cloud-m365-securiser-tenant-apres-midi",
+  "slugFr": "pme-cloud-m365-securiser-entite-apres-midi",
   "metadata": {
     "title": "Secure Microsoft 365 Tenant One Afternoon",
     "description": "Security insights for small and mid-sized businesses",
@@ -19,7 +19,7 @@
   },
   "translatedMetadata": {
     "fr": {
-      "title": "Secure Microsoft 365 Tenant One Afternoon",
+      "title": "Secure Microsoft 365 entité One Afternoon",
       "description": "Security insights for small and mid-sized businesses",
       "date": "2026-01-19",
       "pillar": "CLOUD",

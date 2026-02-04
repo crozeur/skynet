@@ -28,5 +28,6 @@
   "endpoints": "terminaux",
   "breach": "compromission",
   "backups": "sauvegardes",
-  "backup": "sauvegarde"
+  "backup": "sauvegarde",
+  "tenant": "entite"
 }

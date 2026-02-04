@@ -1,7 +1,7 @@
 import type { PostMetadata } from "@/lib/blog";
 
 // Small, opinionated set of post-edits to make FR strings sound natural in IT/SecOps.
-// Goal: fix common literal translations (e.g., "locataire" for M365 tenant) and normalize product names/acronyms.
+// Goal: fix common literal translations and normalize product names/acronyms.
 
 type ReplaceRule = {
   pattern: RegExp;
@@ -23,10 +23,15 @@ const PRODUCT_RULES: ReplaceRule[] = [
   // Microsoft naming
   { pattern: /\bOffice\s*365\b/gi, replace: "Microsoft 365" },
   { pattern: /\bBureau\s*365\b/gi, replace: "Microsoft 365" },
-  { pattern: /\bMicrosoft\s*365\s*(?:locataire|tenant)\b/gi, replace: "tenant Microsoft 365" },
+  { pattern: /\bMicrosoft\s*365\s*(?:locataire|tenant|entit[eé])\b/gi, replace: "entité Microsoft 365" },
 
-  // Tenant: Google often uses "locataire" which is wrong in IT French.
-  { pattern: /\blocataire\b/gi, replace: "tenant" },
+  // Tenant vocabulary: normalize to "entité" for IT French on this site.
+  { pattern: /\btenant-wide\b/gi, replace: "à l'échelle de l'entité" },
+  { pattern: /\bmulti[-\s]?tenant\b/gi, replace: "multi-entité" },
+  { pattern: /\blocataires\b/gi, replace: "entités" },
+  { pattern: /\blocataire\b/gi, replace: "entité" },
+  { pattern: /\btenants\b/gi, replace: "entités" },
+  { pattern: /\btenant\b/gi, replace: "entité" },
 ];
 
 const SECURITY_TERMS_RULES: ReplaceRule[] = [

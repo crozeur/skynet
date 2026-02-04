@@ -16,6 +16,13 @@ const frenchGlossary = {
   "account takeover": "prise de contrôle de compte",
   "business email compromise": "compromission de messagerie",
   "password spraying": "pulvérisation de mots de passe",
+  "tenant-wide": "à l'échelle de l'entité",
+  "multi-tenant": "multi-entité",
+  "multi tenant": "multi-entité",
+  tenants: "entités",
+  tenant: "entité",
+  locataires: "entités",
+  locataire: "entité",
   incident: "incident",
   vulnerability: "vulnérabilité",
   compliance: "conformité",
@@ -329,6 +336,7 @@ function generateId(text) {
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
 const SLUG_OVERRIDES_PATH = path.join(process.cwd(), "scripts", "blog_slug_overrides.fr.json");
+const SLUG_ALIASES_SEED_PATH = path.join(process.cwd(), "scripts", "blog_slug_aliases.fr.json");
 
 function readJsonFileSafe(filePath, fallback) {
   try {
@@ -341,6 +349,7 @@ function readJsonFileSafe(filePath, fallback) {
 }
 
 const slugOverridesFr = readJsonFileSafe(SLUG_OVERRIDES_PATH, {});
+const slugAliasesFrSeed = readJsonFileSafe(SLUG_ALIASES_SEED_PATH, {});
 
 // Create output directory
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -554,7 +563,7 @@ function autoFrenchSlugFromEnSlug(slugEn) {
       m365: "m365",
       microsoft: "microsoft",
       aws: "aws",
-      tenant: "tenant",
+      tenant: "entite",
 
       minutes: "min",
       minute: "min",
@@ -732,7 +741,7 @@ console.log(`📝 Building ${files.length} blog posts...`);
   const aliasesPath = path.join(OUTPUT_DIR, "_aliases_fr.json");
   const prevIndex = readJsonFileSafe(indexPath, []);
   const prevAliases = readJsonFileSafe(aliasesPath, {});
-  const aliases = { ...prevAliases };
+  const aliases = { ...(slugAliasesFrSeed || {}), ...prevAliases };
 
   for (const file of files) {
     const slug = file.replace(/\.mdx$/, "");
