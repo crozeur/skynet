@@ -16,6 +16,8 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   // translations are consumed directly inside components that need them
 
+  const desktopNavGapClass = language === "fr" ? "gap-2 lg:gap-3" : "gap-3 lg:gap-4";
+
   const pathname = usePathname();
 
   // Always track scrolled state for navbar shadow
@@ -71,7 +73,7 @@ export const Navbar = () => {
   };
 
   const blogBadge = (
-    <span className="ml-2 inline-flex items-center rounded-full bg-gray-900/5 dark:bg-white/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-gray-700 dark:text-gray-200 ring-1 ring-gray-300/60 dark:ring-white/15">
+    <span className="ml-2 inline-flex items-center rounded-full bg-blue-600/10 dark:bg-cyan-300/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-blue-800 dark:text-cyan-100 ring-1 ring-blue-600/25 dark:ring-cyan-200/20 shadow-[0_1px_0_rgba(255,255,255,0.15)]">
       {language === "en" ? "Guides" : "Guides"}
     </span>
   );
@@ -85,7 +87,7 @@ export const Navbar = () => {
           <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={144} height={144} className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
-        <div className="hidden md:flex flex-1 min-w-0 items-center justify-center gap-3 lg:gap-4 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1">
+        <div className={`hidden md:flex flex-1 min-w-0 items-center justify-center ${desktopNavGapClass} overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1`}>
           <a
             href="/#hero"
             className={navItemClass("hero")}
