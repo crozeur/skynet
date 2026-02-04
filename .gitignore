@@ -41,3 +41,21 @@ yarn-error.log*
 
 # local temp logs (created by scripts/test-api-local.ps1)
 /.tmp/
+
+# local dev logs
+.next-dev.log
+.next-dev.err.log
+
+# editor settings
+.vscode/
+
+# python caches
+**/__pycache__/
+*.pyc
+
+# local exported docs/reports
+SKYNET-Consulting-Plan-*.pdf
+SKYNET-Consulting-Plan-*.docx
+Skynet-Consulting-Master-Plan.*
+Skynet-Plan-*.pdf
+Skynet-Consulting-Interactive-Report*.html

@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   
 jobs:
   fix-metadata:
@@ -32,34 +33,24 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Fix missing metadata
+      - name: Validate blog metadata (push/PR)
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        run: node scripts/validate-blog-metadata.js
+
+      - name: Fix missing metadata (scheduled/manual)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: node scripts/fix-missing-metadata.js
 
-      - name: Validate blog metadata
+      - name: Validate blog metadata (scheduled/manual)
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: node scripts/validate-blog-metadata.js
-      
-      - name: Validate metadata on PR (no push)
-        if: github.event_name == 'pull_request'
-        run: |
-          git add content/blog/
-          if git diff-index --quiet HEAD --; then
-            echo "✅ Metadata OK"
-          else
-            echo "❌ Missing metadata detected. Run: node scripts/fix-missing-metadata.js"
-            git --no-pager diff --name-only
-            exit 1
-          fi
 
-      - name: Commit and push changes (push to main)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add content/blog/
-          if git diff-index --quiet HEAD --; then
-            echo "✅ No metadata changes needed"
-          else
-            git commit -m "chore: auto-add missing blog metadata [skip ci]"
-            git push origin HEAD:main
-            echo "✅ Metadata changes pushed"
-          fi
+      - name: Create PR with metadata fixes
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore(blog): fix missing metadata'
+          title: 'chore(blog): fix missing metadata'
+          body: 'Automated metadata normalization from scripts/fix-missing-metadata.js.'
+          branch: 'bot/fix-blog-metadata'
+          delete-branch: true
