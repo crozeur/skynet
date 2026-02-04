@@ -59,12 +59,22 @@ export const Navbar = () => {
 
   const isActive = (sectionId: string) => activeSection === sectionId;
 
-  const navItemClass = (sectionId: string) =>
-    `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
+  const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
+    const promoted = Boolean(opts?.promoted);
+    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-lg lg:text-xl px-3 py-2 rounded-md ${
       isActive(sectionId)
         ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
-        : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+        : promoted
+          ? "text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30"
+          : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
     }`;
+  };
+
+  const blogBadge = (
+    <span className="ml-2 inline-flex items-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-0.5 text-[11px] font-extrabold tracking-wide text-white shadow-sm">
+      {language === "en" ? "Guides" : "Guides"}
+    </span>
+  );
 
   return (
     <nav className={`sticky top-0 z-50 bg-white dark:bg-gray-900/90 backdrop-blur-md border-b-2 border-gray-300 dark:border-gray-800 relative transition-all duration-300 ${
@@ -95,16 +105,19 @@ export const Navbar = () => {
             {language === "en" ? "Services" : "Nos Services"}
           </a>
           <a
+            href={language === "fr" ? "/fr/blog" : "/blog"}
+            className={navItemClass("blog", { promoted: true })}
+          >
+            <span className="inline-flex items-center">
+              {language === "en" ? "Blog" : "Blog"}
+              {blogBadge}
+            </span>
+          </a>
+          <a
             href="/#compliance"
             className={navItemClass("compliance")}
           >
             {language === "en" ? "Compliance" : "Conformité & Risques"}
-          </a>
-          <a
-            href={language === "fr" ? "/fr/blog" : "/blog"}
-            className={navItemClass("blog")}
-          >
-            {language === "en" ? "Blog" : "Blog"}
           </a>
           <a
             href="/#about"
@@ -182,11 +195,18 @@ export const Navbar = () => {
             <a href="/#services-overview" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Services" : "Nos Services"}
             </a>
+            <a
+              href={language === "fr" ? "/fr/blog" : "/blog"}
+              className="w-full text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30 transition font-bold text-lg px-3 py-2 rounded-md"
+              onClick={() => setOpen(false)}
+            >
+              <span className="inline-flex items-center">
+                Blog
+                {blogBadge}
+              </span>
+            </a>
             <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Compliance" : "Conformité & Risques"}
-            </a>
-            <a href={language === "fr" ? "/fr/blog" : "/blog"} className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
-              Blog
             </a>
             <a href="/#about" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "About Us" : "À Propos"}
