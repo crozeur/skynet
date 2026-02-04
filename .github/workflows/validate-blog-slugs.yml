@@ -8,6 +8,7 @@ on:
       - 'scripts/build-blog.js'
       - 'scripts/blog_slug_overrides.fr.json'
       - 'scripts/validate-blog-slugs.js'
+      - 'scripts/verify-fr-alias-urls.js'
       - 'scripts/validate-blog-metadata.js'
       - 'src/app/**/blog/**'
       - 'src/lib/blog.ts'
@@ -21,6 +22,7 @@ on:
       - 'scripts/build-blog.js'
       - 'scripts/blog_slug_overrides.fr.json'
       - 'scripts/validate-blog-slugs.js'
+      - 'scripts/verify-fr-alias-urls.js'
       - 'scripts/validate-blog-metadata.js'
       - 'src/app/**/blog/**'
       - 'src/lib/blog.ts'
@@ -51,3 +53,9 @@ jobs:
 
       - name: Validate blog slugs + mappings
         run: node scripts/validate-blog-slugs.js
+
+      - name: Build Next.js (uses skip-translation blog artifacts)
+        run: npx next build
+
+      - name: Verify FR blog alias URLs (no 404s)
+        run: node scripts/verify-fr-alias-urls.js --ci
