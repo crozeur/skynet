@@ -10,6 +10,7 @@ export interface PostMetadata {
   description: string;
   date: string; // YYYY-MM-DD
   pillar: Pillar;
+  topic?: string; // Sub-category within a pillar (e.g., "Alert Triage")
   tags?: string[];
   coverImage?: string; // /img/blog/...
   coverAlt?: string;

@@ -4,6 +4,31 @@ const path = require("path");
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
+const TOPICS_BY_PILLAR = {
+  SOC: new Set([
+    "SOC Setup",
+    "Alert Triage",
+    "Escalation & Comms",
+    "Noise Reduction",
+    "Incident Response",
+    "Reporting & KPIs",
+  ]),
+  AUDIT: new Set([
+    "Audit Checklists",
+    "Evidence Collection",
+    "SaaS/Vendor Review",
+    "Remediation Roadmap",
+    "Risk Prioritization",
+  ]),
+  CLOUD: new Set([
+    "Cloud Foundations",
+    "Misconfigurations",
+    "Migration Delivery",
+    "Planning & Waves",
+    "Hypercare & Stabilization",
+  ]),
+};
+
 function extractMetadataFromMDX(source) {
   const startMatch = source.match(/export\s+const\s+metadata\s*=\s*\{/);
   if (!startMatch) return null;
@@ -115,6 +140,18 @@ function validateOne(filePath) {
     const expected = inferPillarFromSlug(slug);
     if (metadata.pillar !== expected) {
       errors.push(`Pillar mismatch for slug '${slug}': expected ${expected}, got ${metadata.pillar}`);
+    }
+
+    // Topic is required and must match the controlled vocabulary for the pillar.
+    if (typeof metadata.topic !== "string" || metadata.topic.trim().length === 0) {
+      errors.push("Missing/empty topic (sub-category)");
+    } else {
+      const allowedTopics = TOPICS_BY_PILLAR[metadata.pillar];
+      if (allowedTopics && !allowedTopics.has(metadata.topic)) {
+        errors.push(
+          `Invalid topic for pillar ${metadata.pillar}: ${JSON.stringify(metadata.topic)}`
+        );
+      }
     }
   }
 

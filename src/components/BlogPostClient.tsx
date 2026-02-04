@@ -7,6 +7,8 @@ import { useLanguage } from "@/components/LanguageProvider";
 import type { PostData } from "@/lib/blog";
 import React from "react";
 import { translateHtmlContent, translateArticleMetadata, getUIString } from "@/lib/translateArticle";
+import { getTopicLabel } from "@/lib/topicI18n";
+import { polishFrenchITMetadata } from "@/lib/polishFrenchIT";
 
 export function BlogPostClient({ post }: { post: PostData }) {
   const { language } = useLanguage();
@@ -50,7 +52,7 @@ export function BlogPostClient({ post }: { post: PostData }) {
         // Use build-time translation when available (fast and cached)
         if (post.translatedMetadata?.fr) {
           // Merge so optional fields (e.g. coverImage/coverAlt) don't disappear
-          setMetadata({ ...post.metadata, ...post.translatedMetadata.fr });
+          setMetadata({ ...post.metadata, ...polishFrenchITMetadata(post.translatedMetadata.fr) });
         } else {
           setMetadata(post.metadata);
         }
@@ -115,6 +117,16 @@ export function BlogPostClient({ post }: { post: PostData }) {
     AUDIT: "ring-purple-500/20",
     CLOUD: "ring-green-500/20",
   };
+
+  const topicBadgeTone = React.useMemo(() => {
+    if (metadata.pillar === "SOC") {
+      return "bg-white/80 dark:bg-gray-900/60 text-blue-900 dark:text-blue-100 border-blue-200/80 dark:border-blue-700/60";
+    }
+    if (metadata.pillar === "AUDIT") {
+      return "bg-white/80 dark:bg-gray-900/60 text-purple-900 dark:text-purple-100 border-purple-200/80 dark:border-purple-700/60";
+    }
+    return "bg-white/80 dark:bg-gray-900/60 text-green-900 dark:text-green-100 border-green-200/80 dark:border-green-700/60";
+  }, [metadata.pillar]);
 
   const [headings, setHeadings] = React.useState<Array<{ id: string; text: string; level: number }>>([]);
 
@@ -301,6 +313,13 @@ export function BlogPostClient({ post }: { post: PostData }) {
               <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-md ring-2 ${pillarRings[metadata.pillar]} uppercase tracking-wide`}>
                 {metadata.pillar}
               </span>
+
+              {/* Topic Badge */}
+              {metadata.topic && (
+                <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${topicBadgeTone}`}>
+                  {getTopicLabel(metadata.topic, language)}
+                </span>
+              )}
               
               {/* Date */}
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 text-sm font-medium">

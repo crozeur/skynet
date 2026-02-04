@@ -4,6 +4,7 @@
  */
 
 import type { PostMetadata } from "@/lib/blog";
+import { polishFrenchITText, polishFrenchITMetadata } from "@/lib/polishFrenchIT";
 
 interface TranslationCache {
   [key: string]: string;
@@ -144,8 +145,9 @@ export async function translateText(
     if (response.ok) {
       const data = await response.json();
       if (data.translated && data.translated.trim()) {
-        cache[cacheKey] = data.translated;
-        return data.translated;
+        const polished = targetLang === "fr" ? polishFrenchITText(applyGlossary(data.translated)) : data.translated;
+        cache[cacheKey] = polished;
+        return polished;
       }
     }
 
@@ -249,6 +251,10 @@ export async function translateArticleMetadata(
     }
   } catch (error) {
     console.warn("Metadata translation error:", error);
+  }
+
+  if (targetLang === "fr") {
+    return { ...translated, ...polishFrenchITMetadata(translated) };
   }
 
   return translated;

@@ -1,0 +1,81 @@
+name: Auto-tag blog posts
+
+on:
+  pull_request:
+    paths:
+      - 'content/blog/**/*.mdx'
+      - 'scripts/auto_tag_blog_posts.js'
+      - 'scripts/validate-blog-metadata.js'
+      - 'BLOG_ARTICLE_GUIDE.md'
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/blog/**/*.mdx'
+      - 'scripts/auto_tag_blog_posts.js'
+      - 'scripts/validate-blog-metadata.js'
+      - 'BLOG_ARTICLE_GUIDE.md'
+
+permissions:
+  contents: write
+
+jobs:
+  autotag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Auto-assign topics/tags
+        run: node scripts/auto_tag_blog_posts.js
+
+      - name: Validate metadata
+        run: node scripts/validate-blog-metadata.js
+
+      - name: Commit changes (PR branches only)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+          git commit -m "chore(blog): auto-add topics/tags"
+          git push
+
+      - name: Commit changes (direct pushes to main)
+        if: github.event_name == 'push'
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+          git commit -m "chore(blog): auto-add topics/tags"
+          git push
+
+      - name: Fail if changes are needed (fork PRs)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed."
+            exit 0
+          fi
+          echo "This PR needs auto-tagging changes, but the workflow can't push to forks."
+          echo "Please run: node scripts/auto_tag_blog_posts.js"
+          exit 1

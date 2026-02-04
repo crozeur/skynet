@@ -4,8 +4,12 @@ import React from "react";
 import Image from "next/image";
 import { Container } from "@/components/Container";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { PostSummary } from "@/lib/blog";
+import { pillarToSlug, topicToSlug } from "@/lib/topicSlug";
+import { getTopicLabel } from "@/lib/topicI18n";
+import { polishFrenchITText } from "@/lib/polishFrenchIT";
 
 interface TranslatedMetadata {
   title: string;
@@ -13,10 +17,20 @@ interface TranslatedMetadata {
   tags: string[];
 }
 
-export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
+export function BlogIndexClient({
+  posts,
+  initialPillar,
+  initialTopic,
+}: {
+  posts: PostSummary[];
+  initialPillar?: string | null;
+  initialTopic?: string | null;
+}) {
   const { language } = useLanguage();
+  const router = useRouter();
   const [filterTag, setFilterTag] = React.useState<string | null>(null);
-  const [filterPillar, setFilterPillar] = React.useState<string | null>(null);
+  const [filterPillar, setFilterPillar] = React.useState<string | null>(initialPillar ?? null);
+  const [filterTopic, setFilterTopic] = React.useState<string | null>(initialTopic ?? null);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [translatedPosts, setTranslatedPosts] = React.useState<Record<string, TranslatedMetadata>>({});
   const [isTranslating, setIsTranslating] = React.useState(false);
@@ -53,9 +67,9 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
     for (const { slug, translatedMetadata } of posts) {
       if (translatedMetadata?.fr) {
         translations[slug] = {
-          title: translatedMetadata.fr.title,
-          description: translatedMetadata.fr.description,
-          tags: translatedMetadata.fr.tags || [],
+          title: polishFrenchITText(translatedMetadata.fr.title),
+          description: polishFrenchITText(translatedMetadata.fr.description),
+          tags: (translatedMetadata.fr.tags || []).map((t) => polishFrenchITText(t)),
         };
       }
     }
@@ -70,16 +84,123 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
     CLOUD: "from-green-600 to-teal-500",
   };
 
+  const topicChipAccent = React.useMemo(() => {
+    if (!filterPillar) {
+      return {
+        selected: "bg-gray-900 text-white border-gray-900 shadow",
+        ring: "ring-gray-900/10 dark:ring-white/10",
+        hoverBorder: "hover:border-gray-400 dark:hover:border-gray-500",
+        softPanel:
+          "bg-white/60 dark:bg-gray-900/40 border-gray-200/70 dark:border-gray-700/70",
+      };
+    }
+
+    const gradient = `bg-gradient-to-r ${pillarColors[filterPillar]}`;
+    const ring =
+      filterPillar === "SOC"
+        ? "ring-blue-500/20 dark:ring-blue-400/20"
+        : filterPillar === "AUDIT"
+          ? "ring-purple-500/20 dark:ring-purple-400/20"
+          : "ring-green-500/20 dark:ring-green-400/20";
+    const hoverBorder =
+      filterPillar === "SOC"
+        ? "hover:border-blue-300 dark:hover:border-blue-600/60"
+        : filterPillar === "AUDIT"
+          ? "hover:border-purple-300 dark:hover:border-purple-600/60"
+          : "hover:border-green-300 dark:hover:border-green-600/60";
+    const softPanel =
+      filterPillar === "SOC"
+        ? "bg-gradient-to-br from-blue-50/70 via-white/60 to-cyan-50/40 dark:from-blue-950/30 dark:via-gray-950/40 dark:to-cyan-950/20 border-blue-200/50 dark:border-blue-700/40"
+        : filterPillar === "AUDIT"
+          ? "bg-gradient-to-br from-purple-50/70 via-white/60 to-pink-50/40 dark:from-purple-950/30 dark:via-gray-950/40 dark:to-pink-950/20 border-purple-200/50 dark:border-purple-700/40"
+          : "bg-gradient-to-br from-green-50/70 via-white/60 to-teal-50/40 dark:from-green-950/30 dark:via-gray-950/40 dark:to-teal-950/20 border-green-200/50 dark:border-green-700/40";
+
+    return {
+      selected: `${gradient} text-white border-transparent shadow-lg`,
+      ring,
+      hoverBorder,
+      softPanel,
+    };
+  }, [filterPillar, pillarColors]);
+
+  const topicBadgeTone = React.useCallback(
+    (pillar: string) => {
+      if (pillar === "SOC") {
+        return "bg-white/85 dark:bg-gray-950/65 text-blue-900 dark:text-blue-100 border-blue-200/70 dark:border-blue-700/50";
+      }
+      if (pillar === "AUDIT") {
+        return "bg-white/85 dark:bg-gray-950/65 text-purple-900 dark:text-purple-100 border-purple-200/70 dark:border-purple-700/50";
+      }
+      return "bg-white/85 dark:bg-gray-950/65 text-green-900 dark:text-green-100 border-green-200/70 dark:border-green-700/50";
+    },
+    []
+  );
+
   const allTags = React.useMemo(() => {
     const tags = new Set<string>();
     posts.forEach(({ metadata }) => (metadata.tags || []).forEach((t) => tags.add(t)));
     return Array.from(tags).sort();
   }, [posts]);
 
+  const basePostsForTopicCounts = React.useMemo(() => {
+    let filtered = posts;
+    if (filterPillar) {
+      filtered = filtered.filter(({ metadata }) => metadata.pillar === filterPillar);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        ({ metadata }) =>
+          metadata.title.toLowerCase().includes(query) ||
+          metadata.description.toLowerCase().includes(query) ||
+          (metadata.tags || []).some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [posts, filterPillar, searchQuery]);
+
+  const topicCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const { metadata } of basePostsForTopicCounts) {
+      const topic = metadata.topic?.trim();
+      if (!topic) continue;
+      counts[topic] = (counts[topic] ?? 0) + 1;
+    }
+    return counts;
+  }, [basePostsForTopicCounts]);
+
+  const availableTopics = React.useMemo(() => {
+    const topics = new Set<string>();
+    for (const { metadata } of basePostsForTopicCounts) {
+      const topic = metadata.topic?.trim();
+      if (topic) topics.add(topic);
+    }
+    return Array.from(topics).sort((a, b) => a.localeCompare(b));
+  }, [basePostsForTopicCounts]);
+
+  React.useEffect(() => {
+    // If switching pillar/search makes the current topic invalid, clear it.
+    if (!filterTopic) return;
+    if (availableTopics.includes(filterTopic)) return;
+    setFilterTopic(null);
+  }, [availableTopics, filterTopic]);
+
+  React.useEffect(() => {
+    // Topics are a pillar-only concept in the UI.
+    if (filterPillar === null && filterTopic !== null) {
+      setFilterTopic(null);
+    }
+  }, [filterPillar, filterTopic]);
+
   const visiblePosts = React.useMemo(() => {
     let filtered = posts;
     if (filterPillar) {
       filtered = filtered.filter(({ metadata }) => metadata.pillar === filterPillar);
+    }
+    if (filterTopic) {
+      filtered = filtered.filter(({ metadata }) => (metadata.topic || null) === filterTopic);
     }
     if (filterTag) {
       filtered = filtered.filter(({ metadata }) => (metadata.tags || []).includes(filterTag));
@@ -93,7 +214,7 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
       );
     }
     return filtered;
-  }, [posts, filterPillar, filterTag, searchQuery]);
+  }, [posts, filterPillar, filterTopic, filterTag, searchQuery]);
 
   const pillars = ["SOC", "AUDIT", "CLOUD"] as const;
   const pageSize = 9;
@@ -103,13 +224,16 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
     const start = (page - 1) * pageSize;
     return visiblePosts.slice(start, start + pageSize);
   }, [visiblePosts, page]);
+
+  const pagedStart = visiblePosts.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const pagedEnd = Math.min(page * pageSize, visiblePosts.length);
   React.useEffect(() => {
     // Reset to first page on filter/search change
     setPage(1);
-  }, [filterPillar, filterTag, searchQuery]);
+  }, [filterPillar, filterTopic, filterTag, searchQuery]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <main className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-white via-slate-50 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Subtle background effects (light mode) */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(59,130,246,0.14),transparent_38%),radial-gradient(circle_at_85%_10%,rgba(56,189,248,0.12),transparent_34%),radial-gradient(circle_at_45%_85%,rgba(99,102,241,0.10),transparent_40%)] dark:hidden" />
@@ -213,7 +337,10 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
               <button
                 type="button"
-                onClick={() => setFilterPillar(null)}
+                onClick={() => {
+                  setFilterPillar(null);
+                  setFilterTopic(null);
+                }}
                 className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
                   filterPillar === null
                     ? "bg-gradient-to-br from-slate-700 via-slate-600 to-slate-700 text-white shadow-2xl shadow-slate-500/50 scale-105 ring-4 ring-slate-500/30"
@@ -242,7 +369,10 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 <button
                   key={pillar}
                   type="button"
-                  onClick={() => setFilterPillar(pillar)}
+                  onClick={() => {
+                    setFilterPillar(pillar);
+                    // Keep topic only if it exists for that pillar.
+                  }}
                   className={`group relative overflow-hidden rounded-xl p-6 text-center transition-all duration-300 ${
                     filterPillar === pillar
                       ? "text-white shadow-2xl scale-105 ring-4 ring-white/30"
@@ -302,11 +432,117 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                 </button>
               ))}
             </div>
+
+            {/* Topic chips (only after selecting a pillar) */}
+            {filterPillar && (
+              <div className="mt-7 max-w-5xl mx-auto">
+                <div className="sticky top-4 z-30">
+                  <div className={`relative overflow-hidden rounded-2xl border ${topicChipAccent.softPanel} backdrop-blur-sm shadow-[0_18px_70px_-50px_rgba(59,130,246,0.35)] dark:shadow-[0_18px_70px_-50px_rgba(0,0,0,0.55)]`}>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r opacity-70" style={{
+                    background:
+                      filterPillar === 'SOC'
+                        ? 'linear-gradient(90deg, rgb(37,99,235), rgb(6,182,212))'
+                        : filterPillar === 'AUDIT'
+                          ? 'linear-gradient(90deg, rgb(147,51,234), rgb(236,72,153))'
+                          : 'linear-gradient(90deg, rgb(22,163,74), rgb(20,184,166))',
+                  }} />
+
+                  <div className="relative p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-4 mb-3">
+                  <h3 className="text-sm font-bold tracking-wide text-gray-800 dark:text-gray-200">
+                    <span className="inline-flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full bg-gradient-to-r ${pillarColors[filterPillar]} shadow-sm`} aria-hidden />
+                      {language === "en" ? "Topics" : "Sous-thèmes"}
+                    </span>
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {filterPillar && filterTopic && (
+                      <Link
+                        href={`/blog/${pillarToSlug(filterPillar)}/${topicToSlug(filterTopic)}`}
+                        className="text-xs font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors"
+                        title={language === "en" ? "Open topic page" : "Ouvrir la page du sous-thème"}
+                      >
+                        {language === "en" ? "Open page" : "Ouvrir"}
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFilterTopic(null);
+                        setFilterTag(null);
+                        setSearchQuery("");
+                      }}
+                      className="text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    >
+                      {language === "en" ? "Reset" : "Réinitialiser"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 overflow-x-auto py-1 -mx-2 px-2 sm:flex-wrap sm:overflow-visible sm:px-0 sm:mx-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFilterTopic(null);
+                    }}
+                    className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
+                      filterTopic === null
+                        ? `${topicChipAccent.selected} ring-2 ${topicChipAccent.ring}`
+                        : `bg-white/80 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 ${topicChipAccent.hoverBorder}`
+                    }`}
+                  >
+                    {filterTopic === null && (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    {language === "en" ? "All topics" : "Tous les sous-thèmes"}
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${filterTopic === null ? "bg-white/15" : "bg-gray-100 dark:bg-gray-800"}`}>
+                      {basePostsForTopicCounts.length}
+                    </span>
+                  </button>
+
+                  {availableTopics.map((topic) => {
+                    const selected = filterTopic === topic;
+                    const count = topicCounts[topic] ?? 0;
+                    return (
+                      <button
+                        key={topic}
+                        type="button"
+                        onClick={() => {
+                          setFilterTopic(topic);
+                        }}
+                        aria-pressed={selected}
+                        className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
+                          selected
+                            ? `${topicChipAccent.selected} ring-2 ${topicChipAccent.ring}`
+                            : `bg-white/80 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-700 ${topicChipAccent.hoverBorder} hover:shadow`
+                        }`}
+                      >
+                        {selected && (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                        <span className="truncate max-w-[16rem]">{getTopicLabel(topic, language)}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${selected ? "bg-white/15" : "bg-gray-100 dark:bg-gray-800"}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  {language === "en" ? "Topics for" : "Sous-thèmes pour"} <span className="font-semibold text-gray-700 dark:text-gray-200">{filterPillar}</span>
+                </p>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
-
-
-
         {/* Results count */}
         <div className="text-center mb-8">
           <p className="text-gray-600 dark:text-gray-400 font-medium">
@@ -315,6 +551,13 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
               (language === "en" ? "articles found" : "articles trouvés")
             }
           </p>
+            {visiblePosts.length > 0 && totalPages > 1 && (
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+              {language === "en"
+                ? `Showing ${pagedStart}–${pagedEnd} (page ${page}/${totalPages})`
+                : `Affichage ${pagedStart}–${pagedEnd} (page ${page}/${totalPages})`}
+            </p>
+          )}
         </div>
 
         {visiblePosts.length === 0 ? (
@@ -405,10 +648,25 @@ export function BlogIndexClient({ posts }: { posts: PostSummary[] }) {
                   )}
                   
                   {/* Pillar badge */}
-                  <div className="absolute top-5 right-5 z-10">
+                  <div className="absolute top-5 right-5 z-10 flex flex-col items-end gap-2">
                     <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${pillarColors[metadata.pillar]} shadow-lg ring-2 ring-white/30 backdrop-blur-sm group-hover:ring-white/50 transition-all duration-500`}>
                       {metadata.pillar}
                     </span>
+                    {metadata.topic && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const url = `/blog/${pillarToSlug(metadata.pillar)}/${topicToSlug(metadata.topic ?? "")}`;
+                          router.push(url);
+                        }}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold border backdrop-blur shadow ${topicBadgeTone(metadata.pillar)} hover:shadow-md transition-shadow`}
+                        title={language === "en" ? "View topic" : "Voir le sous-thème"}
+                      >
+                        {getTopicLabel(metadata.topic, language)}
+                      </button>
+                    )}
                   </div>
 
                   {/* Content section */}

@@ -2,6 +2,11 @@
 const fs = require("fs");
 const path = require("path");
 
+const SKIP_TRANSLATION =
+  process.argv.includes("--skip-translation") ||
+  process.env.SKIP_TRANSLATION === "1" ||
+  process.env.SKIP_TRANSLATION === "true";
+
 // Professional French glossary
 const frenchGlossary = {
   cybersecurity: "cybersécurité",
@@ -66,6 +71,8 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 12000) {
 async function translateText(text) {
   if (!text) return text;
 
+  if (SKIP_TRANSLATION) return applyGlossary(text);
+
   try {
     // Try Google Translate
     const encoded = encodeURIComponent(text);
@@ -101,6 +108,19 @@ async function translateText(text) {
 async function translateMetadata(metadata) {
   const translated = { ...metadata };
 
+  if (SKIP_TRANSLATION) {
+    // Keep EN text; still apply glossary so common cybersecurity terms look consistent.
+    translated.title = applyGlossary(translated.title);
+    translated.description = applyGlossary(translated.description);
+    if (Array.isArray(translated.tags)) {
+      translated.tags = translated.tags.map((t) => applyGlossary(t));
+    }
+    if (translated.coverAlt) {
+      translated.coverAlt = applyGlossary(translated.coverAlt);
+    }
+    return translated;
+  }
+
   // Translate title
   if (metadata.title) {
     translated.title = await translateText(metadata.title);
@@ -129,6 +149,8 @@ async function translateMetadata(metadata) {
 // Translate HTML content while preserving tags
 async function translateHtmlContent(html) {
   if (!html) return html;
+
+  if (SKIP_TRANSLATION) return html;
 
   // Split HTML into chunks (text vs tags)
   const chunks = [];
