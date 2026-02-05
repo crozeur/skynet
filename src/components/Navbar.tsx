@@ -17,7 +17,8 @@ export const Navbar = () => {
   // translations are consumed directly inside components that need them
 
   const isFrench = language === "fr";
-  const desktopNavGapClass = isFrench ? "gap-1.5 lg:gap-2.5" : "gap-3 lg:gap-4";
+  const desktopNavGapClass = isFrench ? "gap-1 lg:gap-2" : "gap-3 lg:gap-4";
+  const desktopRightGapClass = isFrench ? "gap-2 md:gap-2" : "gap-2 md:gap-3";
 
   const pathname = usePathname();
 
@@ -64,12 +65,13 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
+    const textSizeClass = isFrench ? "text-sm lg:text-base xl:text-lg 2xl:text-xl" : "text-base lg:text-lg xl:text-xl";
     const paddingClass = isFrench
       ? sectionId === "hero" || sectionId === "contact"
-        ? "px-1.5 lg:px-2"
-        : "px-2 lg:px-2.5"
+        ? "px-1 lg:px-1.5"
+        : "px-1.5 lg:px-2"
       : "px-2.5 lg:px-3";
-    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-base lg:text-lg xl:text-xl ${paddingClass} py-2 rounded-md ${
+    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap ${textSizeClass} ${paddingClass} py-2 rounded-md ${
       isActive(sectionId)
         ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
         : promoted
@@ -125,7 +127,14 @@ export const Navbar = () => {
             href="/#compliance"
             className={navItemClass("compliance")}
           >
-            {language === "en" ? "Compliance" : "Conformité & Risques"}
+            {language === "en" ? (
+              "Compliance"
+            ) : (
+              <>
+                <span className="hidden lg:inline">Conformité & Risques</span>
+                <span className="lg:hidden">Conformité</span>
+              </>
+            )}
           </a>
           <a
             href="/#about"
@@ -137,10 +146,17 @@ export const Navbar = () => {
             href="/#contact"
             className={navItemClass("contact")}
           >
-            {language === "en" ? "Contact" : "Nous Contacter"}
+            {language === "en" ? (
+              "Contact"
+            ) : (
+              <>
+                <span className="hidden lg:inline">Nous Contacter</span>
+                <span className="lg:hidden">Contact</span>
+              </>
+            )}
           </a>
         </div>
-        <div className="flex flex-shrink-0 items-center gap-2 md:gap-3">
+        <div className={`flex flex-shrink-0 items-center ${desktopRightGapClass}`}>
           <div className="hidden md:block">
             <ThemeChanger />
           </div>
