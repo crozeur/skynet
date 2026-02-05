@@ -65,7 +65,7 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
-    const textSizeClass = isFrench ? "text-sm lg:text-base xl:text-lg 2xl:text-xl" : "text-base lg:text-lg xl:text-xl";
+    const textSizeClass = isFrench ? "text-[15px] lg:text-base xl:text-lg 2xl:text-xl" : "text-base lg:text-lg xl:text-xl";
     const paddingClass = isFrench
       ? sectionId === "hero" || sectionId === "contact"
         ? "px-1 lg:px-1.5"
