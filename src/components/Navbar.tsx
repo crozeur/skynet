@@ -64,7 +64,11 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
-    const paddingClass = isFrench ? "px-2 lg:px-2.5" : "px-2.5 lg:px-3";
+    const paddingClass = isFrench
+      ? sectionId === "hero" || sectionId === "contact"
+        ? "px-1.5 lg:px-2"
+        : "px-2 lg:px-2.5"
+      : "px-2.5 lg:px-3";
     return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap text-base lg:text-lg xl:text-xl ${paddingClass} py-2 rounded-md ${
       isActive(sectionId)
         ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
