@@ -75,8 +75,8 @@ export const Navbar = () => {
   };
 
   const blogBadge = (
-    <span className="ml-2 inline-flex items-center rounded-full bg-blue-600/10 dark:bg-cyan-300/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-blue-800 dark:text-cyan-100 ring-1 ring-blue-600/25 dark:ring-cyan-200/20 shadow-[0_1px_0_rgba(255,255,255,0.15)]">
-      {language === "en" ? "Guides" : "Guides"}
+    <span className="ml-2 inline-flex items-center rounded-full bg-blue-600/10 dark:bg-cyan-300/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-blue-800 dark:text-cyan-100 ring-1 ring-blue-600/25 dark:ring-cyan-200/20 shadow-[0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 ease-out group-hover:-translate-y-px group-hover:scale-[1.05] group-hover:bg-blue-600/15 dark:group-hover:bg-cyan-200/15 group-hover:ring-blue-600/35 dark:group-hover:ring-cyan-200/30 motion-safe:group-hover:animate-pulse">
+      {language === "en" ? "New" : "Nouveau"}
     </span>
   );
 
@@ -110,10 +110,10 @@ export const Navbar = () => {
           </a>
           <a
             href={language === "fr" ? "/fr/blog" : "/blog"}
-            className={navItemClass("blog", { promoted: true })}
+            className={`${navItemClass("blog", { promoted: true })} group`}
           >
             <span className="inline-flex items-center">
-              {language === "en" ? "Blog" : "Blog"}
+              {language === "en" ? "Guides" : "Guides"}
               {blogBadge}
             </span>
           </a>
@@ -201,11 +201,11 @@ export const Navbar = () => {
             </a>
             <a
               href={language === "fr" ? "/fr/blog" : "/blog"}
-              className="w-full text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30 transition font-bold text-lg px-3 py-2 rounded-md"
+              className="group w-full text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30 transition font-bold text-lg px-3 py-2 rounded-md"
               onClick={() => setOpen(false)}
             >
               <span className="inline-flex items-center">
-                Blog
+                Guides
                 {blogBadge}
               </span>
             </a>
