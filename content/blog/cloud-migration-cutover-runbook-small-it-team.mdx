@@ -1,0 +1,201 @@
+## Intro (3–5 sentences)
+Cloud migration success is often decided in the cutover window, when a small IT team has to execute many steps quickly and safely. A cutover runbook is your single source of truth for what happens, who does it, and how you recover if anything goes wrong. For SMEs, the goal isn’t perfection—it’s repeatability, clear decision points, and risk controls that fit a lean team. This post provides a practical, security-aware cutover runbook you can adapt to your environment.
+
+## Quick take (exactly 5 bullet points)
+- Treat cutover as a controlled change: define scope, roles, and a strict go/no-go gate.
+- Make security and access changes explicit (accounts, keys, firewall rules, DNS, logging) to avoid last-minute surprises.
+- Pre-stage data and validate with scripted checks so cutover is mostly “switch traffic,” not “move everything.”
+- Always have a tested rollback path and a timebox for when to use it.
+- Capture decisions and timestamps during execution; it’s invaluable for incident response and post-cutover fixes.
+
+## Build the cutover plan: scope, roles, and decision gates
+A small IT team can’t afford ambiguity during cutover. Before you touch production, write the runbook as an execution document—not a strategy deck.
+
+Practical elements to include:
+
+1) Define the cutover scope
+- What is in scope: applications, databases, file shares, identity components, integrations, monitoring.
+- What is out of scope: “nice-to-have” refactors, major version upgrades, UI changes.
+- What is frozen: code changes, config changes, infrastructure changes (and when the freeze starts).
+
+2) Assign roles with backups
+Even if one person wears multiple hats, name the roles so you don’t miss critical tasks:
+- Cutover lead (owns the timeline and decisions)
+- Cloud operator (infra and platform changes)
+- App owner (application configuration and validation)
+- Data owner (DB/file sync, integrity checks)
+- Security reviewer (access, logging, secrets, firewall rules)
+- Communications owner (status updates to business stakeholders)
+
+If you only have 2–3 people, combine roles, but keep responsibilities explicit.
+
+3) Create go/no-go gates
+Use at least three gates:
+- T-7 days: readiness gate (testing complete, monitoring in place, rollback validated)
+- T-1 day: change freeze and final prechecks
+- T-0: final go/no-go right before switching traffic
+
+Example go/no-go criteria (keep it measurable):
+- Backups completed and restore tested within the last 30 days
+- Monitoring and alerting active for key services and logs flowing to a central place
+- Access controls reviewed (admin access limited, MFA enforced where feasible)
+- Rollback steps time-estimated and rehearsed
+- Business owners approve the maintenance window and user comms are ready
+
+Security note: If you use generic guidance like NIST/ISO/CIS, reference it as a checklist lens (e.g., inventory, least privilege, logging), not as “compliance.”
+
+## Pre-cutover security and operational readiness checks
+Cutover is not the time to discover missing logs, overly broad firewall rules, or secrets stored in a spreadsheet. Pre-cutover checks should be written as step-by-step tasks you can execute and verify.
+
+1) Identity and access
+- Inventory privileged accounts (cloud admin, CI/CD, break-glass). Confirm who can use them and how.
+- Reduce standing privilege where possible; use time-bound elevation or separate admin accounts.
+- Confirm MFA and account recovery paths (especially for tenant/global admins).
+- Validate service accounts used by apps/integrations. Rotate credentials if they were shared broadly during build.
+
+Example check:
+- “Attempt login with admin role using MFA from approved network; verify audit log event recorded.”
+
+2) Network and exposure
+- Confirm inbound rules: only required ports, only from required sources.
+- Confirm outbound rules: restrict egress if your architecture supports it.
+- Validate DNS approach (TTL reductions, split-horizon, internal vs external records).
+- Confirm any VPN/peering routes and that monitoring can reach targets.
+
+Example check:
+- “From a test client, validate only HTTPS is reachable; SSH/RDP not exposed publicly.”
+
+3) Logging and monitoring
+- Identify your minimum signals: authentication logs, admin actions, application errors, database health, and network flow (if available).
+- Confirm log retention meets your business needs (even if it’s just “enough to investigate incidents”).
+- Set alert thresholds conservatively for cutover night (auth failures, 5xx errors, CPU/memory saturation, queue backlogs).
+
+Example check:
+- “Generate a failed login and confirm it appears in central logging within 5 minutes.”
+
+4) Backup and recovery
+- Confirm backups exist for both source and target (where applicable).
+- Document restore steps and credentials needed.
+- Know the recovery time you can tolerate for a rollback decision.
+
+Example check:
+- “Restore a small subset of data to a sandbox and validate application can read it.”
+
+## Rehearse the cutover: dry runs, test scripts, and data strategy
+Small teams succeed by turning unknowns into scripts. If a step can be tested ahead of time, do it.
+
+1) Dry run the runbook
+Do at least one rehearsal in a staging environment that resembles production.
+- Time each step and note dependencies.
+- Identify steps that require waiting (DNS propagation, data sync completion).
+- Convert “tribal knowledge” into explicit commands and validation checks.
+
+2) Use validation scripts, not manual clicking
+Create simple repeatable checks you can run before and after the cutover. Examples:
+- Health endpoint checks: /health, /status, or synthetic login
+- Database checks: connectivity, read/write test table, expected row counts for critical tables
+- File checks: hash/size comparison for sampled files
+- Integration checks: email sending, payment gateway sandbox call, SSO login
+
+3) Choose a cutover data approach
+Your runbook should explicitly state which approach you’re using and the implications:
+- Big-bang: full stop, final sync, switch traffic. Simpler, but longer outage.
+- Phased: migrate components over time (e.g., app tier first, database later). Lower risk, more complexity.
+- Parallel run: run old and new briefly. Requires careful data consistency and “source of truth” decisions.
+
+Practical SME tip: If you can, pre-stage the bulk of data days ahead, then do a short final delta sync during the maintenance window.
+
+## Cutover execution: minute-by-minute steps and rollback triggers
+During cutover, you need a timeline, a communications cadence, and a disciplined approach to changes.
+
+1) Timeline structure
+Write steps as:
+- Step number
+- Owner
+- Action
+- Expected result
+- Validation method
+- Time estimate
+- Backout step (if this step fails)
+
+Example cutover slice:
+- Step 12 (Data owner): Stop writes on legacy app (maintenance mode)
+  - Expected: no new transactions accepted
+  - Validate: test transaction returns maintenance banner; DB shows no new writes
+  - Backout: disable maintenance mode
+
+- Step 13 (Data owner): Run final delta sync to cloud DB
+  - Expected: sync completes with zero errors
+  - Validate: sync logs clean; row counts match for critical tables
+  - Backout: keep legacy DB primary and abort traffic switch
+
+- Step 14 (Cloud operator): Switch DNS to new endpoints
+  - Expected: clients start resolving new target
+  - Validate: query DNS from multiple resolvers; synthetic checks pass
+  - Backout: revert DNS records; restore prior TTL afterward
+
+2) Communications during cutover
+- Post a start message, midpoint update, and completion message.
+- Avoid detailed internal troubleshooting in business channels; keep it status + ETA.
+- Document who decides whether to extend the window.
+
+3) Rollback triggers (define them before cutover)
+Rollback is a planned action, not a failure. Define clear triggers such as:
+- Authentication/SSO failure affecting most users for more than X minutes
+- Data integrity issues discovered in validation (e.g., missing critical records)
+- Error rates above agreed thresholds with no clear fix within the timebox
+- Security control failure (e.g., logs not collecting, unexpected public exposure)
+
+4) Rollback approach
+Your rollback section should include:
+- How to direct traffic back (DNS, load balancer, routing)
+- How to handle data written during the attempted cutover (if any)
+- How to preserve evidence and logs for later investigation
+- Who approves rollback (one accountable decision maker)
+
+If there’s any chance of “split brain” (both old and new accepting writes), call it out explicitly and avoid it unless you have a proven design.
+
+## Post-cutover hardening and stabilization (first 72 hours)
+Cutover isn’t done when the status page is green. The first 72 hours is where you prevent small issues from becoming incidents.
+
+1) Stabilization tasks
+- Increase monitoring sensitivity temporarily and set an on-call rotation, even if it’s informal.
+- Review error logs and performance bottlenecks daily.
+- Validate scheduled jobs, backups, and report exports.
+- Confirm user access patterns and look for unusual admin actions.
+
+2) Security follow-ups
+- Rotate any credentials used during migration that had broader access than normal.
+- Remove temporary firewall rules, IP allowlists, or “debug” settings.
+- Confirm least privilege: tighten roles, remove unused accounts, and document ownership.
+- Ensure asset inventory is updated: endpoints, data stores, public URLs, certificates.
+
+3) Lessons learned
+Within a week, run a short retrospective:
+- What steps caused delays?
+- What checks caught issues early?
+- What should be automated next time?
+
+Write these improvements into the runbook immediately so the next cutover is easier.
+
+## Checklist (8–12 checkbox items using "- [ ]")
+- [ ] Cutover scope, maintenance window, and change freeze dates approved by business owners
+- [ ] Roles assigned (cutover lead, cloud ops, app, data, security, comms) with backups identified
+- [ ] Backups verified and a restore test completed for critical systems
+- [ ] Logging and alerting validated (auth logs, admin actions, app errors, DB health)
+- [ ] Network exposure reviewed (only required ports/services reachable)
+- [ ] Final data sync plan defined (pre-stage + delta sync) with validation scripts ready
+- [ ] DNS plan documented (TTL adjustments, records to change, verification method)
+- [ ] Rollback plan rehearsed and rollback decision triggers agreed
+- [ ] Runbook dry run completed with time estimates updated
+- [ ] Post-cutover hardening tasks scheduled (credential rotation, remove temporary access)
+
+## FAQ (3 questions with short answers)
+Q1: How long should a small-team cutover runbook be?
+A: Long enough to execute without guessing—typically 2–10 pages of steps plus a checklist and validation commands.
+
+Q2: What’s the biggest security risk during cutover?
+A: Temporary access and “just for tonight” exceptions that never get removed—document them and schedule explicit cleanup within 72 hours.
+
+Q3: Do we need a rollback plan if we’re confident in testing?
+A: Yes—testing reduces risk, but rollback covers unknowns like DNS issues, third-party outages, or unexpected data integrity problems.
