@@ -1,0 +1,187 @@
+## Intro
+Audits often fail for a simple reason: the evidence exists, but it’s scattered, unlabeled, and hard to connect to what the auditor is actually asking for. A lightweight evidence template fixes that by turning “send me proof” into a repeatable collection and tracking process. The goal isn’t to hoard documents—it’s to capture the right artifacts, show how they relate to security controls, and keep them current. This post provides a practical template you can copy into a spreadsheet or ticketing system and start using today.
+
+## Quick take
+- Use one evidence register (not email threads) as the single source of truth.
+- Define each evidence item by control objective, owner, system, and time period.
+- Prefer “evidence from systems” (exports, logs, configs) over screenshots where possible.
+- Map artifacts to generic control families (access, change, backup, monitoring) to avoid gaps.
+- Track freshness (how often it must be updated) to prevent last-minute scrambles.
+
+## Build your evidence template (fields that matter)
+A good evidence template is an “evidence register”: a table where each row is one evidence item. You can run it in a spreadsheet, GRC tool, or even a project board—but keep the fields consistent.
+
+Core fields to include:
+
+1) Evidence ID
+Use a simple, stable naming scheme like `AE-001`, `AE-002`, etc. Stable IDs prevent confusion when filenames change.
+
+2) Control/Requirement reference (generic)
+Avoid overfitting to a single framework. Use a plain-language control statement plus an optional generic mapping tag, such as:
+- “Access to production systems is restricted and reviewed” (maps to Access Control / IAM)
+- “Changes to systems are approved and tracked” (maps to Change Management)
+- “Backups are performed and restorations are tested” (maps to Backup/Recovery)
+
+If you later need to align to NIST/ISO/CIS, you can add a column like “Framework mapping (optional)” without claiming compliance.
+
+3) Evidence description
+Write what the artifact is and what it demonstrates. Keep it testable.
+Example: “Export of admin group members for production tenant, showing named accounts only; includes date/time of export.”
+
+4) System/Scope
+Where the evidence comes from (system name, environment, business unit). This reduces the “wrong system” problem.
+Example: “Microsoft 365 tenant (prod), AWS account 123…, HRIS.”
+
+5) Evidence type
+Choose a small set to normalize reporting:
+- Policy/procedure
+- Configuration/export
+- Log/report
+- Ticket/approval record
+- Training/attestation
+- Vendor/third-party artifact
+
+6) Owner and contributor(s)
+The owner is accountable for producing/updating the artifact. Contributors can help gather data.
+
+7) Collection method
+How you get it in a repeatable way:
+- “Export CSV from admin portal”
+- “Query SIEM saved search”
+- “Screenshot of settings page” (use only if exports are not available)
+
+8) Period covered and as-of date
+Auditors often care about time. Include:
+- “Period covered” (e.g., Q4 2025)
+- “As-of date” (e.g., 2026-01-31)
+
+9) Storage location
+One canonical location: a folder path, ticket link, or document repository URL. Don’t paste sensitive content into the register itself.
+
+10) Sensitivity and handling
+Label items that contain secrets, personal data, or security-sensitive configuration. Add handling notes like “redact tokens,” “share via secure link,” “restricted to audit team.”
+
+11) Review cadence (freshness)
+Set how often this evidence must be refreshed: monthly/quarterly/annually/on-change.
+
+12) Status and notes
+Statuses such as: Not started, In progress, Collected, Reviewed, Approved, Superseded. Notes capture exceptions and context.
+
+Practical example row (you can copy this pattern):
+- Evidence ID: AE-012
+- Control statement: “Privileged access is reviewed periodically”
+- Evidence description: “Quarterly privileged access review report including approver and remediation actions”
+- System/Scope: “Cloud admin roles (prod)”
+- Type: “Log/report”
+- Owner: “IT Manager”
+- Collection method: “Export role assignments + approval ticket list”
+- Period covered: “Q1 2026”
+- As-of date: “2026-03-31”
+- Storage location: “Secure drive /Audit/2026/Q1/AE-012/”
+- Sensitivity: “Restricted (privileged account list)”
+- Review cadence: “Quarterly”
+- Status: “Collected”
+- Notes: “2 removals completed; 1 exception approved until project end.”
+
+## Collect evidence efficiently (and avoid common traps)
+The fastest way to lose time is collecting “pretty evidence” that doesn’t answer the question. Aim for artifacts that are (a) objective, (b) reproducible, and (c) tied to a time period.
+
+Prioritize these sources:
+
+1) System exports and reports
+Exports (CSV/PDF) with timestamps are stronger than screenshots because they’re easier to validate and re-run.
+Example: export of MFA enrollment status for all users as of a specific date.
+
+2) Tickets and approvals
+Change requests, access requests, incident tickets, and exception approvals often form the backbone of audit trails.
+Example: link a firewall rule change ticket to the corresponding change window and approval.
+
+3) Immutable logs or centrally collected logs
+If you have centralized logging, capture evidence from there; it reduces “log on the server” disputes.
+Example: a saved search showing successful and failed admin logins for the quarter.
+
+Common traps to avoid:
+
+- Over-collecting: Don’t dump a 300-page policy set if the audit asks for the onboarding procedure plus evidence of execution.
+- Missing context: A screenshot without the system name, tenant, or timestamp is often unusable.
+- Evidence that proves the opposite: A “backup configured” screenshot doesn’t prove backups ran successfully or that restores work.
+- Stale artifacts: A policy last updated years ago might create uncomfortable questions. Track review dates.
+
+A practical collection workflow:
+- Create an evidence request ticket per evidence item (or bundle related items).
+- The owner attaches/export uploads to the canonical location.
+- A reviewer checks completeness against the evidence description and marks it “Reviewed.”
+- If an exception exists (e.g., review missed), record it explicitly with dates and remediation plan.
+
+## Map evidence to control families (NIST/ISO/CIS-friendly)
+Mapping is what turns a folder of files into a defensible story. You don’t need perfect framework alignment; you need consistent coverage across common control areas.
+
+Use a “Control family” column with a small controlled vocabulary. Here is a practical set that maps broadly to NIST/ISO/CIS concepts without claiming compliance:
+
+- Governance & Policy
+- Asset Inventory
+- Identity & Access Management
+- Privileged Access
+- Security Awareness
+- Vulnerability & Patch Management
+- Secure Configuration
+- Change Management
+- Logging & Monitoring
+- Incident Response
+- Backup & Recovery
+- Third-Party Risk
+
+Example mapping (evidence → control family):
+
+- “New user onboarding checklist + 3 sample completed access requests” → Identity & Access Management
+- “Admin role membership export + quarterly review sign-off” → Privileged Access
+- “Patch report for servers + exception approvals” → Vulnerability & Patch Management
+- “Central logging retention settings + sample alert tickets” → Logging & Monitoring
+- “Restore test report with results and issues tracked” → Backup & Recovery
+
+How to use mapping day-to-day:
+- Filter the register by control family to see where you have no evidence.
+- Ensure each control family has both “design” evidence (policy/procedure/config) and “operating” evidence (logs/tickets showing it happened).
+- For SMEs, start with the highest-risk families: IAM, patching, logging, backup/recovery, incident response.
+
+## Track “freshness” and change (so audits aren’t a fire drill)
+Most evidence breaks because it goes stale or the system changes. Your template should make staleness obvious.
+
+Add these tracking columns:
+
+- Freshness cadence: monthly / quarterly / annually / on-change
+- Next due date: calculated from as-of date + cadence
+- Trigger events: “new system,” “major upgrade,” “org change,” “security incident”
+- Version / superseded by: link newer evidence IDs when you replace artifacts
+
+Practical examples of freshness rules:
+
+- MFA enrollment report: monthly (fast-changing user base)
+- Privileged access review: quarterly
+- Incident response tabletop exercise: annually
+- Secure configuration baseline: on-change (and at least annually)
+- Vendor security review: annually or on contract renewal
+
+Operational tip: run a short monthly “evidence hygiene” meeting (15–20 minutes). Review what’s due in the next 30 days, assign owners, and close gaps early.
+
+## Checklist
+- [ ] Create a single evidence register with stable Evidence IDs (AE-001, AE-002…)
+- [ ] Define a short list of control families (IAM, patching, logging, backup, IR, etc.)
+- [ ] Write evidence descriptions that state what the artifact proves and the period covered
+- [ ] Record system/scope for every evidence item (tenant/account/environment)
+- [ ] Prefer exports/reports and ticket links over screenshots when possible
+- [ ] Add sensitivity labels and handling notes for privileged or personal data
+- [ ] Assign an owner and a reviewer for each evidence item
+- [ ] Track as-of dates, cadence, and next due dates to prevent stale evidence
+- [ ] Mark status consistently (Not started → Collected → Reviewed → Approved)
+- [ ] Capture exceptions with remediation plans instead of hiding missing evidence
+
+## FAQ
+Q1: What’s the difference between an evidence register and a document folder?
+A: A folder stores files; a register explains what each file is, what it proves, who owns it, and whether it’s current.
+
+Q2: Are screenshots acceptable evidence?
+A: Sometimes, but exports/logs are usually stronger because they’re repeatable and timestamped; use screenshots when exports aren’t available.
+
+Q3: How much evidence is “enough” for an SME?
+A: Enough to show both design (policy/config) and operation (logs/tickets) for your highest-risk controls, refreshed on a predictable cadence.
