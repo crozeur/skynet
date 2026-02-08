@@ -1,0 +1,205 @@
+## Intro
+If your SOC (or outsourced monitoring) feels like a nonstop firehose of alerts, you’re not alone. Most SMEs start with “turn everything on,” then discover that high volume doesn’t automatically translate into high security. The goal in the first 30 days isn’t perfection—it’s to make alerts actionable, repeatable, and measurable. This checklist focuses on reducing noise while preserving visibility into the events that matter.
+
+## Quick take
+- Prioritize alerts by business impact and likelihood, not by raw severity labels.
+- Fix the basics first: asset inventory, identity coverage, and time synchronization.
+- Use a simple triage rubric and close the loop with tuning rules every week.
+- Suppress or group known-benign patterns with documented rationale and expiry.
+- Measure noise with a few operational metrics (volume, actionability, time-to-triage).
+
+## Week 1: Establish a baseline and define “actionable”
+Noise reduction starts with agreeing on what “good” looks like. If you can’t describe an actionable alert in your environment, every alert becomes a debate.
+
+Start by capturing a baseline for 5–7 days:
+
+- Total alert volume per day
+- Top 10 alert types by count
+- Top 10 noisy assets (hosts, servers, firewalls, SaaS tenants)
+- Percentage of alerts that led to a concrete action (containment, ticket to IT, user outreach, rule change)
+- Average time-to-triage (from alert creation to first analyst action)
+
+Then define an “actionable alert” for your SOC using a short rubric. A practical rubric for SMEs is:
+
+1) It maps to an asset you care about (known owner and business function).
+2) It has enough context to make a decision in under 15 minutes.
+3) It suggests a next step (confirm, contain, escalate, or tune).
+
+Example: actionable vs. noisy
+
+- Noisy: “Multiple failed logins” with no user identity details, no source IP reputation/context, and no correlation to a critical account.
+- More actionable: “5 failed logins followed by a success for a privileged account from a new country within 10 minutes,” linked to a known admin group and device inventory.
+
+Operational tip: create a simple “Alert Disposition” field in your ticketing or SOC notes with a controlled list (True Positive, Benign True Positive, False Positive, Needs More Data, Duplicate). You’ll use this to tune.
+
+## Week 1–2: Fix data quality issues that create phantom alerts
+Many “bad alerts” are actually “bad inputs.” Before you start suppressing, make sure the data is trustworthy.
+
+1) Time synchronization
+If logs come in with incorrect timestamps, correlations break and you get odd sequences (e.g., “impossible travel” or session anomalies that aren’t real). Ensure your endpoints, servers, and network devices use a consistent time source.
+
+2) Asset identity and ownership
+If your SOC can’t tell whether “HOST-123” is a kiosk, a domain controller, or a developer laptop, it will treat them all the same.
+
+Practical steps:
+
+- Tag assets into 3–5 tiers (e.g., Critical, Important, Standard).
+- Ensure each tier has an owner group (IT Ops, Finance, Engineering).
+- Identify crown jewels: directory services, email, ERP/accounting, remote access infrastructure, backups.
+
+Example: tuning priority by tier
+
+If you have to pick one: tune authentication alerts for privileged accounts on critical systems first, before worrying about workstation-level port scan noise.
+
+3) Identity coverage and log completeness
+Missing or inconsistent identity signals produce alerts that look suspicious but can’t be confirmed. In the first 30 days, focus on consistent coverage for:
+
+- Email authentication and access
+- Remote access/VPN
+- Administrator actions (privileged group membership changes, new admin accounts)
+- Endpoint process activity (at least for critical tiers)
+
+4) Reduce duplicates at the source
+If the same event is reported by multiple sensors, you’ll see “echo” alerts. Where possible, choose a primary source of truth for a signal.
+
+Example:
+
+If both a firewall and an endpoint agent report the same blocked outbound connection, decide which one drives alerting and which one is retained for enrichment.
+
+## Week 2–3: Implement triage standards and enrichment that cuts decision time
+The fastest way to reduce noise isn’t always suppression—it’s making triage quicker and more consistent. This prevents “alert fatigue” where everything gets ignored.
+
+1) A lightweight triage playbook per top alert type
+Pick the top 5–10 alert types by volume. For each, document:
+
+- What it means (in your environment)
+- Common benign causes
+- Minimum data required to close or escalate
+- The first 3 checks an analyst must do
+- When to escalate to IT or security lead
+
+Example: “Multiple failed logins” playbook (SME version)
+
+- Checks:
+  - Is the account privileged or tied to finance/admin functions?
+  - Is the source IP internal, known corporate egress, or unusual?
+  - Did a success follow the failures? If yes, treat as higher priority.
+- Common benign:
+  - Password manager sync issue
+  - Old device repeatedly attempting login
+  - User traveling and hitting MFA prompts
+- Escalate when:
+  - Privileged account, unusual geolocation, new device, or success after failures
+
+2) Enrichment that matters (without adding tools)
+Often you can enrich with what you already have:
+
+- Asset tier and owner
+- User role (standard vs. admin)
+- Known corporate IP ranges and VPN egress
+- “Is this a new device for this user?” using existing identity logs
+
+3) A simple severity model aligned to business impact
+Don’t rely solely on default “High/Medium/Low” from a tool. SMEs do better with a severity model that considers:
+
+- Asset criticality
+- Privilege level
+- Evidence of execution (not just scanning)
+- Lateral movement indicators
+- Data access indicators
+
+Example:
+
+A medium-severity malware detection on a domain controller should often outrank a high-severity detection on a disposable test machine.
+
+## Week 3–4: Tune rules safely (suppression, grouping, thresholds, and expiries)
+Tuning is where noise reduction becomes real—if you do it with guardrails.
+
+1) Use “suppression with expiry,” not permanent ignore
+If you suppress an alert pattern, document:
+
+- Why it is benign
+- What conditions make it risky again
+- An expiry date (e.g., 14 or 30 days)
+
+This prevents the common SME failure mode: a long list of “ignored” alerts that eventually hides real incidents.
+
+2) Group duplicates and bursty alerts
+Instead of 500 alerts for the same behavior, you want one alert that summarizes a burst.
+
+Practical approaches:
+
+- Group by user + source IP + time window
+- Group by host + process + hash + time window
+- Set threshold alerts (e.g., “>X events in Y minutes”) rather than per-event alerts
+
+Example:
+
+Replace “alert on every blocked outbound connection to known-bad” with “alert if the same host hits known-bad domains 10+ times in 5 minutes,” and include the list of domains in the alert summary.
+
+3) Tune by disposition data, not feelings
+Each week, review the top 10 alert types and answer:
+
+- How many were True Positive vs. False Positive?
+- Which ones lacked context (“Needs More Data”)?
+- Which were duplicates?
+
+Then apply one change per noisy alert type:
+
+- Add required fields before generating the alert
+- Adjust threshold or time window
+- Restrict to critical tiers
+- Add correlation (e.g., failures + success)
+
+4) Keep a “tuning log” for auditability and rollback
+Even if you’re not pursuing compliance, a tuning log helps you avoid regressions and supports incident reviews. It can be as simple as a shared document with:
+
+- Rule name
+- Change made
+- Reason
+- Date
+- Owner
+- Expiry/review date
+
+## Week 4: Metrics and governance to keep noise down
+Noise reduction isn’t a one-time project. In SMEs, staff changes and new apps can double alert volume overnight.
+
+Track a small set of metrics:
+
+- Alerts per day (total)
+- Actionable rate (actionable alerts / total alerts)
+- Median time-to-triage
+- Top 5 noisy alert types (by count)
+- Reopen rate (alerts or tickets reopened due to premature closure)
+
+Set a cadence:
+
+- Weekly: 30-minute tuning review (top 10 by volume)
+- Monthly: revisit asset tiers and “crown jewel” list
+- After major change: review new log sources, rule defaults, and duplicates
+
+If you reference generic frameworks (NIST/ISO/CIS), use them as a compass, not a checkbox. For example: “We’re improving detection and response consistency,” rather than “We are compliant.”
+
+## Checklist
+- [ ] Capture 5–7 days of baseline metrics (volume, top alert types, noisy assets, time-to-triage)
+- [ ] Define an “actionable alert” rubric and use a standard disposition label for every alert
+- [ ] Confirm time synchronization across endpoints, servers, and network/security devices
+- [ ] Tag assets into 3–5 criticality tiers and assign clear business/IT ownership
+- [ ] Ensure core identity logs are consistently collected for email, VPN/remote access, and admin actions
+- [ ] Build mini triage playbooks for the top 5–10 alert types (checks, benign causes, escalation triggers)
+- [ ] Add enrichment fields (asset tier, owner, user privilege) into alert context where possible
+- [ ] Group duplicates and bursty patterns into single summary alerts using time windows and thresholds
+- [ ] Apply suppressions only with documented rationale and an expiry/review date
+- [ ] Maintain a tuning log with rule changes, owner, and rollback notes
+- [ ] Run a weekly tuning review focused on the top 10 alert types by volume
+- [ ] Track actionable rate and median time-to-triage to validate that noise is decreasing
+
+## FAQ
+Q1: Will suppressing alerts make us less secure?
+A: It can if done permanently or without guardrails. Use suppression with expiry, document rationale, and prioritize grouping and enrichment before outright ignoring.
+
+Q2: What if we don’t have enough staff for playbooks and tuning?
+A: Start with just the top 5 alert types by volume and one 30-minute review per week. Small, consistent changes usually outperform occasional big overhauls.
+
+Q3: Should we add more tools to reduce noise?
+A: Not in the first 30 days. Most early wins come from asset context, consistent identity logging, and disciplined tuning based on dispositions rather than buying new platforms.
