@@ -22,12 +22,12 @@ A small IT team can’t afford ambiguity during cutover. Before you touch produc
 
 Practical elements to include:
 
-1) Define the cutover scope
+### 1) Define the cutover scope
 - What is in scope: applications, databases, file shares, identity components, integrations, monitoring.
 - What is out of scope: “nice-to-have” refactors, major version upgrades, UI changes.
 - What is frozen: code changes, config changes, infrastructure changes (and when the freeze starts).
 
-2) Assign roles with backups
+### 2) Assign roles with backups
 Even if one person wears multiple hats, name the roles so you don’t miss critical tasks:
 - Cutover lead (owns the timeline and decisions)
 - Cloud operator (infra and platform changes)
@@ -38,7 +38,7 @@ Even if one person wears multiple hats, name the roles so you don’t miss criti
 
 If you only have 2–3 people, combine roles, but keep responsibilities explicit.
 
-3) Create go/no-go gates
+### 3) Create go/no-go gates
 Use at least three gates:
 - T-7 days: readiness gate (testing complete, monitoring in place, rollback validated)
 - T-1 day: change freeze and final prechecks
@@ -56,7 +56,7 @@ Security note: If you use generic guidance like NIST/ISO/CIS, reference it as a 
 ## Pre-cutover security and operational readiness checks
 Cutover is not the time to discover missing logs, overly broad firewall rules, or secrets stored in a spreadsheet. Pre-cutover checks should be written as step-by-step tasks you can execute and verify.
 
-1) Identity and access
+### 1) Identity and access
 - Inventory privileged accounts (cloud admin, CI/CD, break-glass). Confirm who can use them and how.
 - Reduce standing privilege where possible; use time-bound elevation or separate admin accounts.
 - Confirm MFA and account recovery paths (especially for tenant/global admins).
@@ -65,7 +65,7 @@ Cutover is not the time to discover missing logs, overly broad firewall rules, o
 Example check:
 - “Attempt login with admin role using MFA from approved network; verify audit log event recorded.”
 
-2) Network and exposure
+### 2) Network and exposure
 - Confirm inbound rules: only required ports, only from required sources.
 - Confirm outbound rules: restrict egress if your architecture supports it.
 - Validate DNS approach (TTL reductions, split-horizon, internal vs external records).
@@ -74,7 +74,7 @@ Example check:
 Example check:
 - “From a test client, validate only HTTPS is reachable; SSH/RDP not exposed publicly.”
 
-3) Logging and monitoring
+### 3) Logging and monitoring
 - Identify your minimum signals: authentication logs, admin actions, application errors, database health, and network flow (if available).
 - Confirm log retention meets your business needs (even if it’s just “enough to investigate incidents”).
 - Set alert thresholds conservatively for cutover night (auth failures, 5xx errors, CPU/memory saturation, queue backlogs).
@@ -82,7 +82,7 @@ Example check:
 Example check:
 - “Generate a failed login and confirm it appears in central logging within 5 minutes.”
 
-4) Backup and recovery
+### 4) Backup and recovery
 - Confirm backups exist for both source and target (where applicable).
 - Document restore steps and credentials needed.
 - Know the recovery time you can tolerate for a rollback decision.
@@ -93,20 +93,20 @@ Example check:
 ## Rehearse the cutover: dry runs, test scripts, and data strategy
 Small teams succeed by turning unknowns into scripts. If a step can be tested ahead of time, do it.
 
-1) Dry run the runbook
+### 1) Dry run the runbook
 Do at least one rehearsal in a staging environment that resembles production.
 - Time each step and note dependencies.
 - Identify steps that require waiting (DNS propagation, data sync completion).
 - Convert “tribal knowledge” into explicit commands and validation checks.
 
-2) Use validation scripts, not manual clicking
+### 2) Use validation scripts, not manual clicking
 Create simple repeatable checks you can run before and after the cutover. Examples:
 - Health endpoint checks: /health, /status, or synthetic login
 - Database checks: connectivity, read/write test table, expected row counts for critical tables
 - File checks: hash/size comparison for sampled files
 - Integration checks: email sending, payment gateway sandbox call, SSO login
 
-3) Choose a cutover data approach
+### 3) Choose a cutover data approach
 Your runbook should explicitly state which approach you’re using and the implications:
 - Big-bang: full stop, final sync, switch traffic. Simpler, but longer outage.
 - Phased: migrate components over time (e.g., app tier first, database later). Lower risk, more complexity.
@@ -117,7 +117,7 @@ Practical SME tip: If you can, pre-stage the bulk of data days ahead, then do a 
 ## Cutover execution: minute-by-minute steps and rollback triggers
 During cutover, you need a timeline, a communications cadence, and a disciplined approach to changes.
 
-1) Timeline structure
+### 1) Timeline structure
 Write steps as:
 - Step number
 - Owner
@@ -143,19 +143,19 @@ Example cutover slice:
   - Validate: query DNS from multiple resolvers; synthetic checks pass
   - Backout: revert DNS records; restore prior TTL afterward
 
-2) Communications during cutover
+### 2) Communications during cutover
 - Post a start message, midpoint update, and completion message.
 - Avoid detailed internal troubleshooting in business channels; keep it status + ETA.
 - Document who decides whether to extend the window.
 
-3) Rollback triggers (define them before cutover)
+### 3) Rollback triggers (define them before cutover)
 Rollback is a planned action, not a failure. Define clear triggers such as:
 - Authentication/SSO failure affecting most users for more than X minutes
 - Data integrity issues discovered in validation (e.g., missing critical records)
 - Error rates above agreed thresholds with no clear fix within the timebox
 - Security control failure (e.g., logs not collecting, unexpected public exposure)
 
-4) Rollback approach
+### 4) Rollback approach
 Your rollback section should include:
 - How to direct traffic back (DNS, load balancer, routing)
 - How to handle data written during the attempted cutover (if any)
@@ -167,19 +167,19 @@ If there’s any chance of “split brain” (both old and new accepting writes)
 ## Post-cutover hardening and stabilization (first 72 hours)
 Cutover isn’t done when the status page is green. The first 72 hours is where you prevent small issues from becoming incidents.
 
-1) Stabilization tasks
+### 1) Stabilization tasks
 - Increase monitoring sensitivity temporarily and set an on-call rotation, even if it’s informal.
 - Review error logs and performance bottlenecks daily.
 - Validate scheduled jobs, backups, and report exports.
 - Confirm user access patterns and look for unusual admin actions.
 
-2) Security follow-ups
+### 2) Security follow-ups
 - Rotate any credentials used during migration that had broader access than normal.
 - Remove temporary firewall rules, IP allowlists, or “debug” settings.
 - Confirm least privilege: tighten roles, remove unused accounts, and document ownership.
 - Ensure asset inventory is updated: endpoints, data stores, public URLs, certificates.
 
-3) Lessons learned
+### 3) Lessons learned
 Within a week, run a short retrospective:
 - What steps caused delays?
 - What checks caught issues early?

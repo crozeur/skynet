@@ -22,9 +22,9 @@ An IT security audit goes smoother when you can produce evidence quickly, consis
 ## 1) Evidence basics: what auditors actually need
 Before collecting anything, align on what “good evidence” looks like. Regardless of whether an audit is inspired by NIST/ISO/CIS controls, evidence generally needs three qualities:
 
-1) Traceable: It clearly ties to a specific system, control, period of time, and owner.
-2) Verifiable: A reviewer can confirm it without relying on “trust me.”
-3) Complete: It covers the scope (users, endpoints, servers, cloud apps) and the audit window.
+### 1) Traceable: It clearly ties to a specific system, control, period of time, and owner.
+### 2) Verifiable: A reviewer can confirm it without relying on “trust me.”
+### 3) Complete: It covers the scope (users, endpoints, servers, cloud apps) and the audit window.
 
 A simple way to package evidence is to bundle:
 
@@ -42,77 +42,77 @@ Example: 2026-01-15_google-workspace_mfa-enforcement_itmgr.pdf
 Below are 20 common evidence items that repeatedly come up in SME audits. If you can produce these quickly, you’re usually ahead of schedule.
 
 ### Governance and “how you run security”
-1) Security policy set (current versions)
+### 1) Security policy set (current versions)
    - Example evidence: PDF of policies (acceptable use, password/MFA, device management, incident response).
    - Good looks like: Version history, approval date, and owner.
 
-2) Asset inventory (systems and data)
+### 2) Asset inventory (systems and data)
    - Example evidence: Spreadsheet or CMDB export listing laptops, servers, cloud services, owners, and criticality.
    - Include: “Where sensitive data lives” notes, even if high-level.
 
-3) Risk register or risk notes
+### 3) Risk register or risk notes
    - Example evidence: A lightweight table of top risks, mitigations, and due dates.
    - SME-friendly: Even 10 risks is better than none.
 
-4) Security awareness training completion
+### 4) Security awareness training completion
    - Example evidence: Training platform export or signed attendance record.
    - Include: New-hire onboarding evidence for at least one recent hire.
 
 ### Identity and access management (IAM)
-5) User list and role mapping
+### 5) User list and role mapping
    - Example evidence: Export of directory users with departments/roles.
    - Add: A simple mapping of roles to access (e.g., “Finance role -> accounting app”).
 
-6) MFA enforcement and exceptions
+### 6) MFA enforcement and exceptions
    - Example evidence: Screenshot/export showing MFA enabled for all users; separate list for any exceptions with justification and end date.
 
-7) Joiner/mover/leaver (JML) process + one completed example
+### 7) Joiner/mover/leaver (JML) process + one completed example
    - Example evidence: Written procedure plus a ticket showing a user offboarded (account disabled, access removed, device recovered).
 
-8) Privileged access list
+### 8) Privileged access list
    - Example evidence: List of admin accounts (domain admins, cloud admins, application admins) and who owns them.
    - Bonus: Proof of separate admin accounts (not daily-use accounts).
 
-9) Access reviews (at least quarterly) for key systems
+### 9) Access reviews (at least quarterly) for key systems
    - Example evidence: Sign-off record (email, ticket, or document) showing who reviewed access, what changed, and when.
 
 ### Endpoint, server, and vulnerability hygiene
-10) Patch management policy + last month’s patch report
+### 10) Patch management policy + last month’s patch report
    - Example evidence: Patch cadence description and a report showing patch status by device.
    - Include: How you handle emergency patches.
 
-11) Endpoint protection status (AV/EDR) coverage report
+### 11) Endpoint protection status (AV/EDR) coverage report
    - Example evidence: Export listing devices protected, last check-in time, and any unmanaged endpoints.
 
-12) Vulnerability scan results + remediation tickets
+### 12) Vulnerability scan results + remediation tickets
    - Example evidence: Most recent scan summary, plus 2–3 remediation examples with closure proof.
    - Keep it practical: Show how you triage “critical/high” findings.
 
-13) Configuration baselines for endpoints/servers
+### 13) Configuration baselines for endpoints/servers
    - Example evidence: Baseline checklist or configuration profile summary (disk encryption, screen lock, firewall on).
 
 ### Backup, recovery, and resilience
-14) Backup policy + backup job status
+### 14) Backup policy + backup job status
    - Example evidence: Backup scope, retention, and a recent job report indicating success/failures.
 
-15) Restore test evidence
+### 15) Restore test evidence
    - Example evidence: A ticket or document proving a restore was tested (what was restored, when, and result).
    - Strong evidence: Screenshots/log excerpts and the person who performed the test.
 
-16) Business continuity / disaster recovery notes
+### 16) Business continuity / disaster recovery notes
    - Example evidence: A short plan describing RTO/RPO targets (even if “best effort”), key dependencies, and who calls whom.
 
 ### Logging, monitoring, and incident readiness
-17) Central logging / audit log retention settings
+### 17) Central logging / audit log retention settings
    - Example evidence: Screenshot/export showing log sources and retention period (e.g., identity provider sign-in logs).
 
-18) Alerting rules and response workflow
+### 18) Alerting rules and response workflow
    - Example evidence: List of alert types (impossible travel, malware detection) and where alerts go (ticket queue, email).
 
-19) Incident response plan + one tabletop exercise record
+### 19) Incident response plan + one tabletop exercise record
    - Example evidence: IR playbook (roles, steps, communications) and a short record of a tabletop: scenario, attendees, actions.
 
-20) Incident register (even if “no incidents”)
+### 20) Incident register (even if “no incidents”)
    - Example evidence: A simple log with date, description, severity, and outcome. If none occurred, record “no reportable incidents” for the period.
 
 ## 3) How to organize and store evidence without chaos

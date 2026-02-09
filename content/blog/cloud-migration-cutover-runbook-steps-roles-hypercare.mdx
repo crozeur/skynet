@@ -24,26 +24,26 @@ A cutover runbook is an operational playbook for the final transition from your 
 
 Include these core elements:
 
-1) Scope and systems
+### 1) Scope and systems
 - What is in the cutover (applications, databases, integrations, identity, endpoints)?
 - What is explicitly out of scope (e.g., “email migration occurs next quarter”)?
 
-2) Definitions and success criteria
+### 2) Definitions and success criteria
 - “Cutover complete” needs a measurable definition: e.g., new traffic routed to cloud, data sync completed, and business validation tests passed.
 - Include RTO/RPO targets as planning inputs (don’t claim compliance; use them as internal goals).
 
-3) Timing and dependencies
+### 3) Timing and dependencies
 - Cutover window start/end in one time zone.
 - Dependencies (ISP changes, certificate issuance, third-party allowlists, payment gateways, MFA policies).
 
-4) Risk controls and security checks
+### 4) Risk controls and security checks
 Keep it generic and aligned with recognized good practices (e.g., NIST/ISO/CIS) without claiming compliance:
 - Access control review (least privilege, admin accounts, break-glass procedure).
 - Logging and monitoring enabled (central logs, alerts for auth failures, privilege changes).
 - Vulnerability exposure check (public endpoints, open ports, misconfigured storage).
 - Backup and restore verification (prove you can restore, not just that backups exist).
 
-5) Rollback plan and trigger
+### 5) Rollback plan and trigger
 A rollback plan isn’t “we can go back.” It is a set of steps that are feasible within the cutover window.
 - Rollback trigger examples: data validation fails, authentication outage exceeds X minutes, or key business flow fails twice after remediation.
 - Rollback steps: revert DNS, re-enable old scheduler/jobs, disable cloud ingress, confirm old environment integrity.
@@ -147,26 +147,26 @@ Hypercare is a short period after cutover where you run operations in a more con
 
 A practical hypercare plan includes:
 
-1) Enhanced monitoring and alerting
+### 1) Enhanced monitoring and alerting
 - Tighten alert thresholds temporarily (especially for auth failures, error spikes, and latency).
 - Add synthetic checks for key user journeys (login, critical transaction).
 - Review dashboards at set times (e.g., start of day, midday, end of day).
 
-2) Fast change control with guardrails
+### 2) Fast change control with guardrails
 - Pre-approve a limited set of low-risk fixes (config tweaks, scaling adjustments).
 - Require explicit approval for higher-risk changes (schema changes, identity policy changes).
 - Keep an audit trail: who changed what, when, and why.
 
-3) Incident response readiness
+### 3) Incident response readiness
 - Define severity levels and response times.
 - Keep a short on-call roster for the first 3–14 days.
 - Use a single incident channel and require concise timelines.
 
-4) User support and communications
+### 4) User support and communications
 - Brief the service desk on known issues and workarounds.
 - Publish a simple “what changed” note for end users (new login URL, MFA prompt changes, new VPN behavior).
 
-5) Hypercare exit criteria
+### 5) Hypercare exit criteria
 End hypercare when:
 - Error rates and latency are stable.
 - No repeated incidents in the same area.

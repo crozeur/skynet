@@ -24,15 +24,15 @@ Object storage (buckets/containers) is designed to be easy to share—which is w
 
 Practical steps that work across providers:
 
-1) Default-deny public access
+### 1) Default-deny public access
 - Establish an “org default” of no public object storage.
 - If your platform supports it, enable an account/tenant-level setting that blocks public access broadly (then explicitly allow known exceptions).
 
-2) Separate “public website” storage from “internal data” storage
+### 2) Separate “public website” storage from “internal data” storage
 - If you host public assets (images, downloads), create dedicated buckets/containers with a naming convention that makes intent obvious (e.g., `public-assets-...` vs `internal-data-...`).
 - Apply different guardrails: public assets can be readable but should still prevent listing where possible, deny writes from anonymous users, and restrict upload paths.
 
-3) Use presigned/temporary URLs for sharing internal files
+### 3) Use presigned/temporary URLs for sharing internal files
 Instead of making a bucket public to share a file with a customer or contractor, generate time-limited links.
 
 Example: a sales team needs to share a proposal archive for 48 hours.
@@ -40,7 +40,7 @@ Example: a sales team needs to share a proposal archive for 48 hours.
 - Generate a link that expires in 48 hours.
 - Log access and disable the link early if needed.
 
-4) Watch for “shadow exposure” via replication, backups, and analytics exports
+### 4) Watch for “shadow exposure” via replication, backups, and analytics exports
 Common mistake: production data is private, but a replicated copy or exported report is stored in a different bucket with weaker controls.
 
 Example: application logs exported nightly to object storage.
@@ -48,13 +48,13 @@ Example: application logs exported nightly to object storage.
 - Deny public access explicitly on the destination.
 - Limit access to the smallest set of roles that needs it (e.g., a security/ops role, not every developer).
 
-5) Encrypt, but don’t confuse encryption with access control
+### 5) Encrypt, but don’t confuse encryption with access control
 Encryption at rest is important, but it doesn’t prevent misuse if everyone has permission to read the objects. Treat encryption as a baseline, and focus on who can access keys/data paths.
 
 ## IAM fundamentals: least privilege without breaking work
 “IAM” misconfigurations usually aren’t a single bad policy—they’re a collection of small shortcuts that accumulate. SMEs often move quickly, grant broad permissions “temporarily,” then forget to tighten them.
 
-1) Design roles around tasks (job functions), not individuals
+### 1) Design roles around tasks (job functions), not individuals
 Create roles like:
 - `app-runtime-read-secrets`
 - `billing-readonly`
@@ -66,7 +66,7 @@ Avoid roles like:
 
 Why it matters: task-based roles remain stable when people change jobs, teams, or leave.
 
-2) Prefer allow-lists over broad wildcards
+### 2) Prefer allow-lists over broad wildcards
 If a policy reads like “allow all actions on all resources,” it’s almost always too broad.
 
 Practical approach:
@@ -74,7 +74,7 @@ Practical approach:
 - Scope to specific resources (a single bucket, a specific secret path, a specific project).
 - Add actions iteratively based on audit logs (“deny then permit with evidence”).
 
-3) Keep human admins separate from service identities
+### 3) Keep human admins separate from service identities
 Humans should not deploy production workloads with the same identity they use to check email and browse the web.
 
 Example pattern:
@@ -82,7 +82,7 @@ Example pattern:
 - When admin tasks are required, the user “assumes” an admin role for a limited time.
 - All admin actions are logged separately.
 
-4) Avoid shared accounts and shared credentials
+### 4) Avoid shared accounts and shared credentials
 Shared credentials destroy accountability and make offboarding unreliable.
 
 Replace:
@@ -94,7 +94,7 @@ With:
 - Centralized role assumption
 - Short-lived access where possible
 
-5) Use guardrails for high-risk permissions
+### 5) Use guardrails for high-risk permissions
 Even if you don’t use advanced tooling, you can still enforce common-sense boundaries:
 - Only a small group can change IAM policies.
 - Only a small group can disable logging.
@@ -103,12 +103,12 @@ Even if you don’t use advanced tooling, you can still enforce common-sense bou
 ## Keys, tokens, and secrets: reduce long-lived access
 Credential sprawl is a quiet risk in growing SMEs: old API keys, CI/CD tokens, and developer laptops that keep access long after it’s needed.
 
-1) Prefer short-lived sessions over long-lived keys
+### 1) Prefer short-lived sessions over long-lived keys
 Where supported:
 - Use role-based access with temporary session credentials.
 - For automation, use workload identity or federation rather than embedding keys in pipelines.
 
-2) If you must use access keys, treat them like perishable goods
+### 2) If you must use access keys, treat them like perishable goods
 Minimum baseline:
 - Unique key per app/service (not shared).
 - Rotation schedule (and a tested rotation process).
@@ -120,12 +120,12 @@ Example: rotating a CI/CD deploy key
 - Validate a deployment.
 - Disable and delete the old key.
 
-3) Scope secrets access to the service, not the entire environment
+### 3) Scope secrets access to the service, not the entire environment
 A common mistake is letting an application read “all secrets” because it’s easier. Instead:
 - Separate secrets by environment (dev/test/prod).
 - Restrict each service to only its own secret paths.
 
-4) Detect exposed secrets early
+### 4) Detect exposed secrets early
 Without inventing stats: it’s common for credentials to land in chat logs, tickets, or repositories.
 - Enable repository scanning features if available.
 - Add pre-commit checks to prevent obvious key patterns.
@@ -134,13 +134,13 @@ Without inventing stats: it’s common for credentials to land in chat logs, tic
 ## Logging and drift control: make misconfigurations harder to reintroduce
 Fixing a misconfiguration once isn’t enough; it tends to reappear during a rushed change.
 
-1) Turn on audit logs and keep them protected
+### 1) Turn on audit logs and keep them protected
 Minimum baseline:
 - Log IAM policy changes.
 - Log object storage access and permission changes.
 - Store logs in a location with restricted deletion permissions.
 
-2) Alert on the changes that matter
+### 2) Alert on the changes that matter
 Start small. Alerts that are too noisy get ignored.
 Useful low-noise alerts:
 - Bucket/container becomes public.
@@ -148,13 +148,13 @@ Useful low-noise alerts:
 - Logging disabled or retention reduced.
 - New access keys created.
 
-3) Use periodic validation (a lightweight “configuration review”)
+### 3) Use periodic validation (a lightweight “configuration review”)
 You don’t need heavy process to start:
 - Weekly: check for new public storage.
 - Monthly: review admin role membership.
 - Quarterly: validate key rotation and offboarding outcomes.
 
-4) Keep frameworks generic, use them as checklists
+### 4) Keep frameworks generic, use them as checklists
 If you align with common guidance (e.g., CIS benchmarks, NIST, ISO-style controls), treat it as a way to structure improvements—not as a claim of compliance.
 
 ## Checklist

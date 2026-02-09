@@ -22,11 +22,11 @@ Most SMEs don’t suffer from “too few alerts”—they suffer from too many t
 ## Build a lightweight triage pipeline (so every alert has a home)
 Alert triage works best when everyone follows the same sequence. For SMEs, the goal isn’t perfect classification—it’s consistent, fast sorting with minimal rework.
 
-1) Intake → normalize
+### 1) Intake → normalize
 - Ensure every alert lands in one queue (ticketing system, shared mailbox, or case tool).
 - Normalize the minimum fields you’ll need later: timestamp, source, alert name, impacted asset/user, and raw evidence link.
 
-2) De-duplicate → create a “case”
+### 2) De-duplicate → create a “case”
 A common noise source is receiving multiple alerts about the same underlying event (for example: “Impossible travel,” “MFA push denied,” and “New device login” for the same account within minutes). Instead of treating these as separate emergencies:
 - Create one case per identity/host per time window (e.g., 30–120 minutes).
 - Attach all related alerts to that case.
@@ -37,14 +37,14 @@ Example:
 - 09:15 “Mailbox forwarding rule created” for user j.smith
 These should form one case: “Potential account compromise – j.smith.”
 
-3) Classify → four outcomes
+### 3) Classify → four outcomes
 Use simple categories that lead to action:
 - False positive (prove it’s benign)
 - Benign true positive (real event, no action required)
 - Needs more info (enrichment required)
 - Likely incident (escalate/contain)
 
-4) Escalate/contain with a timer
+### 4) Escalate/contain with a timer
 Set a maximum time you’ll spend on triage before escalating. SMEs often stall because triage becomes a research project.
 - Suggested: 10–15 minutes of enrichment before escalation for high-risk cases.
 - If evidence is insufficient but risk is high, escalate anyway with what you have.
@@ -54,7 +54,7 @@ Most tools assign a severity level. Keep it—but don’t let it be the only dri
 
 Use a simple risk lens:
 
-1) Asset criticality
+### 1) Asset criticality
 Maintain a short list of critical systems and identities:
 - Email admin accounts
 - Finance and payroll systems
@@ -64,7 +64,7 @@ Maintain a short list of critical systems and identities:
 
 If the alert involves a critical asset or privileged identity, it automatically moves up.
 
-2) Credible attacker behavior (TTP-like signals)
+### 2) Credible attacker behavior (TTP-like signals)
 Prioritize alerts that match common attack behaviors, even without “proof”:
 - New MFA device registration or changes to recovery methods
 - Mailbox forwarding rules or OAuth consent to unknown apps
@@ -72,7 +72,7 @@ Prioritize alerts that match common attack behaviors, even without “proof”:
 - New scheduled task/service creation on servers
 - Large outbound data transfers or unusual admin tool use
 
-3) Blast radius and propagation potential
+### 3) Blast radius and propagation potential
 One compromised laptop is bad; one compromised admin account is worse.
 - Any lateral movement indicators (new remote logins, new admin group membership) raise priority.
 - Any sign of persistence (new startup items, new cloud app tokens) raises priority.
@@ -88,23 +88,23 @@ If 2 out of 3 are “yes,” treat it as “Likely incident.”
 Enrichment is where triage either becomes efficient—or collapses into endless investigation. The trick is to standardize what “enough context” looks like.
 
 Minimum evidence questions (aim to answer in 10–15 minutes)
-1) Who is affected?
+### 1) Who is affected?
 - User: role, department, privilege level, recent password/MFA changes
 - Host: owner, purpose, whether it’s a server/workstation, last patch date (if available)
 
-2) What happened?
+### 2) What happened?
 - Exact event type (login, process execution, email rule change, firewall deny/allow)
 - What changed (new rule, new token, new admin membership)
 
-3) When and where?
+### 3) When and where?
 - Timeline: first seen, last seen, frequency
 - Location/IP/ASN (if available), device fingerprint, geo anomalies
 
-4) How confident is the signal?
+### 4) How confident is the signal?
 - Is it rule-based (known bad) or anomaly-based (unusual)?
 - Does the alert include concrete indicators (hash, domain, process path)?
 
-5) What’s the expected legitimate explanation?
+### 5) What’s the expected legitimate explanation?
 - Planned maintenance, travel, new device rollout, HR onboarding
 - Known business apps that create similar patterns
 
@@ -130,7 +130,7 @@ Outcome:
 ## Close the loop: tune noisy detections without weakening security
 Noise doesn’t go away by itself. SMEs can steadily reduce it by treating every closed case as feedback for detection tuning.
 
-1) Track closure reasons
+### 1) Track closure reasons
 Use a few standardized closure codes:
 - Known business behavior
 - Misconfigured asset (e.g., time skew, agent issues)
@@ -138,20 +138,20 @@ Use a few standardized closure codes:
 - Detection too broad (needs scope)
 - True positive (incident)
 
-2) Create “allow with guardrails,” not blanket exclusions
+### 2) Create “allow with guardrails,” not blanket exclusions
 If a legitimate tool triggers alerts, avoid excluding it globally. Prefer scoped tuning:
 - Limit to specific host groups, service accounts, or signed binaries.
 - Add conditions (time window, expected source network).
 - Keep an exception expiry date and review monthly.
 
-3) Establish a weekly 30-minute tuning review
+### 3) Establish a weekly 30-minute tuning review
 Even a tiny SOC function can improve quickly with a short routine:
 - Top 5 recurring alerts by volume
 - Which ones were always benign? Why?
 - What enrichment data was repeatedly missing?
 - Which rules should be tightened, scoped, or supplemented with context?
 
-4) Align with generic best-practice frameworks (without overcomplicating)
+### 4) Align with generic best-practice frameworks (without overcomplicating)
 If you use references like NIST, ISO, or CIS, treat them as guidance for building repeatable processes: detection, response, documentation, and continual improvement. Don’t chase “compliance” in triage—chase consistency and measurable reduction in rework.
 
 ## Checklist

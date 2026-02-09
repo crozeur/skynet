@@ -22,10 +22,10 @@ A good evidence template is an “evidence register”: a table where each row i
 
 Core fields to include:
 
-1) Evidence ID
+### 1) Evidence ID
 Use a simple, stable naming scheme like `AE-001`, `AE-002`, etc. Stable IDs prevent confusion when filenames change.
 
-2) Control/Requirement reference (generic)
+### 2) Control/Requirement reference (generic)
 Avoid overfitting to a single framework. Use a plain-language control statement plus an optional generic mapping tag, such as:
 - “Access to production systems is restricted and reviewed” (maps to Access Control / IAM)
 - “Changes to systems are approved and tracked” (maps to Change Management)
@@ -33,15 +33,15 @@ Avoid overfitting to a single framework. Use a plain-language control statement 
 
 If you later need to align to NIST/ISO/CIS, you can add a column like “Framework mapping (optional)” without claiming compliance.
 
-3) Evidence description
+### 3) Evidence description
 Write what the artifact is and what it demonstrates. Keep it testable.
 Example: “Export of admin group members for production tenant, showing named accounts only; includes date/time of export.”
 
-4) System/Scope
+### 4) System/Scope
 Where the evidence comes from (system name, environment, business unit). This reduces the “wrong system” problem.
 Example: “Microsoft 365 tenant (prod), AWS account 123…, HRIS.”
 
-5) Evidence type
+### 5) Evidence type
 Choose a small set to normalize reporting:
 - Policy/procedure
 - Configuration/export
@@ -50,30 +50,30 @@ Choose a small set to normalize reporting:
 - Training/attestation
 - Vendor/third-party artifact
 
-6) Owner and contributor(s)
+### 6) Owner and contributor(s)
 The owner is accountable for producing/updating the artifact. Contributors can help gather data.
 
-7) Collection method
+### 7) Collection method
 How you get it in a repeatable way:
 - “Export CSV from admin portal”
 - “Query SIEM saved search”
 - “Screenshot of settings page” (use only if exports are not available)
 
-8) Period covered and as-of date
+### 8) Period covered and as-of date
 Auditors often care about time. Include:
 - “Period covered” (e.g., Q4 2025)
 - “As-of date” (e.g., 2026-01-31)
 
-9) Storage location
+### 9) Storage location
 One canonical location: a folder path, ticket link, or document repository URL. Don’t paste sensitive content into the register itself.
 
-10) Sensitivity and handling
+### 10) Sensitivity and handling
 Label items that contain secrets, personal data, or security-sensitive configuration. Add handling notes like “redact tokens,” “share via secure link,” “restricted to audit team.”
 
-11) Review cadence (freshness)
+### 11) Review cadence (freshness)
 Set how often this evidence must be refreshed: monthly/quarterly/annually/on-change.
 
-12) Status and notes
+### 12) Status and notes
 Statuses such as: Not started, In progress, Collected, Reviewed, Approved, Superseded. Notes capture exceptions and context.
 
 Practical example row (you can copy this pattern):
@@ -97,15 +97,15 @@ The fastest way to lose time is collecting “pretty evidence” that doesn’t 
 
 Prioritize these sources:
 
-1) System exports and reports
+### 1) System exports and reports
 Exports (CSV/PDF) with timestamps are stronger than screenshots because they’re easier to validate and re-run.
 Example: export of MFA enrollment status for all users as of a specific date.
 
-2) Tickets and approvals
+### 2) Tickets and approvals
 Change requests, access requests, incident tickets, and exception approvals often form the backbone of audit trails.
 Example: link a firewall rule change ticket to the corresponding change window and approval.
 
-3) Immutable logs or centrally collected logs
+### 3) Immutable logs or centrally collected logs
 If you have centralized logging, capture evidence from there; it reduces “log on the server” disputes.
 Example: a saved search showing successful and failed admin logins for the quarter.
 

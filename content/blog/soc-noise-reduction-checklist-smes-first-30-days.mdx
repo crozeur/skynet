@@ -30,9 +30,9 @@ Start by capturing a baseline for 5–7 days:
 
 Then define an “actionable alert” for your SOC using a short rubric. A practical rubric for SMEs is:
 
-1) It maps to an asset you care about (known owner and business function).
-2) It has enough context to make a decision in under 15 minutes.
-3) It suggests a next step (confirm, contain, escalate, or tune).
+### 1) It maps to an asset you care about (known owner and business function).
+### 2) It has enough context to make a decision in under 15 minutes.
+### 3) It suggests a next step (confirm, contain, escalate, or tune).
 
 Example: actionable vs. noisy
 
@@ -44,10 +44,10 @@ Operational tip: create a simple “Alert Disposition” field in your ticketing
 ## Week 1–2: Fix data quality issues that create phantom alerts
 Many “bad alerts” are actually “bad inputs.” Before you start suppressing, make sure the data is trustworthy.
 
-1) Time synchronization
+### 1) Time synchronization
 If logs come in with incorrect timestamps, correlations break and you get odd sequences (e.g., “impossible travel” or session anomalies that aren’t real). Ensure your endpoints, servers, and network devices use a consistent time source.
 
-2) Asset identity and ownership
+### 2) Asset identity and ownership
 If your SOC can’t tell whether “HOST-123” is a kiosk, a domain controller, or a developer laptop, it will treat them all the same.
 
 Practical steps:
@@ -60,7 +60,7 @@ Example: tuning priority by tier
 
 If you have to pick one: tune authentication alerts for privileged accounts on critical systems first, before worrying about workstation-level port scan noise.
 
-3) Identity coverage and log completeness
+### 3) Identity coverage and log completeness
 Missing or inconsistent identity signals produce alerts that look suspicious but can’t be confirmed. In the first 30 days, focus on consistent coverage for:
 
 - Email authentication and access
@@ -68,7 +68,7 @@ Missing or inconsistent identity signals produce alerts that look suspicious but
 - Administrator actions (privileged group membership changes, new admin accounts)
 - Endpoint process activity (at least for critical tiers)
 
-4) Reduce duplicates at the source
+### 4) Reduce duplicates at the source
 If the same event is reported by multiple sensors, you’ll see “echo” alerts. Where possible, choose a primary source of truth for a signal.
 
 Example:
@@ -78,7 +78,7 @@ If both a firewall and an endpoint agent report the same blocked outbound connec
 ## Week 2–3: Implement triage standards and enrichment that cuts decision time
 The fastest way to reduce noise isn’t always suppression—it’s making triage quicker and more consistent. This prevents “alert fatigue” where everything gets ignored.
 
-1) A lightweight triage playbook per top alert type
+### 1) A lightweight triage playbook per top alert type
 Pick the top 5–10 alert types by volume. For each, document:
 
 - What it means (in your environment)
@@ -100,7 +100,7 @@ Example: “Multiple failed logins” playbook (SME version)
 - Escalate when:
   - Privileged account, unusual geolocation, new device, or success after failures
 
-2) Enrichment that matters (without adding tools)
+### 2) Enrichment that matters (without adding tools)
 Often you can enrich with what you already have:
 
 - Asset tier and owner
@@ -108,7 +108,7 @@ Often you can enrich with what you already have:
 - Known corporate IP ranges and VPN egress
 - “Is this a new device for this user?” using existing identity logs
 
-3) A simple severity model aligned to business impact
+### 3) A simple severity model aligned to business impact
 Don’t rely solely on default “High/Medium/Low” from a tool. SMEs do better with a severity model that considers:
 
 - Asset criticality
@@ -124,7 +124,7 @@ A medium-severity malware detection on a domain controller should often outrank 
 ## Week 3–4: Tune rules safely (suppression, grouping, thresholds, and expiries)
 Tuning is where noise reduction becomes real—if you do it with guardrails.
 
-1) Use “suppression with expiry,” not permanent ignore
+### 1) Use “suppression with expiry,” not permanent ignore
 If you suppress an alert pattern, document:
 
 - Why it is benign
@@ -133,7 +133,7 @@ If you suppress an alert pattern, document:
 
 This prevents the common SME failure mode: a long list of “ignored” alerts that eventually hides real incidents.
 
-2) Group duplicates and bursty alerts
+### 2) Group duplicates and bursty alerts
 Instead of 500 alerts for the same behavior, you want one alert that summarizes a burst.
 
 Practical approaches:
@@ -146,7 +146,7 @@ Example:
 
 Replace “alert on every blocked outbound connection to known-bad” with “alert if the same host hits known-bad domains 10+ times in 5 minutes,” and include the list of domains in the alert summary.
 
-3) Tune by disposition data, not feelings
+### 3) Tune by disposition data, not feelings
 Each week, review the top 10 alert types and answer:
 
 - How many were True Positive vs. False Positive?
@@ -160,7 +160,7 @@ Then apply one change per noisy alert type:
 - Restrict to critical tiers
 - Add correlation (e.g., failures + success)
 
-4) Keep a “tuning log” for auditability and rollback
+### 4) Keep a “tuning log” for auditability and rollback
 Even if you’re not pursuing compliance, a tuning log helps you avoid regressions and supports incident reviews. It can be as simple as a shared document with:
 
 - Rule name

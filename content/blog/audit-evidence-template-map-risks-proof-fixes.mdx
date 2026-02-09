@@ -22,11 +22,11 @@ Security audits often fail for small and mid-sized businesses because evidence i
 ## Build the “risk → control objective → evidence” chain
 An evidence library is useful only when it is organized around outcomes. A simple chain works well for SMEs:
 
-1) Risk statement: what could go wrong and why it matters.
-2) Control objective: what you’re trying to ensure (not how you do it).
-3) Evidence: the artifact(s) that demonstrate the objective is met.
-4) Test method: how an auditor (or you) verifies the evidence.
-5) Result and remediation: pass/fail/partial, plus what changes if it’s not sufficient.
+### 1) Risk statement: what could go wrong and why it matters.
+### 2) Control objective: what you’re trying to ensure (not how you do it).
+### 3) Evidence: the artifact(s) that demonstrate the objective is met.
+### 4) Test method: how an auditor (or you) verifies the evidence.
+### 5) Result and remediation: pass/fail/partial, plus what changes if it’s not sufficient.
 
 If you align your template to common control families (e.g., access control, logging, vulnerability management), you can later map it to NIST/ISO/CIS categories without claiming compliance.
 
@@ -93,20 +93,20 @@ Audits become painful when evidence relies on one person taking screenshots at t
 
 Good evidence patterns:
 
-1) Exports and reports with timestamps
+### 1) Exports and reports with timestamps
 - Directory user list exports (status, last login, MFA flags)
 - MDM compliance reports (encryption, OS version, jailbreak/root status)
 - Ticket exports showing approvals, timestamps, and assignments
 
-2) Configuration baselines and diffs
+### 2) Configuration baselines and diffs
 - Approved standard configurations stored in version control
 - Change records linking configuration updates to tickets
 
-3) Log-derived proof
+### 3) Log-derived proof
 - Authentication logs showing MFA challenges and outcomes
 - Admin activity logs and alerts for privileged changes
 
-4) Reconciliation artifacts
+### 4) Reconciliation artifacts
 - A monthly access review worksheet that ties users to roles and approvals
 - A joiner/mover/leaver reconciliation between HR and directory
 
@@ -131,22 +131,22 @@ An audit finding is only useful if it changes operations. Your template should m
 
 A practical “finding-to-fix” workflow:
 
-1) Classify the weakness
+### 1) Classify the weakness
 - Design gap: the control doesn’t exist.
 - Implementation gap: control exists but not configured correctly.
 - Operating gap: control exists but isn’t consistently followed.
 - Monitoring gap: you can’t tell if the control is working.
 
-2) Write remediation actions that create new evidence
+### 2) Write remediation actions that create new evidence
 Bad remediation action: “Improve patching.”
 Good remediation action: “Create a weekly patch report covering all servers; auto-create tickets for critical patches; track SLA; store the weekly report in the evidence folder.”
 
-3) Define re-test evidence before you implement
+### 3) Define re-test evidence before you implement
 This prevents “we fixed it” with no proof. For example:
 - For MFA rollout: “directory report showing MFA enabled for all users in scope, plus sign-in logs confirming MFA prompts.”
 - For logging: “log source inventory, SIEM ingestion health report, and an alert test record.”
 
-4) Keep exceptions explicit and time-bounded
+### 4) Keep exceptions explicit and time-bounded
 Sometimes you can’t fix immediately (legacy app, business constraints). Track exceptions with:
 - business justification
 - compensating controls

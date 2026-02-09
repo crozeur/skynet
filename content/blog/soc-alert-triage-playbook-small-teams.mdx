@@ -44,7 +44,7 @@ Example: An “impossible travel” login alert for a VIP account might be Sev 2
 
 A good triage flow is short enough to follow under pressure, but thorough enough to avoid mistakes. Use this sequence.
 
-1) Validate the alert (is it a true signal?)
+### 1) Validate the alert (is it a true signal?)
 
 Ask:
 
@@ -54,7 +54,7 @@ Ask:
 
 Example: A “new admin created” alert may be legitimate but triggered because the directory sync service created a privileged group during onboarding. Validation step: confirm the event exists in the authoritative log source (e.g., directory audit logs), not just a forwarded summary.
 
-2) Enrich with fast context (what does it touch?)
+### 2) Enrich with fast context (what does it touch?)
 
 Prioritize the minimum context that changes your decision:
 
@@ -70,7 +70,7 @@ Example enrichment for a suspicious PowerShell alert:
 - Was it launched from Office, a browser, or a remote session?
 - Are there follow-on signs: scheduled task creation, credential dumping, unusual outbound connections?
 
-3) Decide severity and category
+### 3) Decide severity and category
 
 Classify the alert into a small set of categories so you can trend and tune:
 
@@ -85,7 +85,7 @@ Then assign severity based on impact and confidence:
 - Confidence: How certain is malicious intent?
 - Impact: What would happen if this is real?
 
-4) Act: close, contain, escalate, or monitor
+### 4) Act: close, contain, escalate, or monitor
 
 Common actions (choose one primary action and document why):
 
