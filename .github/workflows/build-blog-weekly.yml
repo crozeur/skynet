@@ -37,8 +37,8 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add public/blog-data/
-          if git diff-index --quiet HEAD --; then
+          git add content/blog/ public/blog-data/
+          if git diff --cached --quiet; then
             echo "✅ No changes to commit"
           else
             git commit -m "🤖 Auto-generated: Blog articles compiled - $(date +'%Y-%m-%d %H:%M UTC')"
