@@ -731,9 +731,12 @@ function extractContent(source) {
   return normalized.trim();
 }
 
-// Get all MDX files
+// Get all MDX files (sorted for deterministic output across OS/filesystems)
 const files = fs.existsSync(BLOG_DIR)
-  ? fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith(".mdx"))
+  ? fs
+      .readdirSync(BLOG_DIR)
+      .filter((f) => f.endsWith(".mdx"))
+      .sort((a, b) => String(a).localeCompare(String(b)))
   : [];
 
 console.log(`📝 Building ${files.length} blog posts...`);
@@ -827,6 +830,7 @@ console.log(`📝 Building ${files.length} blog posts...`);
 
   // Write slug index used by language switch + localized routes
   try {
+    slugIndex.sort((a, b) => String(a.slugEn).localeCompare(String(b.slugEn)));
     fs.writeFileSync(indexPath, JSON.stringify(slugIndex, null, 2) + "\n");
   } catch (err) {
     console.warn(`  ⚠️  Could not write slug index: ${err.message}`);

@@ -31,7 +31,7 @@ jobs:
         run: node scripts/fix-h3-formatting.js
       
       - name: Run blog build
-        run: npm run build:blog
+        run: npm run build:blog:dev
       
       - name: Commit and push changes
         run: |
