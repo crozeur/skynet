@@ -4,6 +4,9 @@ const path = require("path");
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
 
+const args = new Set(process.argv.slice(2));
+const CHECK = args.has("--check");
+
 function findMetadataBlock(source) {
   const m = source.match(/export\s+const\s+metadata\s*=\s*\{/);
   if (!m || typeof m.index !== "number") return null;
@@ -117,8 +120,29 @@ function toJsValue(value, indentLevel = 0) {
 }
 
 function renderMetadataBlock(metadataObj, newline = "\n") {
-  const { title, description, date, pillar, tags, ...rest } = metadataObj || {};
-  const ordered = { title, description, date, pillar, tags, ...rest };
+  // Keep output compatible with scripts/auto_tag_blog_posts.js (stable key order)
+  const {
+    title,
+    description,
+    date,
+    pillar,
+    topic,
+    tags,
+    coverAlt,
+    coverImage,
+    ...rest
+  } = metadataObj || {};
+  const ordered = {
+    title,
+    description,
+    date,
+    pillar,
+    topic,
+    tags,
+    coverAlt,
+    coverImage,
+    ...rest,
+  };
 
   const lines = Object.entries(ordered)
     .filter(([, v]) => typeof v !== "undefined")
@@ -131,6 +155,9 @@ function normalizeForCompare(text) {
   return String(text || "")
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+\n/g, "\n")
+    // Metadata blocks often have varying numbers of blank lines after `};`.
+    // Collapse excessive blank lines so --check doesn't fail for cosmetic spacing.
+    .replace(/\n{3,}/g, "\n\n")
     .trimEnd();
 }
 
@@ -356,6 +383,10 @@ function upsertMetadataInFile(filePath, filename) {
   if (!block) {
     const normalized = normalizeMetadata(null, filename, content);
     const newContent = renderMetadataBlock(normalized, newline) + content;
+    if (CHECK) {
+      console.error(`❌ ${filename} - métadonnées manquantes (run without --check to apply)`);
+      return true;
+    }
     fs.writeFileSync(filePath, newContent.endsWith("\n") ? newContent : newContent + "\n", "utf-8");
     console.log(`✅ ${filename} - métadonnées ajoutées`);
     return true;
@@ -372,6 +403,10 @@ function upsertMetadataInFile(filePath, filename) {
   }
 
   const out = content.slice(0, block.blockStart) + newBlock + content.slice(block.blockEnd);
+  if (CHECK) {
+    console.error(`❌ ${filename} - métadonnées à normaliser (run without --check to apply)`);
+    return true;
+  }
   fs.writeFileSync(filePath, out.endsWith("\n") ? out : out + "\n", "utf-8");
   console.log(`✅ ${filename} - métadonnées normalisées`);
   return true;
@@ -397,6 +432,11 @@ async function fixAllMetadata() {
     }
 
     if (failed > 0) process.exit(1);
+
+    if (CHECK && changed > 0) {
+      console.error(`\n❌ fix-missing-metadata: changements requis dans ${changed} fichier(s). Exécute sans --check pour appliquer.`);
+      process.exit(2);
+    }
 
     console.log(`\n✨ Vérification des métadonnées terminée (${changed} modifié(s)).`);
   } catch (err) {

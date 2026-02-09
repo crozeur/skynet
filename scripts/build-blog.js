@@ -2,6 +2,10 @@
 const fs = require("fs");
 const path = require("path");
 
+function normalizeNewlines(text) {
+  return String(text || "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
 const SKIP_TRANSLATION =
   process.argv.includes("--skip-translation") ||
   process.env.SKIP_TRANSLATION === "1" ||
@@ -748,7 +752,8 @@ console.log(`📝 Building ${files.length} blog posts...`);
   for (const file of files) {
     const slug = file.replace(/\.mdx$/, "");
     const filePath = path.join(BLOG_DIR, file);
-    const source = fs.readFileSync(filePath, "utf8");
+    // Normalize to LF so generated blog-data is deterministic across OS.
+    const source = normalizeNewlines(fs.readFileSync(filePath, "utf8"));
 
     const metadata = extractMetadataFromMDX(source);
     if (!metadata) {
@@ -756,13 +761,13 @@ console.log(`📝 Building ${files.length} blog posts...`);
       continue;
     }
 
-    const markdownContent = extractContent(source);
-    const htmlContent = markdownToHtml(markdownContent);
+    const markdownContent = normalizeNewlines(extractContent(source));
+    const htmlContent = normalizeNewlines(markdownToHtml(markdownContent));
 
     // Translate metadata and content for French version
     console.log(`  🔄 Translating ${slug}...`);
     const translatedMetadata = await translateMetadata(metadata);
-    const translatedContent = await translateHtmlContent(htmlContent);
+    const translatedContent = normalizeNewlines(await translateHtmlContent(htmlContent));
 
     // Optional: deterministic FR title overrides for awkward machine translations.
     const overrideTitleFr =
@@ -803,7 +808,7 @@ console.log(`📝 Building ${files.length} blog posts...`);
         },
         null,
         2
-      )
+      ) + "\n"
     );
 
     slugIndex.push({ slugEn, slugFr });
@@ -822,7 +827,7 @@ console.log(`📝 Building ${files.length} blog posts...`);
 
   // Write slug index used by language switch + localized routes
   try {
-    fs.writeFileSync(indexPath, JSON.stringify(slugIndex, null, 2));
+    fs.writeFileSync(indexPath, JSON.stringify(slugIndex, null, 2) + "\n");
   } catch (err) {
     console.warn(`  ⚠️  Could not write slug index: ${err.message}`);
   }
@@ -832,7 +837,7 @@ console.log(`📝 Building ${files.length} blog posts...`);
     const sorted = Object.fromEntries(
       Object.entries(aliases).sort((a, b) => String(a[0]).localeCompare(String(b[0])))
     );
-    fs.writeFileSync(aliasesPath, JSON.stringify(sorted, null, 2));
+    fs.writeFileSync(aliasesPath, JSON.stringify(sorted, null, 2) + "\n");
   } catch (err) {
     console.warn(`  ⚠️  Could not write FR aliases: ${err.message}`);
   }

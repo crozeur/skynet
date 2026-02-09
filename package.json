@@ -10,6 +10,8 @@
     "autotag:blog": "node scripts/auto_tag_blog_posts.js",
     "validate:blog-metadata": "node scripts/validate-blog-metadata.js",
     "validate:blog-slugs": "node scripts/validate-blog-slugs.js",
+    "check:blog": "node scripts/blog-ci-checks.js",
+    "check:all": "npm run lint && npm run check:blog",
     "audit:blog-slugs:fr": "node scripts/audit-fr-slugs.js",
     "verify:blog-alias-urls:fr": "node scripts/verify-fr-alias-urls.js",
     "build:blog:dev": "npm run fix:blog-metadata && npm run autotag:blog && npm run validate:blog-metadata && node scripts/build-blog.js --skip-translation",

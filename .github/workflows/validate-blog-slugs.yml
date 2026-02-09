@@ -45,17 +45,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate blog metadata
-        run: node scripts/validate-blog-metadata.js
-
-      - name: Build blog artifacts (skip translation)
-        run: node scripts/build-blog.js --skip-translation
-
-      - name: Validate blog slugs + mappings
-        run: node scripts/validate-blog-slugs.js
-
-      - name: Build Next.js (uses skip-translation blog artifacts)
-        run: npx next build
-
-      - name: Verify FR blog alias URLs (no 404s)
-        run: node scripts/verify-fr-alias-urls.js --ci
+      - name: Run unified blog checks
+        run: npm run check:blog
