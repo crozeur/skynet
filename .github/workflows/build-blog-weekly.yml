@@ -42,8 +42,20 @@ jobs:
             echo "✅ No changes to commit"
           else
             git commit -m "🤖 Auto-generated: Blog articles compiled - $(date +'%Y-%m-%d %H:%M UTC')"
-            git push origin main
-            echo "✅ Changes pushed to GitHub"
+            # Avoid non-fast-forward failures if main moved since checkout
+            git pull --rebase origin main
+            # Push with a small retry loop to handle transient races
+            for i in 1 2 3; do
+              if git push origin HEAD:main; then
+                echo "✅ Changes pushed to GitHub"
+                exit 0
+              fi
+              echo "⚠️  Push failed (attempt $i). Retrying..."
+              git pull --rebase origin main
+              sleep 3
+            done
+            echo "❌ Push failed after 3 attempts"
+            exit 1
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
