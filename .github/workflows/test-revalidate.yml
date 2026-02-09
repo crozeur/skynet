@@ -21,14 +21,22 @@ jobs:
         env:
           SITE_URL: ${{ inputs.site_url }}
           SLUG: ${{ inputs.slug }}
+          # Prefer token list if configured (supports rotation); fallback to single token.
+          REVALIDATE_SECRETS: ${{ secrets.REVALIDATE_SECRETS }}
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
           set -euo pipefail
 
-          if [ -z "${REVALIDATE_SECRET:-}" ]; then
-            echo "❌ Missing GitHub secret: REVALIDATE_SECRET"
+          if [ -z "${REVALIDATE_SECRETS:-}" ] && [ -z "${REVALIDATE_SECRET:-}" ]; then
+            echo "❌ Missing GitHub secret: REVALIDATE_SECRET (or REVALIDATE_SECRETS)"
             echo "Add it in: Repo Settings → Secrets and variables → Actions"
             exit 1
+          fi
+
+          # Pick the first token if a list is provided.
+          TOKEN="${REVALIDATE_SECRET:-}"
+          if [ -n "${REVALIDATE_SECRETS:-}" ]; then
+            TOKEN="${REVALIDATE_SECRETS%%,*}"
           fi
 
           # Avoid www -> apex redirect (drops or delays headers depending on client)
@@ -40,7 +48,7 @@ jobs:
           http_code=$(curl -sS -L -o response.json -w "%{http_code}" \
             -X POST "${SITE_URL}/api/revalidate" \
             -H "Content-Type: application/json" \
-            -H "x-revalidate-secret: ${REVALIDATE_SECRET}" \
+            -H "x-revalidate-secret: ${TOKEN}" \
             --data "{\"slug\":\"${SLUG}\"}")
 
           echo "HTTP ${http_code}"

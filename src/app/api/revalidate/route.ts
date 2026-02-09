@@ -7,6 +7,15 @@ type Body = {
   tags?: string[] | string;
 };
 
+function getExpectedTokens(): string[] {
+  const raw = (process.env.REVALIDATE_SECRETS || process.env.REVALIDATE_SECRET || "").trim();
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
 function getToken(request: NextRequest) {
   const auth = request.headers.get("authorization") || "";
   if (auth.toLowerCase().startsWith("bearer ")) return auth.slice(7).trim();
@@ -23,9 +32,9 @@ function normalizeTags(tags: Body["tags"]): string[] {
 }
 
 export async function POST(request: NextRequest) {
-  const expected = process.env.REVALIDATE_SECRET?.trim();
+  const expectedTokens = getExpectedTokens();
 
-  if (!expected) {
+  if (expectedTokens.length === 0) {
     return Response.json(
       { revalidated: false, message: "Missing REVALIDATE_SECRET" },
       { status: 500 }
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (token !== expected) {
+  if (!expectedTokens.includes(token)) {
     return Response.json(
       { revalidated: false, message: "Invalid token" },
       { status: 401 }

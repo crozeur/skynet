@@ -1,6 +1,7 @@
 name: Auto-tag blog posts
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'content/blog/**/*.mdx'
