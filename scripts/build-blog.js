@@ -736,7 +736,11 @@ const files = fs.existsSync(BLOG_DIR)
   ? fs
       .readdirSync(BLOG_DIR)
       .filter((f) => f.endsWith(".mdx"))
-      .sort((a, b) => String(a).localeCompare(String(b)))
+      .sort((a, b) => {
+        const aa = String(a);
+        const bb = String(b);
+        return aa < bb ? -1 : aa > bb ? 1 : 0;
+      })
   : [];
 
 console.log(`📝 Building ${files.length} blog posts...`);
@@ -830,7 +834,11 @@ console.log(`📝 Building ${files.length} blog posts...`);
 
   // Write slug index used by language switch + localized routes
   try {
-    slugIndex.sort((a, b) => String(a.slugEn).localeCompare(String(b.slugEn)));
+    slugIndex.sort((a, b) => {
+      const aa = String(a.slugEn);
+      const bb = String(b.slugEn);
+      return aa < bb ? -1 : aa > bb ? 1 : 0;
+    });
     fs.writeFileSync(indexPath, JSON.stringify(slugIndex, null, 2) + "\n");
   } catch (err) {
     console.warn(`  ⚠️  Could not write slug index: ${err.message}`);
@@ -839,7 +847,11 @@ console.log(`📝 Building ${files.length} blog posts...`);
   // Write FR aliases map (frSlug -> slugEn) for backwards-compatible routing
   try {
     const sorted = Object.fromEntries(
-      Object.entries(aliases).sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+      Object.entries(aliases).sort((a, b) => {
+        const aa = String(a[0]);
+        const bb = String(b[0]);
+        return aa < bb ? -1 : aa > bb ? 1 : 0;
+      })
     );
     fs.writeFileSync(aliasesPath, JSON.stringify(sorted, null, 2) + "\n");
   } catch (err) {
