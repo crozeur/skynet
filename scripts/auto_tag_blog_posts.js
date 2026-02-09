@@ -226,7 +226,10 @@ function renderMetadataBlock(metadataObj, newline = "\n") {
     .filter(([, v]) => typeof v !== "undefined")
     .map(([k, v]) => `  ${k}: ${toJsValue(v, 1)},`);
 
-  return `export const metadata = {${newline}${lines.join(newline)}${newline}};${newline}`;
+  // Important: do NOT force an extra trailing newline here.
+  // The source file typically already has one or more newlines after the block;
+  // adding another makes the script non-idempotent (each run adds blank lines).
+  return `export const metadata = {${newline}${lines.join(newline)}${newline}};`;
 }
 
 function dedupePreserveOrder(values) {
