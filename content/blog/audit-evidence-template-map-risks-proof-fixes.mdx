@@ -53,19 +53,19 @@ This structure works whether you align controls loosely to NIST/ISO/CIS language
 ## Choose evidence that is repeatable and reviewable (not “pretty”)
 Common failure mode: evidence that looks convincing but can’t be re-verified. When possible, pick artifacts that are:
 
-1) System-generated
+### 1) System-generated
 - Examples: access review exports, endpoint compliance reports, backup job logs, vulnerability scan summaries.
 - Why: they reduce the risk of “manual curation” and can be re-run.
 
-2) Time-bound and scoped
+### 2) Time-bound and scoped
 - Specify “as of” date and scope (e.g., “All production servers,” “All active employees,” “Last 30 days”).
 - Avoid: “Here’s a screenshot of the dashboard,” unless you also record the filters and timeframe.
 
-3) Verifiable by a third party
+### 3) Verifiable by a third party
 - Include enough context for a reviewer to reproduce the check.
 - Example: “Run query X in the log tool for admin logins in last 14 days” is verifiable; “No suspicious activity observed” is not.
 
-4) Minimal and privacy-aware
+### 4) Minimal and privacy-aware
 - Evidence should demonstrate the control without exposing unnecessary personal data.
 - Tip: redact or aggregate where possible, and store evidence securely with limited access.
 
@@ -144,24 +144,24 @@ Your template shouldn’t end at “pass/fail.” It should make it easy to deci
 
 A simple remediation workflow for SMEs:
 
-1) Rate impact and likelihood (qualitative)
+### 1) Rate impact and likelihood (qualitative)
 - Use a consistent scale (e.g., Low/Medium/High) and define it in one paragraph.
 - Example definitions:
   - High impact: could stop operations, cause major financial loss, or expose regulated data.
   - High likelihood: exposed to internet, widely exploited, or no compensating control.
 
-2) Assign one owner per finding
+### 2) Assign one owner per finding
 - Teams can help, but accountability is single-threaded.
 
-3) Define “done” criteria in the template
+### 3) Define “done” criteria in the template
 - Example: “MFA enforced for all users, exclusions list is empty or documented with compensating controls and expiry.”
 
-4) Document exceptions like risk decisions
+### 4) Document exceptions like risk decisions
 - If leadership accepts risk temporarily, record:
   - reason, compensating control, expiry date, and review date
 - An exception with no expiry becomes a permanent vulnerability.
 
-5) Close the loop with evidence of the fix
+### 5) Close the loop with evidence of the fix
 - The remediation itself needs evidence (new report, updated config export, successful test ticket). Reuse the same “evidence requested” field so closure is consistent.
 
 ## Checklist (8–12 checkbox items using "- [ ]")

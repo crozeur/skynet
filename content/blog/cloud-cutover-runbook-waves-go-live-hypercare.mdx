@@ -74,34 +74,34 @@ Go-live should follow a predictable order. The goal is to prevent cascading fail
 
 A practical go-live flow:
 
-1) Freeze and snapshot
+### 1) Freeze and snapshot
 - Confirm change freeze for the impacted system.
 - Validate backups/snapshots and document identifiers.
 
-2) Access and identity validation
+### 2) Access and identity validation
 - Confirm admin access in the target environment.
 - Validate service accounts/managed identities, certificate validity, and secrets rotation plan.
 - Verify that logging for authentication and privileged actions is enabled and reachable.
 
-3) Network and name resolution
+### 3) Network and name resolution
 - Validate routing, firewall rules, and allowlists.
 - Check DNS TTL strategy. If lowering TTL, do it ahead of the cutover window.
 - Validate inbound and outbound connectivity for dependencies (email relays, payment gateways, SSO endpoints, third-party APIs).
 
-4) Data and state cutover
+### 4) Data and state cutover
 - Confirm replication status and cutover point.
 - Validate schema/app version compatibility.
 - If feasible, run “dual write” or a controlled write pause during the final sync.
 
-5) Traffic switch
+### 5) Traffic switch
 - Switch traffic gradually if possible (weighted routing, canary release) rather than flipping everything at once.
 - Confirm health checks are meaningful (not just “port open”).
 
-6) Application validation (smoke tests)
+### 6) Application validation (smoke tests)
 - Test the top workflows in the order users experience them: login, view data, create/update, export/report, admin function.
 - Validate security controls: authorization checks (least privilege), rate limiting if used, and that audit logs record key actions.
 
-7) Observability and stability check
+### 7) Observability and stability check
 - Watch error rate, latency, resource saturation, queue depths, and auth failures.
 - Confirm alerts are firing to the right on-call channel.
 
