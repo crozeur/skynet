@@ -3,6 +3,11 @@ const fs = require("fs");
 const path = require("path");
 
 const BLOG_DIR = path.join(process.cwd(), "content", "blog");
+const COVER_DUP_ALLOWLIST_PATH = path.join(
+  process.cwd(),
+  "scripts",
+  "blog_cover_duplicate_allowlist.json"
+);
 
 const TOPICS_BY_PILLAR = {
   SOC: new Set([
@@ -110,6 +115,20 @@ function isBadTitle(title) {
   return false;
 }
 
+function loadAllowedDuplicateCoverImages() {
+  if (!fs.existsSync(COVER_DUP_ALLOWLIST_PATH)) return new Set();
+  try {
+    const raw = fs.readFileSync(COVER_DUP_ALLOWLIST_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    const items = Array.isArray(parsed?.allowedDuplicateCoverImages)
+      ? parsed.allowedDuplicateCoverImages
+      : [];
+    return new Set(items.filter((v) => typeof v === "string" && v.trim().length > 0));
+  } catch {
+    return new Set();
+  }
+}
+
 function validateOne(filePath) {
   const slug = path.basename(filePath).replace(/\.mdx$/i, "");
   const source = fs.readFileSync(filePath, "utf8");
@@ -167,6 +186,7 @@ function main() {
   const files = fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith(".mdx"));
   const failures = [];
   const coverUsage = new Map();
+  const allowedDuplicateCoverImages = loadAllowedDuplicateCoverImages();
 
   for (const file of files) {
     const fullPath = path.join(BLOG_DIR, file);
@@ -192,7 +212,7 @@ function main() {
   }
 
   for (const [coverImage, usedBy] of coverUsage.entries()) {
-    if (usedBy.length > 1) {
+    if (usedBy.length > 1 && !allowedDuplicateCoverImages.has(coverImage)) {
       failures.push({
         file: usedBy.join(", "),
         errors: [`Duplicate coverImage across posts: ${coverImage}`],
