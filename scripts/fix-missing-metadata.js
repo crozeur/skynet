@@ -304,6 +304,62 @@ function inferPillarFromSlug(slug) {
   return "SOC";
 }
 
+const TOPICS_BY_PILLAR = {
+  SOC: new Set([
+    "SOC Setup",
+    "Alert Triage",
+    "Escalation & Comms",
+    "Noise Reduction",
+    "Incident Response",
+    "Reporting & KPIs",
+  ]),
+  AUDIT: new Set([
+    "Audit Checklists",
+    "Evidence Collection",
+    "SaaS/Vendor Review",
+    "Remediation Roadmap",
+    "Risk Prioritization",
+  ]),
+  CLOUD: new Set([
+    "Cloud Foundations",
+    "Misconfigurations",
+    "Migration Delivery",
+    "Planning & Waves",
+    "Hypercare & Stabilization",
+  ]),
+};
+
+function inferTopicFromSlug(slug, pillar) {
+  const s = String(slug || "").toLowerCase();
+
+  if (pillar === "SOC") {
+    if (s.includes("noise")) return "Noise Reduction";
+    if (s.includes("incident") || s.includes("response")) return "Incident Response";
+    if (s.includes("escalate") || s.includes("escalation") || s.includes("comm")) return "Escalation & Comms";
+    if (s.includes("kpi") || s.includes("report")) return "Reporting & KPIs";
+    if (s.includes("triage") || s.includes("alert") || s.includes("playbook")) return "Alert Triage";
+    return "SOC Setup";
+  }
+
+  if (pillar === "AUDIT") {
+    if (s.includes("evidence")) return "Evidence Collection";
+    if (s.includes("vendor") || s.includes("saas")) return "SaaS/Vendor Review";
+    if (s.includes("remediation") || s.includes("roadmap")) return "Remediation Roadmap";
+    if (s.includes("risk") || s.includes("priorit")) return "Risk Prioritization";
+    return "Audit Checklists";
+  }
+
+  if (pillar === "CLOUD") {
+    if (s.includes("misconfig") || s.includes("iam") || s.includes("storage")) return "Misconfigurations";
+    if (s.includes("hypercare")) return "Hypercare & Stabilization";
+    if (s.includes("wave") || s.includes("planning") || s.includes("plan")) return "Planning & Waves";
+    if (s.includes("migration") || s.includes("cutover")) return "Migration Delivery";
+    return "Cloud Foundations";
+  }
+
+  return "SOC Setup";
+}
+
 // Génération des métadonnées basée sur le slug et le contenu
 function generateMetadata(filename, content) {
   const slug = slugFromFilename(filename);
@@ -338,6 +394,7 @@ function generateMetadata(filename, content) {
     description: config.description,
     date: new Date().toISOString().split("T")[0],
     pillar: config.pillar,
+    topic: inferTopicFromSlug(slug, config.pillar),
     tags: ["SME", "Security"]
   };
 }
@@ -367,6 +424,12 @@ function normalizeMetadata(existing, filename, content) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) meta.date = inferred.date;
 
   if (meta.pillar !== expectedPillar) meta.pillar = expectedPillar;
+
+  const topic = typeof meta.topic === "string" ? meta.topic.trim() : "";
+  const allowedTopics = TOPICS_BY_PILLAR[meta.pillar];
+  if (!topic || (allowedTopics && !allowedTopics.has(topic))) {
+    meta.topic = inferTopicFromSlug(slug, meta.pillar);
+  }
 
   if (!Array.isArray(meta.tags) || meta.tags.filter((t) => typeof t === "string" && t.trim()).length === 0) {
     meta.tags = inferred.tags;

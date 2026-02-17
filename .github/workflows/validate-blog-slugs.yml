@@ -58,6 +58,12 @@ jobs:
         if: github.event_name == 'push'
         run: node scripts/auto_tag_blog_posts.js
 
+      - name: Build blog data (push)
+        if: github.event_name == 'push'
+        run: |
+          node scripts/build-blog.js --skip-translation
+          node scripts/validate-blog-data-sync.js
+
       - name: Validate slugs only (push)
         if: github.event_name == 'push'
         run: |
