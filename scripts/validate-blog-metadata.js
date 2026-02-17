@@ -166,12 +166,37 @@ function main() {
 
   const files = fs.readdirSync(BLOG_DIR).filter((f) => f.endsWith(".mdx"));
   const failures = [];
+  const coverUsage = new Map();
 
   for (const file of files) {
     const fullPath = path.join(BLOG_DIR, file);
     const errors = validateOne(fullPath);
     if (errors.length > 0) {
       failures.push({ file, errors });
+    }
+
+    const source = fs.readFileSync(fullPath, "utf8");
+    const metadata = extractMetadataFromMDX(source);
+    const coverImage =
+      metadata && typeof metadata.coverImage === "string" ? metadata.coverImage.trim() : "";
+
+    if (!coverImage) {
+      failures.push({ file, errors: ["Missing/empty coverImage"] });
+      continue;
+    }
+
+    if (!coverUsage.has(coverImage)) {
+      coverUsage.set(coverImage, []);
+    }
+    coverUsage.get(coverImage).push(file);
+  }
+
+  for (const [coverImage, usedBy] of coverUsage.entries()) {
+    if (usedBy.length > 1) {
+      failures.push({
+        file: usedBy.join(", "),
+        errors: [`Duplicate coverImage across posts: ${coverImage}`],
+      });
     }
   }
 
