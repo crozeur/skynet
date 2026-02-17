@@ -69,4 +69,5 @@ jobs:
         run: |
           node scripts/validate-blog-metadata.js
           node scripts/validate-blog-slugs.js
+          npx next build
           node scripts/verify-fr-alias-urls.js --ci
