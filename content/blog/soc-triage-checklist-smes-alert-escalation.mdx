@@ -1,0 +1,126 @@
+## Intro
+Most small and mid-sized businesses don’t have the luxury of a 24/7 security operations center (SOC), yet they still face the same noisy stream of alerts as larger organizations. The difference is that SMEs must triage faster, with fewer people, and with clearer “stop points” for escalation. This post gives you a repeatable checklist to move from “an alert fired” to “we know what to do next” without guesswork. Use it to reduce false positives, capture the right evidence early, and avoid both panic and paralysis.
+
+## Quick take
+- Treat triage as a decision workflow: validate, scope, prioritize, then escalate or close.
+- Start with data quality checks (time, asset identity, user context) before deep investigation.
+- Use a consistent severity model tied to business impact, not tool urgency.
+- Collect minimal, high-value evidence early (logs, host/user identifiers, timeline).
+- Define escalation triggers in advance so junior staff can act confidently.
+
+## 1) Before you triage: set up the “minimum viable SOC”
+Triage is much easier when a few basics are in place. You don’t need a full program to start, but you do need shared definitions and access.
+
+Practical setup steps:
+- **Asset and identity basics:** Maintain a simple inventory (even a spreadsheet) with system owner, business function, and criticality. Ensure you can map alerts to a real hostname, IP, or account.
+- **Log sources you can trust:** Prioritize authentication logs, endpoint/security logs, email security events, and key server/application logs. If a source is frequently wrong (time drift, duplicate events), flag it as “low confidence” until fixed.
+- **Roles and handoffs:** Define who can:
+  - close an alert,
+  - open an incident ticket,
+  - isolate a host / disable an account,
+  - contact leadership or legal.
+- **A simple severity model:** Keep it understandable. Example (customize to your org):
+  - **Sev 1:** confirmed compromise or active impact (data theft, ransomware behavior, privileged account takeover).
+  - **Sev 2:** likely malicious with meaningful exposure (malware detected on a server, suspicious OAuth app on exec mailbox).
+  - **Sev 3:** suspicious but unconfirmed (brute-force attempts blocked, unusual login requiring more context).
+  - **Sev 4:** benign/expected activity or known false positive.
+
+Example: If you receive “Multiple failed logins,” severity depends on context. Ten failures against a public-facing VPN might be routine background noise (Sev 4 or Sev 3). The same pattern against an admin account followed by a successful login from a new country becomes Sev 2 or Sev 1.
+
+Framework note: If you align your workflow to common guidance (NIST/ISO/CIS), focus on being consistent and auditable—don’t overreach into compliance claims.
+
+## 2) Step-by-step triage: from alert to a defensible decision
+A good triage process answers four questions in order:
+
+### A. Is the alert real (or at least plausible)?
+Start with quick validation checks:
+- **Time sanity:** Are timestamps in the same timezone? Any clock drift on the reporting host?
+- **Entity sanity:** Is the user/service account real? Is the host actually yours (not a stale record)?
+- **Alert logic:** What condition triggered it (threshold, signature, behavior)? Does it fit the environment?
+
+Example: An alert for “new admin created” might be normal during IT onboarding. If the change window matches and the request ticket exists, it may be benign. If it happened at 02:13 with no change record, treat as suspicious.
+
+### B. What’s the scope right now?
+Don’t jump straight into “how bad could this be.” First identify what is currently involved:
+- Which user(s), host(s), IP(s), mailbox(es), or cloud tenant objects?
+- What is the earliest and latest event time?
+- Are there adjacent related alerts (same user, same host, same destination domain)?
+
+A simple approach:
+1. Search for the same user/host in the last 24 hours.
+2. Look for a “before” baseline (previous login locations, typical processes).
+3. Expand to correlated indicators (e.g., the source IP appears across multiple users).
+
+### C. How severe is it in your business context?
+Severity should reflect impact and confidence:
+- **Confidence:** Do you have direct evidence (malware hash quarantined, suspicious OAuth consent) or only weak signals?
+- **Impact:** Is the affected system a finance server, a domain controller, a CEO mailbox, or a kiosk?
+- **Exposure:** Does it involve external access, privileged accounts, sensitive data, or lateral movement?
+
+Example: “Suspicious PowerShell” on a developer workstation might be Sev 3 if it’s common tooling and no network callbacks exist. The same behavior on a server that processes payroll becomes Sev 2 if unusual.
+
+### D. What’s the next best action: close, monitor, contain, or escalate?
+Triage ends with a decision and a clear next step:
+- **Close as false positive** (with a documented reason and tuning note).
+- **Monitor / enrich** (request more logs, wait for follow-on signals, set a watch).
+- **Contain** (disable account, isolate endpoint) if confidence is high enough and business risk is acceptable.
+- **Escalate** (to incident response, IT, or leadership) when triggers are met.
+
+## 3) Evidence to capture early (without boiling the ocean)
+SMEs lose time when they either collect nothing (“we’ll look later”) or try to collect everything (“pull all logs everywhere”). Capture a small set of artifacts that keeps options open.
+
+Minimum evidence pack (tailor to your environment):
+- **Alert metadata:** alert name, rule/signature, severity, source tool, raw event IDs.
+- **Identifiers:** username, user ID, host name, device ID, IPs (src/dst), tenant/app IDs where relevant.
+- **Timeline:** earliest observed event, most recent event, and notable transitions (failed → successful login, download → execution).
+- **Authentication context:** MFA status, device compliance status, geolocation (if available), user agent, conditional access result.
+- **Endpoint context:** running process tree (parent/child), command line, network connections, file path, hash if available.
+
+Practical examples:
+- For a suspected phishing-led compromise: capture the email headers (or message ID), URLs clicked, mailbox rules created, sign-in logs, and any OAuth consents.
+- For suspected malware: capture the detection name, file path, hash, process tree, and outbound connections around the detection time.
+
+Keep chain-of-custody lightweight: record who collected what, when, and from where. Even if you’re not doing formal forensics, this reduces confusion later.
+
+## 4) Escalation triggers and playbooks that work in small teams
+Escalation fails when it’s subjective. Define triggers that anyone on-call can apply.
+
+Common escalation triggers (use as a starting point):
+- **Confirmed credential compromise:** successful login after multiple failures + new location/device, or impossible travel signals with high confidence.
+- **Privilege or policy changes:** new admin account, MFA disabled, conditional access altered, new forwarding rules to external addresses.
+- **Ransomware indicators:** rapid file modifications, shadow copy deletion attempts, widespread endpoint detections.
+- **Lateral movement signs:** repeated authentication to multiple hosts, remote service creation, unusual admin tools on servers.
+- **Data exposure risk:** access to sensitive shares, large unusual downloads, or cloud storage sharing changes.
+
+What an SME-friendly escalation message should include:
+- What happened (one sentence).
+- What assets/users are affected.
+- Your confidence level (low/medium/high) and why.
+- Immediate containment actions taken (if any).
+- What you need from the next responder (e.g., isolate host, reset password, review firewall logs).
+
+Example escalation note:
+“User j.smith shows successful VPN login from new country 10 minutes after 40 failures; MFA not prompted. Affected: j.smith, VPN gateway, finance file server accessed after login. Confidence: medium-high (correlated sign-in + file access). Request: disable account, force password reset, review VPN logs for source IP, check endpoint for malware.”
+
+## Checklist
+- [ ] Confirm timestamps and timezones; check for clock drift or delayed ingestion.
+- [ ] Verify the entity: user/host/app exists, is in scope, and is correctly identified.
+- [ ] Read the alert trigger logic (threshold/signature/behavior) and note confidence level.
+- [ ] Pull surrounding events (at least 15–60 minutes before/after) for the same entity.
+- [ ] Identify scope: affected users, hosts, IPs, mailboxes, cloud resources, and earliest/latest event.
+- [ ] Check business criticality of affected assets (owner, function, sensitivity).
+- [ ] Look for common high-signal correlates (new admin, MFA changes, mailbox rules, unusual process tree, outbound callbacks).
+- [ ] Assign severity based on impact + confidence; document the rationale in one or two sentences.
+- [ ] Capture a minimum evidence pack (IDs, raw logs, timeline, key screenshots/exports where applicable).
+- [ ] Decide outcome: close (with reason), monitor/enrich, contain, or escalate; create/updated ticket.
+- [ ] If escalating, include a concise handoff: summary, scope, confidence, actions taken, and next requests.
+
+## FAQ
+Q1: How long should SOC triage take for an SME?
+A: Aim for a quick first pass (often 10–30 minutes) to validate, scope, and decide next action; deeper investigation becomes an incident task.
+
+Q2: When should we contain (disable accounts/isolate devices) during triage?
+A: Contain when confidence is high enough and the risk of waiting outweighs business disruption—especially for privileged accounts, servers, or signs of active exploitation.
+
+Q3: How do we reduce alert fatigue without missing real incidents?
+A: Document false positives with reasons, tune noisy rules, prioritize high-signal sources, and use consistent severity criteria tied to business impact.
