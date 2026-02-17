@@ -32,6 +32,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Normalize metadata before cover update
+        run: node scripts/fix-missing-metadata.js
+
       - name: Add cover image to MDX metadata (commit & push)
         id: add_cover
         run: |
@@ -222,8 +225,8 @@ jobs:
             exit 1
           fi
 
-          echo "ℹ️  Staging: ${FILE_PATH}"
-          git add "$FILE_PATH"
+          echo "ℹ️  Staging normalized blog files"
+          git add content/blog/*.mdx
 
           SLUG=$(python3 -c "import json,os; d=json.load(open(os.environ['GITHUB_EVENT_PATH'])); i=d.get('inputs') or {}; p=d.get('client_payload') or {}; fp=(i.get('file_path') or p.get('file_path') or '').strip(); print(fp.replace('content/blog/','').replace('.mdx',''))")
           if [ -n "${SLUG:-}" ] && [ -f "public/blog-data/${SLUG}.json" ]; then

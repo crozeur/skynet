@@ -46,5 +46,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run unified blog checks
+      - name: Run unified blog checks (PR/manual)
+        if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
         run: npm run check:blog
+
+      - name: Normalize metadata (push)
+        if: github.event_name == 'push'
+        run: node scripts/fix-missing-metadata.js
+
+      - name: Auto-tag posts (push)
+        if: github.event_name == 'push'
+        run: node scripts/auto_tag_blog_posts.js
+
+      - name: Validate slugs only (push)
+        if: github.event_name == 'push'
+        run: |
+          node scripts/validate-blog-metadata.js
+          node scripts/validate-blog-slugs.js
+          node scripts/verify-fr-alias-urls.js --ci

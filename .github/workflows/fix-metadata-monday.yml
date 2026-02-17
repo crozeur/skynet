@@ -35,9 +35,41 @@ jobs:
         with:
           node-version: '20'
       
+      - name: Fix missing metadata (push)
+        if: github.event_name == 'push'
+        run: node scripts/fix-missing-metadata.js
+
       - name: Validate blog metadata (push/PR)
         if: github.event_name == 'push' || github.event_name == 'pull_request'
         run: node scripts/validate-blog-metadata.js
+
+      - name: Commit fixes on main (push)
+        if: github.event_name == 'push'
+        run: |
+          if git diff --quiet; then
+            echo "No metadata changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/blog/*.mdx
+          git commit -m "chore(blog): fix missing metadata"
+
+          git pull --rebase origin main || true
+
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "✅ Metadata fixes pushed to main"
+              exit 0
+            fi
+            echo "⚠️ Push failed (attempt $i), retrying after rebase..."
+            git pull --rebase origin main
+            sleep 2
+          done
+
+          echo "❌ Push failed after retries"
+          exit 1
 
       - name: Fix missing metadata (scheduled/manual)
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

@@ -34,6 +34,10 @@ jobs:
         with:
           node-version: 20
 
+      - name: Normalize metadata before auto-tagging (push)
+        if: github.event_name == 'push'
+        run: node scripts/fix-missing-metadata.js
+
       - name: Auto-assign topics/tags
         run: node scripts/auto_tag_blog_posts.js
 
@@ -55,7 +59,7 @@ jobs:
           git commit -m "chore(blog): auto-add topics/tags"
           git push
 
-      - name: Fail if changes are needed on main (no auto-push)
+      - name: Commit changes on main
         if: github.event_name == 'push'
         run: |
           if git diff --quiet; then
@@ -63,9 +67,25 @@ jobs:
             exit 0
           fi
 
-          echo "Auto-tagging would modify files on main, but this workflow does not auto-push to main."
-          echo "Please run locally: node scripts/auto_tag_blog_posts.js"
-          git --no-pager diff --name-only
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+          git commit -m "chore(blog): auto-add topics/tags"
+
+          git pull --rebase origin main || true
+
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "✅ Changes pushed to main"
+              exit 0
+            fi
+            echo "⚠️ Push failed (attempt $i), retrying after rebase..."
+            git pull --rebase origin main
+            sleep 2
+          done
+
+          echo "❌ Push failed after retries"
           exit 1
 
       - name: Fail if changes are needed (fork PRs)
