@@ -1,0 +1,160 @@
+## Intro
+Cloud cutover is the moment a well-planned migration becomes a live production change—with real users, real data, and real risk. For SMEs, the difference between a smooth go-live and a week of firefighting is usually not the cloud platform choice, but the quality of the cutover runbook. A good runbook makes the work repeatable, measurable, and resilient to surprises like access issues, DNS delays, or an overlooked dependency. This guide shows how to structure cutovers into waves, execute go-live with confidence, and run hypercare without burning out your team.
+
+## Quick take
+- Plan cutover as a sequence of small, reversible waves rather than one “big bang.”
+- Write the runbook to be executed by a tired human at 2 a.m.: explicit steps, owners, and stop/go criteria.
+- Build security into each phase (access, logging, change control, and rollback), not as a final check.
+- Treat go-live as controlled validation: verify identity, networking, data, and business workflows in order.
+- Hypercare is a time-boxed operational mode with tighter monitoring, faster triage, and clear exit criteria.
+
+## 1) Build the cutover runbook: scope, roles, and decision gates
+A cutover runbook is not a project plan. It is an execution document: who does what, when, with which tool, and what “done” looks like. If you want it to work under pressure, design it around decision gates.
+
+Practical components to include:
+
+- Scope boundaries: what is in the cutover and what is explicitly out. Example: “ERP web tier and database cutover included; reporting jobs migrate next sprint.”
+- Roles and on-call plan: name a Cutover Lead (coordinates), Comms Lead (updates stakeholders), Technical Owners (app, data, network), and a Security/Access Owner.
+- Preconditions (must be true before the window starts): backups completed, change freeze in effect, approved maintenance notification sent, admin access verified, monitoring enabled.
+- Stop/go criteria: objective thresholds that decide whether you proceed. Example: “If replication lag > X minutes at T-30, delay DNS switch.” (Use your own thresholds; avoid hand-wavy “looks okay.”)
+- Rollback criteria and authority: define what conditions trigger rollback and who can authorize it. SMEs often fail here—rollback becomes a debate instead of a planned response.
+
+Security-focused runbook details (often missed):
+
+- Access verification: confirm break-glass accounts, MFA readiness, and least-privilege role assignments for the cutover team.
+- Logging and audit: ensure you can trace changes (identity logs, admin actions, network flow logs where available). This supports incident response and post-cutover lessons learned.
+- Change control mapping: log each high-risk step with a timestamp and owner. This aligns with common control objectives found in frameworks like NIST, ISO, and CIS—without claiming compliance.
+
+Example decision gate snippet (simple but effective):
+
+- Gate A (T-60): “All owners present + backups validated + monitoring dashboards green.”
+- Gate B (T-15): “Identity and network validation passed in target environment.”
+- Gate C (T+30): “Top 5 business transactions successful + error rate stable.”
+
+## 2) Design migration waves: reduce blast radius and simplify rollback
+Waves are how you make cutover manageable. Instead of moving everything at once, you group systems so each wave has a clear purpose and a contained failure domain.
+
+Common wave patterns for SMEs:
+
+- Wave 0: shared foundations (identity integration, network connectivity, logging, secrets management approach, baseline monitoring).
+- Wave 1: low-risk internal apps (intranet, dev/test tooling) to validate procedures.
+- Wave 2: customer-facing but stateless services (web front ends) where rollback is easier.
+- Wave 3: stateful dependencies (databases, message brokers, file shares) that require deeper validation and more careful cutover timing.
+- Wave 4: critical business processes (billing, ERP) once operational confidence is earned.
+
+How to choose what goes together:
+
+- Dependency mapping: group by real runtime dependencies (auth, DNS, API calls, database connections), not by org chart.
+- Data gravity: if a service is chatty with a database, plan them in the same wave or ensure low-latency connectivity.
+- Change frequency: avoid bundling a frequently changing app with a fragile legacy system in the same wave.
+
+Wave-level rollback planning:
+
+- Prefer reversible steps: traffic shifting, feature flags, parallel runs, and read-only validation.
+- Define rollback artifacts: “Previous DNS record values,” “last known good VM image,” “database snapshot ID,” “config bundle version.”
+
+Example wave plan (illustrative):
+
+- Wave 1 (weeknight): move a stateless API service behind a new load balancer; keep the old service running for quick traffic reversion.
+- Wave 2 (weekend): cut over the database with replication; run application in “read-only + smoke tests,” then enable writes.
+
+## 3) Go-live execution: a step-by-step flow that prioritizes security and availability
+Go-live should follow a predictable order. The goal is to prevent cascading failures: identity first, then network, then application, then user journeys.
+
+A practical go-live flow:
+
+1) Freeze and snapshot
+- Confirm change freeze for the impacted system.
+- Validate backups/snapshots and document identifiers.
+
+2) Access and identity validation
+- Confirm admin access in the target environment.
+- Validate service accounts/managed identities, certificate validity, and secrets rotation plan.
+- Verify that logging for authentication and privileged actions is enabled and reachable.
+
+3) Network and name resolution
+- Validate routing, firewall rules, and allowlists.
+- Check DNS TTL strategy. If lowering TTL, do it ahead of the cutover window.
+- Validate inbound and outbound connectivity for dependencies (email relays, payment gateways, SSO endpoints, third-party APIs).
+
+4) Data and state cutover
+- Confirm replication status and cutover point.
+- Validate schema/app version compatibility.
+- If feasible, run “dual write” or a controlled write pause during the final sync.
+
+5) Traffic switch
+- Switch traffic gradually if possible (weighted routing, canary release) rather than flipping everything at once.
+- Confirm health checks are meaningful (not just “port open”).
+
+6) Application validation (smoke tests)
+- Test the top workflows in the order users experience them: login, view data, create/update, export/report, admin function.
+- Validate security controls: authorization checks (least privilege), rate limiting if used, and that audit logs record key actions.
+
+7) Observability and stability check
+- Watch error rate, latency, resource saturation, queue depths, and auth failures.
+- Confirm alerts are firing to the right on-call channel.
+
+Example “smoke test” set for an SME e-commerce site:
+
+- User login via SSO
+- Browse product catalog
+- Add to cart and checkout (test payment in sandbox if available)
+- Create support ticket
+- Admin: change a product price (confirm audit log entry)
+
+Rollback triggers should be prewritten and objective. Examples:
+
+- Sustained elevated error rate in core transaction endpoint after traffic switch
+- Authentication failures spike (suggesting misconfigured identity, clock skew, or certificate issues)
+- Data integrity checks fail (missing records, unexpected duplicates)
+
+## 4) Hypercare: operate in a controlled “high attention” mode, then exit cleanly
+Hypercare is a planned period after go-live where you deliberately increase visibility and responsiveness. It is not “we keep everyone on edge indefinitely.” Time-box it and define an exit.
+
+Set expectations up front:
+
+- Duration: common choices are 3–10 business days depending on criticality.
+- Coverage: define hours and escalation paths.
+- Scope: incidents related to the cutover have priority; unrelated backlog work is deferred.
+
+Operational practices that help SMEs:
+
+- Daily triage standup (15 minutes): review new incidents, performance anomalies, and user feedback.
+- Tight feedback loops with support: standard intake form for symptoms, timestamps, affected users, and screenshots/log IDs.
+- Enhanced monitoring: temporary dashboards and lower alert thresholds for the migrated services.
+- Change discipline: limit changes during hypercare; if changes are required, route them through a mini change review.
+
+Security in hypercare:
+
+- Watch for “normalization of deviance”: teams may loosen access controls to fix issues quickly. Keep break-glass use logged, time-limited, and reviewed.
+- Review auth anomalies: unusual login patterns, sudden permission denials, or unexpected privileged actions.
+- Confirm vulnerability management cadence: new images/configurations should still go through your standard scanning and patching flow.
+
+Exit criteria examples:
+
+- No Sev-1 incidents for X days
+- Error rate and latency stable within agreed operational targets
+- Support ticket volume returns to baseline
+- Known issues documented with owners and deadlines
+
+## Checklist
+- [ ] Runbook includes owners, timestamps, and explicit stop/go gates
+- [ ] Preconditions verified: backups/snapshots completed and identifiers recorded
+- [ ] Change freeze communicated and confirmed for impacted systems
+- [ ] Break-glass access tested; MFA and least-privilege roles validated
+- [ ] Logging/audit streams confirmed reachable for identity and admin actions
+- [ ] DNS strategy set (TTL lowered in advance where appropriate) and rollback values recorded
+- [ ] Dependency checks completed (third-party APIs, email/SMS, SSO, allowlists)
+- [ ] Smoke tests written for top business workflows and assigned to testers
+- [ ] Rollback plan includes clear triggers and authority to execute
+- [ ] Hypercare plan defined: duration, coverage, triage routine, and exit criteria
+
+## FAQ
+Q1: What’s the difference between a migration plan and a cutover runbook?
+A: A migration plan describes the project; a cutover runbook is the step-by-step execution guide for the go-live window, including decision gates and rollback.
+
+Q2: Should we do a big-bang cutover or waves?
+A: Waves are safer for most SMEs because they reduce blast radius and make rollback realistic, especially when dependencies are not perfectly understood.
+
+Q3: How long should hypercare last?
+A: Long enough to prove stability and resolve cutover-related issues, but time-boxed with exit criteria—commonly several business days to two weeks depending on criticality.
