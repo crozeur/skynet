@@ -33,8 +33,17 @@ export const LanguageSwitcher = () => {
           } else {
             // target EN
             const aliasesFr = await getBlogFrAliasesClient();
-            const fromAlias = aliasesFr[currentSlug];
-            const match = index.find((e) => e.slugFr === currentSlug) || index.find((e) => e.slugEn === currentSlug);
+            const variants = Array.from(
+              new Set([
+                currentSlug,
+                currentSlug.replace(/^pme-/, ""),
+                currentSlug.startsWith("pme-") ? currentSlug : `pme-${currentSlug}`,
+              ])
+            );
+            const fromAlias = variants.map((s) => aliasesFr[s]).find(Boolean);
+            const match =
+              index.find((e) => variants.includes(e.slugFr)) ||
+              index.find((e) => e.slugEn === currentSlug);
             const slugEn = match?.slugEn || fromAlias || currentSlug;
             router.push(`/blog/${slugEn}`);
           }

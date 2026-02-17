@@ -76,12 +76,22 @@ export function resolveBlogSlugToEn(lang: "en" | "fr", slug: string): string | n
   if (!clean) return null;
   if (lang === "en") return clean;
 
+  const variants = Array.from(
+    new Set([
+      clean,
+      clean.replace(/^pme-/, ""),
+      clean.startsWith("pme-") ? clean : `pme-${clean}`,
+    ])
+  );
+
   const aliases = getBlogFrAliasesServer();
-  const viaAliases = aliases[clean];
-  if (viaAliases) return viaAliases;
+  for (const key of variants) {
+    const viaAliases = aliases[key];
+    if (viaAliases) return viaAliases;
+  }
 
   const index = getBlogSlugIndexServer();
-  const match = index.find((e) => e.slugFr === clean);
+  const match = index.find((e) => variants.includes(e.slugFr));
   return match?.slugEn ?? null;
 }
 
