@@ -62,3 +62,6 @@ SKYNET-Consulting-Plan-*.docx
 Skynet-Consulting-Master-Plan.*
 Skynet-Plan-*.pdf
 Skynet-Consulting-Interactive-Report*.html
+
+# local docs (generated/exported)
+/docs/
