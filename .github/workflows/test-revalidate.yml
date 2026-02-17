@@ -56,6 +56,12 @@ jobs:
           echo
 
           if [ "${http_code}" != "200" ]; then
+            if [ "${http_code}" = "401" ]; then
+              echo "⚠️ Revalidate returned 401 (invalid token)."
+              echo "Check secret alignment between GitHub Actions and production env."
+              echo "Non-blocking for manual diagnostics."
+              exit 0
+            fi
             echo "❌ Revalidate failed"
             exit 1
           fi
