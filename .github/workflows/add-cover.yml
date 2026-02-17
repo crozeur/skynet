@@ -25,7 +25,7 @@ jobs:
   add-cover:
     runs-on: ubuntu-latest
     concurrency:
-      group: add-cover-image
+      group: add-cover-image-${{ github.event.client_payload.file_path || github.event.inputs.file_path || github.run_id }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -121,6 +121,7 @@ jobs:
           meta_lines = meta_obj.splitlines(True)
 
           title_line_idx = None
+          insert_idx = None
           title_line_re = re.compile(r"^(\s*)title\s*:\s*([\"']).*\2\s*,?\s*$")
           indent = "  "
           for idx, line in enumerate(meta_lines):
@@ -128,10 +129,21 @@ jobs:
             if mm:
               title_line_idx = idx
               indent = mm.group(1)
+              insert_idx = idx + 1
               break
 
-          if title_line_idx is None:
-            raise SystemExit(f"No `title:` field found inside metadata object in {file_path}")
+          if insert_idx is None:
+            prop_re = re.compile(r"^(\s*)[A-Za-z_][A-Za-z0-9_]*\s*:")
+            for idx, line in enumerate(meta_lines):
+              mm = prop_re.match(line)
+              if mm:
+                indent = mm.group(1)
+                insert_idx = idx + 1
+                break
+
+          if insert_idx is None:
+            # Insert before closing brace if object is empty or unusual formatting.
+            insert_idx = max(1, len(meta_lines) - 1)
 
           def make_field_line(key: str, value: str) -> str:
             return f"{indent}{key}: {json.dumps(value)},\n"
@@ -142,7 +154,7 @@ jobs:
               if field_re.match(line):
                 meta_lines[i] = make_field_line(key, value)
                 return
-            meta_lines.insert(title_line_idx + 1, make_field_line(key, value))
+            meta_lines.insert(insert_idx, make_field_line(key, value))
 
           upsert_field("coverImage", url)
           upsert_field("coverAlt", alt)
@@ -225,8 +237,13 @@ jobs:
             exit 1
           fi
 
-          echo "ℹ️  Staging normalized blog files"
-          git add content/blog/*.mdx
+          echo "ℹ️  Staging: ${FILE_PATH}"
+          git add "${FILE_PATH}"
+
+          if ! grep -q "coverImage:" "${FILE_PATH}" || ! grep -q "coverAlt:" "${FILE_PATH}"; then
+            echo "❌ coverImage/coverAlt still missing after update: ${FILE_PATH}"
+            exit 1
+          fi
 
           SLUG=$(python3 -c "import json,os; d=json.load(open(os.environ['GITHUB_EVENT_PATH'])); i=d.get('inputs') or {}; p=d.get('client_payload') or {}; fp=(i.get('file_path') or p.get('file_path') or '').strip(); print(fp.replace('content/blog/','').replace('.mdx',''))")
           if [ -n "${SLUG:-}" ] && [ -f "public/blog-data/${SLUG}.json" ]; then
