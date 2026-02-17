@@ -2,7 +2,7 @@
 
 import { useLanguage } from "./LanguageProvider";
 import { usePathname, useRouter } from "next/navigation";
-import { getBlogSlugIndexClient } from "@/lib/blogSlugIndexClient";
+import { getBlogFrAliasesClient, getBlogSlugIndexClient } from "@/lib/blogSlugIndexClient";
 
 export const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
@@ -32,8 +32,10 @@ export const LanguageSwitcher = () => {
             router.push(`/fr/blog/${slugFr}`);
           } else {
             // target EN
+            const aliasesFr = await getBlogFrAliasesClient();
+            const fromAlias = aliasesFr[currentSlug];
             const match = index.find((e) => e.slugFr === currentSlug) || index.find((e) => e.slugEn === currentSlug);
-            const slugEn = match?.slugEn || currentSlug;
+            const slugEn = match?.slugEn || fromAlias || currentSlug;
             router.push(`/blog/${slugEn}`);
           }
         }
