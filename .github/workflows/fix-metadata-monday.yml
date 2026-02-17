@@ -21,6 +21,8 @@ permissions:
 jobs:
   fix-metadata:
     runs-on: ubuntu-latest
+    env:
+      HAS_BOT_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN != '' }}
     
     steps:
       - name: Checkout code
@@ -45,10 +47,29 @@ jobs:
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: node scripts/validate-blog-metadata.js
 
-      - name: Create PR with metadata fixes
+      - name: Detect changes
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        uses: peter-evans/create-pull-request@v6
+        id: changes
+        run: |
+          if git diff --quiet --exit-code; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No metadata changes to commit."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Metadata changes detected."
+          fi
+
+      - name: Skip PR (missing BOT_GITHUB_TOKEN)
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && env.HAS_BOT_TOKEN != 'true'
+        run: |
+          echo "Skipping PR creation: BOT_GITHUB_TOKEN is not configured."
+          echo "This repository disallows GitHub Actions default token for PR creation."
+
+      - name: Create PR with metadata fixes
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && env.HAS_BOT_TOKEN == 'true'
+        uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           commit-message: 'chore(blog): fix missing metadata'
           title: 'chore(blog): fix missing metadata'
           body: 'Automated metadata normalization from scripts/fix-missing-metadata.js.'
