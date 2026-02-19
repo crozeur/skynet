@@ -42,21 +42,6 @@ export function StickyCta() {
           </svg>
         </a>
       </div>
-
-      {/* Mobile floating button */}
-      <a
-        href={calendlyUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="md:hidden fixed bottom-5 right-5 z-40 inline-flex items-center gap-1.5 px-3 py-2.5 rounded-full bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 shadow-2xl shadow-blue-500/40 text-white text-xs font-bold hover:scale-105 active:scale-95 transition-transform duration-200"
-      >
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4h16v16H4z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 11h6" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 15h4" />
-        </svg>
-        {label}
-      </a>
     </>
   );
 }

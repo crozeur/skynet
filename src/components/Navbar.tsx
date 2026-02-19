@@ -86,6 +86,12 @@ export const Navbar = () => {
     </span>
   );
 
+  const servicesBadge = (
+    <span className="ml-2 inline-flex items-center rounded-full bg-blue-700/10 dark:bg-blue-300/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-blue-800 dark:text-blue-100 ring-1 ring-blue-700/30 dark:ring-blue-300/25">
+      {language === "en" ? "Core" : "Clé"}
+    </span>
+  );
+
   return (
     <nav className={`sticky top-0 z-50 bg-white dark:bg-gray-900/90 backdrop-blur-md border-b-2 border-gray-300 dark:border-gray-800 relative transition-all duration-300 ${
       scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
@@ -110,13 +116,16 @@ export const Navbar = () => {
           </a>
           <a
             href="/#services-overview"
-            className={navItemClass("services-overview")}
+            className={`${navItemClass("services-overview", { promoted: true })} group`}
           >
-            {language === "en" ? "Services" : "Nos Services"}
+            <span className="inline-flex items-center">
+              {language === "en" ? "Services" : "Nos Services"}
+              {servicesBadge}
+            </span>
           </a>
           <a
             href={language === "fr" ? "/fr/blog" : "/blog"}
-            className={`${navItemClass("blog", { promoted: true })} group`}
+            className={`${navItemClass("blog")} group`}
           >
             <span className="inline-flex items-center">
               {language === "en" ? "Guides" : "Guides"}
@@ -216,12 +225,19 @@ export const Navbar = () => {
             <a href="/#case-studies" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Success Stories" : "Nos Succès"}
             </a>
-            <a href="/#services-overview" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
-              {language === "en" ? "Services" : "Nos Services"}
+            <a
+              href="/#services-overview"
+              className="group w-full text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30 transition font-bold text-lg px-3 py-2 rounded-md"
+              onClick={() => setOpen(false)}
+            >
+              <span className="inline-flex items-center">
+                {language === "en" ? "Services" : "Nos Services"}
+                {servicesBadge}
+              </span>
             </a>
             <a
               href={language === "fr" ? "/fr/blog" : "/blog"}
-              className="group w-full text-blue-700 dark:text-blue-300 bg-blue-50/70 dark:bg-blue-900/20 ring-1 ring-blue-200/80 dark:ring-blue-700/40 hover:bg-blue-100/70 dark:hover:bg-blue-900/30 transition font-bold text-lg px-3 py-2 rounded-md"
+              className="group w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg"
               onClick={() => setOpen(false)}
             >
               <span className="inline-flex items-center">
