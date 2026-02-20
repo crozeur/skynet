@@ -108,7 +108,7 @@ export const Navbar = () => {
           >
             <span className="inline-flex items-center">
               {language === "en" ? "Services" : "Nos Services"}
-              <span className="ml-2 inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.22)] animate-[pulse_2.8s_ease-in-out_infinite]" />
+              <span className="ml-2 inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.30),0_0_14px_rgba(16,185,129,0.85)] animate-[pulse_2.2s_ease-in-out_infinite]" />
             </span>
           </a>
           <a
@@ -223,7 +223,7 @@ export const Navbar = () => {
             >
               <span className="inline-flex items-center">
                 {language === "en" ? "Services" : "Nos Services"}
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.22)] animate-[pulse_2.8s_ease-in-out_infinite]" />
+                <span className="ml-2 inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_4px_rgba(52,211,153,0.30),0_0_14px_rgba(16,185,129,0.85)] animate-[pulse_2.2s_ease-in-out_infinite]" />
               </span>
             </a>
             <a href="/#case-studies" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
