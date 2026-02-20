@@ -108,7 +108,11 @@ export const Navbar = () => {
           >
             <span className="inline-flex items-center">
               {language === "en" ? "Services" : "Nos Services"}
-              <span className="ml-2 inline-block h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.34),0_0_22px_rgba(16,185,129,0.95),0_0_34px_rgba(16,185,129,0.55)] animate-[pulse_1.8s_ease-in-out_infinite]" />
+              <span className="relative ml-2 inline-flex h-2.5 w-2.5">
+                <span className="absolute inset-0 rounded-full bg-emerald-400/75 animate-ping [animation-duration:2.2s]" />
+                <span className="absolute inset-0 rounded-full bg-emerald-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
+                <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.34),0_0_22px_rgba(16,185,129,0.95),0_0_34px_rgba(16,185,129,0.55)] animate-[pulse_1.9s_ease-in-out_infinite]" />
+              </span>
             </span>
           </a>
           <a
@@ -223,7 +227,11 @@ export const Navbar = () => {
             >
               <span className="inline-flex items-center">
                 {language === "en" ? "Services" : "Nos Services"}
-                <span className="ml-2 inline-block h-3 w-3 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.34),0_0_22px_rgba(16,185,129,0.95),0_0_34px_rgba(16,185,129,0.55)] animate-[pulse_1.8s_ease-in-out_infinite]" />
+                <span className="relative ml-2 inline-flex h-2.5 w-2.5">
+                  <span className="absolute inset-0 rounded-full bg-emerald-400/75 animate-ping [animation-duration:2.2s]" />
+                  <span className="absolute inset-0 rounded-full bg-emerald-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
+                  <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.34),0_0_22px_rgba(16,185,129,0.95),0_0_34px_rgba(16,185,129,0.55)] animate-[pulse_1.9s_ease-in-out_infinite]" />
+                </span>
               </span>
             </a>
             <a href="/#case-studies" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
