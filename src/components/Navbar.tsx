@@ -75,7 +75,7 @@ export const Navbar = () => {
       isActive(sectionId)
         ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
         : promoted
-          ? "text-blue-800 dark:text-blue-200 bg-blue-50/80 dark:bg-blue-900/25 ring-1 ring-blue-200 dark:ring-blue-700/50 shadow-sm hover:bg-blue-100/80 dark:hover:bg-blue-900/35 hover:shadow-md"
+          ? "text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200"
           : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
     }`;
   };
@@ -108,7 +108,7 @@ export const Navbar = () => {
           >
             <span className="inline-flex items-center">
               {language === "en" ? "Services" : "Nos Services"}
-              <span className="ml-2 inline-block h-2 w-2 rounded-full bg-cyan-500/90 shadow-[0_0_0_3px_rgba(6,182,212,0.2)]" />
+              <span className="ml-2 inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.22)] animate-[pulse_2.8s_ease-in-out_infinite]" />
             </span>
           </a>
           <a
@@ -218,12 +218,12 @@ export const Navbar = () => {
             </a>
             <a
               href="/#services-overview"
-              className="group w-full text-blue-800 dark:text-blue-200 bg-blue-50/80 dark:bg-blue-900/25 ring-1 ring-blue-200 dark:ring-blue-700/50 shadow-sm hover:bg-blue-100/80 dark:hover:bg-blue-900/35 hover:shadow-md transition font-bold text-lg px-3 py-2 rounded-md"
+              className="group w-full text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 transition font-bold text-lg"
               onClick={() => setOpen(false)}
             >
               <span className="inline-flex items-center">
                 {language === "en" ? "Services" : "Nos Services"}
-                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-cyan-500/90 shadow-[0_0_0_3px_rgba(6,182,212,0.2)]" />
+                <span className="ml-2 inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.22)] animate-[pulse_2.8s_ease-in-out_infinite]" />
               </span>
             </a>
             <a href="/#case-studies" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
