@@ -262,7 +262,9 @@ jobs:
           # We serialize runs via `concurrency`, but still rebase+retry defensively.
           BRANCH="${GITHUB_REF_NAME:-main}"
           echo "ℹ️  Syncing with origin/${BRANCH} before push"
+          git stash || true
           git pull --rebase origin "${BRANCH}" || true
+          git stash pop || true
 
           for attempt in 1 2 3; do
             echo "ℹ️  Push attempt ${attempt}/3"
@@ -277,7 +279,9 @@ jobs:
             fi
 
             echo "⚠️  Push failed; rebasing and retrying..."
+            git stash || true
             git pull --rebase origin "${BRANCH}"
+            git stash pop || true
           done
 
       - name: Revalidate site cache (optional)
