@@ -1,0 +1,176 @@
+## Intro
+Cloud migration goes smoother when you treat it like an operational change, not a one-time project plan. A good runbook makes the work repeatable: you migrate in waves, execute a controlled cutover, then stabilize in hypercare. For SMEs, this approach reduces downtime risk and prevents “unknown unknowns” from becoming security incidents. Below is a practical runbook structure you can adapt whether you’re moving a single line-of-business app or a portfolio.
+
+## Quick take
+- Plan migrations in waves based on dependency and risk, not org charts.
+- Define cutover as a sequence of verifiable steps with a rollback decision point.
+- Build security checks into each wave (identity, logging, backups, and exposure).
+- Hypercare is a time-boxed stabilization sprint with clear owners and metrics.
+- Treat every migration like a rehearsal: test, document, and improve the runbook.
+
+## Wave planning: how to batch systems without breaking dependencies
+A “wave” is a batch of workloads that move together because they share dependencies, need the same cutover window, or require the same controls. The goal is to deliver value early while limiting blast radius.
+
+Practical approach for SMEs:
+
+1) Inventory and dependency map (lightweight)
+- Start with a table: application, business owner, technical owner, data stores, integrations, auth method, criticality, and acceptable downtime.
+- Add a simple dependency view: “App A requires DB B and SSO C.” Even a whiteboard diagram is enough to avoid moving a downstream system first.
+
+2) Choose wave criteria
+Use criteria that influence risk and effort:
+- Business criticality (revenue, operations, safety)
+- Data sensitivity (customer PII, financial data, regulated data)
+- Integration complexity (number of inbound/outbound connections)
+- Change frequency (apps with frequent releases need more mature deployment)
+- Legacy constraints (unsupported OS, hard-coded IPs, old libraries)
+
+3) Common wave patterns
+- Wave 0 (foundation): identity, logging, monitoring, network segmentation, backup approach, and baseline policies.
+- Wave 1 (low risk): internal tools, dev/test, non-critical apps.
+- Wave 2 (medium risk): customer-facing but with good rollback options.
+- Wave 3 (high risk): core transactional systems, tightly integrated apps, or systems with strict uptime.
+
+Example
+A 250-person manufacturer might define:
+- Wave 0: centralized identity integration, log forwarding, baseline network/security groups, backup strategy.
+- Wave 1: intranet, HR portal, ticketing.
+- Wave 2: customer portal (read-heavy) and analytics.
+- Wave 3: ERP and warehouse scanning service.
+
+Security and control gates per wave
+Keep this generic and aligned with common best practices (NIST/ISO/CIS concepts) without claiming compliance:
+- Identity: least privilege roles, MFA for admins, remove shared accounts.
+- Logging: ensure audit logs and system logs are captured and retained.
+- Backups: verify backup/restore, not just “backup enabled.”
+- Exposure: confirm public endpoints are intentional; block default inbound access.
+
+## Cutover runbook: define steps, owners, timing, and rollback
+Cutover is the moment you switch production traffic, users, or data flows to the cloud target. Most cutovers fail because steps are vague (“switch DNS”) or decision points are missing (“when do we roll back?”).
+
+A good cutover runbook includes:
+
+1) Preconditions (what must be true before cutover)
+- Change window approved and communicated.
+- Monitoring in place for old and new environments.
+- Backups/snapshots taken and restore procedure confirmed.
+- Admin access tested (including break-glass access).
+- Final test results recorded (performance, integration, security checks).
+
+2) A timed sequence with owners
+Write steps so someone else could execute them at 2 a.m.:
+- T-60: Freeze deployments; confirm no outstanding changes.
+- T-45: Confirm replication status / data sync is current.
+- T-30: Put app in maintenance mode (if applicable).
+- T-20: Final incremental sync.
+- T-10: Update routing (DNS/load balancer) with a documented TTL plan.
+- T+0: Enable production traffic to cloud.
+- T+10: Run smoke tests (auth, core transactions, key integrations).
+- T+30: Validate logs, error rates, and performance counters.
+
+3) Explicit validation criteria (what “good” looks like)
+Define pass/fail checks such as:
+- Users can authenticate via SSO; admin logins require MFA.
+- Error rate below your known baseline.
+- Key business transaction succeeds end-to-end.
+- No unexpected public exposure (e.g., management ports not reachable externally).
+- Logs are arriving in the central collector; alerts are firing for test events.
+
+4) A rollback plan with a decision gate
+Rollback is not failure—it’s risk management.
+- Define the rollback window (e.g., “within 45 minutes”).
+- Define the trigger conditions (e.g., login failures, data inconsistency, unbounded latency).
+- Define the steps: revert routing, stop writes to cloud system, re-enable old environment, document what happened.
+
+Example: DNS cutover with safety
+If you must use DNS:
+- Lower TTL 24–48 hours in advance.
+- Use weighted or staged routing if available (e.g., 10% traffic first).
+- Keep the old target healthy and monitored until the rollback window passes.
+
+Security-focused cutover checks
+During cutover, security issues often surface as availability issues (blocked traffic) or exposure issues (opened too much).
+- Confirm network paths are minimal and documented.
+- Confirm secrets and certificates are loaded from an approved store, not baked into images.
+- Confirm privilege boundaries: workloads run with non-admin identities.
+
+## Hypercare: stabilize fast, then hand off to steady-state operations
+Hypercare is a time-boxed period after cutover where the team actively monitors, fixes, and tunes the migrated workload. Without hypercare, SMEs often drift into “temporary” exceptions—extra admin access, open firewall rules, or missing logging—that become permanent risk.
+
+1) Time-box and staff it
+Typical hypercare windows are 1–3 weeks depending on complexity. Define:
+- A primary on-call engineer.
+- A backup.
+- An incident commander role (can be a rotating duty).
+- A daily 15-minute review of incidents, changes, and open risks.
+
+2) What to monitor (beyond uptime)
+- Authentication failures and unusual admin activity.
+- Error rate and latency on key endpoints.
+- Data pipeline health (replication lag, queue depth, failed jobs).
+- Resource saturation (CPU, memory, storage IOPS).
+- Security telemetry (blocked connections, denied API calls, policy violations).
+
+3) Common hypercare tasks
+- Tighten access: remove temporary elevated permissions used during migration.
+- Close exposure: remove temporary inbound rules and unused public endpoints.
+- Tune alerts: reduce noise, keep high-signal notifications.
+- Validate backups and run at least one restore test.
+- Update runbooks and diagrams based on what actually happened.
+
+Example: Hypercare for a customer portal
+Day 1–2: tune autoscaling thresholds, fix missing environment variables, adjust timeouts to upstream systems.
+Day 3–5: tighten firewall rules after verifying required integrations.
+Week 2: complete restore test, finalize dashboards, hand off to operations with documented SLO/SLA expectations.
+
+## Security threads to weave through every wave
+Security shouldn’t be a separate “phase at the end.” Add repeatable security threads to each wave so you don’t accumulate migration debt.
+
+1) Identity and access management
+- Use role-based access and least privilege.
+- Require MFA for privileged access.
+- Keep a documented break-glass process (who, when, and how it’s audited).
+
+2) Configuration baselines
+- Standardize hardened images or build templates.
+- Disable default passwords, remove unused services.
+- Enforce encryption in transit and at rest where supported.
+
+3) Secrets, keys, and certificates
+- Centralize secrets management.
+- Rotate credentials when workloads move (don’t reuse old long-lived keys).
+- Track certificate expiry and ownership.
+
+4) Logging and incident readiness
+- Ensure audit logs are enabled and retained.
+- Forward logs to a central place with access controls.
+- Define what triggers an incident response process (even a lightweight one).
+
+5) Data protection and backup
+- Classify data by sensitivity and decide where it can live.
+- Verify backups and restores.
+- Document retention and deletion behavior (including “who can delete backups”).
+
+## Checklist
+- [ ] Define Wave 0 foundation (identity, logging, monitoring, networking, backups)
+- [ ] Build a dependency map and group workloads into waves by risk and coupling
+- [ ] Document preconditions for cutover (tests, access, backups, comms)
+- [ ] Create a step-by-step cutover timeline with named owners
+- [ ] Define measurable validation checks (auth, transactions, logs, performance)
+- [ ] Write a rollback plan with triggers and a firm decision point
+- [ ] Confirm least-privilege roles and MFA for all privileged access
+- [ ] Verify secrets/certificates are stored and rotated appropriately
+- [ ] Ensure audit/system logs are collected and alerting is functional
+- [ ] Time-box hypercare and assign on-call + incident coordination
+- [ ] Perform at least one restore test during hypercare
+- [ ] Update runbooks and remove temporary exceptions before handoff
+
+## FAQ
+### How big should a migration wave be?
+Small enough to troubleshoot in one change window and large enough to deliver meaningful value; for many SMEs, that’s 1–3 apps plus their direct dependencies.
+
+### When is re-host (“lift and shift”) acceptable?
+When time-to-move is critical and risk is managed with strong baselines (identity, logging, backups, network segmentation) and a plan to remediate technical debt post-move.
+
+### What’s the most common cutover failure mode?
+Missing decision points: teams switch traffic without clear validation criteria or rollback triggers, then lose time debating while impact grows.
