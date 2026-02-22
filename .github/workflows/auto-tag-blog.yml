@@ -47,44 +47,45 @@ jobs:
       - name: Commit changes (PR branches only)
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
-          if git diff --quiet; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"  
+
+          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+          if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
           git commit -m "chore(blog): auto-add topics/tags"
           git push
 
       - name: Commit changes on main
         if: github.event_name == 'push'
         run: |
-          if git diff --quiet; then
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"  
+
+          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+          if git diff --cached --quiet; then
             echo "No changes needed."
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
           git commit -m "chore(blog): auto-add topics/tags"
 
+          git stash || true
           git pull --rebase origin main || true
+          git stash pop || true
 
           for i in 1 2 3; do
             if git push origin HEAD:main; then
               echo "✅ Changes pushed to main"
               exit 0
             fi
-            echo "⚠️ Push failed (attempt $i), retrying after rebase..."
+            echo "⚠️ Push failed (attempt $i), retrying after rebase..."     
+            git stash || true
             git pull --rebase origin main
-            sleep 2
-          done
-
+            git stash pop || true
           echo "❌ Push failed after retries"
           exit 1
 
