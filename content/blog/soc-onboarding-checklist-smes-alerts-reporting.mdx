@@ -1,0 +1,165 @@
+## Intro
+Standing up (or improving) a Security Operations Center (SOC) capability is less about buying tools and more about making alerts meaningful, repeatable, and reportable. For SMEs, onboarding often fails when noisy detections overwhelm a small team and reporting becomes a last-minute scramble. This checklist-style guide walks from “what should alert” to “what should be reported,” with practical steps you can apply whether your SOC is internal, outsourced, or hybrid. The goal is a monitoring program that finds real issues, routes them to the right people, and communicates outcomes clearly.
+
+## Quick take
+- Define what “actionable” means before you ingest every log source.
+- Start with a small set of high-signal alerts mapped to real business risks.
+- Create a triage workflow (severity, ownership, escalation) that fits your staffing.
+- Tune detections continuously using feedback from incidents and false positives.
+- Reporting should translate SOC activity into risk, response quality, and next steps.
+
+## 1) Set scope: assets, risks, and what the SOC owns
+Before configuring alerts, decide what the SOC is responsible for detecting and responding to. Otherwise you’ll collect data you can’t act on.
+
+Practical steps:
+- Inventory “crown jewel” assets: identity provider, email, endpoints for finance/admin, key servers, SaaS platforms with sensitive data, critical network segments.
+- Define the top threat scenarios you care about (examples below) and what “done” looks like for detection and response.
+- Clarify boundaries with IT and leadership: what the SOC can change (e.g., disabling accounts), what requires approval, and what is out of scope (e.g., application performance issues).
+
+Example threat scenarios (SME-friendly):
+- Account takeover in email/IdP (impossible travel, suspicious OAuth app consent, password reset followed by forwarding rules).
+- Ransomware precursors (mass file rename, suspicious admin tool use, endpoint protection tamper, privilege escalation attempts).
+- Business email compromise (new inbox rules, suspicious login + new device, unusual outbound email spikes).
+- Data exposure (new public sharing links, bulk downloads, unusual API token activity).
+
+Framework alignment (without compliance claims):
+- If you use NIST/ISO/CIS as a reference, keep it simple: you’re building Detect + Respond capabilities and measuring whether alerts lead to timely, consistent outcomes.
+
+## 2) Build your alert catalog: from log sources to actionable detections
+A common onboarding mistake is “turn on everything.” Instead, build an alert catalog that prioritizes signal over volume.
+
+How to do it:
+1) Start with a minimum viable set of log sources:
+   - Identity/authentication logs (IdP, VPN, SSO)
+   - Email security and audit logs
+   - Endpoint security/EDR alerts
+   - Firewall or secure web gateway logs (as available)
+   - Critical SaaS audit logs (file sharing, admin actions)
+
+2) Define alert requirements for each detection:
+   - Trigger condition (what event pattern fires)
+   - Data needed (fields required to investigate)
+   - Expected false positives (known benign causes)
+   - Response playbook link (what to do next)
+   - Owner (SOC only, IT, or business owner)
+
+3) Classify alerts by intent:
+   - High confidence (act immediately): malware detected/quarantined failed, admin account created, MFA disabled for privileged user.
+   - Suspicious (needs triage): anomalous login, unusual data access.
+   - Hygiene (track as tickets): missing patches, weak configurations (often better handled outside the SOC queue).
+
+Example: turning a noisy alert into an actionable one
+- Too noisy: “Multiple failed logins” for all users.
+- Better: “Multiple failed logins followed by successful login from new geo/device for privileged group,” excluding known corporate IP ranges.
+
+Set an initial target: a small catalog (e.g., 15–30 alerts) that you can reliably triage and report on. Expand only when your process is stable.
+
+## 3) Triage workflow: severity, ownership, escalation, and timeboxes
+Alerts only help if every alert has a predictable path from detection to outcome.
+
+Core triage components:
+- Severity rubric (example):
+  - Sev 1: confirmed compromise or active impact (ransomware activity, admin takeover).
+  - Sev 2: high-likelihood suspicious activity affecting sensitive assets (privileged login anomaly + risky action).
+  - Sev 3: low-confidence suspicious activity (single indicator, limited scope).
+  - Sev 4: informational/hygiene (track, trend, but don’t page).
+
+- Timeboxes (adapt to staffing):
+  - Acknowledge: how quickly someone looks at it.
+  - Triage: how quickly you decide “benign / needs more data / escalate.”
+  - Escalation: when you wake someone up or engage IR.
+
+- Ownership model:
+  - SOC owns: investigation, containment recommendations, evidence capture.
+  - IT owns: configuration changes, patching, device reimaging (with SOC guidance).
+  - Business owners/legal/HR: decisions that affect people or disclosure.
+
+- Escalation triggers (examples):
+  - Any sign of privileged account misuse.
+  - Lateral movement indicators (remote exec tools, credential dumping behavior).
+  - Confirmed data access outside normal patterns on regulated/sensitive datasets.
+
+Example triage decision tree (simple):
+1) Is this tied to a privileged account or crown jewel system?
+2) Is there a risky action (MFA disabled, new forwarding rule, new admin role, mass download)?
+3) Do we have corroborating evidence from a second source (IdP + endpoint, email + SaaS audit)?
+If “yes” to 1 and 2, escalate even if confidence isn’t perfect.
+
+## 4) Response readiness: playbooks, evidence, and containment options
+Onboarding isn’t complete until responders can execute. The SOC needs pre-approved playbooks and the ability to collect evidence quickly.
+
+What to prepare:
+- Playbooks for your top 5 scenarios (keep them short):
+  - Account takeover
+  - Malware/ransomware suspicion
+  - Suspicious email rule/forwarding
+  - Lost/stolen device with corporate access
+  - Suspicious SaaS admin activity
+
+- Evidence checklist per scenario:
+  - Identity: login timestamps, IPs, device identifiers, MFA events, token issuance.
+  - Email: message trace, mailbox rules, OAuth grants.
+  - Endpoint: process tree, command line, network connections, detections.
+  - Network: firewall/proxy logs for related hosts.
+
+- Containment options and who can approve them:
+  - Disable account / revoke sessions
+  - Reset password + enforce MFA re-registration
+  - Quarantine endpoint / isolate from network
+  - Block indicators (domains/IPs) where appropriate
+
+Example: account takeover containment (minimal viable)
+- Revoke active sessions and tokens for the user.
+- Reset credentials and require MFA re-enrollment.
+- Review mailbox rules and OAuth app consents.
+- Identify impacted data/actions (sent mail, file access).
+- Decide if broader hunting is needed (similar logins for other users).
+
+## 5) Reporting: turning SOC activity into decisions and improvement
+Good SOC reporting helps leadership prioritize risk reduction, not just count alerts.
+
+Set up three reporting layers:
+1) Operational reporting (daily/weekly, for IT/SOC):
+   - Open investigations by severity
+   - Aging items (stuck tickets)
+   - Recurrent noisy alerts (tuning candidates)
+
+2) Management reporting (monthly/quarterly, for leadership):
+   - Top incident themes (e.g., phishing, misconfigurations, credential issues)
+   - Mean time-to-acknowledge and mean time-to-contain (only if you can measure reliably)
+   - Control improvement backlog (what would reduce repeat incidents)
+
+3) Incident reporting (per event):
+   - What happened, when, and how it was detected
+   - Scope and impact (systems/users/data involved)
+   - Actions taken (containment, eradication, recovery)
+   - Lessons learned and preventive actions (with owners and dates)
+
+Avoid misleading metrics:
+- Don’t report “alerts handled” as success. If alert volume drops because logging broke, that’s worse.
+- Use trends with context: “Alert volume decreased after tuning X; confirmed incidents remained stable.”
+
+Example management summary (plain language)
+- “This month we investigated 6 high-risk identity events. Two were confirmed account compromises contained within the same business day. Primary contributing factor: legacy accounts without MFA. Next step: enforce MFA for all users and disable inactive accounts older than 90 days.”
+
+## Checklist
+- [ ] Define SOC scope: systems covered, hours of coverage, and what “response” means for your business.
+- [ ] Identify crown jewel assets and prioritize 5–10 threat scenarios relevant to your SME.
+- [ ] Confirm minimum log sources (IdP, email, endpoints, key SaaS, network edge) and verify they are actually ingesting.
+- [ ] Create an alert catalog with trigger, required fields, owner, and linked playbook for each alert.
+- [ ] Establish a severity rubric and escalation rules (including after-hours thresholds).
+- [ ] Implement a consistent triage workflow (acknowledge → validate → scope → contain → document).
+- [ ] Write short playbooks for top scenarios and pre-approve containment actions (disable account, isolate endpoint, revoke sessions).
+- [ ] Set up ticketing/incident tracking with mandatory fields (time, asset, user, evidence, outcome).
+- [ ] Create an alert tuning loop: review false positives weekly and document changes.
+- [ ] Define reporting templates for operations, management, and per-incident summaries.
+
+## FAQ
+Q1: Should we start with a 24/7 SOC?
+A: Not necessarily. Many SMEs begin with business-hours monitoring plus clear after-hours escalation for high-severity events.
+
+Q2: How many alerts should we enable at first?
+A: Start small—only what you can reliably triage and respond to. Expand the catalog once workflows and tuning are stable.
+
+Q3: What’s the biggest reason SOC onboarding fails?
+A: No clear ownership and no playbooks—alerts arrive, but nobody is empowered to contain, document, and improve detections.
