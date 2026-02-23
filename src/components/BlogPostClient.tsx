@@ -4,13 +4,13 @@ import Image from "next/image";
 import { Container } from "@/components/Container";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
-import type { PostData } from "@/lib/blog";
+import type { PostData, PostSummary } from "@/lib/blog";
 import React from "react";
 import { translateHtmlContent, translateArticleMetadata, getUIString } from "@/lib/translateArticle";
 import { getTopicLabel } from "@/lib/topicI18n";
 import { polishFrenchITMetadata } from "@/lib/polishFrenchIT";
 
-export function BlogPostClient({ post }: { post: PostData }) {
+export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, relatedPosts?: PostSummary[] }) {
   const { language } = useLanguage();
   const blogHomeHref = language === "fr" ? "/fr/blog" : "/blog";
   const [metadata, setMetadata] = React.useState(post.metadata);
@@ -272,7 +272,8 @@ export function BlogPostClient({ post }: { post: PostData }) {
             {getUIString("Back to Blog", language)}
           </Link>
 
-          <article className="max-w-4xl mx-auto">
+          <div className="max-w-7xl mx-auto lg:grid lg:grid-cols-[1fr_320px] lg:gap-12 items-start">
+            <article className="min-w-0 max-w-4xl mx-auto lg:mx-0 w-full">
           {/* Hero cover image */}
           {metadata.coverImage && (
             <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl bg-gray-100 dark:bg-gray-800">
@@ -371,91 +372,6 @@ export function BlogPostClient({ post }: { post: PostData }) {
           </header>
 
           {/* Article Content */}
-          {/* Table of contents - Professional Design */}
-          {headings.length > 0 && (
-            <div className="mb-12 sticky top-20 z-10">
-              <div className="relative overflow-hidden rounded-xl border border-blue-200/70 shadow-[0_18px_70px_-42px_rgba(59,130,246,0.45)] hover:shadow-[0_26px_90px_-44px_rgba(59,130,246,0.55)] transition-shadow duration-300 dark:border-blue-500/30 dark:shadow-[0_20px_50px_-30px_rgba(59,130,246,0.55)] dark:hover:shadow-[0_24px_60px_-30px_rgba(59,130,246,0.7)]">
-                {/* Light-mode glow */}
-                <div className="pointer-events-none absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-500/25 via-cyan-400/20 to-indigo-500/20 blur-2xl opacity-60 dark:hidden" aria-hidden />
-
-                {/* Gradient background with blue accent */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-100/90 via-white to-cyan-50/70 dark:from-blue-900/35 dark:via-slate-900 dark:to-slate-950 opacity-95" />
-
-                {/* Top accent line */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-80 dark:opacity-60" aria-hidden />
-                
-                {/* Content */}
-                <div className="relative p-8 backdrop-blur-xl bg-white/80 dark:bg-slate-900/90 border-2 border-white/60 dark:border-blue-500/30 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.10)] dark:shadow-none">
-                  {/* Header with icon and blue accent bar */}
-                  <div className="relative mb-6 pl-4 border-l-4 border-blue-600 dark:border-blue-400 bg-gradient-to-r from-blue-50/90 via-blue-50/40 to-transparent dark:from-blue-900/35 dark:to-transparent py-3 -ml-4 pr-4 rounded-r shadow-[0_10px_30px_-18px_rgba(59,130,246,0.45)] dark:shadow-[inset_0_0_0_1px_rgba(59,130,246,0.15)]">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="absolute -inset-1 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 blur opacity-35 dark:opacity-0" aria-hidden />
-                        <div className="relative bg-blue-500 dark:bg-blue-600 p-2.5 rounded-lg shadow-md">
-                          <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-blue-900 dark:text-blue-100 text-xl">
-                          {getUIString("Contents", language)}
-                        </h3>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Divider with gradient */}
-                  <div className="h-px bg-gradient-to-r from-blue-300 via-blue-200 to-transparent dark:from-blue-400/80 dark:via-blue-600/60 dark:to-transparent mb-5" />
-                  
-                  {/* TOC List - Clean Professional */}
-                  <nav className="space-y-2">
-                    {headings.map((h) => {
-                      const isActive = activeHeadingId === h.id;
-                      const isH2 = h.level === 2;
-                      const isH3 = h.level === 3;
-
-                      return (
-                        <a
-                          key={h.id}
-                          href={`#${h.id}`}
-                          aria-current={isActive ? "true" : undefined}
-                          className={`
-                            group flex items-center gap-2.5 rounded-lg
-                            transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-slate-950
-                            ${isActive ? 'bg-blue-100/70 shadow-[0_10px_24px_-18px_rgba(59,130,246,0.55)] dark:bg-transparent dark:shadow-none' : ''}
-                            ${isH2
-                              ? 'px-3 py-2.5 text-slate-900 dark:text-slate-200 font-semibold text-base hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50/80 dark:hover:bg-blue-900/25 hover:pl-4 hover:shadow-[0_10px_24px_-18px_rgba(59,130,246,0.55)]'
-                              : 'px-3 py-2 text-slate-800 dark:text-slate-400 font-medium text-sm hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-50/80 dark:hover:bg-blue-900/15'}
-                            ${isH3 ? 'pl-8' : ''}
-                          `}
-                          onClick={() => setActiveHeadingId(h.id)}
-                        >
-                          {isH2 && (
-                            <span
-                              className={`flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shadow-sm ${isActive ? 'ring-2 ring-blue-500/20 dark:ring-0' : ''}`}
-                            />
-                          )}
-
-                          {isH3 && (
-                            <span className="flex items-center gap-2">
-                              <span className="flex-shrink-0 w-4 h-px bg-blue-300/90 dark:bg-blue-500/40" />
-                              <span
-                                className={`flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 ${isActive ? 'ring-2 ring-blue-500/15 dark:ring-0' : ''}`}
-                              />
-                            </span>
-                          )}
-
-                          <span className="line-clamp-2">{h.text}</span>
-                        </a>
-                      );
-                    })}
-                  </nav>
-                </div>
-              </div>
-            </div>
-          )}
-
           <style>{`
             .blog-content {
               font-size: 1.0625rem;
@@ -842,6 +758,60 @@ export function BlogPostClient({ post }: { post: PostData }) {
               color: #93c5fd;
             }
 
+            /* Callouts */
+            .article-callout {
+              display: flex;
+              gap: 1rem;
+              padding: 1.25rem 1.5rem;
+              margin: 2rem 0;
+              border-radius: 0.75rem;
+              border: 1px solid transparent;
+            }
+            .callout-icon {
+              font-size: 1.5rem;
+              line-height: 1;
+              flex-shrink: 0;
+            }
+            .callout-content {
+              flex-grow: 1;
+            }
+            .callout-content p:last-child {
+              margin-bottom: 0;
+            }
+            
+            .article-callout-warning {
+              background: #fffbeb;
+              border-color: #fde68a;
+              color: #92400e;
+            }
+            .dark .article-callout-warning {
+              background: rgba(245, 158, 11, 0.1);
+              border-color: rgba(245, 158, 11, 0.2);
+              color: #fcd34d;
+            }
+            
+            .article-callout-info {
+              background: #f0fdf4;
+              border-color: #a5f3fc;
+              color: #164e63;
+            }
+            .dark .article-callout-info {
+              background: rgba(6, 182, 212, 0.1);
+              border-color: rgba(6, 182, 212, 0.2);
+              color: #67e8f9;
+            }
+            
+            .article-callout-success {
+              background: #f0fdf4;
+              border-color: #bbf7d0;
+              color: #166534;
+            }
+            .dark .article-callout-success {
+              background: rgba(34, 197, 94, 0.1);
+              border-color: rgba(34, 197, 94, 0.2);
+              color: #86efac;
+            }
+
             /* Images */
             .article-img {
               max-width: 100%;
@@ -1060,6 +1030,87 @@ export function BlogPostClient({ post }: { post: PostData }) {
             </div>
           </div>
         </article>
+
+        {/* Right Sidebar: Sticky TOC & Related Posts */}
+        <aside className="hidden lg:block sticky top-24 space-y-8">
+          {/* Table of Contents */}
+          {headings.length > 0 && (
+            <div className="p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                {getUIString("Table of contents", language)}
+              </h3>
+              <nav className="max-h-[calc(100vh-24rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+                <ul className="space-y-2.5 text-sm">
+                  {headings.map((heading) => (
+                    <li
+                      key={heading.id}
+                      style={{ paddingLeft: `${(heading.level - 2) * 1}rem` }}
+                    >
+                      <a
+                        href={`#${heading.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const el = document.getElementById(heading.id);
+                          if (el) {
+                            const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                            window.scrollTo({ top: y, behavior: "smooth" });
+                            // Update URL without jumping
+                            window.history.pushState(null, "", `#${heading.id}`);
+                          }
+                        }}
+                        className={`block leading-snug transition-colors duration-200 ${
+                          activeHeadingId === heading.id
+                            ? "text-blue-600 dark:text-blue-400 font-medium"
+                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          )}
+
+          {/* Related Posts */}
+          {relatedPosts.length > 0 && (
+            <div className="p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                {language === "en" ? "Related Posts" : "Articles similaires"}
+              </h3>
+              <div className="space-y-4">
+                {relatedPosts.map((rp) => {
+                  const rpMeta = language === "fr" && rp.translatedMetadata?.fr 
+                    ? { ...rp.metadata, ...polishFrenchITMetadata(rp.translatedMetadata.fr) }
+                    : rp.metadata;
+                  const rpSlug = language === "fr" && rp.slugFr ? rp.slugFr : rp.slugEn;
+                  const rpLink = language === "fr" ? `/fr/blog/${rpSlug}` : `/blog/${rpSlug}`;
+                  
+                  return (
+                    <Link key={rp.slug} href={rpLink} className="block group">
+                      <article className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                          {rpMeta.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                          {rpMeta.description}
+                        </p>
+                      </article>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </aside>
+        </div>
         </Container>
       </div>
     </main>

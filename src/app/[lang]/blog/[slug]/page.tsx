@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { BlogPostClient } from "@/components/BlogPostClient";
+import { getAllBlogPosts } from "@/lib/blog";
 import type { PostData } from "@/lib/blog";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -15,6 +16,20 @@ function loadPostJsonBySlugEn(slugEn: string): any {
   const filePath = join(BLOG_DATA_DIR, `${slugEn}.json`);
   const fileContent = readFileSync(filePath, "utf-8");
   return JSON.parse(fileContent);
+}
+
+function extractFAQs(htmlContent: string) {
+  const faqs: { question: string; answer: string }[] = [];
+  const regex = /<h[23][^>]*>(.*?)\?<\/h[23]>\s*<p>(.*?)<\/p>/gi;
+  let match;
+  while ((match = regex.exec(htmlContent)) !== null) {
+    const question = match[1].replace(/<[^>]*>?/gm, '').trim() + '?';
+    const answer = match[2].replace(/<[^>]*>?/gm, '').trim();
+    if (question && answer) {
+      faqs.push({ question, answer });
+    }
+  }
+  return faqs;
 }
 
 export default async function LocalizedBlogPostPage({
@@ -56,7 +71,48 @@ export default async function LocalizedBlogPostPage({
     translatedContent: data.translatedContent,
   };
 
-  return <BlogPostClient post={post} />;
+  // Fetch related posts
+  const allPosts = await getAllBlogPosts();
+  const currentTags = post.metadata.tags || [];
+  
+  const relatedPosts = allPosts
+    .filter(p => p.slug !== post.slug)
+    .map(p => {
+      const sharedTags = (p.metadata.tags || []).filter(t => currentTags.includes(t)).length;
+      const samePillar = p.metadata.pillar === post.metadata.pillar ? 1 : 0;
+      return { post: p, score: sharedTags * 2 + samePillar };
+    })
+    .filter(p => p.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(p => p.post);
+
+  const contentToParse = lang === "fr" && post.translatedContent?.fr ? post.translatedContent.fr : post.content;
+  const faqs = extractFAQs(contentToParse);
+  const faqJsonLd = faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
+  return (
+    <>
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
+      <BlogPostClient post={post} relatedPosts={relatedPosts} />
+    </>
+  );
 }
 
 export async function generateMetadata({

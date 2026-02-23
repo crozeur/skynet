@@ -235,11 +235,20 @@ function markdownToHtml(markdown) {
     return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
   });
 
-  // Blockquotes
+  // Blockquotes & Callouts
   html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
   html = html.replace(/(<blockquote>.*?<\/blockquote>)/gs, (match) => {
-    const content = match.replace(/<blockquote>/g, '').replace(/<\/blockquote>/g, '\n');
-    return `<blockquote class="article-blockquote">${content.trim()}</blockquote>`;
+    const content = match.replace(/<blockquote>/g, '').replace(/<\/blockquote>/g, '\n').trim();
+    
+    if (content.startsWith('⚠️') || content.toLowerCase().startsWith('attention')) {
+      return `<div class="article-callout article-callout-warning"><div class="callout-icon">⚠️</div><div class="callout-content">${content.replace(/^⚠️\s*/, '').replace(/^attention\s*:\s*/i, '')}</div></div>`;
+    } else if (content.startsWith('💡') || content.toLowerCase().startsWith('pro-tip') || content.toLowerCase().startsWith('astuce')) {
+      return `<div class="article-callout article-callout-info"><div class="callout-icon">💡</div><div class="callout-content">${content.replace(/^💡\s*/, '').replace(/^(pro-tip|astuce)\s*:\s*/i, '')}</div></div>`;
+    } else if (content.startsWith('✅') || content.toLowerCase().startsWith('succès') || content.toLowerCase().startsWith('success')) {
+      return `<div class="article-callout article-callout-success"><div class="callout-icon">✅</div><div class="callout-content">${content.replace(/^✅\s*/, '').replace(/^(succès|success)\s*:\s*/i, '')}</div></div>`;
+    }
+    
+    return `<blockquote class="article-blockquote">${content}</blockquote>`;
   });
 
   // Images with loading lazy
