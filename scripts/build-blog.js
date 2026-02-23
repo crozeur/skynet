@@ -87,7 +87,15 @@ async function translateText(text) {
 
   if (SKIP_TRANSLATION) return applyGlossary(text);
 
+  // Check cache first
+  if (translationCache[text]) {
+    return applyGlossary(translationCache[text]);
+  }
+
   try {
+    // Add a small delay to avoid rate limiting
+    await sleep(1000); // Increased delay to 1s
+
     // Try Google Translate
     const encoded = encodeURIComponent(text);
     const response = await fetchWithTimeout(
@@ -98,7 +106,7 @@ async function translateText(text) {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         },
       },
-      12000
+      15000 // Increased timeout to 15s
     );
 
     if (response.ok) {
@@ -106,12 +114,19 @@ async function translateText(text) {
       if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
         const translated = data[0].map((chunk) => chunk[0] || "").join("");
         if (translated) {
+          // Save to cache
+          translationCache[text] = translated;
+          cacheUpdated = true;
           return applyGlossary(translated);
         }
       }
+    } else if (response.status === 429) {
+      console.warn(`  ⚠️  Rate limited by Google Translate. Waiting 5 seconds...`);
+      await sleep(5000);
     }
   } catch (err) {
     console.warn(`  ⚠️  Translation failed for: ${text.substring(0, 30)}...`);
+    console.error(err);
   }
 
   // Fallback to glossary only
@@ -191,7 +206,6 @@ async function translateHtmlContent(html) {
   }
 
   // Translate text chunks in parallel (batch them to avoid too many requests)
-  const batchSize = 5;
   const translatedChunks = [];
 
   for (let i = 0; i < chunks.length; i++) {
@@ -342,6 +356,7 @@ const OUTPUT_DIR = path.join(process.cwd(), "public", "blog-data");
 const SLUG_OVERRIDES_PATH = path.join(process.cwd(), "scripts", "blog_slug_overrides.fr.json");
 const SLUG_ALIASES_SEED_PATH = path.join(process.cwd(), "scripts", "blog_slug_aliases.fr.json");
 const TITLE_OVERRIDES_FR_PATH = path.join(process.cwd(), "scripts", "blog_title_overrides.fr.json");
+const TRANSLATION_CACHE_PATH = path.join(process.cwd(), "scripts", "translation-cache.json");
 
 function readJsonFileSafe(filePath, fallback) {
   try {
@@ -356,6 +371,8 @@ function readJsonFileSafe(filePath, fallback) {
 const slugOverridesFr = readJsonFileSafe(SLUG_OVERRIDES_PATH, {});
 const slugAliasesFrSeed = readJsonFileSafe(SLUG_ALIASES_SEED_PATH, {});
 const titleOverridesFr = readJsonFileSafe(TITLE_OVERRIDES_FR_PATH, {});
+const translationCache = readJsonFileSafe(TRANSLATION_CACHE_PATH, {});
+let cacheUpdated = false;
 
 // Create output directory
 if (!fs.existsSync(OUTPUT_DIR)) {
@@ -856,6 +873,15 @@ console.log(`📝 Building ${files.length} blog posts...`);
     fs.writeFileSync(aliasesPath, JSON.stringify(sorted, null, 2) + "\n");
   } catch (err) {
     console.warn(`  ⚠️  Could not write FR aliases: ${err.message}`);
+  }
+
+  if (cacheUpdated) {
+    try {
+      fs.writeFileSync(TRANSLATION_CACHE_PATH, JSON.stringify(translationCache, null, 2) + "\n");
+      console.log(`✅ Translation cache updated`);
+    } catch (err) {
+      console.warn(`  ⚠️  Could not write translation cache: ${err.message}`);
+    }
   }
 
   console.log(`✅ Blog posts compiled to ${OUTPUT_DIR}`);
