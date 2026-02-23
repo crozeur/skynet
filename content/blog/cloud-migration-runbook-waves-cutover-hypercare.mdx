@@ -24,11 +24,11 @@ A “wave” is a batch of workloads that move together because they share depen
 
 Practical approach for SMEs:
 
-1) Inventory and dependency map (lightweight)
+### 1) Inventory and dependency map (lightweight)
 - Start with a table: application, business owner, technical owner, data stores, integrations, auth method, criticality, and acceptable downtime.
 - Add a simple dependency view: “App A requires DB B and SSO C.” Even a whiteboard diagram is enough to avoid moving a downstream system first.
 
-2) Choose wave criteria
+### 2) Choose wave criteria
 Use criteria that influence risk and effort:
 - Business criticality (revenue, operations, safety)
 - Data sensitivity (customer PII, financial data, regulated data)
@@ -36,7 +36,7 @@ Use criteria that influence risk and effort:
 - Change frequency (apps with frequent releases need more mature deployment)
 - Legacy constraints (unsupported OS, hard-coded IPs, old libraries)
 
-3) Common wave patterns
+### 3) Common wave patterns
 - Wave 0 (foundation): identity, logging, monitoring, network segmentation, backup approach, and baseline policies.
 - Wave 1 (low risk): internal tools, dev/test, non-critical apps.
 - Wave 2 (medium risk): customer-facing but with good rollback options.
@@ -61,14 +61,14 @@ Cutover is the moment you switch production traffic, users, or data flows to the
 
 A good cutover runbook includes:
 
-1) Preconditions (what must be true before cutover)
+### 1) Preconditions (what must be true before cutover)
 - Change window approved and communicated.
 - Monitoring in place for old and new environments.
 - Backups/snapshots taken and restore procedure confirmed.
 - Admin access tested (including break-glass access).
 - Final test results recorded (performance, integration, security checks).
 
-2) A timed sequence with owners
+### 2) A timed sequence with owners
 Write steps so someone else could execute them at 2 a.m.:
 - T-60: Freeze deployments; confirm no outstanding changes.
 - T-45: Confirm replication status / data sync is current.
@@ -79,7 +79,7 @@ Write steps so someone else could execute them at 2 a.m.:
 - T+10: Run smoke tests (auth, core transactions, key integrations).
 - T+30: Validate logs, error rates, and performance counters.
 
-3) Explicit validation criteria (what “good” looks like)
+### 3) Explicit validation criteria (what “good” looks like)
 Define pass/fail checks such as:
 - Users can authenticate via SSO; admin logins require MFA.
 - Error rate below your known baseline.
@@ -87,7 +87,7 @@ Define pass/fail checks such as:
 - No unexpected public exposure (e.g., management ports not reachable externally).
 - Logs are arriving in the central collector; alerts are firing for test events.
 
-4) A rollback plan with a decision gate
+### 4) A rollback plan with a decision gate
 Rollback is not failure—it’s risk management.
 - Define the rollback window (e.g., “within 45 minutes”).
 - Define the trigger conditions (e.g., login failures, data inconsistency, unbounded latency).
@@ -108,21 +108,21 @@ During cutover, security issues often surface as availability issues (blocked tr
 ## Hypercare: stabilize fast, then hand off to steady-state operations
 Hypercare is a time-boxed period after cutover where the team actively monitors, fixes, and tunes the migrated workload. Without hypercare, SMEs often drift into “temporary” exceptions—extra admin access, open firewall rules, or missing logging—that become permanent risk.
 
-1) Time-box and staff it
+### 1) Time-box and staff it
 Typical hypercare windows are 1–3 weeks depending on complexity. Define:
 - A primary on-call engineer.
 - A backup.
 - An incident commander role (can be a rotating duty).
 - A daily 15-minute review of incidents, changes, and open risks.
 
-2) What to monitor (beyond uptime)
+### 2) What to monitor (beyond uptime)
 - Authentication failures and unusual admin activity.
 - Error rate and latency on key endpoints.
 - Data pipeline health (replication lag, queue depth, failed jobs).
 - Resource saturation (CPU, memory, storage IOPS).
 - Security telemetry (blocked connections, denied API calls, policy violations).
 
-3) Common hypercare tasks
+### 3) Common hypercare tasks
 - Tighten access: remove temporary elevated permissions used during migration.
 - Close exposure: remove temporary inbound rules and unused public endpoints.
 - Tune alerts: reduce noise, keep high-signal notifications.
@@ -137,27 +137,27 @@ Week 2: complete restore test, finalize dashboards, hand off to operations with 
 ## Security threads to weave through every wave
 Security shouldn’t be a separate “phase at the end.” Add repeatable security threads to each wave so you don’t accumulate migration debt.
 
-1) Identity and access management
+### 1) Identity and access management
 - Use role-based access and least privilege.
 - Require MFA for privileged access.
 - Keep a documented break-glass process (who, when, and how it’s audited).
 
-2) Configuration baselines
+### 2) Configuration baselines
 - Standardize hardened images or build templates.
 - Disable default passwords, remove unused services.
 - Enforce encryption in transit and at rest where supported.
 
-3) Secrets, keys, and certificates
+### 3) Secrets, keys, and certificates
 - Centralize secrets management.
 - Rotate credentials when workloads move (don’t reuse old long-lived keys).
 - Track certificate expiry and ownership.
 
-4) Logging and incident readiness
+### 4) Logging and incident readiness
 - Ensure audit logs are enabled and retained.
 - Forward logs to a central place with access controls.
 - Define what triggers an incident response process (even a lightweight one).
 
-5) Data protection and backup
+### 5) Data protection and backup
 - Classify data by sensitivity and decide where it can live.
 - Verify backups and restores.
 - Document retention and deletion behavior (including “who can delete backups”).

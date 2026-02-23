@@ -40,21 +40,21 @@ Framework alignment (without compliance claims):
 A common onboarding mistake is “turn on everything.” Instead, build an alert catalog that prioritizes signal over volume.
 
 How to do it:
-1) Start with a minimum viable set of log sources:
+### 1) Start with a minimum viable set of log sources:
    - Identity/authentication logs (IdP, VPN, SSO)
    - Email security and audit logs
    - Endpoint security/EDR alerts
    - Firewall or secure web gateway logs (as available)
    - Critical SaaS audit logs (file sharing, admin actions)
 
-2) Define alert requirements for each detection:
+### 2) Define alert requirements for each detection:
    - Trigger condition (what event pattern fires)
    - Data needed (fields required to investigate)
    - Expected false positives (known benign causes)
    - Response playbook link (what to do next)
    - Owner (SOC only, IT, or business owner)
 
-3) Classify alerts by intent:
+### 3) Classify alerts by intent:
    - High confidence (act immediately): malware detected/quarantined failed, admin account created, MFA disabled for privileged user.
    - Suspicious (needs triage): anomalous login, unusual data access.
    - Hygiene (track as tickets): missing patches, weak configurations (often better handled outside the SOC queue).
@@ -91,9 +91,9 @@ Core triage components:
   - Confirmed data access outside normal patterns on regulated/sensitive datasets.
 
 Example triage decision tree (simple):
-1) Is this tied to a privileged account or crown jewel system?
-2) Is there a risky action (MFA disabled, new forwarding rule, new admin role, mass download)?
-3) Do we have corroborating evidence from a second source (IdP + endpoint, email + SaaS audit)?
+### 1) Is this tied to a privileged account or crown jewel system?
+### 2) Is there a risky action (MFA disabled, new forwarding rule, new admin role, mass download)?
+### 3) Do we have corroborating evidence from a second source (IdP + endpoint, email + SaaS audit)?
 If “yes” to 1 and 2, escalate even if confidence isn’t perfect.
 
 ## 4) Response readiness: playbooks, evidence, and containment options
@@ -130,17 +130,17 @@ Example: account takeover containment (minimal viable)
 Good SOC reporting helps leadership prioritize risk reduction, not just count alerts.
 
 Set up three reporting layers:
-1) Operational reporting (daily/weekly, for IT/SOC):
+### 1) Operational reporting (daily/weekly, for IT/SOC):
    - Open investigations by severity
    - Aging items (stuck tickets)
    - Recurrent noisy alerts (tuning candidates)
 
-2) Management reporting (monthly/quarterly, for leadership):
+### 2) Management reporting (monthly/quarterly, for leadership):
    - Top incident themes (e.g., phishing, misconfigurations, credential issues)
    - Mean time-to-acknowledge and mean time-to-contain (only if you can measure reliably)
    - Control improvement backlog (what would reduce repeat incidents)
 
-3) Incident reporting (per event):
+### 3) Incident reporting (per event):
    - What happened, when, and how it was detected
    - Scope and impact (systems/users/data involved)
    - Actions taken (containment, eradication, recovery)

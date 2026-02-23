@@ -22,12 +22,12 @@ Audits go wrong when evidence is collected as an afterthought: screenshots scatt
 ## Build the “risk → control → evidence → fix” chain
 An audit evidence template works best when it forces a straight line from “what could go wrong” to “how we reduce the chance/impact” to “what proves it.” That chain looks like this:
 
-1) Risk statement (in plain language)
-2) Control objective (what must be true)
-3) Control activity (what you do)
-4) Evidence (what proves you do it)
-5) Exception handling (what you do when it fails)
-6) Fix tracking (how you prevent repeats)
+### 1) Risk statement (in plain language)
+### 2) Control objective (what must be true)
+### 3) Control activity (what you do)
+### 4) Evidence (what proves you do it)
+### 5) Exception handling (what you do when it fails)
+### 6) Fix tracking (how you prevent repeats)
 
 For SMEs, the key is to keep risk statements specific enough to guide evidence collection.
 
@@ -86,7 +86,7 @@ Why these fields matter:
 
 Mini example rows (simplified):
 
-1) EVID-ACCESS-001
+### 1) EVID-ACCESS-001
 - Risk: Orphaned accounts enable unauthorized access
 - Control activity: Disable accounts within 24–72 hours of termination notice
 - Evidence: Monthly HR termination list matched to identity provider disabled accounts export
@@ -94,13 +94,13 @@ Mini example rows (simplified):
 - Owner: IT Operations
 - Fix link: INC-1234 (automation to sync HR terminations)
 
-2) EVID-PATCH-003
+### 2) EVID-PATCH-003
 - Risk: Known vulnerabilities exploited due to delayed patching
 - Control activity: Apply critical security updates within agreed window; document exceptions
 - Evidence: Patch compliance report + exception tickets for deferred systems
 - Review notes: Confirm sample of deferred items has approval + target date
 
-3) EVID-BACKUP-002
+### 3) EVID-BACKUP-002
 - Risk: Data loss due to failed backups or untested restores
 - Control activity: Daily backups + quarterly restore test
 - Evidence: Backup job success logs + restore test ticket with screenshots/outputs
@@ -111,19 +111,19 @@ Keep the register small at first. A “perfect” register no one maintains is w
 ## Collect stronger evidence (and avoid common traps)
 Not all evidence is equal. When you can choose, prioritize evidence that is:
 
-1) Verifiable and reproducible
+### 1) Verifiable and reproducible
 - Better: An export (CSV/PDF) generated from the system with a timestamp.
 - Risky: A screenshot without context (no time, no scope, easy to misread).
 
-2) Tied to a time window
+### 2) Tied to a time window
 - Better: “Patch report for Jan 1–Mar 31”
 - Risky: “Current patch status” (current can change by the hour).
 
-3) Demonstrates operation, not intent
+### 3) Demonstrates operation, not intent
 - Better: “10 sampled access requests show approvals, provisioning, and review.”
 - Risky: “Policy says managers approve access.”
 
-4) Shows exception handling
+### 4) Shows exception handling
 Auditors (and internal reviewers) care about what happens when controls fail.
 - Example: If a critical patch is deferred, show the exception ticket with: reason, risk review, compensating measure, approval, and target remediation date.
 
@@ -146,27 +146,27 @@ If you can’t review every transaction, pick a small sample that covers normal 
 Evidence collection should feed improvement. Add two lightweight mechanisms to your template: a “finding severity” field and a “fix plan” linkage.
 
 Recommended approach:
-1) Record the gap precisely
+### 1) Record the gap precisely
 - Bad: “Patching needs improvement.”
 - Good: “12 servers missed the critical patch window in Feb; 7 had no approved exception.”
 
-2) Classify the impact in plain language
+### 2) Classify the impact in plain language
 - Example scales: High/Medium/Low or Critical/Important/Opportunistic.
 Keep it consistent; avoid overstating.
 
-3) Create a fix plan with an owner and due date
+### 3) Create a fix plan with an owner and due date
 Fix plans are easier to execute when they’re framed as a control improvement.
 Examples:
 - Automate patch reporting and exception tracking.
 - Add an onboarding checklist step for least-privilege role assignment.
 - Enable alerts for backup job failures and define on-call response.
 
-4) Capture compensating controls when immediate fix isn’t possible
+### 4) Capture compensating controls when immediate fix isn’t possible
 If the “ideal” control can’t be implemented quickly, document what reduces risk in the interim.
 Example:
 - If a legacy system can’t be patched, compensating measures might include network segmentation, reduced exposure, strict allow-listing, enhanced monitoring, and a decommission plan.
 
-5) Close the loop with “verification evidence”
+### 5) Close the loop with “verification evidence”
 When a fix is completed, collect evidence that the change works:
 - Before/after configuration exports
 - A successful restore test after backup changes
