@@ -274,9 +274,9 @@ export const uiStrings: Record<string, Record<string, string>> = {
     "Share": "Share",
     "Found this article valuable?": "Found this article valuable?",
     "Share it with your network": "Share it with your network",
-    "Download the Cybersecurity Checklist": "Download the Cybersecurity Checklist",
-    "Leave your email to receive our practical checklist to strengthen your cyber posture.": "Leave your email to receive our practical checklist to strengthen your cyber posture.",
-    "Get the Checklist": "Get the Checklist",
+    "Need help securing your infrastructure?": "Need help securing your infrastructure?",
+    "Discover our managed services and let our experts protect your organization.": "Discover our managed services and let our experts protect your organization.",
+    "Contact Us": "Contact Us",
   },
   fr: {
     "Back to Blog": "Retour au blog",
@@ -288,9 +288,9 @@ export const uiStrings: Record<string, Record<string, string>> = {
     "Share": "Partager",
     "Found this article valuable?": "Cet article vous a-t-il été utile ?",
     "Share it with your network": "Partagez-le avec votre réseau",
-    "Download the Cybersecurity Checklist": "Télécharger la checklist cybersécurité",
-    "Leave your email to receive our practical checklist to strengthen your cyber posture.": "Laissez votre email pour recevoir notre checklist pratique afin de renforcer votre posture cybersécurité.",
-    "Get the Checklist": "Obtenir la checklist",
+    "Need help securing your infrastructure?": "Besoin d'aide pour sécuriser votre infrastructure ?",
+    "Discover our managed services and let our experts protect your organization.": "Découvrez nos services managés et laissez nos experts protéger votre organisation.",
+    "Contact Us": "Nous contacter",
   },
 };
 

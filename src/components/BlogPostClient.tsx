@@ -896,6 +896,25 @@ export function BlogPostClient({ post }: { post: PostData }) {
             dangerouslySetInnerHTML={{ __html: content }}
           />
 
+          {/* E-E-A-T Signature */}
+          <div className="mt-12 mb-8 p-6 rounded-2xl bg-gradient-to-br from-blue-50/80 to-slate-50/80 dark:from-slate-800/80 dark:to-slate-900/80 border border-blue-100 dark:border-slate-700 shadow-sm flex items-center gap-6">
+            <div className="flex-shrink-0">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 p-[2px]">
+                <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden">
+                  <span className="text-xl font-bold text-blue-600 dark:text-blue-400">YH</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
+                {language === "en" ? "Article written by" : "Article rédigé par"} <a href="https://www.linkedin.com/in/yassine-hadji-5889813a0" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">Yassine Hadji</a>
+              </h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {language === "en" ? "Cybersecurity Expert at Skynet Consulting" : "Expert en Cybersécurité chez Skynet Consulting"}
+              </p>
+            </div>
+          </div>
+
           {/* Citation box (encourage attribution instead of copying blocks) */}
           <div className="mt-10 rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/70">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -1024,16 +1043,16 @@ export function BlogPostClient({ post }: { post: PostData }) {
                 </svg>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                {getUIString("Download the Cybersecurity Checklist", language)}
+                {getUIString("Need help securing your infrastructure?", language)}
               </h2>
               <p className="text-gray-700 dark:text-gray-300 mb-8 leading-relaxed text-lg">
-                {getUIString("Leave your email to receive our practical checklist to strengthen your cyber posture.", language)}
+                {getUIString("Discover our managed services and let our experts protect your organization.", language)}
               </p>
               <Link
                 href="/#contact"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-lg font-bold hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 active:scale-95 transition-all duration-300 shadow-2xl shadow-blue-500/40 hover:shadow-blue-500/60"
               >
-                {getUIString("Get the Checklist", language)}
+                {getUIString("Contact Us", language)}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
