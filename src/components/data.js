@@ -12,7 +12,7 @@ const benefitOne = {
   desc: "Skynet delivers enterprise-grade security capabilities specifically designed for SMBs and mid-market organizations. Our AI-powered platform provides continuous monitoring, rapid threat detection, and expert-led incident response.",
   bullets: [
     {
-      title: "24/7 SOC Monitoring",
+      title: "AI-Augmented Execution",
       desc: "Round-the-clock security operations center staffed by certified analysts monitoring your environment.",
       icon: <ShieldCheckIcon />,
     },

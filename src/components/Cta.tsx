@@ -95,7 +95,7 @@ export const Cta = () => {
                         className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-cyan-600 to-blue-700 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:-translate-y-1 active:scale-95 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900 overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-cyan-700 to-blue-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <span className="relative">{language === "en" ? "Schedule a discovery call" : "Planifier un appel de découverte"}</span>
+                        <span className="relative">{language === "en" ? "See the platform in action" : "Voir la plateforme en action"}</span>
                         <svg className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>

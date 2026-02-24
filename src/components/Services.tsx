@@ -424,7 +424,7 @@ export const Services = () => {
                         <h3 className="text-lg sm:text-xl font-bold text-blue-900 break-words dark:text-white">{activeService.solution}</h3>
                         {activeTab === 0 && (
                           <span className="inline-flex md:hidden text-[11px] text-slate-600 dark:text-slate-300">
-                            {language === "en" ? "(SOC: Security Operations Center)" : "(SOC : Centre des opérations de sécurité)"}
+                            {language === "en" ? "(AI-Augmented Execution Platform)" : "(Plateforme d'Exécution Augmentée par l'IA)"}
                           </span>
                         )}
                       </div>
@@ -478,8 +478,8 @@ export const Services = () => {
                     </h4>
                     <p className="text-sm text-slate-700 mt-2 dark:text-slate-200/90 break-words leading-relaxed">
                       {language === "en"
-                        ? "Share your context with us and we'll design the right combination of SOC, audit, and cloud modernization services."
-                        : "Partagez votre contexte avec nous et nous concevrons la bonne combinaison de services SOC, audit et modernisation cloud."}
+                          ? "Share your context with us and we'll design the right combination of AI-augmented audits, cloud migrations, and compliance services."
+                          : "Partagez votre contexte avec nous et nous concevrons la bonne combinaison d'audits augmentés par l'IA, de migrations cloud et de services de conformité."}
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -489,13 +489,13 @@ export const Services = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-blue-300 hover:scale-105 dark:shadow-blue-900/40 break-words"
                     >
-                      {language === "en" ? "Book a call" : "Réserver un appel"}
+                      {language === "en" ? "Request a Demo" : "Demander une démo"}
                     </a>
                     <a
                       href="mailto:skynet.consulting.dz@email.com"
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/30 dark:text-white dark:hover:border-white/60 break-words"
                     >
-                      {language === "en" ? "Email us" : "Nous écrire"}
+                      {language === "en" ? "Start a Free Audit" : "Lancer un audit gratuit"}
                     </a>
                   </div>
                 </div>
@@ -628,7 +628,7 @@ export const Services = () => {
                               <circle cx="12" cy="16.2" r="0.8" />
                             </svg>
                             <span className="absolute left-5 top-1 z-20 whitespace-nowrap rounded-md bg-gray-900 text-white px-2 py-1 text-xs shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none">
-                              {language === "en" ? "SOC = Security Operations Center" : "SOC = Centre des opérations de sécurité"}
+                              {language === "en" ? "AI-Augmented Execution Platform" : "Plateforme d'Exécution Augmentée par l'IA"}
                             </span>
                           </span>
                         )}
@@ -693,13 +693,13 @@ export const Services = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-all duration-300 hover:translate-y-[-2px] hover:shadow-blue-300 hover:scale-105 dark:shadow-blue-900/40 break-words"
                     >
-                      {language === "en" ? "Book a call" : "Réserver un appel"}
+                      {language === "en" ? "Request a Demo" : "Demander une démo"}
                     </a>
                     <a
                       href="mailto:skynet.consulting.dz@email.com"
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/30 dark:text-white dark:hover:border-white/60 break-words"
                     >
-                      {language === "en" ? "Email us" : "Nous écrire"}
+                      {language === "en" ? "Start a Free Audit" : "Lancer un audit gratuit"}
                     </a>
                   </div>
                 </div>

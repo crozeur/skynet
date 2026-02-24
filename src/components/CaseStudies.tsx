@@ -14,12 +14,12 @@ export const CaseStudies = () => {
       cases: [
         {
           title: "Banque multinationale – Région EMEA",
-          sector: "Services financiers | SOC externalisé 24/7",
+          sector: "Services financiers | Audit Augmenté par l'IA",
           icon: "🏦",
           points: [
             "Une banque régionale avec 50+ agences, sans équipe de sécurité dédiée",
             "Aucune détection d'incidents en temps réel, vulnérabilités critiques non identifiées",
-            "Déploiement d'un SOC externalisé 24/7 avec monitoring complet et détection IA",
+            "Audit de sécurité complet et migration Cloud via infrastructure éphémère",
             "Temps de détection réduit à < 2 minutes",
             "90% des attaques bloquées automatiquement",
           ],
@@ -43,7 +43,7 @@ export const CaseStudies = () => {
           points: [
             "Groupe avec sites en Europe, Afrique du Nord et Middle East",
             "Infrastructure dispersée, incidents non détectés pendant des semaines",
-            "SOC hybride 24/7 pour tous les sites, support multilingue",
+            "Exécution standardisée sur tous les sites via nos playbooks IA",
             "Réduction de 40% des coûts de cybersécurité",
             "Attaque ransomware confinée en < 15 minutes",
           ],
@@ -56,12 +56,12 @@ export const CaseStudies = () => {
       cases: [
         {
           title: "Regional Bank – 50+ Branches",
-          sector: "Financial Services | 24/7 Managed SOC",
+          sector: "Financial Services | AI-Augmented Audit",
           icon: "🏦",
           points: [
             "Regional bank with 50+ branches, no dedicated security team",
             "No real-time incident detection, unidentified critical vulnerabilities",
-            "24/7 managed SOC deployment with full monitoring and AI detection",
+            "Comprehensive security audit and Cloud migration via ephemeral infrastructure",
             "Detection time reduced to < 2 minutes",
             "90% of attacks blocked automatically",
           ],
@@ -85,7 +85,7 @@ export const CaseStudies = () => {
           points: [
             "Global industrial group with multiple regional sites",
             "Dispersed infrastructure, incidents undetected for weeks",
-            "24/7 hybrid SOC for all sites, multilingual support",
+            "Standardized execution across all sites via our AI playbooks",
             "40% reduction in cybersecurity costs",
             "Ransomware attack contained in < 15 minutes",
           ],

@@ -40,9 +40,9 @@ export const SearchBar = () => {
 
       // Define searchable sections
       const sections = [
-        { id: "hero", title: language === "en" ? "Home" : "Accueil", keywords: "security audit soc monitoring cybersecurity surveillance sécurité audit" },
+        { id: "hero", title: language === "en" ? "Home" : "Accueil", keywords: "security audit ai execution cybersecurity surveillance sécurité audit" },
         { id: "case-studies", title: language === "en" ? "Success Stories" : "Nos Succès", keywords: "case study success client projet réussite" },
-        { id: "services-overview", title: language === "en" ? "Services" : "Nos Services", keywords: "services soc audit cloud compliance conformité" },
+        { id: "services-overview", title: language === "en" ? "Services" : "Nos Services", keywords: "services ai audit cloud compliance conformité" },
         { id: "compliance", title: language === "en" ? "Compliance" : "Conformité & Risques", keywords: "compliance iso gdpr pci conformité rgpd norme" },
         { id: "about", title: language === "en" ? "About Us" : "À Propos", keywords: "about company team expertise équipe entreprise" },
         { id: "contact", title: language === "en" ? "Contact" : "Nous Contacter", keywords: "contact email phone form formulaire" },

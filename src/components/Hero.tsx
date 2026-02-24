@@ -10,7 +10,7 @@ export const Hero = () => {
   const t = translations[language];
 
   const heroTitle =
-    t.hero_title || "Protect Your Critical Infrastructure with Confidence";
+    t.hero_title || "Enterprise-Grade Cybersecurity, Powered by Advanced Automation";
   const heroDesc =
     t.hero_desc ||
     "Around-the-clock threat detection and response, comprehensive audits, and strategic guidance. A holistic approach to secure, audit, and govern your cybersecurity.";
@@ -70,8 +70,8 @@ export const Hero = () => {
                           </svg>
                           <span className="absolute left-5 top-1 z-20 whitespace-nowrap rounded-md bg-gray-900 text-white px-2 py-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                             {language === "en"
-                              ? "SOC = Security Operations Center"
-                              : "SOC = Centre des opérations de sécurité"}
+                              ? "AI-Augmented Execution Platform"
+                              : "Plateforme d'Exécution Augmentée par l'IA"}
                           </span>
                         </span>
                       )}
@@ -80,7 +80,7 @@ export const Hero = () => {
                       <p className="md:hidden mt-1 text-xs text-gray-600 dark:text-blue-100/80">
                         {language === "en"
                           ? "Powered by our Security Operations Center"
-                          : "Propulsé par notre centre des opérations de sécurité (SOC)"}
+                          : "Propulsé par notre Cerveau IA propriétaire"}
                       </p>
                     )}
                   </div>
@@ -89,7 +89,7 @@ export const Hero = () => {
             ))}
 
             <div className="flex flex-wrap gap-3 pt-2 animate-[fadeInUp_0.8s_ease-out]" style={{ animationFillMode: "backwards" }}>
-              {["24/7 SOC", "Evidence-ready reports", "Deployment < 10 days"].map((pill, idx) => (
+              {["Zero-Trace VMs", "Evidence-ready reports", "Deployment < 10 days"].map((pill, idx) => (
                 <span
                   key={pill}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-white/10 dark:to-white/8 border border-blue-300/50 dark:border-white/15 text-xs font-bold text-blue-700 dark:text-blue-100 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
@@ -139,7 +139,7 @@ export const Hero = () => {
                     </span>
                     <div className="leading-snug space-y-1">
                       <p className="font-semibold text-gray-900 dark:text-white">{t.hero_call_to_action}</p>
-                      <p className="text-xs text-gray-500 dark:text-blue-100/70">Agenda prioritaire, créneau de 30 minutes.</p>
+                      <p className="text-xs text-gray-500 dark:text-blue-100/70">{t.hero_call_to_action_sub}</p>
                       <div className="h-1 w-24 rounded-full bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 animate-[pulseGlow_2.6s_ease-in-out_infinite]" aria-hidden />
                     </div>
                   </div>

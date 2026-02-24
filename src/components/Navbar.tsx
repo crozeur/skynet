@@ -71,12 +71,12 @@ export const Navbar = () => {
         ? "px-1 lg:px-1.5"
         : "px-1.5 lg:px-2"
       : "px-2.5 lg:px-3";
-    return `text-gray-900 dark:text-gray-100 transition font-bold whitespace-nowrap ${textSizeClass} ${paddingClass} py-2 rounded-md ${
+    return `relative text-gray-900 dark:text-gray-100 transition-all duration-300 ease-out font-bold whitespace-nowrap ${textSizeClass} ${paddingClass} py-2 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-1 after:h-0.5 after:w-0 after:rounded-full after:bg-blue-600 dark:after:bg-blue-300 after:transition-all after:duration-300 after:ease-out ${
       isActive(sectionId)
-        ? "text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 border-b-2 border-blue-700 dark:border-blue-300 shadow-sm"
+        ? "text-blue-700 dark:text-blue-300 after:w-[70%]"
         : promoted
-          ? "text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200"
-          : "hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+          ? "text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 hover:after:w-[55%]"
+          : "hover:text-blue-700 dark:hover:text-blue-300 hover:after:w-[55%]"
     }`;
   };
 
@@ -87,8 +87,8 @@ export const Navbar = () => {
   );
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white dark:bg-gray-900/90 backdrop-blur-md border-b-2 border-gray-300 dark:border-gray-800 relative transition-all duration-300 ${
-      scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
+    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md relative transition-all duration-300 ${
+      scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50 py-0.5" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
@@ -186,7 +186,7 @@ export const Navbar = () => {
                 onClick={() => setOpen(!open)}
                 aria-expanded={open}
                 aria-label={open ? "Close menu" : "Open menu"}
-                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {open ? (
                   <>
@@ -209,14 +209,11 @@ export const Navbar = () => {
         </div>
       </Container>
 
-      {/* Accent line */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-blue-500/40 via-cyan-400/40 to-blue-600/40"></div>
-
       {/* Mobile menu */}
       {/* Mobile menu: uses max-height + opacity transition for slide/fade effect */}
       <div className={`md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${open ? 'max-h-96 opacity-100 py-3' : 'max-h-0 opacity-0 py-0'}`}>
         <Container className="px-4">
-          <div className={`flex flex-col items-start gap-4 ${open ? '' : 'pointer-events-none'}`}>
+          <div className={`flex flex-col items-start gap-4 transition-transform duration-300 ${open ? 'translate-y-0' : '-translate-y-2 pointer-events-none'}`}>
             <a href="/#hero" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Home" : "Accueil"}
             </a>

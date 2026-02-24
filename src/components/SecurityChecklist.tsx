@@ -66,7 +66,7 @@ export const SecurityChecklist = () => {
       conclusion:
         "Si vous avez répondu \"Non\" à plusieurs de ces questions, votre organisation est exposée à des risques cyber majeurs. Une seule faille peut suffire à compromettre l'ensemble de vos systèmes.",
       solution:
-        "Skynet Consulting réalise des audits de sécurité complets pour identifier vos vulnérabilités et vous proposer un plan d'actions concret. Nos solutions de SOC externalisé 24/7 permettent de corriger ces points faibles.",
+        "Skynet Consulting réalise des audits de sécurité complets pour identifier vos vulnérabilités et vous proposer un plan d'actions concret. Notre plateforme d'exécution IA permet de corriger ces points faibles rapidement et à moindre coût.",
       cta: "Demandez dès maintenant un audit de sécurité gratuit en laissant votre email. Nous analysons votre posture actuelle et vous envoyons des recommandations concrètes par email sous 48 heures.",
     },
     en: {
@@ -125,7 +125,7 @@ export const SecurityChecklist = () => {
       conclusion:
         'If you answered "No" to several of these questions, your organization is exposed to major cyber risks. A single vulnerability can compromise your entire system.',
       solution:
-        "Skynet Consulting conducts comprehensive security audits to identify your vulnerabilities and propose concrete action plans. Our 24/7 managed SOC solutions address these weaknesses.",
+        "Skynet Consulting conducts comprehensive security audits to identify your vulnerabilities and propose concrete action plans. Our AI-augmented execution platform addresses these weaknesses quickly and cost-effectively.",
       cta: "Request a free security audit now by leaving your email. We analyze your current posture and send you concrete recommendations by email within 48 hours.",
     },
   };

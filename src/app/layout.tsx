@@ -16,8 +16,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://skynet-consulting.net"),
-  title: "Skynet Consulting | Cybersecurity Solutions & Managed SOC",
-  description: "Expert cybersecurity services: Managed SOC operations, security audits, and cloud security. Protect your organization with proven expertise.",
+  title: "Skynet Consulting | Advanced Cybersecurity Solutions",
+  description: "Skynet Consulting: The Cybertech platform replacing traditional consulting. Standardized audits, ephemeral infrastructure, and automated compliance.",
   icons: {
     icon: [
       { url: '/favicon-black.svg?v=1', type: 'image/svg+xml' },
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Skynet Consulting | Cybersecurity Solutions & Managed SOC",
-    description: "Expert cybersecurity services: Managed SOC operations, security audits, and cloud security.",
+    title: "Skynet Consulting | Advanced Cybersecurity Solutions",
+    description: "Skynet Consulting: The Cybertech platform replacing traditional consulting. Standardized audits, ephemeral infrastructure, and automated compliance.",
     url: "https://skynet-consulting.net",
     siteName: "Skynet Consulting",
     images: [

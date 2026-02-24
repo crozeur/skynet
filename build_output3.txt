@@ -1,0 +1,158 @@
+
+> nextly-template@2.0.0 build
+> npm run build:blog && next build
+
+
+> nextly-template@2.0.0 build:blog
+> npm run fix:blog-metadata && npm run autotag:blog && npm run validate:blog-metadata && node scripts/build-blog.js --skip-translation
+
+
+> nextly-template@2.0.0 fix:blog-metadata
+> node scripts/fix-missing-metadata.js
+
+🔍 Vérification de 28 fichiers MDX...
+
+✓ 30-question-security-audit-checklist-sme-it-managers.mdx - métadonnées OK
+✓ audit-evidence-template-collect-map-track.mdx - métadonnées OK
+✓ audit-evidence-template-map-risks-proof-fixes.mdx - métadonnées OK
+✓ build-practical-soc-smes-monitor-run.mdx - métadonnées OK
+✓ cloud-cutover-runbook-waves-go-live-hypercare.mdx - métadonnées OK
+✓ cloud-migration-cutover-runbook-small-it-team.mdx - métadonnées OK
+✓ cloud-migration-cutover-runbook-steps-roles-hypercare.mdx - métadonnées OK
+✓ cloud-migration-runbook-waves-cutover-hypercare.mdx - métadonnées OK
+✓ cloud-misconfigurations-catch-first-microsoft-365-aws.mdx - métadonnées OK
+✓ cloud-misconfigurations-smes-storage-iam-basics.mdx - métadonnées OK
+✓ internal-security-audit-checklist-small-it-teams.mdx - métadonnées OK
+✓ it-security-audit-prep-20-evidence-items-gather-now.mdx - métadonnées OK
+✓ run-security-audit-new-saas-apps-60-minutes.mdx - métadonnées OK
+✓ secure-first-aws-account-day-one-settings.mdx - métadonnées OK
+✓ secure-m365-10-settings-smes-review-first.mdx - métadonnées OK
+✓ secure-microsoft-365-tenant-one-afternoon.mdx - métadonnées OK
+✓ security-audit-checklist-review-before-consultant.mdx - métadonnées OK
+✓ sme-incident-response-playbook-contain-communicate-recover.mdx - métadonnées OK
+✓ sme-security-audit-checklist-30-days.mdx - métadonnées OK
+✓ soc-alert-triage-playbook-small-teams.mdx - métadonnées OK
+✓ soc-alert-triage-workflow-small-it-teams.mdx - métadonnées OK
+✓ soc-alerts-triage-playbook-small-it-teams.mdx - métadonnées OK
+✓ soc-noise-reduction-checklist-smes-first-30-days.mdx - métadonnées OK
+✓ soc-onboarding-checklist-smes-alerts-reporting.mdx - métadonnées OK
+✓ soc-playbook-smes-triage-phishing-alerts-15-minutes.mdx - métadonnées OK
+✓ soc-playbook-triage-escalate-sme-alerts.mdx - métadonnées OK
+✓ soc-triage-checklist-smes-alert-escalation.mdx - métadonnées OK
+✓ soc-triage-checklist-smes-reduce-alert-noise-fast.mdx - métadonnées OK
+
+✨ Vérification des métadonnées terminée (0 modifié(s)).
+
+> nextly-template@2.0.0 autotag:blog
+> node scripts/auto_tag_blog_posts.js
+
+✅ auto-tagging complete (0 file(s)  updated)
+
+> nextly-template@2.0.0 validate:blog-metadata
+> node scripts/validate-blog-metadata.js
+
+✅ Blog metadata validation OK (28 file(s))
+📝 Building 28 blog posts...
+  🔄 Translating 30-question-security-audit-checklist-sme-it-managers...
+✓ 30-question-security-audit-checklist-sme-it-managers
+  🔄 Translating audit-evidence-template-collect-map-track...
+✓ audit-evidence-template-collect-map-track
+  🔄 Translating audit-evidence-template-map-risks-proof-fixes...
+✓ audit-evidence-template-map-risks-proof-fixes
+  🔄 Translating build-practical-soc-smes-monitor-run...
+✓ build-practical-soc-smes-monitor-run
+  🔄 Translating cloud-cutover-runbook-waves-go-live-hypercare...
+✓ cloud-cutover-runbook-waves-go-live-hypercare
+  🔄 Translating cloud-migration-cutover-runbook-small-it-team...
+✓ cloud-migration-cutover-runbook-small-it-team
+  🔄 Translating cloud-migration-cutover-runbook-steps-roles-hypercare...
+✓ cloud-migration-cutover-runbook-steps-roles-hypercare
+  🔄 Translating cloud-migration-runbook-waves-cutover-hypercare...
+✓ cloud-migration-runbook-waves-cutover-hypercare
+  🔄 Translating cloud-misconfigurations-catch-first-microsoft-365-aws...
+✓ cloud-misconfigurations-catch-first-microsoft-365-aws
+  🔄 Translating cloud-misconfigurations-smes-storage-iam-basics...
+✓ cloud-misconfigurations-smes-storage-iam-basics
+  🔄 Translating internal-security-audit-checklist-small-it-teams...
+✓ internal-security-audit-checklist-small-it-teams
+  🔄 Translating it-security-audit-prep-20-evidence-items-gather-now...
+✓ it-security-audit-prep-20-evidence-items-gather-now
+  🔄 Translating run-security-audit-new-saas-apps-60-minutes...
+✓ run-security-audit-new-saas-apps-60-minutes
+  🔄 Translating secure-first-aws-account-day-one-settings...
+✓ secure-first-aws-account-day-one-settings
+  🔄 Translating secure-m365-10-settings-smes-review-first...
+✓ secure-m365-10-settings-smes-review-first
+  🔄 Translating secure-microsoft-365-tenant-one-afternoon...
+✓ secure-microsoft-365-tenant-one-afternoon
+  🔄 Translating security-audit-checklist-review-before-consultant...
+✓ security-audit-checklist-review-before-consultant
+  🔄 Translating sme-incident-response-playbook-contain-communicate-recover...
+✓ sme-incident-response-playbook-contain-communicate-recover
+  🔄 Translating sme-security-audit-checklist-30-days...
+✓ sme-security-audit-checklist-30-days
+  🔄 Translating soc-alert-triage-playbook-small-teams...
+✓ soc-alert-triage-playbook-small-teams
+  🔄 Translating soc-alert-triage-workflow-small-it-teams...
+✓ soc-alert-triage-workflow-small-it-teams
+  🔄 Translating soc-alerts-triage-playbook-small-it-teams...
+✓ soc-alerts-triage-playbook-small-it-teams
+  🔄 Translating soc-noise-reduction-checklist-smes-first-30-days...
+✓ soc-noise-reduction-checklist-smes-first-30-days
+  🔄 Translating soc-onboarding-checklist-smes-alerts-reporting...
+✓ soc-onboarding-checklist-smes-alerts-reporting
+  🔄 Translating soc-playbook-smes-triage-phishing-alerts-15-minutes...
+✓ soc-playbook-smes-triage-phishing-alerts-15-minutes
+  🔄 Translating soc-playbook-triage-escalate-sme-alerts...
+✓ soc-playbook-triage-escalate-sme-alerts
+  🔄 Translating soc-triage-checklist-smes-alert-escalation...
+✓ soc-triage-checklist-smes-alert-escalation
+  🔄 Translating soc-triage-checklist-smes-reduce-alert-noise-fast...
+✓ soc-triage-checklist-smes-reduce-alert-noise-fast
+✅ Blog posts compiled to C:\Users\yainf\.vscode\skynet\public\blog-data
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+[generateStaticParams] Found 28 blog posts
+   Generating static pages (0/41) ...
+   Generating static pages (10/41) 
+   Generating static pages (20/41) 
+   Generating static pages (30/41) 
+ ✓ Generating static pages (41/41)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                       Size     First Load JS
+┌ ○ /                                                             19.7 kB         117 kB
+├ ○ /_not-found                                                   872 B          88.1 kB
+├ ƒ /[lang]/blog                                                  142 B           110 kB
+├ ƒ /[lang]/blog/[slug]                                           142 B           114 kB
+├ ƒ /api/article-webhook                                          0 B                0 B
+├ ƒ /api/blog/[slug]                                              0 B                0 B
+├ ƒ /api/lead                                                     0 B                0 B
+├ ƒ /api/revalidate                                               0 B                0 B
+├ ƒ /api/translate                                                0 B                0 B
+├ ƒ /blog                                                         142 B           110 kB
+├ ● /blog/[slug]                                                  143 B           114 kB
+├   ├ /blog/30-question-security-audit-checklist-sme-it-managers
+├   ├ /blog/audit-evidence-template-collect-map-track
+├   ├ /blog/audit-evidence-template-map-risks-proof-fixes
+├   └ [+25 more paths]
+├ ƒ /blog/[slug]/[topic]                                          141 B           110 kB
+├ ○ /icon.svg                                                     0 B                0 B
+├ ○ /privacy                                                      142 B          87.4 kB
+└ ○ /terms                                                        142 B          87.4 kB
++ First Load JS shared by all                                     87.3 kB
+  ├ chunks/117-286be76e9e567e80.js                                31.7 kB
+  ├ chunks/fd9d1056-a5dcb6553579cec7.js                           53.6 kB
+  └ other shared chunks (total)                                   1.9 kB
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+
