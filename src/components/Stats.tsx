@@ -15,118 +15,143 @@ export const Stats = () => {
       label: t.stats_threats || "Menaces détectées",
       value: t.stats_threats_value || "2,847",
       description: t.stats_threats_desc || "Attaques, anomalies et tentatives d'intrusion bloquées ce mois",
-      icon: "🛡️",
+      icon: (
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+      ),
     },
     {
       label: t.stats_response_time || "Temps de réponse",
       value: t.stats_response_value || "8m 42s",
       description: t.stats_response_desc || "Délai moyen de détection et d'intervention sur incident critique",
-      icon: "⚡",
+      icon: (
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
     },
     {
       label: t.stats_system_health || "Santé du système",
       value: t.stats_health_value || "99.8%",
       description: t.stats_health_desc || "Disponibilité garantie de vos systèmes critiques en production",
-      icon: "📊",
+      icon: (
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
     },
     {
       label: t.stats_coverage || "Couverture active",
       value: t.stats_coverage_value || "100%",
       description: t.stats_coverage_desc || "Tous les actifs informatiques monitorés 24/7 sans interruption",
-      icon: "🔍",
+      icon: (
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      ),
     },
   ];
 
   return (
-    <section className="relative overflow-hidden py-10 lg:py-12 bg-gradient-to-b from-white via-blue-50/35 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.12),transparent_35%),radial-gradient(circle_at_80%_10%,rgba(56,189,248,0.12),transparent_32%),radial-gradient(circle_at_30%_80%,rgba(99,102,241,0.12),transparent_30%)]" aria-hidden />
-      <Container>
-        <div className="text-center mb-16 animate-[fadeInUp_0.6s_ease-out]">
-          <SectionTitle
-            title={t.stats_section_title || "Skynet en un coup d'œil"}
-            align="center"
-          />
-          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{language === "en" ? "Measurable objectives, continuously tracked." : "Des objectifs mesurables de façon continue."}</p>
+    <section className="relative py-24 overflow-hidden bg-slate-50 dark:bg-[#0B1120]">
+      {/* High-tech background elements */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[1px] bg-gradient-to-r from-transparent via-slate-300 dark:via-slate-800 to-transparent"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-blue-500/5 dark:bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+      
+      <Container className="relative z-10">
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 text-blue-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            {language === "en" ? "Performance Metrics" : "Indicateurs de Performance"}
+          </div>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-6">
+            {t.stats_section_title || "Our Commitment to Excellence"}
+          </h2>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            {language === "en" 
+              ? "Measurable objectives, continuously tracked to ensure your security posture remains uncompromised." 
+              : "Des objectifs mesurables et suivis en continu pour garantir une posture de sécurité sans faille."}
+          </p>
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-x-4 -top-6 bottom-6 rounded-3xl border border-blue-100/60 dark:border-blue-900/50 bg-white/30 dark:bg-white/5 blur-xl" aria-hidden />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            {metrics.map((metric, index) => (
-              <div
-                key={index}
-                className="group relative overflow-hidden bg-white/90 dark:bg-gray-900/80 backdrop-blur rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-7 shadow-[0_18px_60px_-40px_rgba(15,23,42,0.55)] transition-all duration-400 hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] cursor-default animate-[fadeInUp_0.6s_ease-out]"
-                style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "backwards" }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/8 via-cyan-500/8 to-indigo-500/8 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none z-0" />
-                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500 opacity-70 group-hover:opacity-100 transition-opacity duration-300 z-10" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+          {metrics.map((metric, index) => (
+            <div
+              key={index}
+              className="group relative p-8 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/50 transition-all duration-500"
+            >
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-500"></div>
+              
+              {/* Top accent line */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 group-hover:w-24 group-hover:opacity-100 transition-all duration-500"></div>
 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-900/25 px-3 py-1 rounded-full text-xs font-semibold text-blue-700 dark:text-blue-300 border border-blue-100/80 dark:border-blue-800/60">
-                      <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                      {metric.label}
-                    </span>
-                    <span className="text-3xl drop-shadow-sm">{metric.icon}</span>
-                  </div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-6 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-blue-100 dark:border-blue-800/30">
+                  {metric.icon}
+                </div>
 
-                  <div className="flex items-baseline gap-2 mb-3">
-                    <p className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                      {metric.value}
-                    </p>
-                    <Acronym
-                      term="SLA"
-                      titleKey="glossary_sla_title"
-                      descKey="glossary_sla_desc"
-                      className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400"
-                    />
-                  </div>
-
-                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-5">
-                    {metric.description}
+                <div className="flex items-baseline gap-2 mb-2">
+                  <p className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {metric.value}
                   </p>
+                  <Acronym
+                    term="SLA"
+                    titleKey="glossary_sla_title"
+                    descKey="glossary_sla_desc"
+                    className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500"
+                  />
+                </div>
 
-                  <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 font-semibold">
-                    <span className="inline-flex h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-                    {language === "en" ? "Continuously monitored" : "Surveillance continue"}
-                  </div>
+                <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-3">
+                  {metric.label}
+                </h4>
+
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                  {metric.description}
+                </p>
+
+                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  {language === "en" ? "Live tracking" : "Suivi en direct"}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-16 relative overflow-hidden rounded-2xl border border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-600/10 via-cyan-500/10 to-indigo-600/10 dark:from-blue-900/30 dark:via-blue-900/20 dark:to-gray-900 p-10 lg:p-12 shadow-[0_22px_70px_-40px_rgba(59,130,246,0.6)] animate-[fadeInUp_0.7s_ease-out]">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/15 via-transparent to-white/10 dark:from-white/5 dark:via-white/0 dark:to-white/5 blur-2xl pointer-events-none z-0" aria-hidden />
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/70 dark:bg-white/10 text-xs font-semibold text-blue-700 dark:text-blue-200 border border-blue-100/70 dark:border-blue-800/60">
-                {language === "en" ? "Tailored Security Assessment" : "Évaluation sécurité sur mesure"}
-              </div>
-              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mt-20 relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl p-10 lg:p-12">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-cyan-500/5 pointer-events-none" aria-hidden />
+          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div className="space-y-4 max-w-2xl">
+              <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">
                 {language === "en"
                   ? "Want a security assessment tailored to you?"
                   : "Une évaluation sécurité sur mesure ?"}
               </h3>
-              <p className="text-gray-700 dark:text-gray-300 text-sm lg:text-base leading-relaxed">
+              <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed">
                 {language === "en"
                   ? "Clear, prioritized actions with SLAs that match your reality."
                   : "Actions claires et priorisées avec des SLA adaptés à votre réalité."}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
               <a
-                href="#hero"
-                className="group inline-flex items-center justify-center px-8 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 text-white font-semibold shadow-[0_18px_45px_-30px_rgba(59,130,246,0.9)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-28px_rgba(59,130,246,0.95)] active:scale-95 focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                href="#contact"
+                className="group inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20"
               >
                 {language === "en" ? "Request a Free Audit" : "Demander un audit gratuit"}
                 <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </a>
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                <p className="font-semibold text-gray-800 dark:text-gray-200">{language === "en" ? "Avg. response < 2h" : "Réponse moyenne < 2h"}</p>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="font-semibold text-slate-700 dark:text-slate-300">{language === "en" ? "Avg. response < 2h" : "Réponse moyenne < 2h"}</p>
                 <p>{language === "en" ? "Evidence-ready reports included" : "Rapports prêts pour audit"}</p>
               </div>
             </div>
