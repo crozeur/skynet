@@ -187,7 +187,7 @@ export const Services = () => {
       {/* Background glow effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-blue-500/5 dark:bg-blue-500/5 blur-[120px] rounded-full pointer-events-none"></div>
       
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/50 bg-white/40 shadow-2xl shadow-blue-900/5 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/40 dark:shadow-none max-w-7xl mx-auto">
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/50 bg-white/40 shadow-2xl shadow-blue-900/5 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/40 dark:shadow-none max-w-[90rem] mx-auto">
         {/* Top accent line */}
         <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50" />
         
@@ -221,7 +221,7 @@ export const Services = () => {
           </div>
 
           {/* Tabs */}
-          <div className="relative z-10 grid gap-6 xl:grid-cols-[1fr_1.5fr] min-w-0 w-full">
+          <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_2fr] xl:grid-cols-[1fr_2.5fr] min-w-0 w-full">
             <div className="space-y-4 w-full">
               {services.map((service, idx) => {
                 const Icon = service.icon;
@@ -509,9 +509,9 @@ export const Services = () => {
             </div>
 
             {/* Desktop: show all cards */}
-            <div className="hidden md:grid gap-6 xl:grid-cols-2 animate-[fadeInUp_0.5s_ease-out] min-w-0 w-full" key={activeTab}>
+            <div className="hidden lg:flex flex-col gap-6 animate-[fadeInUp_0.5s_ease-out] min-w-0 w-full" key={activeTab}>
               {/* Problem & For - split into two clear sections */}
-              <div className="col-span-2 w-full rounded-3xl border border-slate-200/50 bg-white/60 p-6 sm:p-8 shadow-xl shadow-blue-900/5 backdrop-blur-md transition-all duration-500 dark:border-slate-700/50 dark:bg-slate-800/60 space-y-6">
+              <div className="w-full rounded-3xl border border-slate-200/50 bg-white/60 p-6 sm:p-8 shadow-xl shadow-blue-900/5 backdrop-blur-md transition-all duration-500 dark:border-slate-700/50 dark:bg-slate-800/60 space-y-6">
                 {/* Target Audience section */}
                 <div>
                   <div className="flex items-center gap-3 mb-4">
@@ -615,25 +615,27 @@ export const Services = () => {
               </div>
 
               {/* Solution */}
-              <div className="relative group w-full rounded-3xl border border-blue-200/50 bg-white/60 shadow-xl shadow-blue-900/5 backdrop-blur-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 dark:border-blue-500/30 dark:bg-slate-800/60 flex flex-col h-full min-h-[480px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative z-10 p-6 md:p-8 flex flex-col h-full overflow-hidden">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0 pt-1">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight">{activeService.solution}</h3>
-                      {activeTab === 0 && (
-                        <span className="inline-block mt-2 text-xs font-medium text-blue-600 dark:text-cyan-400 bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded-md">
-                          {language === "en" ? "AI-Augmented Execution Platform" : "Plateforme d'Exécution Augmentée par l'IA"}
-                        </span>
-                      )}
-                    </div>
+              <div className="relative group w-full rounded-3xl border border-blue-200/50 bg-white/60 shadow-xl shadow-blue-900/5 backdrop-blur-md hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 dark:border-blue-500/30 dark:bg-slate-800/60 flex flex-col xl:flex-row overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Left side: Icon and Title */}
+                <div className="relative z-10 p-6 md:p-8 xl:w-2/5 flex flex-col justify-center border-b xl:border-b-0 xl:border-r border-blue-200/30 dark:border-blue-500/20 bg-blue-50/30 dark:bg-blue-900/10">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-6 group-hover:scale-110 transition-transform duration-500">
+                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
                   </div>
-                  <ul className="space-y-4 flex-1 overflow-y-auto pr-2">
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight">{activeService.solution}</h3>
+                  {activeTab === 0 && (
+                    <span className="inline-block mt-4 text-xs font-medium text-blue-600 dark:text-cyan-400 bg-blue-100/50 dark:bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-200/50 dark:border-blue-800/50 w-fit">
+                      {language === "en" ? "AI-Augmented Execution Platform" : "Plateforme d'Exécution Augmentée par l'IA"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Right side: Points */}
+                <div className="relative z-10 p-6 md:p-8 xl:w-3/5 flex items-center">
+                  <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-4 w-full">
                     {activeService.points.map((point, idx) => (
                       <li key={idx} className="flex gap-3 text-sm text-slate-700 group/item dark:text-slate-300 leading-relaxed">
                         <CheckCircleIcon className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform dark:text-cyan-400" />
@@ -645,20 +647,22 @@ export const Services = () => {
               </div>
 
               {/* Results */}
-              <div className="relative group w-full rounded-3xl border border-emerald-200/50 bg-white/60 shadow-xl shadow-emerald-900/5 backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 dark:border-emerald-500/30 dark:bg-slate-800/60 flex flex-col h-full min-h-[480px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-green-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative z-10 p-6 md:p-8 flex flex-col h-full overflow-hidden">
-                  <div className="flex items-start gap-4 mb-6">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-500">
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0 pt-1">
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight">{activeService.results}</h3>
-                    </div>
+              <div className="relative group w-full rounded-3xl border border-emerald-200/50 bg-white/60 shadow-xl shadow-emerald-900/5 backdrop-blur-md hover:shadow-2xl hover:shadow-emerald-500/10 transition-all duration-500 dark:border-emerald-500/30 dark:bg-slate-800/60 flex flex-col xl:flex-row overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Left side: Icon and Title */}
+                <div className="relative z-10 p-6 md:p-8 xl:w-2/5 flex flex-col justify-center border-b xl:border-b-0 xl:border-r border-emerald-200/30 dark:border-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-900/10">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-6 group-hover:scale-110 transition-transform duration-500">
+                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
                   </div>
-                  <ul className="space-y-4 flex-1 overflow-y-auto pr-2">
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight tracking-tight">{activeService.results}</h3>
+                </div>
+
+                {/* Right side: Points */}
+                <div className="relative z-10 p-6 md:p-8 xl:w-3/5 flex items-center">
+                  <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-4 w-full">
                     {activeService.resultsList.map((result, idx) => (
                       <li key={idx} className="flex gap-3 text-sm text-slate-700 group/item dark:text-slate-300 leading-relaxed">
                         <CheckCircleIcon className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform dark:text-emerald-400" />
@@ -670,7 +674,7 @@ export const Services = () => {
               </div>
 
               {/* CTA Card */}
-              <div className="col-span-2 w-full rounded-3xl border border-slate-200/50 bg-white/80 p-8 shadow-xl shadow-blue-900/5 backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/80 mt-4">
+              <div className="w-full rounded-3xl border border-slate-200/50 bg-white/80 p-8 shadow-xl shadow-blue-900/5 backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/80 mt-4">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                   <div className="max-w-2xl">
                     <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-cyan-400 mb-2">
