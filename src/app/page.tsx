@@ -16,10 +16,6 @@ export default function Home() {
         <Hero />
       </section>
 
-      <section id="stats">
-        <Stats />
-      </section>
-
       <section id="case-studies">
         <CaseStudies />
       </section>
