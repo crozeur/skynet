@@ -98,7 +98,7 @@ export const Navbar = () => {
             className={`${navItemClass("services-overview", { promoted: true })} group`}
           >
             <span className="inline-flex items-center">
-              {language === "en" ? "Services" : "Services"}
+              {language === "en" ? "Capabilities" : "Savoir-faire"}
               <span className="relative ml-2 inline-flex h-2.5 w-2.5">
                 <span className="absolute inset-0 rounded-full bg-cyan-400/75 animate-ping [animation-duration:2.2s]" />
                 <span className="absolute inset-0 rounded-full bg-cyan-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
@@ -217,7 +217,7 @@ export const Navbar = () => {
               onClick={() => setOpen(false)}
             >
               <span className="inline-flex items-center">
-                {language === "en" ? "Services" : "Nos Services"}
+                {language === "en" ? "Capabilities" : "Savoir-faire"}
                 <span className="relative ml-2 inline-flex h-2.5 w-2.5">
                   <span className="absolute inset-0 rounded-full bg-emerald-400/75 animate-ping [animation-duration:2.2s]" />
                   <span className="absolute inset-0 rounded-full bg-emerald-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
