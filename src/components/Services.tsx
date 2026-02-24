@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   ClipboardDocumentCheckIcon,
   CloudIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/solid";
 
 export const Services = () => {
@@ -168,6 +169,7 @@ export const Services = () => {
         t.service3_point1,
         t.service3_point2,
         t.service3_point3,
+        t.service3_point4,
       ],
       results: t.service3_results,
       resultsList: [
@@ -177,6 +179,25 @@ export const Services = () => {
       ],
       price: t.service3_price,
       icon: CloudIcon,
+    },
+    {
+      title: t.service4_title,
+      for: t.service4_for,
+      problem: t.service4_problem,
+      solution: t.service4_solution,
+      points: [
+        t.service4_point1,
+        t.service4_point2,
+        t.service4_point3,
+      ],
+      results: t.service4_results,
+      resultsList: [
+        t.service4_result1,
+        t.service4_result2,
+        t.service4_result3,
+      ],
+      price: t.service4_price,
+      icon: ChartBarIcon,
     },
   ];
 
@@ -284,18 +305,64 @@ export const Services = () => {
                 })}
               </div>
               
-              {/* Decorative filler for the empty space on desktop */}
-              <div className="hidden lg:flex flex-1 mt-6 rounded-2xl border border-slate-200/50 bg-gradient-to-b from-white/40 to-transparent p-6 dark:border-slate-700/30 dark:from-slate-800/20 items-center justify-center relative overflow-hidden">
+              {/* Stats/Metrics Card for the empty space on desktop */}
+              <div className="hidden lg:flex flex-1 mt-6 rounded-3xl border border-blue-200/50 bg-gradient-to-br from-white/80 to-blue-50/50 p-6 shadow-xl shadow-blue-900/5 backdrop-blur-md dark:border-blue-500/30 dark:from-slate-800/80 dark:to-slate-900/80 flex-col justify-center relative overflow-hidden group transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10">
                 <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-[0.03] dark:opacity-[0.05]"></div>
-                <div className="text-center relative z-10">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-cyan-400 mb-3">
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl dark:bg-cyan-400/10 transition-all duration-500 group-hover:bg-blue-400/20"></div>
+                
+                <div className="relative z-10 h-full flex flex-col">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                      {language === "en" ? "Our Priorities" : "Nos Priorités"}
+                    </h4>
                   </div>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {language === "en" ? "Select an offer to view details" : "Sélectionnez une offre pour voir les détails"}
-                  </p>
+                  
+                  <div className="grid grid-cols-2 gap-4 flex-1">
+                    <div className="flex flex-col justify-center p-3 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t.stats_threats || "Menaces"}</span>
+                      </div>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{t.stats_threats_value || "2,847"}</span>
+                    </div>
+                    
+                    <div className="flex flex-col justify-center p-3 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t.stats_response_time || "Réponse"}</span>
+                      </div>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{t.stats_response_value || "8m 42s"}</span>
+                    </div>
+                    
+                    <div className="flex flex-col justify-center p-3 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t.stats_system_health || "Santé"}</span>
+                      </div>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{t.stats_health_value || "99.8%"}</span>
+                    </div>
+                    
+                    <div className="flex flex-col justify-center p-3 rounded-2xl bg-white/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t.stats_coverage || "Couverture"}</span>
+                      </div>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{t.stats_coverage_value || "100%"}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
