@@ -1035,42 +1035,64 @@ export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, re
         <aside className="hidden lg:block sticky top-24 space-y-8">
           {/* Table of Contents */}
           {headings.length > 0 && (
-            <div className="p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
+            <div className="p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md shadow-lg shadow-slate-200/20 dark:shadow-none relative overflow-hidden group">
+              {/* Decorative background elements */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50"></div>
+              <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-500/10 dark:bg-cyan-500/5 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50"></div>
+              
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 relative z-10">
+                <span className="flex items-center justify-center w-6 h-6 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+                </span>
                 {getUIString("Table of contents", language)}
               </h3>
-              <nav className="max-h-[calc(100vh-24rem)] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
-                <ul className="space-y-2.5 text-sm">
-                  {headings.map((heading) => (
-                    <li
-                      key={heading.id}
-                      style={{ paddingLeft: `${(heading.level - 2) * 1}rem` }}
-                    >
-                      <a
-                        href={`#${heading.id}`}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const el = document.getElementById(heading.id);
-                          if (el) {
-                            const y = el.getBoundingClientRect().top + window.scrollY - 100;
-                            window.scrollTo({ top: y, behavior: "smooth" });
-                            // Update URL without jumping
-                            window.history.pushState(null, "", `#${heading.id}`);
-                          }
-                        }}
-                        className={`block leading-snug transition-colors duration-200 ${
-                          activeHeadingId === heading.id
-                            ? "text-blue-600 dark:text-blue-400 font-medium"
-                            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-                        }`}
+              
+              <nav className="max-h-[calc(100vh-24rem)] overflow-y-auto pr-3 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent relative z-10">
+                <div className="absolute left-[11px] top-2 bottom-2 w-px bg-gradient-to-b from-slate-200 via-slate-200 to-transparent dark:from-slate-800 dark:via-slate-800 dark:to-transparent"></div>
+                <ul className="space-y-3 text-[13px] relative">
+                  {headings.map((heading) => {
+                    const isActive = activeHeadingId === heading.id;
+                    const isH2 = heading.level === 2;
+                    
+                    return (
+                      <li
+                        key={heading.id}
+                        className="relative flex items-start"
+                        style={{ paddingLeft: `${(heading.level - 2) * 1}rem` }}
                       >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
+                        {/* Active indicator dot */}
+                        <div className={`absolute left-[9px] top-[6px] w-1.5 h-1.5 rounded-full transition-all duration-300 z-10 ${
+                          isActive 
+                            ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] scale-125" 
+                            : "bg-slate-300 dark:bg-slate-700 scale-100"
+                        }`}></div>
+                        
+                        <a
+                          href={`#${heading.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const el = document.getElementById(heading.id);
+                            if (el) {
+                              const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                              window.scrollTo({ top: y, behavior: "smooth" });
+                              window.history.pushState(null, "", `#${heading.id}`);
+                            }
+                          }}
+                          className={`block pl-6 leading-relaxed transition-all duration-200 ${
+                            isActive
+                              ? "text-blue-700 dark:text-cyan-400 font-bold translate-x-1"
+                              : isH2
+                                ? "text-slate-700 dark:text-slate-300 font-semibold hover:text-blue-600 dark:hover:text-cyan-400 hover:translate-x-0.5"
+                                : "text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 hover:translate-x-0.5"
+                          }`}
+                        >
+                          {heading.text}
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </nav>
             </div>
@@ -1078,11 +1100,15 @@ export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, re
 
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
-            <div className="p-6 rounded-2xl bg-white/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 backdrop-blur-sm">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
+            <div className="p-6 rounded-2xl bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md shadow-lg shadow-slate-200/20 dark:shadow-none relative overflow-hidden group">
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50"></div>
+              
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-3 relative z-10">
+                <span className="flex items-center justify-center w-6 h-6 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                </span>
                 {language === "en" ? "Related Posts" : "Articles similaires"}
               </h3>
               <div className="space-y-4">

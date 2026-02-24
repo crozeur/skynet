@@ -65,18 +65,15 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
-    const textSizeClass = isFrench ? "text-[15px] lg:text-base xl:text-lg 2xl:text-xl" : "text-base lg:text-lg xl:text-xl";
-    const paddingClass = isFrench
-      ? sectionId === "hero" || sectionId === "contact"
-        ? "px-1 lg:px-1.5"
-        : "px-1.5 lg:px-2"
-      : "px-2.5 lg:px-3";
-    return `relative text-gray-900 dark:text-gray-100 transition-all duration-300 ease-out font-bold whitespace-nowrap ${textSizeClass} ${paddingClass} py-2 after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-1 after:h-0.5 after:w-0 after:rounded-full after:bg-blue-600 dark:after:bg-blue-300 after:transition-all after:duration-300 after:ease-out ${
+    const textSizeClass = isFrench ? "text-[14px] lg:text-[15px] xl:text-base" : "text-[15px] lg:text-base xl:text-lg";
+    const paddingClass = "px-3 py-1.5 lg:px-4 lg:py-2";
+    
+    return `relative group rounded-full transition-all duration-300 ease-out font-semibold tracking-wide whitespace-nowrap ${textSizeClass} ${paddingClass} ${
       isActive(sectionId)
-        ? "text-blue-700 dark:text-blue-300 after:w-[70%]"
+        ? "text-blue-700 dark:text-cyan-300 bg-blue-50/80 dark:bg-cyan-900/20 ring-1 ring-blue-200/50 dark:ring-cyan-700/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(34,211,238,0.05)]"
         : promoted
-          ? "text-blue-700 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-200 hover:after:w-[55%]"
-          : "hover:text-blue-700 dark:hover:text-blue-300 hover:after:w-[55%]"
+          ? "text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+          : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
     }`;
   };
 
@@ -100,18 +97,18 @@ export const Navbar = () => {
             href="/#hero"
             className={navItemClass("hero")}
           >
-            {language === "en" ? "Home" : "Accueil"}
+            {language === "en" ? "Hub" : "Hub"}
           </a>
           <a
             href="/#services-overview"
             className={`${navItemClass("services-overview", { promoted: true })} group`}
           >
             <span className="inline-flex items-center">
-              {language === "en" ? "Services" : "Nos Services"}
+              {language === "en" ? "Capabilities" : "Capacités"}
               <span className="relative ml-2 inline-flex h-2.5 w-2.5">
-                <span className="absolute inset-0 rounded-full bg-emerald-400/75 animate-ping [animation-duration:2.2s]" />
-                <span className="absolute inset-0 rounded-full bg-emerald-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
-                <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(52,211,153,0.34),0_0_22px_rgba(16,185,129,0.95),0_0_34px_rgba(16,185,129,0.55)] animate-[pulse_1.9s_ease-in-out_infinite]" />
+                <span className="absolute inset-0 rounded-full bg-cyan-400/75 animate-ping [animation-duration:2.2s]" />
+                <span className="absolute inset-0 rounded-full bg-cyan-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
+                <span className="relative inline-block h-2.5 w-2.5 rounded-full bg-cyan-400 shadow-[0_0_0_6px_rgba(34,211,238,0.34),0_0_22px_rgba(6,182,212,0.95),0_0_34px_rgba(6,182,212,0.55)] animate-[pulse_1.9s_ease-in-out_infinite]" />
               </span>
             </span>
           </a>
@@ -119,14 +116,14 @@ export const Navbar = () => {
             href="/#case-studies"
             className={navItemClass("case-studies")}
           >
-            {language === "en" ? "Success Stories" : "Nos Succès"}
+            {language === "en" ? "Impact" : "Impact"}
           </a>
           <a
             href={language === "fr" ? "/fr/blog" : "/blog"}
             className={`${navItemClass("blog")} group`}
           >
             <span className="inline-flex items-center">
-              {language === "en" ? "Guides" : "Guides"}
+              {language === "en" ? "Intel" : "Renseignement"}
               {blogBadge}
             </span>
           </a>
@@ -135,11 +132,11 @@ export const Navbar = () => {
             className={navItemClass("compliance")}
           >
             {language === "en" ? (
-              "Compliance"
+              "Governance"
             ) : (
               <>
-                <span className="hidden lg:inline">Conformité & Risques</span>
-                <span className="lg:hidden">Conformité</span>
+                <span className="hidden lg:inline">Gouvernance</span>
+                <span className="lg:hidden">Gouvernance</span>
               </>
             )}
           </a>
@@ -147,18 +144,18 @@ export const Navbar = () => {
             href="/#about"
             className={navItemClass("about")}
           >
-            {language === "en" ? "About Us" : "À Propos"}
+            {language === "en" ? "Vision" : "Vision"}
           </a>
           <a
             href="/#contact"
             className={navItemClass("contact")}
           >
             {language === "en" ? (
-              "Contact"
+              "Engage"
             ) : (
               <>
-                <span className="hidden lg:inline">Nous Contacter</span>
-                <span className="lg:hidden">Contact</span>
+                <span className="hidden lg:inline">Engager</span>
+                <span className="lg:hidden">Engager</span>
               </>
             )}
           </a>

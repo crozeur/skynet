@@ -246,56 +246,60 @@ export function BlogIndexClient({
         <div className="absolute inset-0 opacity-[0.22] dark:opacity-0 [background-image:linear-gradient(to_right,rgba(59,130,246,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.10)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(ellipse_at_center,black_45%,transparent_75%)]" />
       </div>
 
-      <Container className="relative py-8 sm:py-12 lg:py-16">
+      <Container className="relative py-12 sm:py-20 lg:py-24">
         {/* Modern Hero Section */}
-        <div className="relative mb-16 overflow-hidden">
-          {/* Background gradient */}
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-transparent rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-cyan-500/10 via-blue-500/10 to-transparent rounded-full blur-3xl"></div>
+        <div className="relative mb-20">
+          {/* High-tech background accents */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/20 via-cyan-400/10 to-blue-600/20 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
           
-          <div className="relative z-10 text-center max-w-4xl mx-auto">
-            {/* Badge */}
-            <div className="mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 dark:bg-white/5 border border-blue-500/20 dark:border-blue-400/30 backdrop-blur-sm shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-              <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]"></div>
-              <span className="text-sm font-semibold text-gray-700 dark:text-blue-100 tracking-wide uppercase">
-                {language === "en" ? "Knowledge Hub" : "Centre de Ressources"}
+          <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+            {/* Tech Badge */}
+            <div className="mb-8 inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-slate-900/5 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 backdrop-blur-md shadow-sm">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+              </span>
+              <span className="text-xs sm:text-sm font-mono font-semibold text-slate-700 dark:text-cyan-300 tracking-widest uppercase">
+                {language === "en" ? "Threat Intelligence & Strategy" : "Renseignement & Stratégie"}
               </span>
             </div>
 
             {/* Main Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-tight mb-6 tracking-tight">
-              <span className="block">
-                <span className="bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 dark:from-white dark:via-blue-100 dark:to-gray-300 bg-clip-text text-transparent drop-shadow-sm">
-                  {language === "en" ? "Cybersecurity" : "Cybersécurité"}
-                </span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] mb-8 tracking-tight">
+              <span className="block text-slate-900 dark:text-white mb-2">
+                {language === "en" ? "Defend. Detect." : "Défendre. Détecter."}
               </span>
-              <span className="block mt-2">
-                <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 dark:from-blue-400 dark:via-cyan-300 dark:to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(59,130,246,0.4)]">
-                  {language === "en" ? "Insights" : "& Expertise"}
+              <span className="block relative inline-block">
+                <span className="absolute -inset-2 bg-gradient-to-r from-blue-600/20 to-cyan-400/20 blur-xl rounded-lg"></span>
+                <span className="relative bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
+                  {language === "en" ? "Respond." : "Réagir."}
                 </span>
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-blue-100/80 mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
+            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
               {language === "en"
-                ? "Expert knowledge on SOC, security audits & cloud security"
-                : "Expertise en SOC, audits de sécurité et sécurité cloud"}
+                ? "Actionable insights, deep-dive tutorials, and strategic guidance for modern security teams."
+                : "Analyses pointues, guides pratiques et stratégies pour les équipes de sécurité modernes."}
             </p>
 
             {/* Search Bar with enhanced design */}
-            <div className="relative max-w-2xl mx-auto mb-6">
+            <div className="relative max-w-2xl mx-auto mb-8">
               <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 via-cyan-500/30 to-blue-500/30 rounded-xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative flex items-center bg-white/90 dark:bg-gray-900/90 border border-gray-200 dark:border-white/10 rounded-xl backdrop-blur-md group-focus-within:border-blue-500/50 dark:group-focus-within:border-cyan-400/50 group-focus-within:shadow-2xl group-focus-within:shadow-blue-500/20 transition-all duration-300">
-                  <svg 
-                    className="w-5 h-5 text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-cyan-400 transition-colors ml-5"
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/30 via-cyan-500/30 to-blue-500/30 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+                <div className="relative flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-lg group-focus-within:border-blue-500/50 dark:group-focus-within:border-cyan-400/50 group-focus-within:shadow-2xl group-focus-within:shadow-blue-500/20 transition-all duration-300 overflow-hidden">
+                  <div className="pl-6 pr-2 py-4 flex items-center justify-center">
+                    <svg 
+                      className="w-6 h-6 text-slate-400 group-focus-within:text-blue-500 dark:group-focus-within:text-cyan-400 transition-colors"
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                   <input
                     type="text"
                     value={searchQuery}
