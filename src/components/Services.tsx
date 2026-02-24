@@ -222,65 +222,82 @@ export const Services = () => {
 
           {/* Tabs */}
           <div className="relative z-10 grid gap-8 lg:grid-cols-[1fr_2fr] xl:grid-cols-[1fr_2.5fr] min-w-0 w-full">
-            <div className="space-y-4 w-full">
-              {services.map((service, idx) => {
-                const Icon = service.icon;
-                const isActive = activeTab === idx;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveTab(idx)}
-                    className={`group relative flex w-full items-center gap-5 rounded-2xl border p-5 text-left transition-all duration-500 backdrop-blur-md cursor-pointer focus:outline-none ${
-                      isActive
-                        ? "border-blue-500/50 bg-white/80 shadow-xl shadow-blue-900/10 dark:border-cyan-500/30 dark:bg-slate-800/80 dark:shadow-cyan-900/20 scale-[1.02]"
-                        : "border-slate-200/50 bg-white/40 hover:bg-white/60 hover:border-blue-300/50 dark:border-slate-700/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/60 dark:hover:border-cyan-500/30"
-                    }`}
-                  >
-                    {/* Glow effect for active tab */}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-cyan-500/5 to-blue-500/5 rounded-2xl blur-md -z-10"></div>
-                    )}
-                    
-                    <div
-                      className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-500 ${
+            <div className="space-y-4 w-full flex flex-col justify-between">
+              <div className="space-y-4">
+                {services.map((service, idx) => {
+                  const Icon = service.icon;
+                  const isActive = activeTab === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveTab(idx)}
+                      className={`group relative flex w-full items-center gap-5 rounded-2xl border p-5 text-left transition-all duration-500 backdrop-blur-md cursor-pointer focus:outline-none ${
                         isActive
-                          ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-110"
-                          : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-500 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 dark:group-hover:text-cyan-400"
+                          ? "border-blue-500/50 bg-white/80 shadow-xl shadow-blue-900/10 dark:border-cyan-500/30 dark:bg-slate-800/80 dark:shadow-cyan-900/20 scale-[1.02]"
+                          : "border-slate-200/50 bg-white/40 hover:bg-white/60 hover:border-blue-300/50 dark:border-slate-700/50 dark:bg-slate-800/40 dark:hover:bg-slate-800/60 dark:hover:border-cyan-500/30"
                       }`}
                     >
-                      <Icon className="h-7 w-7" />
-                    </div>
-                    
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                        <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] transition-all duration-500 ${
-                          isActive 
-                            ? "bg-blue-100 text-blue-700 dark:bg-cyan-900/30 dark:text-cyan-300" 
-                            : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
-                        }`}>
-                          {idx + 1}
-                        </span>
-                        <span>{language === "en" ? "Offer" : "Offre"}</span>
+                      {/* Glow effect for active tab */}
+                      {isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-cyan-500/5 to-blue-500/5 rounded-2xl blur-md -z-10"></div>
+                      )}
+                      
+                      <div
+                        className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-500 ${
+                          isActive
+                            ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-110"
+                            : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-500 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 dark:group-hover:text-cyan-400"
+                        }`}
+                      >
+                        <Icon className="h-7 w-7" />
                       </div>
-                      <p className={`text-lg font-bold leading-tight truncate transition-colors duration-300 ${
+                      
+                      <div className="flex flex-col gap-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] transition-all duration-500 ${
+                            isActive 
+                              ? "bg-blue-100 text-blue-700 dark:bg-cyan-900/30 dark:text-cyan-300" 
+                              : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <span>{language === "en" ? "Offer" : "Offre"}</span>
+                        </div>
+                        <p className={`text-lg font-bold leading-tight truncate transition-colors duration-300 ${
+                          isActive 
+                            ? "text-slate-900 dark:text-white" 
+                            : "text-slate-700 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white"
+                        }`}>
+                          {service.title}
+                        </p>
+                      </div>
+                      
+                      <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
                         isActive 
-                          ? "text-slate-900 dark:text-white" 
-                          : "text-slate-700 group-hover:text-slate-900 dark:text-slate-300 dark:group-hover:text-white"
+                          ? "bg-blue-50 text-blue-600 dark:bg-cyan-900/20 dark:text-cyan-400 translate-x-1" 
+                          : "bg-transparent text-slate-300 group-hover:text-blue-400 dark:text-slate-600 dark:group-hover:text-cyan-500"
                       }`}>
-                        {service.title}
-                      </p>
-                    </div>
-                    
-                    <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
-                      isActive 
-                        ? "bg-blue-50 text-blue-600 dark:bg-cyan-900/20 dark:text-cyan-400 translate-x-1" 
-                        : "bg-transparent text-slate-300 group-hover:text-blue-400 dark:text-slate-600 dark:group-hover:text-cyan-500"
-                    }`}>
-                      <ChevronRightIcon className="h-5 w-5" />
-                    </div>
-                  </button>
-                );
-              })}
+                        <ChevronRightIcon className="h-5 w-5" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {/* Decorative filler for the empty space on desktop */}
+              <div className="hidden lg:flex flex-1 mt-6 rounded-2xl border border-slate-200/50 bg-gradient-to-b from-white/40 to-transparent p-6 dark:border-slate-700/30 dark:from-slate-800/20 items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-[0.03] dark:opacity-[0.05]"></div>
+                <div className="text-center relative z-10">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-cyan-400 mb-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                    {language === "en" ? "Select an offer to view details" : "Sélectionnez une offre pour voir les détails"}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Service Content */}

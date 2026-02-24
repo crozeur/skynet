@@ -77,12 +77,6 @@ export const Navbar = () => {
     }`;
   };
 
-  const blogBadge = (
-    <span className="ml-2 inline-flex items-center rounded-full bg-blue-600/10 dark:bg-cyan-300/10 px-2 py-0.5 text-[11px] font-bold tracking-wide text-blue-800 dark:text-cyan-100 ring-1 ring-blue-600/25 dark:ring-cyan-200/20 shadow-[0_1px_0_rgba(255,255,255,0.15)] transition-all duration-200 ease-out group-hover:-translate-y-px group-hover:scale-[1.05] group-hover:bg-blue-600/15 dark:group-hover:bg-cyan-200/15 group-hover:ring-blue-600/35 dark:group-hover:ring-cyan-200/30 motion-safe:group-hover:animate-pulse">
-      {language === "en" ? "New" : "Nouveau"}
-    </span>
-  );
-
   return (
     <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md relative transition-all duration-300 ${
       scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50 py-0.5" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
@@ -104,7 +98,7 @@ export const Navbar = () => {
             className={`${navItemClass("services-overview", { promoted: true })} group`}
           >
             <span className="inline-flex items-center">
-              {language === "en" ? "Capabilities" : "Capacités"}
+              {language === "en" ? "Services" : "Services"}
               <span className="relative ml-2 inline-flex h-2.5 w-2.5">
                 <span className="absolute inset-0 rounded-full bg-cyan-400/75 animate-ping [animation-duration:2.2s]" />
                 <span className="absolute inset-0 rounded-full bg-cyan-300/60 animate-ping [animation-duration:2.2s] [animation-delay:1.1s]" />
@@ -122,9 +116,12 @@ export const Navbar = () => {
             href={language === "fr" ? "/fr/blog" : "/blog"}
             className={`${navItemClass("blog")} group`}
           >
-            <span className="inline-flex items-center">
-              {language === "en" ? "Intel" : "Renseignement"}
-              {blogBadge}
+            <span className="inline-flex items-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-400 dark:to-purple-400 font-bold drop-shadow-sm group-hover:from-blue-500 group-hover:to-indigo-500 dark:group-hover:from-cyan-300 dark:group-hover:to-purple-300 transition-all duration-300">
+              {language === "en" ? "Intel" : "Expertise"}
+              <span className="ml-1.5 relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 dark:bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500 dark:bg-purple-500"></span>
+              </span>
             </span>
           </a>
           <a
@@ -151,11 +148,11 @@ export const Navbar = () => {
             className={navItemClass("contact")}
           >
             {language === "en" ? (
-              "Engage"
+              "Contact"
             ) : (
               <>
-                <span className="hidden lg:inline">Engager</span>
-                <span className="lg:hidden">Engager</span>
+                <span className="hidden lg:inline">Contact</span>
+                <span className="lg:hidden">Contact</span>
               </>
             )}
           </a>
@@ -236,9 +233,12 @@ export const Navbar = () => {
               className="group w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg"
               onClick={() => setOpen(false)}
             >
-              <span className="inline-flex items-center">
-                Guides
-                {blogBadge}
+              <span className="inline-flex items-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-400 dark:to-purple-400 font-bold drop-shadow-sm">
+                {language === "en" ? "Intel" : "Expertise"}
+                <span className="ml-2 relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 dark:bg-purple-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500 dark:bg-purple-500"></span>
+                </span>
               </span>
             </a>
             <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
