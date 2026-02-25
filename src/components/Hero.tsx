@@ -33,7 +33,7 @@ export const Hero = () => {
               {heroTag}
             </span>
           </div>
-          <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.2] sm:leading-[1.15] tracking-tight bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent animate-[fadeInUp_0.6s_ease-out] drop-shadow-sm">
+          <h1 className="mt-6 text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.2] sm:leading-[1.15] tracking-tight bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent animate-[fadeInUp_0.6s_ease-out] drop-shadow-sm break-words">
             {heroTitle}
           </h1>
           <p className="mt-5 sm:mt-4 text-base sm:text-lg lg:text-xl leading-[1.7] sm:leading-relaxed text-gray-600 dark:text-blue-100/90 max-w-4xl mx-auto animate-[fadeInUp_0.8s_ease-out] font-medium">

@@ -83,7 +83,7 @@ export const Navbar = () => {
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
-          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={144} height={144} className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
+          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={144} height={144} className="h-12 w-auto sm:h-14 md:h-16 lg:h-20 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className={`hidden md:flex flex-1 min-w-0 items-center justify-center ${desktopNavGapClass} overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1`}>
@@ -205,9 +205,9 @@ export const Navbar = () => {
 
       {/* Mobile menu */}
       {/* Mobile menu: uses max-height + opacity transition for slide/fade effect */}
-      <div className={`md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${open ? 'max-h-96 opacity-100 py-3' : 'max-h-0 opacity-0 py-0'}`}>
+      <div className={`md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${open ? 'max-h-[32rem] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}>
         <Container className="px-4">
-          <div className={`flex flex-col items-start gap-4 transition-transform duration-300 ${open ? 'translate-y-0' : '-translate-y-2 pointer-events-none'}`}>
+          <div className={`flex flex-col items-start gap-5 transition-transform duration-300 ${open ? 'translate-y-0' : '-translate-y-2 pointer-events-none'}`}>
             <a href="/#hero" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "Home" : "Accueil"}
             </a>

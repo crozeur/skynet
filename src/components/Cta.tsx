@@ -45,7 +45,7 @@ export const Cta = () => {
                     </span>
                   </div>
 
-                  <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+                  <h2 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight break-words">
                     {language === "en" ? "Ready to secure your organization?" : "Prêt à sécuriser votre organisation ?"}
                   </h2>
 

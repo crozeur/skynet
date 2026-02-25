@@ -106,7 +106,7 @@ export const CaseStudies = () => {
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
             {t.subtitle}
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight break-words">
             {t.title}
           </h2>
         </div>

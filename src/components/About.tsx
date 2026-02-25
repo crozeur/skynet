@@ -44,7 +44,7 @@ export const About = () => {
           <div className="inline-block mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 blur-2xl opacity-20"></div>
-              <h2 className="relative text-4xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 dark:from-white dark:via-cyan-400 dark:to-white tracking-tight">
+              <h2 className="relative text-4xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 dark:from-white dark:via-cyan-400 dark:to-white tracking-tight break-words">
                 {language === "en" ? "Your Global Partner" : "Votre Partenaire Mondial"}
               </h2>
             </div>

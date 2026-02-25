@@ -100,7 +100,7 @@ export const Compliance = () => {
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
             {t.subtitle}
           </div>
-          <h2 className="mt-4 text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white">
+          <h2 className="mt-4 text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white break-words">
             {t.title}
           </h2>
           <div className="mx-auto mt-5 h-[2px] w-28 rounded-full bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
