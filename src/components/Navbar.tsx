@@ -148,11 +148,11 @@ export const Navbar = () => {
             className={navItemClass("contact")}
           >
             {language === "en" ? (
-              "Contact"
+              "Secure Channel"
             ) : (
               <>
-                <span className="hidden lg:inline">Contact</span>
-                <span className="lg:hidden">Contact</span>
+                <span className="hidden lg:inline">Canal Sécurisé</span>
+                <span className="lg:hidden">Canal Sécurisé</span>
               </>
             )}
           </a>
@@ -248,7 +248,7 @@ export const Navbar = () => {
               {language === "en" ? "About Us" : "À Propos"}
             </a>
             <a href="/#contact" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
-              {language === "en" ? "Contact" : "Nous Contacter"}
+              {language === "en" ? "Secure Channel" : "Canal Sécurisé"}
             </a>
 
             <div className="pt-2 w-full flex items-center gap-4">
