@@ -18,12 +18,6 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://skynet-consulting.net"),
   title: "Skynet Consulting | Advanced Cybersecurity Solutions",
   description: "Skynet Consulting: The Cybertech platform replacing traditional consulting. Standardized audits, ephemeral infrastructure, and automated compliance.",
-  icons: {
-    icon: [
-      { url: '/favicon-black.svg?v=1', type: 'image/svg+xml' },
-      { url: '/favicon.ico?v=1', sizes: 'any' }
-    ],
-  },
   openGraph: {
     title: "Skynet Consulting | Advanced Cybersecurity Solutions",
     description: "Skynet Consulting: The Cybertech platform replacing traditional consulting. Standardized audits, ephemeral infrastructure, and automated compliance.",
@@ -31,10 +25,10 @@ export const metadata: Metadata = {
     siteName: "Skynet Consulting",
     images: [
       {
-        url: "/img/skynet-logo.png",
+        url: "/img/hero.png",
         width: 1200,
         height: 630,
-        alt: "Skynet Consulting Logo"
+        alt: "Skynet Consulting"
       }
     ],
     locale: "en_US",
@@ -51,11 +45,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <GoogleAnalytics />
-        {/* Favicon (forced to black in all themes) */}
-        <link rel="icon" type="image/svg+xml" href="/favicon-black.svg?v=1" />
-        <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/img/skynet-logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.svg" />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#0f172a" />
       </head>
