@@ -102,7 +102,7 @@ export const CaseStudies = () => {
 
       <div className="relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 text-blue-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-blue-900/20 border border-slate-200/80 dark:border-blue-800/30 text-slate-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6 shadow-sm shadow-slate-200/50">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
             {t.subtitle}
           </div>
@@ -115,7 +115,7 @@ export const CaseStudies = () => {
           {t.cases.map((caseStudy, idx) => (
             <div
               key={idx}
-              className="group relative flex flex-col p-8 bg-white/60 dark:bg-slate-800/60 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-500 animate-[fadeInUp_0.6s_ease-out] cursor-default overflow-hidden"
+              className="group relative flex flex-col p-8 bg-white/90 dark:bg-slate-800/60 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-blue-900/5 border border-slate-200/80 dark:border-slate-700/50 backdrop-blur-md hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-500 animate-[fadeInUp_0.6s_ease-out] cursor-default overflow-hidden"
               style={{ animationDelay: `${idx * 0.1}s`, animationFillMode: "backwards" }}
             >
               {/* Hover Gradient Background */}

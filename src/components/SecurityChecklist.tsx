@@ -155,10 +155,10 @@ export const SecurityChecklist = () => {
               border transition-all duration-300
               ${
                 answers[question.id] === true
-                  ? "bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border-green-300 dark:border-green-700/50 shadow-md"
+                  ? "bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border-green-300 dark:border-green-700/50 shadow-md shadow-slate-200/50"
                   : answers[question.id] === false
-                    ? "bg-gradient-to-r from-red-50/80 to-rose-50/80 dark:from-red-900/20 dark:to-rose-900/20 border-red-300 dark:border-red-700/50 shadow-md"
-                    : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-700/50 hover:shadow-md"
+                    ? "bg-gradient-to-r from-red-50/80 to-rose-50/80 dark:from-red-900/20 dark:to-rose-900/20 border-red-300 dark:border-red-700/50 shadow-md shadow-slate-200/50"
+                    : "bg-white/90 dark:bg-gray-800/50 border-slate-200/80 dark:border-gray-700/50 hover:border-slate-300/80 dark:hover:border-blue-700/50 hover:shadow-md hover:shadow-slate-300/50 shadow-sm shadow-slate-200/50"
               }
               p-6
             `}
@@ -191,7 +191,7 @@ export const SecurityChecklist = () => {
                     ${
                       answers[question.id] === true
                         ? "bg-green-600 text-white shadow-lg shadow-green-500/50"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-700 dark:hover:text-green-300"
+                        : "bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/40 hover:text-green-700 dark:hover:text-green-300"
                     }
                   `}
                 >
@@ -210,7 +210,7 @@ export const SecurityChecklist = () => {
                     ${
                       answers[question.id] === false
                         ? "bg-red-600 text-white shadow-lg shadow-red-500/50"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-700 dark:hover:text-red-300"
+                        : "bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-700 dark:hover:text-red-300"
                     }
                   `}
                 >
@@ -230,7 +230,7 @@ export const SecurityChecklist = () => {
       {/* Progress Bar */}
       {totalAnswered > 0 && (
         <div className="max-w-4xl mx-auto mt-12">
-          <div className="bg-white dark:bg-gray-800/50 rounded-2xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-lg">
+          <div className="bg-white/90 dark:bg-gray-800/50 rounded-2xl p-8 border border-slate-200/80 dark:border-gray-700/50 shadow-xl shadow-slate-200/50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 {language === "fr" ? "Votre score de sécurité" : "Your security score"}
@@ -323,8 +323,8 @@ export const SecurityChecklist = () => {
         <p className="text-lg text-gray-700 dark:text-gray-300 mb-6 leading-relaxed font-medium">
           {t.solution}
         </p>
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800/50 rounded-2xl p-6 shadow-lg">
-          <p className="text-lg font-semibold text-blue-900 dark:text-blue-300 leading-relaxed">
+        <div className="bg-white/90 dark:from-blue-900/20 dark:to-indigo-900/20 border border-slate-200/80 dark:border-blue-800/50 rounded-2xl p-6 shadow-xl shadow-slate-200/50">
+          <p className="text-lg font-semibold text-slate-800 dark:text-blue-300 leading-relaxed">
             {t.cta}
           </p>
         </div>

@@ -12,7 +12,7 @@ export const Certifications = () => {
   const { language } = useLanguage();
 
   return (
-    <section className="py-16 bg-white dark:bg-gray-900">
+    <section className="py-16 bg-slate-50 dark:bg-gray-900">
       <Container>
         <div className="text-center mb-10">
           <p className="text-sm uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-semibold">
@@ -33,7 +33,7 @@ export const Certifications = () => {
           {badges.map((badge) => (
             <div
               key={badge.name}
-              className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60 p-4 shadow-sm"
+              className="rounded-lg border border-slate-200/80 dark:border-gray-800 bg-white/90 dark:bg-gray-800/60 p-4 shadow-sm shadow-slate-200/50"
             >
               <p className="text-sm uppercase tracking-wide text-blue-600 dark:text-blue-300 font-semibold mb-1">{badge.name}</p>
               <p className="text-gray-900 dark:text-white font-semibold">{badge.desc}</p>

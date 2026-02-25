@@ -226,7 +226,7 @@ export const Services = () => {
         <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-6 break-words">
           {t.services_section_subtitle}
         </h2>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-lg font-medium text-slate-700 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
           {language === "en"
             ? "Pick the pillar you need now and expand later. Each offer is designed to deliver fast, tangible results."
             : "Commencez par le pilier dont vous avez besoin, puis élargissez ensuite. Nous garantissons des résultats rapides et concrets."}
@@ -245,7 +245,7 @@ export const Services = () => {
               className={`relative group p-5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${
                 isActive 
                   ? "bg-slate-900 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.15)] dark:bg-slate-800" 
-                  : "bg-white/60 border-slate-200/50 hover:bg-white hover:border-cyan-300/50 dark:bg-slate-900/40 dark:border-slate-700/50 dark:hover:bg-slate-800/60"
+                  : "bg-white/90 border-slate-200/80 hover:bg-white hover:border-cyan-300/50 hover:shadow-md hover:shadow-slate-300/50 dark:bg-slate-900/40 dark:border-slate-700/50 dark:hover:bg-slate-800/60 shadow-sm shadow-slate-200/50"
               }`}
             >
               {isActive && (
@@ -272,7 +272,7 @@ export const Services = () => {
       </div>
 
       {/* Content Area (Glassmorphism Dashboard) */}
-      <div ref={contentRef} className="relative z-10 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-cyan-500/20 rounded-[2.5rem] p-6 sm:p-10 lg:p-12 shadow-2xl overflow-hidden mb-12">
+      <div ref={contentRef} className="relative z-10 bg-white/90 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/20 rounded-[2.5rem] p-6 sm:p-10 lg:p-12 shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden mb-12">
         {/* Top scanning line */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
         
@@ -280,12 +280,18 @@ export const Services = () => {
           {/* Left Column: The Problem & Target */}
           <div className="space-y-8">
             {/* Target Audience */}
-            <div className="relative p-6 sm:p-8 rounded-2xl bg-white/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-100 dark:border-blue-500/20">
-                  <UserGroupIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="group relative p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-[0_8px_30px_rgba(56,189,248,0.1)]">
+              {/* Glowing accent line */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-transparent opacity-70"></div>
+              
+              {/* Decorative background glow */}
+              <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-500/5 dark:bg-cyan-500/10 blur-3xl rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
+
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/40 dark:to-cyan-900/20 flex items-center justify-center border border-blue-200/50 dark:border-cyan-700/30 shadow-inner">
+                    <UserGroupIcon className="w-6 h-6 text-blue-600 dark:text-cyan-400" />
                 </div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-white">
+                <h3 className="text-sm font-extrabold uppercase tracking-[0.2em] text-slate-900 dark:text-white">
                   {language === "en" ? "Target Profile" : "Profil Cible"}
                 </h3>
               </div>
@@ -297,22 +303,22 @@ export const Services = () => {
                     {chips.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {chips.map((c) => (
-                          <span key={c} className="inline-flex items-center rounded-md border border-blue-200/50 bg-blue-50/50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
+                            <span key={c} className="inline-flex items-center rounded-md border border-slate-200/80 bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300 shadow-sm shadow-slate-200/50">
                             {c}
                           </span>
                         ))}
                       </div>
                     )}
                     {blocks.lead && (
-                      <p className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                      <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
                         {blocks.lead}
                       </p>
                     )}
                     {blocks.bullets.length > 0 && (
                       <ul className="space-y-3">
                         {blocks.bullets.map((b) => (
-                          <li key={b} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400">
-                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400/60" />
+                          <li key={b} className="flex gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
@@ -324,15 +330,18 @@ export const Services = () => {
             </div>
 
             {/* The Challenge */}
-            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-red-50/80 to-orange-50/80 dark:from-red-950/30 dark:to-orange-950/10 border border-red-100 dark:border-red-900/30 shadow-sm overflow-hidden backdrop-blur-sm">
-              {/* Decorative background element */}
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-red-500/5 dark:bg-red-500/10 blur-2xl rounded-full pointer-events-none"></div>
+            <div className="group relative p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-rose-50/50 to-orange-50/50 dark:from-slate-900/60 dark:to-slate-900/60 border border-rose-200/80 dark:border-rose-900/30 shadow-xl shadow-rose-100/50 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-rose-200/50 dark:hover:shadow-[0_8px_30px_rgba(244,63,94,0.1)]">
+              {/* Glowing accent line */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-orange-400 to-transparent opacity-70"></div>
               
-              <div className="flex items-center gap-3 mb-6 relative z-10">
-                <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center border border-red-200 dark:border-red-500/30">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+              {/* Decorative background glow */}
+              <div className="absolute -right-20 -top-20 w-64 h-64 bg-rose-500/5 dark:bg-rose-500/10 blur-3xl rounded-full pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
+
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900/40 dark:to-orange-900/20 flex items-center justify-center border border-rose-200/50 dark:border-rose-700/30 shadow-inner">
+                    <ExclamationTriangleIcon className="w-6 h-6 text-rose-600 dark:text-rose-400" />
                 </div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-red-900 dark:text-red-400">
+                <h3 className="text-sm font-extrabold uppercase tracking-[0.2em] text-rose-900 dark:text-rose-400">
                   {language === "en" ? "The Challenge" : "Le Défi"}
                 </h3>
               </div>
@@ -344,7 +353,7 @@ export const Services = () => {
                     {badges.length > 0 && (
                       <div className="mb-5 flex flex-wrap gap-2">
                         {badges.map((b) => (
-                          <span key={b} className="inline-flex items-center rounded-md border border-red-200/60 bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 shadow-sm">
+                            <span key={b} className="inline-flex items-center rounded-md border border-rose-200/80 bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 shadow-sm shadow-slate-200/50">
                             {b}
                           </span>
                         ))}
@@ -357,7 +366,7 @@ export const Services = () => {
                       <ul className="mt-5 space-y-3">
                         {blocks.bullets.map((b) => (
                           <li key={b} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
-                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500/60" />
+                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
@@ -374,23 +383,24 @@ export const Services = () => {
             {/* The Solution */}
             <div>
               <div className="flex items-center gap-2 mb-5">
-                <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                  {language === "en" ? "Our Solution" : "Notre Solution"}
-                </h3>
-              </div>
-              <div className="p-6 sm:p-8 rounded-2xl bg-slate-900 dark:bg-slate-800/50 border border-slate-800 dark:border-cyan-500/30 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-2xl rounded-full"></div>
-                <h4 className="text-xl sm:text-2xl font-bold text-white mb-6 relative z-10">
-                  {activeService.solution}
-                </h4>
-                <ul className="space-y-4 relative z-10">
-                  {activeService.points.map((point, idx) => (
-                    <li key={idx} className="flex gap-3 text-sm text-slate-300 leading-relaxed">
-                      <CheckCircleIcon className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
+                  <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.8)]"></div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                    {language === "en" ? "Our Solution" : "Notre Solution"}
+                  </h3>
+                </div>
+                <div className="group relative p-6 sm:p-8 rounded-3xl bg-slate-900 dark:bg-slate-900/80 border border-slate-800 dark:border-cyan-500/30 shadow-2xl shadow-cyan-900/20 dark:shadow-[0_8px_30px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:shadow-cyan-500/20">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full transition-transform duration-700 group-hover:scale-110"></div>
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 blur-3xl rounded-full transition-transform duration-700 group-hover:scale-110"></div>
+                  
+                  <h4 className="text-xl sm:text-2xl font-bold text-white mb-8 relative z-10 leading-snug">
+                    {activeService.solution}
+                  </h4>
+                  <ul className="space-y-5 relative z-10">
+                    {activeService.points.map((point, idx) => (
+                      <li key={idx} className="flex gap-4 text-sm font-medium text-slate-300 leading-relaxed">
+                        <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
+                          <CheckCircleIcon className="w-4 h-4 text-cyan-400" />
+                        </div>
                 </ul>
               </div>
             </div>
@@ -398,16 +408,16 @@ export const Services = () => {
             {/* Expected Outcomes */}
             <div>
               <div className="flex items-center gap-2 mb-5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
                 <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {language === "en" ? "Expected Outcomes" : "Résultats Attendus"}
                 </h3>
               </div>
               <ul className="grid sm:grid-cols-2 gap-4">
                 {activeService.resultsList.map((result, idx) => (
-                  <li key={idx} className="flex gap-3 p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
-                    <CheckCircleIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-snug">{result}</span>
+                  <li key={idx} className="group flex gap-4 p-5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-100/50 dark:hover:shadow-[0_4px_20px_rgba(16,185,129,0.1)] hover:-translate-y-1">
+                    <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50 group-hover:scale-110 transition-transform duration-300"><CheckCircleIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /></div>
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">{result}</span>
                   </li>
                 ))}
               </ul>

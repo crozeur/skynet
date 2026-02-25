@@ -19,8 +19,8 @@ export const Hero = () => {
 
   return (
     <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-all duration-700" aria-hidden />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.15),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.12),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.1),transparent_35%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.14),transparent_35%)]" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 transition-all duration-700" aria-hidden />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.08),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.06),transparent_40%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.05),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(56,189,248,0.18),transparent_32%),radial-gradient(circle_at_50%_80%,rgba(99,102,241,0.14),transparent_35%)]" aria-hidden />
 
       <Container className="relative">
         <div className="text-center max-w-5xl mx-auto mb-12 lg:mb-14">
@@ -47,7 +47,7 @@ export const Hero = () => {
             {[t.hero_benefit1, t.hero_benefit2, t.hero_benefit3].map((benefit, idx) => (
               <div
                 key={benefit}
-                className="group relative overflow-hidden rounded-2xl border-2 border-blue-200/60 dark:border-white/10 bg-gradient-to-br from-white via-blue-50/30 to-white dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-xl shadow-blue-500/5 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 active:translate-y-0 hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300 dark:hover:border-white/20 cursor-default"
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-lg shadow-slate-200/50 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 active:translate-y-0 hover:shadow-xl hover:shadow-slate-300/60 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300/50 dark:hover:border-white/20 cursor-default"
                 style={{ animationDelay: `${0.1 * idx}s`, animationFillMode: "backwards" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.08] via-cyan-500/[0.06] to-indigo-500/[0.08] dark:from-blue-600/12 dark:via-cyan-500/12 dark:to-indigo-600/12 opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
@@ -92,7 +92,7 @@ export const Hero = () => {
               {["Zero-Trace VMs", "Evidence-ready reports", "Deployment < 10 days"].map((pill, idx) => (
                 <span
                   key={pill}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-white/10 dark:to-white/8 border border-blue-300/50 dark:border-white/15 text-xs font-bold text-blue-700 dark:text-blue-100 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:from-white/10 dark:to-white/8 border border-slate-200 dark:border-white/15 text-xs font-bold text-slate-700 dark:text-blue-100 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
                   style={{ animationDelay: `${0.08 * idx}s`, animationFillMode: "backwards" }}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -104,8 +104,8 @@ export const Hero = () => {
 
           {/* Right: form card */}
           <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards]">
-            <div className="relative rounded-3xl border-2 border-blue-200/40 dark:border-white/10 bg-white/95 dark:bg-gray-900/70 backdrop-blur-2xl shadow-2xl shadow-blue-500/10 dark:shadow-[0_28px_90px_-48px_rgba(0,0,0,0.75)] p-6 sm:p-8 lg:p-10 transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_40px_130px_-50px_rgba(59,130,246,0.4)]">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-indigo-50/80 dark:from-blue-600/10 dark:via-cyan-500/8 dark:to-indigo-600/10" aria-hidden />
+              <div className="relative rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-gray-900/70 backdrop-blur-2xl shadow-xl shadow-slate-200/50 dark:shadow-[0_28px_90px_-48px_rgba(0,0,0,0.75)] p-6 sm:p-8 lg:p-10 transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300/60">
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-50/80 via-white/60 to-slate-50/80 dark:from-blue-600/10 dark:via-cyan-500/8 dark:to-indigo-600/10" aria-hidden />
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-0 hover:opacity-20 blur-2xl transition-opacity duration-700" aria-hidden />
               <div className="relative">
                 <div className="flex items-start justify-between gap-3 mb-6">
@@ -130,9 +130,9 @@ export const Hero = () => {
 
                 <AuditForm />
 
-                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border-2 border-blue-200/50 dark:border-white/10 bg-gradient-to-br from-blue-50/80 via-cyan-50/60 to-blue-50/80 dark:from-white/[0.06] dark:via-cyan-500/[0.03] dark:to-white/[0.06] backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-lg shadow-blue-500/5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
-                  <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-blue-100">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-white/10 border border-blue-300 dark:border-white/20 text-blue-600 dark:text-blue-100 shadow-sm">
+                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:from-white/[0.06] dark:via-cyan-500/[0.03] dark:to-white/[0.06] backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-sm hover:shadow-md transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
+                  <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-blue-100">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-blue-600 dark:text-blue-100 shadow-sm">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h5l2 5-3 2c1.5 2.8 3.7 5 6.5 6.5l2-3 5 2v5c0 1.1-.9 2-2 2C10.3 24 0 13.7 0 2 0 .9.9 0 2 0h5l2 5-3 2" />
                       </svg>

@@ -75,7 +75,7 @@ export const About = () => {
             {expertiseItems.map((item, index) => (
               <div
                 key={index}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/85 dark:bg-[#0e1424]/80 backdrop-blur p-6 shadow-[0_20px_70px_-45px_rgba(0,0,0,0.75)] hover:shadow-[0_26px_80px_-40px_rgba(59,130,246,0.45)] transition-all duration-300 hover:-translate-y-1 animate-[fadeInUp_0.7s_ease-out_backwards]"
+                className="relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-[#0e1424]/80 backdrop-blur p-6 shadow-lg shadow-slate-200/50 dark:shadow-[0_20px_70px_-45px_rgba(0,0,0,0.75)] hover:shadow-xl hover:shadow-slate-300/50 dark:hover:shadow-[0_26px_80px_-40px_rgba(59,130,246,0.45)] transition-all duration-300 hover:-translate-y-1 animate-[fadeInUp_0.7s_ease-out_backwards]"
                 style={{ animationDelay: `${0.1 + index * 0.05}s` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/8 to-indigo-500/10 opacity-0 hover:opacity-100 transition-opacity duration-300" aria-hidden />

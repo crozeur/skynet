@@ -122,7 +122,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
@@ -138,7 +138,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
@@ -155,7 +155,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
-            className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/80 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
@@ -173,8 +173,8 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
                   htmlFor={`sector-${option.value}`}
                   className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition-all duration-200 ${
                     selected
-                      ? "border-blue-500 bg-blue-50 text-blue-800 dark:border-blue-400/80 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm scale-[1.01]"
-                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-blue-300/80 hover:shadow-sm"
+                        ? "border-slate-300 bg-slate-50 text-slate-800 dark:border-blue-400/80 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm shadow-slate-200/50 scale-[1.01]"
+                        : "border-slate-200/80 dark:border-gray-700 bg-white/90 dark:bg-gray-800 text-slate-700 dark:text-gray-200 hover:border-slate-300/80 hover:shadow-sm hover:shadow-slate-200/50"
                   } animate-[fadeInUp_0.9s_ease-out] hover:-translate-y-0.5`}
                   style={{ animationFillMode: "backwards", animationDelay: `${0.18 + idx * 0.03}s` }}
                 >

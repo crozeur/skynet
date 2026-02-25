@@ -61,7 +61,7 @@ export const Stats = () => {
       
       <Container className="relative z-10">
         <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 text-blue-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-blue-900/20 border border-slate-200/80 dark:border-blue-800/30 text-slate-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6 shadow-sm shadow-slate-200/50">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
             {language === "en" ? "Performance Metrics" : "Indicateurs de Performance"}
           </div>
@@ -79,7 +79,7 @@ export const Stats = () => {
           {metrics.map((metric, index) => (
             <div
               key={index}
-              className="group relative p-8 rounded-3xl bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/50 backdrop-blur-xl hover:bg-white/60 dark:hover:bg-slate-800/50 transition-all duration-500"
+              className="group relative p-8 rounded-3xl bg-white/90 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/50 backdrop-blur-xl hover:bg-white dark:hover:bg-slate-800/50 transition-all duration-500 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-300/50 hover:-translate-y-1"
             >
               {/* Subtle glow effect on hover */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 rounded-3xl transition-opacity duration-500"></div>
@@ -88,7 +88,7 @@ export const Stats = () => {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[2px] bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50 group-hover:w-24 group-hover:opacity-100 transition-all duration-500"></div>
 
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-cyan-400 mb-6 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-blue-100 dark:border-blue-800/30">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-blue-900/20 flex items-center justify-center text-slate-700 dark:text-cyan-400 mb-6 group-hover:scale-110 transition-transform duration-500 shadow-sm border border-slate-200/80 dark:border-blue-800/30">
                   {metric.icon}
                 </div>
 

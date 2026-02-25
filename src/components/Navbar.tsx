@@ -70,16 +70,16 @@ export const Navbar = () => {
     
     return `relative group rounded-full transition-all duration-300 ease-out font-semibold tracking-wide whitespace-nowrap ${textSizeClass} ${paddingClass} ${
       isActive(sectionId)
-        ? "text-blue-700 dark:text-cyan-300 bg-blue-50/80 dark:bg-cyan-900/20 ring-1 ring-blue-200/50 dark:ring-cyan-700/30 shadow-[0_0_15px_rgba(59,130,246,0.1)] dark:shadow-[0_0_15px_rgba(34,211,238,0.05)]"
+        ? "text-slate-800 dark:text-cyan-300 bg-white dark:bg-cyan-900/20 ring-1 ring-slate-200/80 dark:ring-cyan-700/30 shadow-sm shadow-slate-200/50 dark:shadow-[0_0_15px_rgba(34,211,238,0.05)]"
         : promoted
-          ? "text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
-          : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+          ? "text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
+          : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-cyan-300 hover:bg-slate-50/50 dark:hover:bg-slate-800/40"
     }`;
   };
 
   return (
     <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md transition-all duration-300 ${
-      scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50 py-0.5" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
+      scrolled ? "shadow-md shadow-slate-200/50 dark:shadow-black/50 py-0.5" : "shadow-sm shadow-slate-200/30 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">

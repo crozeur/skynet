@@ -95,8 +95,8 @@ export const Compliance = () => {
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-4 h-28 w-80 -translate-x-1/2 rounded-full bg-blue-500/15 blur-3xl" aria-hidden />
         </div>
-        <div className="rounded-2xl border border-gray-200/80 dark:border-blue-900/70 bg-white/70 dark:bg-slate-950/55 px-6 py-7 lg:px-10 lg:py-9 text-center backdrop-blur-sm shadow-[0_18px_70px_-45px_rgba(30,64,175,0.7)]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/80 dark:border-blue-800/80 bg-blue-50/80 dark:bg-blue-950/60 px-4 py-1.5 text-xs font-bold tracking-[0.18em] uppercase text-blue-700 dark:text-blue-200">
+        <div className="rounded-2xl border border-slate-200/80 dark:border-blue-900/70 bg-white/90 dark:bg-slate-950/55 px-6 py-7 lg:px-10 lg:py-9 text-center backdrop-blur-sm shadow-xl shadow-slate-200/50 dark:shadow-[0_18px_70px_-45px_rgba(30,64,175,0.7)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 dark:border-blue-800/80 bg-white dark:bg-blue-950/60 px-4 py-1.5 text-xs font-bold tracking-[0.18em] uppercase text-slate-600 dark:text-blue-200 shadow-sm shadow-slate-200/50">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
             {t.subtitle}
           </div>
@@ -108,25 +108,25 @@ export const Compliance = () => {
       </div>
 
       <div className="max-w-6xl mx-auto mt-10 lg:mt-12">
-        <div className="group relative overflow-hidden rounded-3xl border border-gray-200 dark:border-blue-900/70 bg-white/95 dark:bg-slate-950/90 backdrop-blur shadow-[0_30px_95px_-45px_rgba(15,23,42,0.9)] animate-[fadeInUp_0.8s_ease-out] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-[0_34px_110px_-45px_rgba(15,23,42,1)]">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-indigo-500/8 to-cyan-500/10 dark:from-blue-500/14 dark:via-indigo-500/10 dark:to-cyan-500/14" aria-hidden />
-          <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-blue-500/16 blur-3xl transition-transform duration-700 group-hover:scale-110" aria-hidden />
-          <div className="absolute -right-16 -bottom-16 h-52 w-52 rounded-full bg-cyan-400/16 blur-3xl transition-transform duration-700 group-hover:scale-110" aria-hidden />
+        <div className="group relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-blue-900/70 bg-white/90 dark:bg-slate-950/90 backdrop-blur shadow-xl shadow-slate-200/50 dark:shadow-[0_30px_95px_-45px_rgba(15,23,42,0.9)] animate-[fadeInUp_0.8s_ease-out] transition-all duration-500 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-[0_34px_110px_-45px_rgba(15,23,42,1)]">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 via-white/50 to-slate-50/50 dark:from-blue-500/14 dark:via-indigo-500/10 dark:to-cyan-500/14" aria-hidden />
+          <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-slate-200/50 dark:bg-blue-500/16 blur-3xl transition-transform duration-700 group-hover:scale-110" aria-hidden />
+          <div className="absolute -right-16 -bottom-16 h-52 w-52 rounded-full bg-slate-200/50 dark:bg-cyan-400/16 blur-3xl transition-transform duration-700 group-hover:scale-110" aria-hidden />
 
           <div className="relative px-6 py-8 lg:px-10 lg:py-12 space-y-8">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 text-xs font-semibold tracking-wide">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-blue-900/30 border border-slate-200/80 dark:border-transparent text-slate-700 dark:text-blue-200 text-xs font-semibold tracking-wide shadow-sm shadow-slate-200/50">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                 ISO 27001 · NIS2 · GDPR
               </span>
-              <span className="text-sm text-gray-700 dark:text-gray-200/95 font-medium">
+              <span className="text-sm text-slate-700 dark:text-gray-200/95 font-medium">
                 {t.intro}
               </span>
             </div>
 
             <div className="grid gap-8 lg:gap-10 lg:grid-cols-[1fr_1fr]">
               {/* Risks */}
-              <div className="rounded-2xl border border-gray-200 dark:border-rose-900/70 bg-white dark:bg-slate-900/90 p-6 lg:p-7 shadow-[0_18px_60px_-45px_rgba(220,38,38,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_-45px_rgba(220,38,38,0.58)]">
+              <div className="rounded-2xl border border-slate-200/80 dark:border-rose-900/70 bg-white/90 dark:bg-slate-900/90 p-6 lg:p-7 shadow-lg shadow-slate-200/50 dark:shadow-[0_18px_60px_-45px_rgba(220,38,38,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-300/50 dark:hover:shadow-[0_22px_70px_-45px_rgba(220,38,38,0.58)]">
                 <div className="flex items-center gap-3 mb-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-200 font-bold">
                     ⚠️
@@ -149,7 +149,7 @@ export const Compliance = () => {
               </div>
 
               {/* Approach */}
-              <div className="rounded-2xl border border-gray-200 dark:border-emerald-900/70 bg-white dark:bg-slate-900/90 p-6 lg:p-7 shadow-[0_18px_60px_-45px_rgba(16,185,129,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_-45px_rgba(16,185,129,0.58)]">
+              <div className="rounded-2xl border border-slate-200/80 dark:border-emerald-900/70 bg-white/90 dark:bg-slate-900/90 p-6 lg:p-7 shadow-lg shadow-slate-200/50 dark:shadow-[0_18px_60px_-45px_rgba(16,185,129,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-300/50 dark:hover:shadow-[0_22px_70px_-45px_rgba(16,185,129,0.58)]">
                 <div className="flex items-center gap-3 mb-5">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200 font-bold">
                     ✓
@@ -172,7 +172,7 @@ export const Compliance = () => {
               </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-5 rounded-2xl border border-blue-200/70 dark:border-blue-700/70 bg-blue-50/90 dark:bg-blue-950/50 transition-all duration-300 hover:border-blue-300/80 dark:hover:border-blue-600/80">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-5 rounded-2xl border border-slate-200/80 dark:border-blue-700/70 bg-white/90 dark:bg-blue-950/50 transition-all duration-300 hover:border-slate-300/80 dark:hover:border-blue-600/80 shadow-sm shadow-slate-200/50">
               <div className="text-gray-900 dark:text-white text-lg font-semibold">
                 {t.conclusion}
               </div>

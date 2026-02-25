@@ -86,7 +86,7 @@
 
   html,
   body {
-    @apply bg-white dark:bg-trueGray-900;
+    @apply bg-slate-50 dark:bg-trueGray-900;
   }
 
   * {

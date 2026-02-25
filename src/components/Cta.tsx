@@ -17,7 +17,7 @@ export const Cta = () => {
 
       <Container className="relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="relative rounded-[2.5rem] border border-slate-200/50 dark:border-cyan-500/20 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl shadow-2xl overflow-hidden">
+          <div className="relative rounded-[2.5rem] border border-slate-200/80 dark:border-cyan-500/20 bg-white/90 dark:bg-slate-900/60 backdrop-blur-2xl shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden">
             {/* Top scanning line */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
 
@@ -85,7 +85,7 @@ export const Cta = () => {
               </div>
 
               {/* Right Side: The Interface */}
-              <div className="bg-slate-100/50 dark:bg-slate-950/50 p-10 lg:p-16 border-t lg:border-t-0 lg:border-l border-slate-200/50 dark:border-slate-800/50 relative flex flex-col justify-center">
+              <div className="bg-slate-50/80 dark:bg-slate-950/50 p-10 lg:p-16 border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-slate-800/50 relative flex flex-col justify-center">
                 {/* Terminal-like header */}
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest">

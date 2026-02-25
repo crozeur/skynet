@@ -66,8 +66,8 @@ export const Faq = () => {
                         dark:focus-visible:ring-offset-gray-900
                         ${
                           open
-                            ? "bg-gradient-to-r from-blue-50 to-blue-100/50 dark:from-blue-900/30 dark:to-blue-800/20 shadow-md border border-blue-200 dark:border-blue-800/50"
-                            : "bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700/50"
+                            ? "bg-gradient-to-r from-slate-50 to-white dark:from-blue-900/30 dark:to-blue-800/20 shadow-md shadow-slate-200/50 border border-slate-200/80 dark:border-blue-800/50"
+                            : "bg-white/90 dark:bg-gray-800/50 border border-slate-200/80 dark:border-gray-700/50 shadow-sm shadow-slate-200/50 hover:shadow-md hover:shadow-slate-300/50 hover:border-slate-300/80 dark:hover:border-blue-700/50"
                         }
                         active:scale-[0.98] text-gray-800 dark:text-gray-100
                       `}

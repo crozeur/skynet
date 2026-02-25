@@ -9,7 +9,7 @@ export function Footer() {
   const { language } = useLanguage();
   const t = translations[language];
   return (
-    <footer className="bg-gradient-to-b from-gray-100/70 via-gray-50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-950 text-gray-900 dark:text-white py-12 lg:py-16 overflow-x-hidden">
+    <footer className="bg-gradient-to-b from-slate-100/70 via-slate-50 to-white dark:from-gray-900 dark:via-gray-950 dark:to-gray-950 text-gray-900 dark:text-white py-12 lg:py-16 overflow-x-hidden">
       <Container>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div>
