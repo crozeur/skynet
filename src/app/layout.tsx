@@ -63,7 +63,7 @@ export default function RootLayout({
         <ThemeProviderClient>
           <LanguageProvider>
             <Navbar />
-            <div>{children}</div>
+            <div className="overflow-x-hidden">{children}</div>
             <Footer />
             <CookieBanner />
             <StickyCta />
