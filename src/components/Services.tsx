@@ -12,6 +12,10 @@ import {
   CloudIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/solid";
+import {
+  UserGroupIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
 export const Services = () => {
   const { language } = useLanguage();
@@ -274,12 +278,14 @@ export const Services = () => {
         
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Left Column: The Problem & Target */}
-          <div className="space-y-10">
+          <div className="space-y-8">
             {/* Target Audience */}
-            <div>
-              <div className="flex items-center gap-2 mb-5">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <div className="relative p-6 sm:p-8 rounded-2xl bg-white/80 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/50 shadow-sm backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-100 dark:border-blue-500/20">
+                  <UserGroupIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-white">
                   {language === "en" ? "Target Profile" : "Profil Cible"}
                 </h3>
               </div>
@@ -287,27 +293,27 @@ export const Services = () => {
                 const { chips, rest } = splitAudienceText(activeService.for);
                 const blocks = toReadableBlocks(rest);
                 return (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {chips.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {chips.map((c) => (
-                          <span key={c} className="inline-flex items-center rounded-full border border-blue-200/50 bg-blue-50/50 px-3 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
+                          <span key={c} className="inline-flex items-center rounded-md border border-blue-200/50 bg-blue-50/50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
                             {c}
                           </span>
                         ))}
                       </div>
                     )}
                     {blocks.lead && (
-                      <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                      <p className="text-base font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
                         {blocks.lead}
                       </p>
                     )}
                     {blocks.bullets.length > 0 && (
-                      <ul className="space-y-2">
+                      <ul className="space-y-3">
                         {blocks.bullets.map((b) => (
-                          <li key={b} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
-                            <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
-                            <span>{b}</span>
+                          <li key={b} className="flex gap-3 text-sm text-slate-600 dark:text-slate-400">
+                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400/60" />
+                            <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
                       </ul>
@@ -318,10 +324,15 @@ export const Services = () => {
             </div>
 
             {/* The Challenge */}
-            <div>
-              <div className="flex items-center gap-2 mb-5">
-                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-red-50/80 to-orange-50/80 dark:from-red-950/30 dark:to-orange-950/10 border border-red-100 dark:border-red-900/30 shadow-sm overflow-hidden backdrop-blur-sm">
+              {/* Decorative background element */}
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-red-500/5 dark:bg-red-500/10 blur-2xl rounded-full pointer-events-none"></div>
+              
+              <div className="flex items-center gap-3 mb-6 relative z-10">
+                <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-500/20 flex items-center justify-center border border-red-200 dark:border-red-500/30">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-red-900 dark:text-red-400">
                   {language === "en" ? "The Challenge" : "Le Défi"}
                 </h3>
               </div>
@@ -329,25 +340,25 @@ export const Services = () => {
                 const badges = extractBadges(activeService.problem);
                 const blocks = toReadableBlocks(activeService.problem);
                 return (
-                  <div className="p-6 rounded-2xl bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30">
+                  <div className="relative z-10">
                     {badges.length > 0 && (
-                      <div className="mb-4 flex flex-wrap gap-2">
+                      <div className="mb-5 flex flex-wrap gap-2">
                         {badges.map((b) => (
-                          <span key={b} className="inline-flex items-center rounded-full border border-red-200/50 bg-white/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+                          <span key={b} className="inline-flex items-center rounded-md border border-red-200/60 bg-white/60 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300 shadow-sm">
                             {b}
                           </span>
                         ))}
                       </div>
                     )}
-                    <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                    <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
                       {blocks.lead}
                     </p>
                     {blocks.bullets.length > 0 && (
-                      <ul className="mt-4 space-y-2">
+                      <ul className="mt-5 space-y-3">
                         {blocks.bullets.map((b) => (
-                          <li key={b} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
-                            <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
-                            <span>{b}</span>
+                          <li key={b} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
+                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500/60" />
+                            <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
                       </ul>
