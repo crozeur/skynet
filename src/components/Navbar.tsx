@@ -78,12 +78,12 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md relative transition-all duration-300 ${
+    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md transition-all duration-300 ${
       scrolled ? "shadow-xl shadow-gray-400/60 dark:shadow-black/50 py-0.5" : "shadow-lg shadow-gray-300/50 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
-          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={144} height={144} className="h-12 w-auto sm:h-14 md:h-16 lg:h-20 hover:opacity-90 transition-opacity duration-150" />
+          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={200} height={200} className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className={`hidden md:flex flex-1 min-w-0 items-center justify-center ${desktopNavGapClass} overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1`}>
