@@ -47,7 +47,7 @@ export const Hero = () => {
             {[t.hero_benefit1, t.hero_benefit2, t.hero_benefit3].map((benefit, idx) => (
               <div
                 key={benefit}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-lg shadow-slate-200/50 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 active:translate-y-0 hover:shadow-xl hover:shadow-slate-300/60 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300/50 dark:hover:border-white/20 cursor-default"
+                className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white/90 dark:bg-slate-900/50 dark:bg-gradient-to-br dark:from-white/[0.07] dark:via-blue-500/[0.03] dark:to-white/[0.07] backdrop-blur-xl px-5 py-5 sm:px-6 sm:py-5 shadow-lg shadow-slate-200/50 dark:shadow-[0_25px_80px_-45px_rgba(0,0,0,0.55)] transition-all duration-500 hover:-translate-y-2 active:translate-y-0 hover:shadow-xl hover:shadow-slate-300/60 dark:hover:shadow-[0_30px_90px_-40px_rgba(59,130,246,0.45)] hover:border-blue-300/50 dark:hover:border-white/20 cursor-default"
                 style={{ animationDelay: `${0.1 * idx}s`, animationFillMode: "backwards" }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/[0.08] via-cyan-500/[0.06] to-indigo-500/[0.08] dark:from-blue-600/12 dark:via-cyan-500/12 dark:to-indigo-600/12 opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden />
@@ -92,7 +92,7 @@ export const Hero = () => {
               {["Zero-Trace VMs", "Evidence-ready reports", "Deployment < 10 days"].map((pill, idx) => (
                 <span
                   key={pill}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:from-white/10 dark:to-white/8 border border-slate-200 dark:border-white/15 text-xs font-bold text-slate-700 dark:text-blue-100 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-800/80 dark:bg-gradient-to-r dark:from-white/10 dark:to-white/5 border border-slate-200 dark:border-white/15 text-xs font-bold text-slate-700 dark:text-blue-100 shadow-sm hover:shadow-md hover:scale-105 active:scale-95 transition-all duration-200 cursor-default"
                   style={{ animationDelay: `${0.08 * idx}s`, animationFillMode: "backwards" }}
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />

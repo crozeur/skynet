@@ -65,8 +65,8 @@ export const Navbar = () => {
 
   const navItemClass = (sectionId: string, opts?: { promoted?: boolean }) => {
     const promoted = Boolean(opts?.promoted);
-    const textSizeClass = isFrench ? "text-[14px] lg:text-[15px] xl:text-base" : "text-[15px] lg:text-base xl:text-lg";
-    const paddingClass = "px-3 py-1.5 lg:px-4 lg:py-2";
+    const textSizeClass = isFrench ? "text-[13px] lg:text-[14px] xl:text-[15px]" : "text-[14px] lg:text-[15px] xl:text-base";
+    const paddingClass = "px-2.5 py-1.5 lg:px-3 lg:py-2";
     
     return `relative group rounded-full transition-all duration-300 ease-out font-semibold tracking-wide whitespace-nowrap ${textSizeClass} ${paddingClass} ${
       isActive(sectionId)
@@ -83,7 +83,7 @@ export const Navbar = () => {
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
-          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={200} height={200} className="h-24 w-auto sm:h-28 md:h-32 lg:h-36 hover:opacity-90 transition-opacity duration-150" />
+          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={200} height={200} className="h-20 w-auto sm:h-24 md:h-28 lg:h-32 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className={`hidden md:flex flex-1 min-w-0 items-center justify-center ${desktopNavGapClass} overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1`}>
