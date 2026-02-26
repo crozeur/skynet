@@ -130,7 +130,7 @@ export const Hero = () => {
 
                 <AuditForm />
 
-                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-slate-50/80 dark:from-white/[0.06] dark:via-cyan-500/[0.03] dark:to-white/[0.06] backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-sm hover:shadow-md transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
+                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-sm hover:shadow-md transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
                   <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-blue-100">
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-blue-600 dark:text-blue-100 shadow-sm">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
