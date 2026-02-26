@@ -430,22 +430,22 @@ export const Services = () => {
       </div>
 
       {/* Telemetry Bar (Our Priorities) */}
-      <div className="relative z-10 bg-white dark:bg-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 overflow-hidden shadow-xl shadow-slate-200/50 dark:shadow-2xl">
-        <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-[0.03] dark:opacity-10"></div>
-        <div className="absolute -right-20 -top-20 w-64 h-64 bg-cyan-500/5 dark:bg-cyan-500/10 blur-3xl rounded-full"></div>
+      <div className="relative z-10 bg-slate-900 dark:bg-slate-950 rounded-3xl border border-slate-800 dark:border-slate-800 p-6 sm:p-8 overflow-hidden shadow-2xl">
+        <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-10"></div>
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full"></div>
         
         <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
           <div className="flex items-center gap-4 lg:w-1/4">
-            <div className="w-12 h-12 rounded-xl bg-cyan-50 dark:bg-cyan-500/20 border border-cyan-100 dark:border-cyan-500/30 flex items-center justify-center flex-shrink-0 shadow-inner">
-              <svg className="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
             <div>
-              <div className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">
+              <div className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-1">
                 {language === "en" ? "Global Telemetry" : "Télémétrie Globale"}
               </div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white">
+              <div className="text-lg font-bold text-white">
                 {language === "en" ? "Our Priorities" : "Nos Priorités"}
               </div>
             </div>
@@ -454,19 +454,19 @@ export const Services = () => {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:w-3/4 w-full">
             <div className="flex flex-col">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_threats || "Menaces"}</span>
-              <span className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400">{t.stats_threats_value || "2,847"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_threats_value || "2,847"}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_response_time || "Réponse"}</span>
-              <span className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400">{t.stats_response_value || "8m 42s"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_response_value || "8m 42s"}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_system_health || "Santé"}</span>
-              <span className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400">{t.stats_health_value || "99.8%"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_health_value || "99.8%"}</span>
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_coverage || "Couverture"}</span>
-              <span className="text-2xl sm:text-3xl font-black text-cyan-600 dark:text-cyan-400">{t.stats_coverage_value || "100%"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_coverage_value || "100%"}</span>
             </div>
           </div>
         </div>
