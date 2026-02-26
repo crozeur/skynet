@@ -401,8 +401,11 @@ export const Services = () => {
                         <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
                           <CheckCircleIcon className="w-4 h-4 text-cyan-400" />
                         </div>
-                </ul>
-              </div>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
             </div>
 
             {/* Expected Outcomes */}

@@ -70,15 +70,7 @@ jobs:
             git stash || true
             git pull --rebase origin main
             git stash pop || true
-          echo "❌ Push failed after retries"
-          exit 1
-
-      - name: Fix missing metadata (scheduled/manual)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-        run: node scripts/fix-missing-metadata.js
-
-      - name: Validate blog metadata (scheduled/manual)
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+          done
         run: node scripts/validate-blog-metadata.js
 
       - name: Detect changes
