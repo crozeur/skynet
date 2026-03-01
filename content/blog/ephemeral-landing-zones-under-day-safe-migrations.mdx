@@ -1,0 +1,230 @@
+## Intro
+Migrations stall when landing zones are inconsistent, guardrails are bolted on late, and environments drift before cutover. The fastest path is to treat the landing zone as ephemeral, reproducible infrastructure: spin up, validate, migrate, and tear down. Skynet operationalizes this as standardized execution—deterministic deployment, policy enforcement, and verification with repeatable checklists. The result is a controlled target environment you can trust in hours/days, not weeks.
+
+## Quick take
+- Disposable landing zones reduce migration risk by preventing configuration drift before cutover.
+- Use **Terraform** as the source of truth, aligned to **AWS Control Tower** and **Azure Landing Zones** patterns.
+- Bake guardrails into deployment: identity boundaries, mandatory logging, encryption defaults, and centralized key management.
+- Prove readiness with deterministic validation (policy queries, log delivery checks, route/DNS/IAM tests).
+- Tear down temporary scaffolding once stable to keep your cloud estate minimal and controlled.
+
+## Build an ephemeral baseline landing zone (Terraform-first)
+### 1) Define the minimum viable landing zone (MVLZ)
+A migration landing zone is not “your future cloud platform.” It is a controlled, temporary target that is secure-by-default and stable long enough to migrate and validate. Keep the MVLZ scope tight:
+
+- Network segmentation (prod/non-prod, shared services), egress control, and private connectivity primitives where required.
+- Identity boundaries: separate management/admin from workload identities; avoid cross-account/subscription sprawl.
+- Logging and audit pipelines: organization/subscription-level logs centralized from day one.
+- Encryption defaults and key lifecycle ownership.
+
+> ⚠️ Attention: If you allow “temporary exceptions” (public buckets, broad admin roles, disabled logs) in an ephemeral landing zone, they tend to survive the cutover and become permanent technical debt.
+
+### 2) Terraform layout that stays disposable
+Use a structure that supports fast creation and clean teardown without leaving ghost resources:
+
+- One root per environment (e.g., `lz-ephemeral-prod`, `lz-ephemeral-nonprod`).
+- State isolation per environment.
+- Provider-level tags (cost, owner, expiry) applied to all resources.
+
+```bash
+# Example: initialize with a remote backend and workspace separation
+terraform init -backend-config="bucket=skynet-tfstate" \
+  -backend-config="key=landingzones/ephemeral/prod.tfstate" \
+  -backend-config="region=us-east-1"
+
+terraform workspace new ephemeral-prod || terraform workspace select ephemeral-prod
+terraform fmt -recursive
+terraform validate
+```
+
+### 3) Plan + policy checks are not optional
+A landing zone is only “standardized” if you can prove it is identical every time. Make `plan` output and policy checks part of the gate.
+
+```bash
+terraform plan -out=tfplan
+terraform show -json tfplan > tfplan.json
+
+# Example policy checks (choose what your org uses)
+# - OPA/Conftest
+# - Sentinel
+# - Checkov
+# - Terraform Cloud policy sets
+conftest test tfplan.json
+```
+
+> 💡 Pro-Tip: Treat policy failures like compilation errors: do not allow “temporary” bypasses in ephemeral builds. If a rule blocks the build, fix the module.
+
+## Embed guardrails at the control plane (AWS Control Tower + Azure Landing Zones)
+### 1) AWS: organization-level boundaries you can verify
+In AWS, your migration-safe posture starts at **AWS Organizations** (account boundaries) and the policies applied to accounts/OUs.
+
+Minimum guardrails to enforce early:
+- Account separation: management/shared services/workloads.
+- Deny-by-default for risky services/regions if you need geo constraints.
+- Mandatory logging and retention path.
+- Encryption requirements for storage services where feasible.
+
+Verification should be CLI-driven and repeatable:
+
+```bash
+# Inspect policies attached to an OU/account target
+aws organizations list-policies-for-target \
+  --target-id ou-xxxx-yyyyyyyy \
+  --filter SERVICE_CONTROL_POLICY
+
+# Confirm CloudTrail is present and multi-region (example query)
+aws cloudtrail describe-trails --include-shadow-trails
+
+# Confirm organization trail status
+aws cloudtrail get-trail-status --name <trail-name>
+```
+
+> ✅ Success: You can point to a deterministic output that proves which guardrails are attached and that audit logging is actively delivering.
+
+### 2) Azure: policy initiatives as the landing zone contract
+In Azure, **Azure Policy** (and initiatives) is your contract. Apply it at the management group level aligned to your landing zone hierarchy.
+
+Focus on:
+- Required diagnostics settings (Activity Logs + resource diagnostics).
+- Allowed locations/SKUs if needed.
+- Mandatory tags and lifecycle controls.
+- Key management patterns (central vault, controlled access).
+
+```bash
+# List policy assignments at a scope (management group/subscription)
+az policy assignment list --scope /providers/Microsoft.Management/managementGroups/<mg-name>
+
+# Review compliance state for assignments
+az policy state list --management-group <mg-name> --query "[0:10]"
+
+# Query Activity Log settings (subscription)
+az monitor diagnostic-settings subscription list
+```
+
+> ⚠️ Attention: If diagnostic settings are not enforced centrally, teams will deploy workloads that never emit logs, and you will not discover it until an incident or failed audit.
+
+### 3) Centralized keys and encryption defaults
+Whether you use **AWS KMS** or **Azure Key Vault**, land the key hierarchy early. Migration cutovers often fail because encryption and access policies were not agreed up front.
+
+What “good” looks like for ephemeral landing zones:
+- Central keys exist and are reachable from target accounts/subscriptions.
+- Access is granted through tight role assumptions / managed identities.
+- Default encryption is enabled where supported (storage, managed databases, disks).
+
+## Deterministic validation: prove readiness before you move data
+### 1) Pre-cutover validation scripts (network, DNS, IAM)
+Treat cutover readiness as a scriptable contract: if checks pass, you migrate; if they fail, you fix the landing zone, not the workload.
+
+Examples of checks that catch real failures:
+- Route tables and egress: can the subnet reach required endpoints without accidental internet paths?
+- DNS resolution: split-horizon DNS and private endpoints resolve correctly.
+- Identity: workload roles can assume required roles across boundaries.
+
+```bash
+# AWS examples
+# Validate role assumption (from a workload principal)
+aws sts assume-role \
+  --role-arn arn:aws:iam::<acct-id>:role/<workload-role> \
+  --role-session-name preCutoverTest
+
+# Confirm VPC route tables (target VPC)
+aws ec2 describe-route-tables --filters "Name=vpc-id,Values=vpc-xxxxxxxx"
+
+# Azure examples
+# Validate role assignment visibility (scope)
+az role assignment list --scope /subscriptions/<sub-id> --query "[0:10]"
+
+# Validate private DNS zones linkage (example)
+az network private-dns link vnet list \
+  --resource-group <rg> \
+  --zone-name <private-zone>
+```
+
+> 💡 Pro-Tip: Store validation outputs (JSON) alongside the Terraform commit SHA used to deploy the landing zone. That gives you a clean chain of custody for what was verified.
+
+### 2) Telemetry confirmation during parallel run
+Parallel runs fail silently when telemetry is incomplete. Before you declare success, verify:
+- Logs arrive centrally and are queryable.
+- Identity events are captured.
+- Key services emit diagnostics.
+
+Keep it vendor-neutral: you’re verifying delivery and coverage, not claiming compliance.
+
+### 3) Drift detection between “validated” and “cutover”
+Drift is the #1 enemy of a clean migration window. Even in a one-day build, drift can happen via console clicks, emergency changes, or ad-hoc scripts.
+
+```bash
+# Terraform drift check
+terraform plan -detailed-exitcode || echo "Drift detected or changes pending"
+
+# Optional: capture plan output for review
+terraform plan -out=postvalidate.tfplan
+terraform show -no-color postvalidate.tfplan | sed -n '1,200p'
+```
+
+> ⚠️ Attention: If drift exists, stop and reconcile. A cutover on a drifting foundation turns debugging into archaeology.
+
+## Cutover and teardown: keep what matters, discard the rest
+### 1) Cutover as a controlled, reversible procedure
+A fast migration is not a reckless migration. The goal is to execute a sequence you can repeat across workloads:
+
+- Freeze changes in source and target.
+- Re-run pre-cutover validation scripts.
+- Migrate data/config.
+- Shift traffic/DNS.
+- Confirm telemetry in the target.
+- Keep rollback conditions explicit (what triggers a revert, and how).
+
+```bash
+# Example: minimal DNS verification (works for most environments)
+# Validate authoritative answer and expected target
+nslookup <app-fqdn>
+
+# If using Route 53 (example) confirm record sets in hosted zone
+aws route53 list-resource-record-sets --hosted-zone-id <zone-id>
+```
+
+> ✅ Success: You can demonstrate (1) the landing zone stayed consistent from validation to cutover and (2) traffic moved with verifiable telemetry in the target.
+
+### 2) Tear down temporary scaffolding without losing governance
+Ephemeral does not mean careless deletion. Keep the control plane, discard the temporary migration scaffolding.
+
+Common teardown candidates:
+- Temporary transit/peering paths that existed only for data replication.
+- Short-lived accounts/subscriptions created for test migrations.
+- One-off security tooling stacks deployed only to observe the parallel run.
+
+```bash
+# Terraform destroy for ephemeral environments
+terraform workspace select ephemeral-prod
+terraform destroy -auto-approve
+```
+
+> 💡 Pro-Tip: Tag everything with an expiry and owner, then enforce cleanup with policy. Ephemeral only works if it’s enforced operationally.
+
+### 3) Where Skynet fits: standardized execution
+Skynet’s execution engine makes ephemeral landing zones repeatable: deploy a known-good baseline, apply guardrails as code, run deterministic validations, execute the cutover checklist, then tear down what should not persist. The value is speed with precision—every step is measurable, reviewable, and repeatable across migrations.
+
+## Checklist
+- [ ] Define MVLZ scope: network segments, identity boundaries, logging, encryption defaults
+- [ ] Establish isolated Terraform state per ephemeral landing zone
+- [ ] Run `terraform fmt`, `terraform validate`, and `terraform plan` gating
+- [ ] Execute policy checks on plan output (OPA/Sentinel/other)
+- [ ] Apply org/subscription guardrails (SCPs / Policy initiatives) at the correct scope
+- [ ] Verify guardrails via CLI (`aws organizations ...`, `az policy ...`)
+- [ ] Confirm centralized logging delivery (CloudTrail / Activity Logs + resource diagnostics)
+- [ ] Validate key management reachability and access boundaries (KMS / Key Vault)
+- [ ] Run pre-cutover scripts: routes, DNS resolution, and role assumption tests
+- [ ] Perform drift detection immediately before cutover and remediate any deltas
+- [ ] Execute cutover with explicit rollback criteria and telemetry confirmation
+- [ ] Tear down temporary migration scaffolding and retain only the intended control plane
+
+## FAQ
+### How is an ephemeral landing zone different from a normal landing zone?
+<p>An ephemeral landing zone is built to be disposable and reproducible: it exists to migrate safely, validate deterministically, and avoid drift. You keep the governance primitives you intend to retain, but you deliberately remove temporary scaffolding once the migration stabilizes.</p>
+
+### What are the minimum guardrails you should never skip?
+<p>Centralized logging from day one, strict identity boundaries for admin vs workload access, and encryption defaults with controlled key ownership. If any of these are deferred, you lose visibility and control precisely during the highest-risk window.</p>
+
+### How do you keep “speed” from turning into risky shortcuts?
+<p>Speed comes from standardization and verification: policy gates on every plan, CLI-verifiable guardrails, scripted pre-cutover validations, and drift detection before cutover. If the checks are deterministic, faster execution increases safety instead of reducing it.</p>
