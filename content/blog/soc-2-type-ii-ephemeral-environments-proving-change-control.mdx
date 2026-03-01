@@ -1,0 +1,216 @@
+export const metadata = {
+  title: "SOC 2 Type II in Ephemeral Environments: Proving Change Control",
+  description: "Capture SOC 2 Type II evidence from control planes so change control remains provable when Kubernetes nodes and CI runners self-destruct.",
+  date: "2026-03-01",
+  pillar: "AUDIT",
+  tags: ["SOC 2", "Kubernetes", "IaC", "Audit Evidence", "Change Control"]
+};
+
+## Introduction
+Ephemeral compute breaks audit evidence because the “thing auditors want to see” (server state, patch logs, local configs) disappears on rotation. For SOC 2 Type II, the requirement doesn’t change: you must prove controls operated consistently across the full review period, including change management, access control, and logging. The only durable source of truth in an ephemeral environment is the control plane: Git, Terraform state, Kubernetes API, and cloud audit logs. This post shows how to produce a time-bound, traceable evidence chain that survives node churn and short-lived CI runners.
+
+## Quick Take
+- Evidence must be harvested from durable control planes, not from transient hosts.
+- Treat **Git** + **Terraform** as the authoritative change ledger and preserve plan/apply artifacts.
+- Prove drift, access, and enforcement via **Kubernetes Audit Logs** + periodic API snapshots of RBAC and policy.
+- Replace “patch evidence” with image provenance, registry scanning, and admission gates enforced at deploy time.
+- Standardize retention, hashing, and control-to-evidence mapping so every artifact is timestamped and auditor-ready.
+
+## Reframe SOC 2 Type II Evidence: From Hosts to Control Planes
+In ephemeral environments, “inventory” is not a list of machines; it’s a set of declared resources, identities, and policies. Your audit posture improves when you stop chasing nodes and instead prove three things:
+
+### 1) Every production change is authorized, reviewed, and attributable
+This maps to change management expectations: who requested it, who approved it, what changed, when it was deployed, and what evidence ties the chain together.
+
+### 2) Every access decision is logged and explainable
+This means you can reconstruct “who did what” from the API surface (**Kubernetes API server**, cloud control planes, and your VCS), not from a node that no longer exists.
+
+### 3) Every runtime artifact is policy-bound at admission
+If nodes are disposable, your security boundary must shift “left” to images and “up” to admission controls and registry policy.
+
+> ⚠️ Attention: If your evidence depends on `/var/log`, node-local package managers, or runner workspaces, you will eventually fail a Type II period because those artifacts won’t exist when sampled.
+
+## Treat Git + Terraform as the Authoritative Change Ledger
+When compute is ephemeral, the change ledger must be durable, queryable, and immutable enough to support review-period sampling. For most teams, that ledger is **Git** plus **Terraform** state and outputs.
+
+### 1) Enforce signed commits and protected branches
+Auditors don’t need a philosophical debate about Git; they need assurance that commits are attributable and merged through a controlled path.
+
+Pragmatic baseline:
+- Signed commits or signed tags for changes that reach production.
+- Protected mainline branches.
+- Mandatory code review (PR approvals) and status checks.
+- Immutable PR metadata retained for the full review period.
+
+CLI verification example:
+```
+git verify-commit <sha>
+```
+
+If your workflow uses merge commits, verify the merge commit that landed in the protected branch. If you use squash merges, ensure the squashed commit is signed (or the tag that represents the deployment is signed).
+
+> 💡 Pro-Tip: Create a deterministic linkage between PR metadata and your internal change ticket identifier (e.g., require a ticket ID in the PR title and commit message), then export it as evidence during each release.
+
+### 2) Preserve Terraform plan/apply outputs as evidence (hashed)
+For IaC-driven environments, the most defensible evidence is: “this was the declared diff, this was approved, and this is what was applied.” Capture artifacts at each stage:
+- `plan` output
+- `apply` output
+- the exact module version or commit
+- the resolved provider versions
+
+Resource inventory extraction (useful when auditors ask “what exists in production?”):
+```
+terraform show -json | jq '.values.root_module.resources[] | {address, type, name}'
+```
+
+Evidence packaging baseline:
+- Store the `plan` and `apply` outputs in write-once storage.
+- Record a content hash (e.g., SHA-256) for each artifact.
+- Timestamp every artifact at capture time and maintain retention through the Type II period.
+
+> ✅ Success: You can answer “what changed” without relying on any single host, because the change diff and application record are retained outside the ephemeral fleet.
+
+### 3) Produce control-to-evidence mapping, not raw logs
+Raw outputs are not sufficient at scale. For sampling, an auditor needs a consistent way to traverse from a control to evidence. Build a simple matrix for each release:
+- Change request / ticket reference
+- PR link and approvals
+- Commit SHA(s)
+- Terraform plan hash and location
+- Terraform apply hash and location
+- Deployment identifier (tag, release ID)
+
+Skynet’s approach here is “Standardized Execution”: evidence capture is not a one-off project; it is a repeatable pipeline that generates the same artifacts every time, with the same naming and hashing rules.
+
+## Prove Kubernetes Drift and Access via the API Server Audit Trail
+Kubernetes is an API-driven control plane. If you can’t prove what the API accepted and who asked for it, you can’t defend change control or access control during a Type II period.
+
+### 1) Enable and retain Kubernetes Audit Logs
+Turn on **Kubernetes Audit Logs** and export them to your cloud logging backend with retention that covers the entire review window (plus whatever buffer your audit program requires). The goal is not to log “everything forever,” but to ensure you can support:
+- change sampling (who changed a deployment spec)
+- privileged actions (RBAC binding changes, namespace creation)
+- authentication events (where available)
+
+> ⚠️ Attention: If audit logs roll off before the auditor samples earlier months, you will be forced into weak “point-in-time” evidence that doesn’t satisfy Type II operation across the period.
+
+### 2) Query events and validate access paths during evidence collection
+Kubernetes events aren’t the same as audit logs, but they can support operational context and corroboration.
+
+Event review example:
+```
+kubectl get events -A --sort-by=.lastTimestamp
+```
+
+Access verification example (useful to show effective permissions at a point in time):
+```
+kubectl auth can-i --list --as <user>
+```
+
+Use these queries as part of a scheduled evidence capture routine (e.g., weekly snapshots) so you can show control operation patterns across the Type II period.
+
+### 3) Snapshot RBAC and admission policies on a schedule
+Node drift is irrelevant if the control plane enforces consistent policy. What matters is whether RBAC and admission controls changed, and whether those changes were authorized.
+
+Capture snapshots of:
+- **Kubernetes RBAC** objects, especially **ClusterRoleBindings** and namespace RoleBindings
+- admission enforcement configurations, such as **OPA Gatekeeper** constraints/templates or **Kyverno** policies
+
+Practical snapshot targets (examples):
+- `clusterrolebindings.rbac.authorization.k8s.io`
+- `rolebindings.rbac.authorization.k8s.io`
+- `validatingwebhookconfigurations.admissionregistration.k8s.io`
+
+One quick check for webhook presence:
+```
+kubectl get validatingwebhookconfigurations
+```
+
+> 💡 Pro-Tip: When you snapshot RBAC/policy, hash the exported YAML/JSON and store it with a timestamp. This gives you an immutable “state proof” even if later changes occur.
+
+## Demonstrate “Patching” Without Host Persistence: Image Provenance + Policy Gates
+In ephemeral fleets, “patching” the node is not the dominant control. Your strongest story is: workloads are deployed from verified images, scanned in the registry, and blocked at admission if they violate policy.
+
+### 1) Make images the unit of compliance evidence
+Your evidence should center on:
+- image build provenance (what source produced it)
+- SBOM generation
+- vulnerability scan results
+- signing/attestation verification
+- admission decisions (allowed/denied)
+
+This reframes “patch evidence” into something consistent with ephemeral compute: the node can be replaced any time, but the workload artifact is controlled.
+
+### 2) Verify attestations and SBOMs at deploy time
+Use **cosign** to verify that an image carries expected attestations (e.g., SBOM).
+
+Example verification:
+```
+cosign verify-attestation --type spdxjson <image>
+```
+
+Pair this with your admission layer so that unsigned or non-attested images cannot reach production.
+
+> ⚠️ Attention: If you only scan images but do not enforce admission policy, you cannot prove the control operated. Enforcement produces a durable decision record.
+
+### 3) Preserve registry scan results and admission outcomes as period evidence
+For Type II, you need evidence across time. Capture:
+- periodic exports of **container registry** scan results
+- policy evaluation outcomes from your admission controller
+- exceptions (if any), including approvals and expiration
+
+Treat exceptions as first-class audit artifacts: who approved, why, and when the exception expires.
+
+> ✅ Success: You can demonstrate vulnerability management and deployment hygiene without ever showing a node-level patch transcript.
+
+## Build a Zero-Trace Audit Bundle: Immutable Timestamps and Traceable Mapping
+The difference between “we have logs somewhere” and “we can pass sampling quickly” is packaging.
+
+### 1) Standardize evidence collectors across sources
+A practical evidence pipeline collects from:
+- **Git** (commit metadata, signatures, PR approvals)
+- **Terraform** (state inventory, plan/apply outputs)
+- **Kubernetes API** (RBAC/policy snapshots, audit log exports)
+- cloud audit logs (control plane activity tied to identities)
+
+The key is consistency: same capture cadence, same storage location patterns, same hashing, same retention.
+
+### 2) Make every artifact immutable and self-describing
+An auditor-friendly artifact has:
+- capture timestamp (UTC)
+- unique identifier (release ID / environment)
+- content hash
+- source pointers (repo, cluster, account)
+- minimal context file explaining what the artifact is
+
+> 💡 Pro-Tip: Keep an “evidence manifest” per capture run: a JSON file listing every artifact path and hash. This becomes your index for sampling.
+
+### 3) Map controls to artifacts so sampling is mechanical
+SOC 2 Type II reviews are often won or lost on speed: can you produce requested samples in hours, not weeks? A control-to-evidence matrix lets you answer with precision:
+- “Show 25 change samples from Q3” → list PRs + signed commits + plan/apply hashes + deployment IDs.
+- “Show privileged access changes” → RBAC diffs + audit log entries + approvals.
+- “Show vulnerability management operated” → scan exports + attestation verification + admission decisions.
+
+Call to action: Run Skynet’s “Ephemeral SOC 2 Type II Evidence Pack” to deploy the control-plane evidence collectors, standardized retention, immutable hashing, and an auditor-ready control matrix—producing complete Type II period evidence even when your compute disappears every hour.
+
+## Checklist
+- [ ] Enforce signed commits or signed release tags for production-bound changes in **Git**.
+- [ ] Require protected branches, mandatory reviews, and status checks before merge.
+- [ ] Capture PR metadata (approvers, timestamps, links to change tickets) and retain it for the full period.
+- [ ] Persist **Terraform** `plan` and `apply` outputs per change; record and store hashes.
+- [ ] Export an IaC-backed inventory using `terraform show -json` and retain periodic snapshots.
+- [ ] Enable **Kubernetes Audit Logs** and export to centralized logging with review-period retention.
+- [ ] Snapshot **Kubernetes RBAC** (RoleBindings/ClusterRoleBindings) on a fixed cadence; hash and store exports.
+- [ ] Snapshot admission policy configurations (e.g., **OPA Gatekeeper**/**Kyverno**) and retain diffs.
+- [ ] Standardize container image provenance: SBOM generation, signing, and attestation verification with **cosign**.
+- [ ] Enforce admission gates that block unsigned/unscanned images; retain allow/deny decision logs.
+- [ ] Produce an evidence manifest per capture run (artifact list + hashes + timestamps).
+- [ ] Maintain a control-to-evidence matrix that maps each control area to specific artifact IDs and locations.
+
+## FAQ
+### How do we handle “server inventory” requests when nodes rotate hourly?
+<p>Use IaC and control-plane inventories as the authoritative inventory: exported **Terraform** state resources plus Kubernetes declared objects (namespaces, workloads, policies). The point is to inventory what is provisioned and governed, not ephemeral instances that are designed to be replaced.</p>
+
+### What if our CI runners are ephemeral and we can’t retain build logs?
+<p>Persist build outputs outside the runner: signed commits/tags in **Git**, immutable build artifacts, SBOMs/attestations, and content-hashed plan/apply logs in durable storage. Evidence should be reproducible from durable systems of record, not from a runner filesystem.</p>
+
+### Do we need to log everything in Kubernetes audit logs to satisfy Type II sampling?
+<p>No. Configure **Kubernetes Audit Logs** to capture the verbs and resources that matter for change control and privileged activity (RBAC changes, workload spec changes, admission decisions) and retain them across the review period. The requirement is defensible coverage with reliable retention, not maximum verbosity.</p>
