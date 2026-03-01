@@ -1,0 +1,254 @@
+Intro (3–5 sentences, BLUF method)
+Audit cycles drag when evidence lives in scattered consoles, access lingers for “just one more export,” and screenshots/spreadsheets can’t be verified. The fastest path to audit-ready proof is to collect evaluated control state directly from native policy engines, add host-level facts at scale, and package everything into immutable, hash-verified artifacts. Skynet executes a zero-trace audit runbook: ephemeral access, policy-as-code evidence capture, immutable evidence packaging, and automatic gap mapping—delivered in days, not weeks. The result is an evidence vault you can hand to auditors with precise, repeatable provenance.
+
+Quick take (exactly 5 bullet points)
+- Use evaluated compliance outputs (not screenshots) from **AWS Config** conformance packs and **Azure Policy** initiatives as your control-state backbone.
+- Add host-level proofs with targeted **OSQuery** packs aligned to common CIS-style expectations (admins, crypto policy, logging, kernel params).
+- Keep access ephemeral: assume-role/temporary tokens, time-boxed elevation, and remove residual credentials immediately after collection.
+- Write evidence to WORM-capable storage (**Amazon S3 Object Lock** / **Azure Immutable Blob**) and ship hashes + timestamps with every artifact.
+- Generate a control-to-evidence index that maps each requirement to exact query output, policy evaluation, and storage object ID.
+
+## Build a zero-trace evidence plane (ephemeral access + deterministic outputs)
+### 1) Use short-lived credentials everywhere
+Long-lived audit accounts and standing elevation create residual access risk and complicate “who touched what.” Evidence collection should run with temporary credentials only, with explicit session names and strict session durations.
+
+**AWS**: assume role with a bounded duration and a unique session name (for traceability in **AWS CloudTrail**).
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::123456789012:role/SkynetAuditEvidenceRole \
+  --role-session-name skynet-audit-$(date +%Y%m%d%H%M%S) \
+  --duration-seconds 3600 > /tmp/assume-role.json
+
+export AWS_ACCESS_KEY_ID=$(jq -r '.Credentials.AccessKeyId' /tmp/assume-role.json)
+export AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' /tmp/assume-role.json)
+export AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' /tmp/assume-role.json)
+```
+
+**Azure**: authenticate using **Azure AD** workload identity or a time-boxed service principal, and scope to the minimal set of subscriptions/resource groups required.
+```bash
+az login --service-principal \
+  -u "$AZURE_CLIENT_ID" \
+  -p "$AZURE_CLIENT_SECRET" \
+  --tenant "$AZURE_TENANT_ID"
+
+az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+```
+
+> ⚠️ Attention: If evidence collection requires subscription-wide reads, treat it as a privileged operation. Time-box it, log it, and ensure the identity is deleted/disabled immediately after the run.
+
+### 2) Define “evidence artifacts” as immutable, content-addressed objects
+Treat each output (policy evaluation, OSQuery results, inventory snapshots) as a signed artifact with:
+- Canonical file name (system, scope, timestamp)
+- SHA-256 hash
+- Capture timestamp (UTC)
+- Collector identity (session name / client ID)
+
+Example evidence manifest entry (YAML) you can generate during the run:
+```yaml
+- id: aws-config-conformancepack-finance-2026-02-23T120000Z
+  source: aws
+  tool: AWS Config
+  scope: account:123456789012 region:us-east-1
+  object_uri: s3://skynet-evidence-vault/aws/config/pack/finance/2026-02-23T120000Z.json
+  sha256: "<computed>"
+  captured_at: "2026-02-23T12:00:00Z"
+  collector: "skynet-audit-20260223120000"
+```
+
+> 💡 Pro-Tip: Use deterministic JSON formatting before hashing (e.g., `jq -S .`) so hashes remain stable across reruns.
+
+## Collect control state from policy engines (AWS Config + Azure Policy)
+### 1) Export evaluated compliance from AWS Config conformance packs
+Your goal is to capture what **AWS Config** evaluated, not what someone observed in a console. Conformance packs and managed rules provide repeatable, time-stamped compliance signals.
+
+Describe pack compliance and per-rule results:
+```bash
+# Pack-level summary
+aws configservice describe-conformance-pack-compliance \
+  --conformance-pack-names FinanceBaselinePack \
+  --output json | jq -S . > aws-config-pack-compliance.json
+
+# Rule-level details for a pack
+aws configservice describe-conformance-pack-rule-compliance \
+  --conformance-pack-name FinanceBaselinePack \
+  --output json | jq -S . > aws-config-pack-rule-compliance.json
+
+# Noncompliant resources for a specific rule
+aws configservice get-compliance-details-by-config-rule \
+  --config-rule-name restricted-ssh \
+  --compliance-types NON_COMPLIANT \
+  --output json | jq -S . > aws-config-restricted-ssh-noncompliant.json
+```
+
+### 2) Export evaluated compliance from Azure Policy initiatives
+For **Azure Policy**, evidence should include both the initiative definition assignment context and the evaluated states.
+
+Summarize policy state and export non-compliance details:
+```bash
+# Summarize by policy assignment/initiative scope
+az policy state summarize \
+  --subscription "$AZURE_SUBSCRIPTION_ID" \
+  --output json | jq -S . > azure-policy-state-summarize.json
+
+# Query detailed states (filter to noncompliant)
+az policy state list \
+  --subscription "$AZURE_SUBSCRIPTION_ID" \
+  --filter "ComplianceState eq 'NonCompliant'" \
+  --output json | jq -S . > azure-policy-noncompliant.json
+
+# Capture initiative and assignment metadata for provenance
+az policy set-definition show --name "$INITIATIVE_NAME" --output json | jq -S . > azure-initiative-definition.json
+az policy assignment list --output json | jq -S . > azure-policy-assignments.json
+```
+
+> ✅ Success: When policy engine outputs are your primary evidence source, you can re-run the exact collection and get the same structure every time, making variance and drift obvious.
+
+### 3) Map “coverage gaps” without hand-built spreadsheets
+Policy engines don’t cover everything (e.g., local group membership, crypto library settings, certain logging agents). Explicitly record coverage:
+- Controls backed by **AWS Config** / **Azure Policy** evaluations
+- Controls requiring host-level interrogation (OSQuery)
+- Controls requiring external attestations (if any)
+
+Skynet’s standardized execution produces this as a machine-readable index rather than a human-maintained spreadsheet.
+
+## Capture host-level proofs at scale with OSQuery (targeted, CIS-aligned)
+### 1) Run OSQuery packs that produce auditor-grade facts
+Host proofs should be narrowly scoped: only the queries required to prove state. Typical high-value queries:
+- Local admin membership
+- Password policy settings
+- Kernel parameters
+- Logging configuration status
+- Crypto policy modes / FIPS indicators (where applicable)
+
+Example OSQuery SQL (Linux) for privileged group membership and SSH hardening signals:
+```sql
+-- Local admin equivalents (group membership)
+SELECT u.username, g.groupname
+FROM user_groups ug
+JOIN users u ON ug.uid = u.uid
+JOIN groups g ON ug.gid = g.gid
+WHERE g.groupname IN ('sudo','wheel');
+
+-- SSH config (best-effort; validates key settings)
+SELECT *
+FROM ssh_configs
+WHERE key IN ('PermitRootLogin','PasswordAuthentication','PubkeyAuthentication');
+
+-- Kernel parameters (example)
+SELECT *
+FROM sysctl
+WHERE name IN ('net.ipv4.ip_forward','kernel.randomize_va_space');
+```
+
+Run a controlled collection and emit JSON:
+```bash
+osqueryi --json "SELECT * FROM users LIMIT 5;" | jq -S . > osquery-users-sample.json
+```
+
+### 2) Normalize, sign, and timestamp OSQuery outputs
+OSQuery output becomes “proof” when it’s tamper-evident and traceable to a run context. A practical pattern:
+- Normalize JSON (`jq -S .`)
+- Hash (`sha256sum`)
+- Sign (GPG or platform signing)
+- Store both data and signature in the vault
+
+Example hashing and signing:
+```bash
+jq -S . osquery-results.json > osquery-results.canonical.json
+sha256sum osquery-results.canonical.json | tee osquery-results.sha256
+
+gpg --batch --yes --armor --detach-sign \
+  --local-user "$EVIDENCE_SIGNING_KEY" \
+  osquery-results.canonical.json
+```
+
+> ⚠️ Attention: Don’t run broad OSQuery inventories “because it’s easy.” Excessive collection expands sensitive data handling and slows reviews. Collect only what you need to prove control intent.
+
+### 3) Tie every query to a control statement
+Auditors don’t want “we ran OSQuery.” They want “this output proves X.” Build a control-to-query mapping that references:
+- Query name
+- Target population (fleet, tags, environment)
+- Output object URI + hash
+
+This is where standardized execution wins: repeatable naming + repeatable mappings.
+
+## Produce immutable, auditor-ready artifacts (WORM + index + gap list)
+### 1) Write to WORM storage with retention and legal hold where needed
+Immutable storage reduces disputes about post-hoc edits and gives you a defensible chain of custody.
+
+**AWS** (**Amazon S3 Object Lock**): enable Object Lock on the bucket (requires bucket creation-time setting), then write objects with retention.
+```bash
+# Put an object with governance retention (example retention date)
+aws s3api put-object \
+  --bucket skynet-evidence-vault \
+  --key aws/config/pack/finance/2026-02-23T120000Z.json \
+  --body aws-config-pack-compliance.json \
+  --object-lock-mode GOVERNANCE \
+  --object-lock-retain-until-date 2026-08-23T00:00:00Z
+```
+
+**Azure** (**Azure Storage Immutable Blob**): apply immutability policies at the container level, then upload evidence. (Commands vary by account policy and permissions; capture the policy configuration itself as evidence.)
+
+> 💡 Pro-Tip: Store the vault configuration as evidence (bucket/container policy, immutability policy, access logs). It proves the environment protecting the evidence, not just the evidence itself.
+
+### 2) Generate a control-to-evidence index (the artifact auditors actually use)
+Create a single index file that maps each requirement to:
+- Evidence type (policy evaluation / host query / config snapshot)
+- Location (object URI)
+- Hash + capture time
+- Scope (account/subscription/resource group/fleet)
+- Result (compliant/noncompliant/unknown)
+
+Minimal JSON structure example:
+```json
+{
+  "generated_at": "2026-02-23T12:30:00Z",
+  "environment": {"aws_accounts": ["123456789012"], "azure_subscriptions": ["..." ]},
+  "controls": [
+    {
+      "control_id": "LOGGING-BASELINE",
+      "evidence": [
+        {
+          "type": "azure_policy_state",
+          "object_uri": "azure://evidence/azure/policy/azure-policy-state-summarize.json",
+          "sha256": "<computed>",
+          "captured_at": "2026-02-23T12:10:00Z"
+        }
+      ],
+      "status": "needs-review"
+    }
+  ]
+}
+```
+
+### 3) Output a gap list that’s immediately actionable
+A gap list should not be narrative. It should be:
+- Affected resource IDs
+- Failed policy/rule IDs
+- Host query failures
+- Exact evidence references
+
+> ✅ Success: When the gap list is generated from the same immutable artifacts you hand to auditors, remediation can start immediately without re-collecting “proof.”
+
+## Checklist
+- [ ] Create time-boxed identities/roles for evidence capture (no standing audit users)
+- [ ] Enforce least-privilege read scopes for **AWS Config** and **Azure Policy** exports
+- [ ] Export **AWS Config** conformance pack compliance (pack summary + rule details)
+- [ ] Export **Azure Policy** state summary and noncompliant state details
+- [ ] Capture policy definitions/assignments used for evaluation (provenance)
+- [ ] Run targeted **OSQuery** packs for admin membership, logging status, crypto policy, kernel params
+- [ ] Canonicalize outputs (stable JSON) and compute SHA-256 hashes for every artifact
+- [ ] Sign critical artifacts (OSQuery outputs, manifests, control index)
+- [ ] Write evidence to WORM storage (**Amazon S3 Object Lock** / **Azure Immutable Blob**)
+- [ ] Generate a control-to-evidence index with object URIs, hashes, timestamps, and scope
+- [ ] Produce an evidence-derived gap list ready for remediation workstreams
+
+FAQ
+### How do we ensure evidence collection leaves no residual access?
+<p>Use only short-lived credentials (assume-role/session tokens or time-boxed service principals), restrict scopes to read-only where possible, and disable/delete the identity immediately after the run. Evidence collection should be repeatable without preserving privileged access between runs.</p>
+
+### What should we treat as “primary” evidence: policy outputs or host queries?
+<p>Use evaluated outputs from **AWS Config** and **Azure Policy** as the primary control-state evidence wherever coverage exists. Use **OSQuery** only to close coverage gaps that policy engines can’t observe (local state, certain crypto/logging settings), and keep the query set minimal and explicitly mapped to controls.</p>
+
+### What makes an evidence vault auditor-ready without screenshots?
+<p>Auditor-ready evidence is tamper-evident and traceable: canonical outputs, hashes, timestamps, and immutable storage, plus a control-to-evidence index that points to exact artifacts. This replaces subjective screenshots with repeatable, verifiable data tied to the evaluated state of your environment.</p>
