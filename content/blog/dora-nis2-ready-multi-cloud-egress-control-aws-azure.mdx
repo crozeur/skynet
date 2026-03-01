@@ -1,0 +1,260 @@
+export const metadata = {
+  title: "DORA/NIS2-Ready Multi-Cloud Egress Control in AWS + Azure",
+  description: "Codify deterministic egress in AWS and Azure, enforce TLS policy, and generate packet-level proof of routing for resilience and third-party risk reviews.",
+  date: "2026-02-23",
+  pillar: "CLOUD",
+  tags: ["AWS", "Azure", "Terraform", "Egress Control", "TLS Policy"]
+};
+
+## Introduction
+Uncontrolled multi-cloud egress is where migrations quietly fail: traffic exits via unexpected NATs, private links, or third-party gateways you didn’t design for. If you can’t deterministically prove where packets leave, what inspection/TLS policy was enforced, and how fast you can reroute during an outage, DORA/NIS2 resilience and third-party risk reviews turn into guesswork. The fix is to standardize egress ownership (routes + gateways), force all outbound through explicit inspection points, and produce objective evidence (logs plus packet proof). This post shows a repeatable AWS+Azure pattern you can deploy fast with **Terraform**, validate end-to-end, and promote with a verified failover runbook.
+
+## Quick Take
+- Deterministic egress starts with explicit route ownership: every private subnet sends `0.0.0.0/0` only to your controlled egress tier.
+- Enforce TLS policy at the choke point (L7 where possible, L4 constraints everywhere) and treat exceptions as code-reviewed changes.
+- Prove egress with two signals: provider-native flow logs and workload-side “expected egress IP” assertions.
+- Add packet-level proof during cutover windows to catch bypass paths that logs won’t highlight quickly enough.
+- Ship a reroute/failover runbook that’s validated (not theoretical): same tests, different route targets, same expected outcomes.
+
+## Standardized Egress Architecture: One Exit Per Environment
+### 1) Define the non-negotiables
+For SMEs running parallel AWS and Azure stacks during migration, the simplest control boundary is: “private workloads never have direct internet egress.” Instead, every outbound path is forced through a centralized egress tier that you own, can rotate, and can validate.
+
+Minimum invariants to codify:
+- Private subnets: no public IP assignment, no implicit internet path.
+- Single egress tier per environment/region (or per trust zone), with controlled public egress IPs.
+- Explicit route tables with clear ownership and drift detection.
+- Inspection capability anchored at the egress tier: L3/L4 baseline (ports/protocols), and TLS/SNI policy where feasible.
+
+> ⚠️ Attention: “We’ll catch it in logs later” fails during migrations because the first bypass is often the one that moves sensitive data. Build the choke point first, then migrate.
+
+### 2) AWS: private tiers route only to controlled egress
+Common deterministic patterns in AWS:
+- Private subnets route `0.0.0.0/0` to **NAT Gateway** in dedicated egress subnets (baseline).
+- For inline inspection, route to **AWS Network Firewall** endpoints, then to NAT (or to an egress VPC construct).
+- If using third-party appliances, use **Gateway Load Balancer (GWLB)** with explicit route insertion.
+
+At minimum, make route ownership explicit via **Terraform** so no subnet can “accidentally” route elsewhere.
+
+```hcl
+# Example: Private subnet route table forces default route to a controlled NAT Gateway
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.egress.id
+  }
+
+  tags = {
+    Name    = "rt-private-egress"
+    Owner   = "egress-control"
+    Purpose = "deterministic-default-route"
+  }
+}
+
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private_a.id
+  route_table_id = aws_route_table.private_rt.id
+}
+```
+
+### 3) Azure: UDRs force default route to Azure Firewall
+In Azure, deterministic egress typically means:
+- Spokes/subnets use **UDR** to force `0.0.0.0/0` to **Azure Firewall** (Virtual appliance next hop).
+- Where applicable, disable implicit outbound to prevent “surprise” egress from platform defaults.
+- Ensure any **Private Endpoint** / service routing is intentional and documented (it’s not “internet egress,” but it is still an outbound path to third parties).
+
+```hcl
+# Example: UDR forces default route to Azure Firewall
+resource "azurerm_route_table" "spoke_egress" {
+  name                = "rt-spoke-egress"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  route {
+    name                   = "default-to-firewall"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
+    next_hop_in_ip_address = azurerm_firewall.fw.ip_configuration[0].private_ip_address
+  }
+}
+
+resource "azurerm_subnet_route_table_association" "spoke_assoc" {
+  subnet_id      = azurerm_subnet.spoke_subnet.id
+  route_table_id = azurerm_route_table.spoke_egress.id
+}
+```
+
+> 💡 Pro-Tip: Tag route tables and firewall policies with a single “egress-control” owner label, then use policy-as-code checks to block any new route table that introduces an alternate `0.0.0.0/0` next hop.
+
+## TLS Policy Enforcement: Keep It Pragmatic and Testable
+### 1) Decide what “TLS policy enforcement” means in your environment
+In multi-cloud, “TLS enforcement” can mean different things:
+- L4-only control: allow only TCP/443 to the internet plus explicit exceptions (fast, coarse).
+- L7 inspection/proxy: enforce SNI/hostname categories, block weak cipher suites, or require outbound via a controlled proxy (stronger, more complex).
+
+For busy engineering teams, the pragmatic baseline is:
+- Default deny for outbound except required ports.
+- Explicit allow-list for destinations where possible.
+- Centralized policy objects tied to environment promotion (dev → stage → prod).
+
+> ⚠️ Attention: If you rely on L7 inspection, plan for certificate handling and exception workflows. The operational cost is real; keep your policy narrow and your evidence strong.
+
+### 2) AWS enforcement options
+Depending on architecture:
+- **AWS Network Firewall** for domain list / stateful rules (where applicable) and tight egress control.
+- **Security Groups** and **Network ACLs** as guardrails (not a full egress solution by themselves).
+- A controlled egress proxy tier (self-managed) when you must enforce SNI/HTTP semantics consistently.
+
+Wherever you enforce, make the policy verifiable. For example, if you expect only 443 outbound, validate that from the workload:
+
+```bash
+# From a test instance/pod: confirm blocked egress on non-allowed ports
+nc -vz example.com 80 || true
+nc -vz example.com 443
+```
+
+### 3) Azure enforcement options
+Typical control points:
+- **Azure Firewall Policy** for centralized outbound rules and logging.
+- **NSG** outbound rules to block “escape paths” at the subnet/NIC level.
+- Egress proxy tier if you require consistent L7 behavior across environments.
+
+Validate policy behavior from test nodes the same way across clouds (same probes, same expected outcomes).
+
+## Proof: Deterministic Routing Evidence (Routes + Logs + Expected Egress IP)
+### 1) Baseline proof: show the expected egress IPs
+Your reviewers (internal risk, third-party assessors, auditors) won’t accept “we think it goes through the firewall.” Give them deterministic proof.
+
+Collect the expected public egress IPs from control-plane truth:
+
+```bash
+# AWS: list NAT Gateway public IPs
+aws ec2 describe-nat-gateways \
+  --filter Name=state,Values=available \
+  --query "NatGateways[].NatGatewayAddresses[].PublicIp" \
+  --output text
+```
+
+```bash
+# Azure: list Azure Firewall public IPs
+az network firewall ip-config list \
+  -g rg-egress \
+  -f fw-egress \
+  --query "[].publicIpAddress" \
+  -o tsv
+```
+
+Then assert from workloads that outbound internet sees only those IPs:
+
+```bash
+# Workload-side: compare observed egress IP to expected list
+curl -s https://ifconfig.me
+```
+
+> ✅ Success: Every workload probe returns an egress IP in your approved list, across both AWS and Azure, for each environment.
+
+### 2) Log proof: flow logs aligned to your egress tier
+Use provider-native telemetry and keep it simple:
+- AWS: **VPC Flow Logs** on private subnets and/or egress ENIs, plus **AWS CloudTrail** for route and gateway change history.
+- Azure: **NSG Flow Logs** (or equivalent) on spoke subnets plus **Azure Firewall** logs for outbound decisions.
+
+What to extract for “packet left where we said it would” evidence:
+- Source workload identity (subnet, ENI/NIC, or tag-based mapping).
+- Destination (IP, port) and decision (allowed/denied).
+- Egress translation point (NAT/FW public IP).
+- Timestamp and correlation ID for the test window.
+
+### 3) Drift detection: route diffs are part of the evidence
+Determinism breaks when someone adds a “temporary” route. Detect it by comparing planned vs actual routes:
+
+```bash
+# AWS: dump route tables and look for unexpected 0.0.0.0/0 targets
+aws ec2 describe-route-tables \
+  --query "RouteTables[].{RT:RouteTableId,Routes:Routes}" \
+  --output json > aws-routes.json
+
+jq -r '.[] | .RT as $rt | .Routes[] | select(.DestinationCidrBlock=="0.0.0.0/0") | [$rt, (.NatGatewayId // .GatewayId // .TransitGatewayId // .NetworkInterfaceId // "unknown")] | @tsv' aws-routes.json
+```
+
+```bash
+# Azure: list effective routes for a NIC to confirm UDR dominance
+az network nic show-effective-route-table \
+  -g rg-app \
+  -n nic-test \
+  --query "value[].{prefix:addressPrefix,nextHop:nextHopType,nextHopIp:nextHopIpAddress}" \
+  -o table
+```
+
+## Packet Proof During Cutover: Short-Lived eBPF Validation
+### 1) Why packet proof matters
+Flow logs tell you that something talked to something. During migrations, the failure mode is subtler: traffic takes a permitted path that bypasses your intended inspection point (alternate NAT, peering, mis-scoped route propagation, or a “helpful” platform default). Packet proof during cutover windows provides a second, higher-confidence signal.
+
+### 2) Minimal eBPF-based validation approach
+Run short-lived capture/validation on designated test nodes only, then remove it.
+
+Example using **bcc** tools (Linux) to observe outbound TCP connects:
+
+```bash
+# On a test node (ephemeral): trace TCP connect attempts
+sudo tcpconnect -t
+```
+
+If you need packet-level visibility for a specific flow during the validation window:
+
+```bash
+# Capture outbound traffic to validate destination/port during cutover
+sudo tcpdump -i any -nn "tcp and (port 443 or port 80)" -c 200
+```
+
+What to record as “packet proof” artifacts:
+- Source node identity (instance ID / VM name / subnet).
+- Destination IP/port and timestamps.
+- Correlation to expected egress public IP from the workload probe.
+- Confirmation that bypass paths (unexpected gateways/links) were not used during the test window.
+
+> ⚠️ Attention: Treat packet proof as a controlled, time-boxed activity. Do it during a defined window, on test nodes, and remove tooling immediately after validation to keep the egress architecture ephemeral and clean.
+
+### 3) Verified reroute runbook (resilience requirement)
+For DORA/NIS2-aligned resilience discussions, the key is not “we have a failover design,” but “we tested reroute and captured evidence.”
+
+A practical reroute drill:
+- Predefine egress tier A and egress tier B (or primary/secondary public IP sets).
+- Change only the route targets (or firewall policy association) via **Terraform**.
+- Re-run the same probe suite (egress IP assertion + log correlation + packet proof).
+- Archive artifacts with timestamps and change IDs.
+
+```bash
+# Promotion pattern: apply controlled egress changes
+terraform plan -out=tfplan
+terraform apply tfplan
+
+# Immediately re-run probes after apply
+curl -s https://ifconfig.me
+```
+
+> ✅ Success: After reroute, probes show the new approved egress IPs, logs confirm decisions at the egress tier, and packet proof shows no alternate path during the window.
+
+## Checklist
+- [ ] Private subnets in AWS have no public IP assignment and no IGW route.
+- [ ] AWS private route tables send `0.0.0.0/0` only to controlled **NAT Gateway** / **AWS Network Firewall** / **GWLB** path.
+- [ ] Azure spoke subnets have **UDR** forcing `0.0.0.0/0` to **Azure Firewall** (next hop virtual appliance).
+- [ ] Implicit/legacy outbound paths are disabled or explicitly documented with owners and expiry.
+- [ ] TLS egress policy is centralized (firewall/proxy) and exceptions are code-reviewed.
+- [ ] Expected egress public IPs are enumerated from cloud control plane and versioned.
+- [ ] Workload probes assert observed egress IP matches the approved list.
+- [ ] Flow logs are enabled at the right points (spokes/private + egress tier) and retained per internal policy.
+- [ ] Route drift detection is implemented (planned vs actual diffs) and alerts on new `0.0.0.0/0` targets.
+- [ ] Packet proof is executed during cutover windows on test nodes and tooling is removed afterward.
+- [ ] Reroute/failover runbook is validated with the same deterministic tests and archived artifacts.
+
+## FAQ
+### What’s the fastest way to detect a bypass route during migration?
+<p>Run a deterministic probe from the workload (egress IP assertion) immediately after each routing change, then correlate with flow/firewall logs for that same timestamp. During cutover windows, add short-lived packet proof on a test node to confirm the actual destination/port and detect unexpected paths.</p>
+
+### Can I prove deterministic egress without deep packet inspection?
+<p>Yes. You can build strong evidence with explicit route ownership (Terraform state + route dumps), provider flow logs that show the egress tier decision point, and workload-side expected egress IP assertions. Deep inspection can improve control, but deterministic routing proof does not require it.</p>
+
+### How does Skynet operationalize this in days, not quarters?
+<p>Skynet executes a standardized, ephemeral egress architecture across AWS and Azure (centralized egress + explicit routes + policy enforcement), then runs deterministic validation (routes + logs + packet proof) before promotion. Deliverables include the Terraform implementation, verified test artifacts, and a reroute runbook with observed outcomes suitable for resilience and third-party risk discussions.</p>
