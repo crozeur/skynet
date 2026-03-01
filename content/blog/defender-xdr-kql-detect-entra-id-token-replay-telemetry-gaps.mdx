@@ -1,0 +1,220 @@
+export const metadata = {
+  title: "Defender XDR + KQL: Detect Entra ID Token Replay via Telemetry Gaps",
+  description: "Detect Entra ID token replay by correlating sign-in gaps, CAE signals, and device telemetry in Defender XDR, then close the blind spots fast.",
+  date: "2026-03-01",
+  pillar: "SOC",
+  tags: ["Defender XDR", "KQL", "Entra ID", "Conditional Access", "CAE"]
+};
+
+## Introduction
+Entra ID token replay and session hijack can evade “impossible travel” and basic risky sign-in logic when CAE, device controls, and legacy auth coexist and create telemetry gaps. The result is an attacker reusing a valid session across IPs/ASNs without obvious password events, and your detections stay low-fidelity. The fix is twofold: detect the replay pattern using **Microsoft Defender XDR** KQL correlation, and eliminate the conditions that make replay survivable (and hard to see). This post gives you a practical detection approach plus an execution-ready hardening set you can deploy in one standardized run.
+
+## Quick Take
+- Token replay often presents as “successful sign-ins” with weak user friction signals but strong network pivots (IP/ASN/device changes) in a tight window.
+- Your highest-leverage telemetry is **Entra ID** sign-in logs enriched with ASN and correlated to endpoint evidence from **Microsoft Defender for Endpoint**.
+- CAE/Conditional Access misalignment creates the blind spot: sessions continue to be accepted while enforcement and logging lag behind.
+- Build a KQL detector that flags token reuse across network pivots and prioritizes unmanaged or uncorroborated device activity.
+- Close the gap by blocking legacy auth, tightening session controls, and validating CAE readiness—then ship the detection with consistent naming, tuning, and rollback.
+
+## Why token replay hides in plain sight (and what “telemetry gap” means)
+### What you’re actually hunting
+Token replay is not “password spray” and not necessarily “MFA fatigue.” It’s the reuse of a valid token/session artifact to authenticate without re-challenging the user. In Entra ID sign-in telemetry, that frequently looks like:
+- ResultType success (0)
+- Normal-looking ClientAppUsed (browser/modern clients)
+- No obvious sequence of failed logons
+- A sudden pivot in network location (IP, geo, ASN) and/or device context in a very short time window
+
+The core detection problem is that identity logs alone may not reliably tell you whether the activity came from a managed endpoint you trust. If device compliance is optional, CAE isn’t enforced consistently, or legacy auth is still permitted for any workload, you can end up with:
+- Incomplete device attribution in sign-ins
+- Long-lived sessions that survive policy changes
+- Inconsistent enforcement timelines (policy says “tight,” session reality says “loose”)
+
+> ⚠️ Attention: If you cannot reliably correlate a suspicious Entra sign-in to a managed endpoint event in **Microsoft Defender for Endpoint**, treat the identity event as untrusted—even if MFA was satisfied.
+
+### Where CAE and session controls can mislead you
+CAE helps enforce near-real-time revocation and policy evaluation for supported apps, but it’s not uniform across every protocol and workload. When your environment mixes modern auth with any legacy allowances, Conditional Access drift, and inconsistent token lifetime policies, you get the operational gap: tokens remain usable longer than your detection logic assumes, while the logs you need to prove replay (or disprove it) are fragmented.
+
+## Build a high-fidelity KQL detector: token reuse across network pivots
+### Data sources and prerequisites
+At minimum, you want:
+- **Entra ID** sign-in logs (interactive and non-interactive where relevant)
+- **Microsoft Defender XDR** advanced hunting access
+- An IP-to-ASN enrichment method (watchlist, external data, or an internal mapping pipeline)
+
+In KQL, the practical approach is to filter to successful sign-ins, bin events in tight windows (e.g., 5 minutes), summarize network pivots per user/app, then score higher when device context is missing or inconsistent.
+
+> 💡 Pro-Tip: Start with a narrow set of high-value apps (admin portals, finance, source control, CI/CD, privileged SaaS) and expand once your thresholds are stable.
+
+### KQL building block: network pivot in a tight window
+Use this as a foundation and iterate. Field availability varies by tenant configuration and log type, so keep the logic resilient.
+
+```kql
+let window = 5m;
+SigninLogs
+| where TimeGenerated > ago(7d)
+| where ResultType == 0
+| where isnotempty(UserPrincipalName)
+| summarize
+    SigninCount = count(),
+    IPs = make_set(IPAddress, 10),
+    DistinctIPs = dcount(IPAddress),
+    AuthReq = make_set(AuthenticationRequirement, 10),
+    ClientApps = make_set(ClientAppUsed, 10),
+    DeviceIds = make_set(DeviceDetail.deviceId, 10),
+    OS = make_set(DeviceDetail.operatingSystem, 10),
+    Browsers = make_set(DeviceDetail.browser, 10)
+  by UserPrincipalName, AppDisplayName, AppId, bin(TimeGenerated, window)
+| where DistinctIPs >= 2
+| project TimeGenerated, UserPrincipalName, AppDisplayName, SigninCount, DistinctIPs, IPs, DeviceIds, AuthReq, ClientApps, OS, Browsers
+| order by TimeGenerated desc
+```
+
+This flags “same user + same app + same short window + multiple IPs.” That’s noisy by itself. Next: enrichment and corroboration.
+
+### Enrich with ASN and prioritize unknown device context
+If you maintain an internal ASN mapping (recommended), join it. Example pattern (adapt to your enrichment source):
+
+```kql
+let window = 5m;
+let asnMap = (
+    // Replace with your enrichment source: watchlist, externaldata, custom table, etc.
+    // Schema should provide IP (or prefix) mapped to ASN/Org.
+    datatable(IPAddress:string, ASN:int, Org:string)
+    [
+      "203.0.113.10", 64500, "ExampleNet"
+    ]
+);
+SigninLogs
+| where TimeGenerated > ago(7d)
+| where ResultType == 0
+| extend DeviceId = tostring(DeviceDetail.deviceId)
+| join kind=leftouter asnMap on IPAddress
+| summarize
+    IPs = make_set(IPAddress, 10),
+    ASNs = make_set(ASN, 10),
+    Orgs = make_set(Org, 10),
+    DistinctIPs = dcount(IPAddress),
+    DistinctASNs = dcount(ASN),
+    DeviceIds = make_set(DeviceId, 10),
+    DistinctDeviceIds = dcount(DeviceId),
+    ClientApps = make_set(ClientAppUsed, 10)
+  by UserPrincipalName, AppDisplayName, AppId, bin(TimeGenerated, window)
+| where DistinctIPs >= 2
+| extend SuspicionScore =
+    (iif(DistinctASNs >= 2, 2, 0)
+    + iif(DistinctDeviceIds == 0 or array_length(DeviceIds) == 0, 2, 0)
+    + iif(DistinctDeviceIds >= 2, 1, 0))
+| where SuspicionScore >= 2
+| project TimeGenerated, UserPrincipalName, AppDisplayName, DistinctIPs, IPs, DistinctASNs, ASNs, Orgs,
+          DistinctDeviceIds, DeviceIds, ClientApps, SuspicionScore
+| order by SuspicionScore desc, TimeGenerated desc
+```
+
+> ⚠️ Attention: Don’t overfit to a single “token identifier” field. Some sign-in records include session-like identifiers; others don’t, and schemas evolve. Build detections that still work when those fields are absent.
+
+### Add identity context enrichment to route severity
+Use **Microsoft Defender XDR** enrichment tables (for example, IdentityInfo when present) to add role/group context and reduce time-to-decision.
+
+```kql
+let window = 5m;
+let pivots = (
+    SigninLogs
+    | where TimeGenerated > ago(7d)
+    | where ResultType == 0
+    | summarize DistinctIPs = dcount(IPAddress), IPs = make_set(IPAddress, 10)
+      by UserId, UserPrincipalName, AppId, AppDisplayName, bin(TimeGenerated, window)
+    | where DistinctIPs >= 2
+);
+pivots
+| join kind=leftouter IdentityInfo on $left.UserId == $right.AccountObjectId
+| project TimeGenerated, UserPrincipalName, AppDisplayName, DistinctIPs, IPs,
+          JobTitle, Department, AccountDomain, Tags, GroupMembership
+| order by TimeGenerated desc
+```
+
+> ✅ Success: Your triage queue shifts from “odd travel” to “same identity, same app, tight window, network pivot, poor device corroboration,” which is far more actionable.
+
+## Corroborate with endpoint truth: confirm (or escalate) with MDE hunting
+### Why endpoint corroboration changes the case
+Replay frequently occurs off-device (token/cookie theft and reuse from attacker infrastructure). If the identity event cannot be tied to managed endpoint activity, you should treat it as a likely session theft case until proven otherwise.
+
+You’re validating:
+- Does the user show interactive logon activity on any managed endpoint near the sign-in time?
+- Is there network egress consistent with the session?
+- Are there endpoint signals that justify the identity pivot?
+
+### Example correlation pattern
+Below is a practical “who has suspicious sign-ins but no corresponding device logon footprint” query.
+
+```kql
+let start = ago(24h);
+let end = now();
+let suspiciousUsers = (
+    SigninLogs
+    | where TimeGenerated between (start..end)
+    | where ResultType == 0
+    | summarize DistinctIPs = dcount(IPAddress) by UserPrincipalName, bin(TimeGenerated, 5m)
+    | where DistinctIPs >= 2
+    | project UserPrincipalName
+    | distinct UserPrincipalName
+);
+DeviceLogonEvents
+| where TimeGenerated between (start..end)
+| where AccountUpn in (suspiciousUsers)
+| summarize Logons=count(), Devices=make_set(DeviceName, 10) by AccountUpn
+| order by Logons asc
+```
+
+Interpretation:
+- Suspicious user with zero device logons: increase severity and focus response on session revocation and identity containment.
+- Suspicious user with device logons: extend to **DeviceNetworkEvents** and your proxy/DNS telemetry to validate the app access path.
+
+> 💡 Pro-Tip: Promote “no managed endpoint corroboration” into an alert enrichment field so the analyst doesn’t have to derive it manually on every incident.
+
+## Close the CAE/legacy-auth blind spot in one deployment run
+### Conditional Access controls that reduce replay survivability
+Your objective is to reduce token reuse value and tighten enforcement timelines:
+- Block legacy authentication across the tenant (with controlled exceptions)
+- Require compliant device or phishing-resistant MFA for high-risk apps and privileged workflows
+- Apply sign-in frequency and session controls deliberately per app sensitivity
+- Validate CAE readiness for critical workloads; document gaps and compensating controls
+
+> ⚠️ Attention: “Report-only” Conditional Access policies are not neutral—they create assumed enforcement without actual control. Either promote them with rollback or remove them.
+
+### Normalize telemetry and detection packaging
+High-speed operations break when every tenant has different tables, field expectations, and alert names. Standardize:
+- Log pipelines: Entra sign-ins, audit, Conditional Access evaluation visibility, endpoint events
+- Detection naming: consistent prefixing, ownership, and severity mapping
+- Tuning: default thresholds (e.g., 2 IPs per 5m) and what increases severity (ASN change, missing device)
+- Rollback: a defined revert path for both policies and detections
+
+### Outcome-focused execution
+A single standardized run should yield the same outcomes every time:
+- Identity session controls hardened (legacy auth blocked, strong access requirements on critical apps)
+- Telemetry completeness validated (identity + endpoint signals present and queryable)
+- Detections deployed with enrichment (ASN, identity context, endpoint corroboration)
+
+> ✅ Success: Within hours of deployment, replay-like patterns produce high-fidelity incidents with the context required to contain quickly instead of open-ended hunting.
+
+## Checklist
+- [ ] Verify **Entra ID** sign-in logs are available for hunting and retention meets your investigation window.
+- [ ] Confirm interactive and relevant non-interactive sign-in telemetry are ingested and searchable.
+- [ ] Stand up IP→ASN enrichment (watchlist/custom table/pipeline) used consistently by detections.
+- [ ] Deploy a baseline KQL detector for multi-IP pivots per user/app in a 5-minute window.
+- [ ] Add scoring for ASN changes, missing device identifiers, and multi-device pivots.
+- [ ] Enrich detections with identity context using **Microsoft Defender XDR** tables where available.
+- [ ] Correlate suspicious sign-ins to **Microsoft Defender for Endpoint** events; escalate when no managed endpoint corroboration exists.
+- [ ] Block legacy authentication tenant-wide with a controlled exception process.
+- [ ] Require compliant device and/or phishing-resistant MFA for high-risk apps and privileged workflows.
+- [ ] Validate CAE readiness and session control behavior for critical workloads; document and track gaps.
+- [ ] Deploy policy changes and detections with consistent naming, tuning defaults, and rollback steps.
+
+## FAQ
+### Will “impossible travel” catch token replay reliably?
+<p>No. Replay often shows up as successful sign-ins that do not trigger travel heuristics, especially when sessions persist and the attacker reuses a valid token in plausible geographies or through nearby egress.</p>
+
+### What’s the fastest way to reduce false positives in the multi-IP detector?
+<p>Constrain the detector to high-value apps, add ASN change scoring, and incorporate device corroboration from **Microsoft Defender for Endpoint**. The combination of “network pivot + no managed endpoint evidence” is a strong discriminator.</p>
+
+### How do we operationalize this without turning it into a long project?
+<p>Run a standardized execution pack that deploys the Conditional Access/CAE hardening set, normalizes log sources, and ships the KQL detections with consistent naming, tuning defaults, and rollback. This turns replay detection and resistance into a repeatable deployment run instead of an open-ended initiative.</p>
