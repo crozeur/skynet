@@ -1,0 +1,116 @@
+```javascript
+export const metadata = {
+ title: "Deploy a Detection-Ready Baseline in 24 Hours: M365 + Azure",
+ description: "Harden identity, enable high-signal telemetry, and tune detections for Microsoft 365 and Azure—validated and drift-checked in 24 hours.",
+ date: "2026-02-23",
+ pillar: "SOC",
+ tags: ["entra-id", "defender", "log-analytics"]
+};
+```
+
+## Introduction
+If you’re shipping Microsoft 365 and Azure changes weekly, your detection posture is probably lagging behind: identity controls drift, diagnostic settings are inconsistent, and detections fire loud but not useful. A “detection-ready baseline” fixes that by standardizing identity hardening and end-to-end telemetry so every critical signal is captured, queryable, and attributable. The fastest path is a repeatable execution runbook that pushes validated configuration, then immediately proves coverage and gaps with queries and exports. This post outlines a 24-hour approach that prioritizes precision, evidence, and measurable outcomes over best-effort tuning.
+
+## Quick Take
+- Establish an identity baseline first: **Microsoft Entra ID** hardening + **PIM** + deterministic **Conditional Access** templates.
+- Turn on telemetry like you mean it: **Microsoft Defender for Cloud**, **Microsoft Defender for Endpoint**, and **Azure Monitor / Log Analytics** with consistent diagnostic settings.
+- Validate coverage with queries, not assumptions: use KQL to find missing diagnostics, unprotected endpoints, and misrouted logs.
+- Reduce noise by design: standardize analytic-rule tuning, severity mapping, and ownership routing.
+- Produce evidence and drift-proofing: export policy state and configuration snapshots so posture is provable and repeatable.
+
+## 1) Identity Baseline: Entra ID + PIM + Conditional Access You Can Prove
+### 1) Prioritize controls that collapse attacker options
+A detection program fails fast when identity is porous. In a 24-hour window, focus on controls that (a) prevent common takeover paths and (b) emit high-quality audit trails:
+- Require phishing-resistant MFA for privileged roles where feasible.
+- Enforce least privilege with **Microsoft Entra Privileged Identity Management (PIM)** (eligible roles, approval, time-bound activation).
+- Lock down legacy auth and risky sign-in patterns with **Conditional Access**.
+
+> ⚠️ Attention: If you tune detections before stabilizing identity, you’ll end up “detecting” the same preventable risk over and over—burning analyst cycles while attackers keep easy paths.
+
+### 2) Deploy Conditional Access via templates, then export state for evidence
+You want policy-as-code behavior even if you’re not using a full CI/CD pipeline. At minimum: apply a standard policy set and export it immediately.
+
+Use **Microsoft Graph PowerShell** to authenticate and export **Conditional Access** policies:
+
+```powershell
+# Requires: Microsoft.Graph module
+Install-Module Microsoft.Graph -Scope CurrentUser
+
+# Connect with least-privileged permissions needed for policy read
+Connect-MgGraph -Scopes "Policy.Read.All","Directory.Read.All"
+
+# Export Conditional Access policies
+$policies = Get-MgIdentityConditionalAccessPolicy -All
+$policies | ConvertTo-Json -Depth 20 | Out-File .\ca-policies-export.json -Encoding utf8
+
+# Quick sanity: list names + state
+$policies | Select-Object DisplayName, State | Format-Table -Auto
+```
+
+What “good” looks like in practice (not exhaustive):
+- Admin role protection policies are ON and scoped tightly.
+- Break-glass accounts are excluded intentionally and tracked.
+- Legacy authentication is blocked.
+- Device compliance requirements are explicit for sensitive apps.
+
+> 💡 Pro-Tip: Treat the export as an immutable artifact for change tracking. If you can’t diff it across runs, you can’t prove drift.
+
+### 3) PIM baseline for privileged roles
+In **PIM**, standardize:
+- Eligible (not permanent) assignments for admin roles.
+- Activation requires MFA and justification.
+- Activation is time-bound (e.g., 1–4 hours depending on role).
+- Notifications and approval for the highest-impact roles.
+
+Your goal isn’t “maximum restriction.” It’s consistent, reviewable privilege elevation with auditability.
+
+## 2) Telemetry Baseline: Defender + Azure Monitor with Zero Guesswork
+### 1) Decide the minimum viable signal set
+A detection-ready baseline needs: identity logs, endpoint telemetry, and cloud control-plane + resource logs. In Microsoft ecosystems, that typically means:
+- **Microsoft Defender for Endpoint** for endpoint events.
+- **Microsoft Defender for Cloud** for cloud posture signals and protections.
+- **Azure Monitor** + **Log Analytics** for centralized queries and correlations.
+
+> ✅ Success: When an incident hits, you can answer “who did what, from where, to which resource” using a single workspace query path—not scattered per-subscription guesses.
+
+### 2) Standardize Log Analytics workspace strategy
+Pick a workspace model deliberately:
+- Central workspace per environment (prod/non-prod) or per region.
+- Consistent retention aligned to operational needs.
+- RBAC boundaries that mirror who investigates.
+
+Then enforce it. The baseline should eliminate “some resources log here, others log nowhere.”
+
+### 3) Find missing Azure diagnostic settings at scale (KQL)
+Use KQL to identify Azure resources that are not forwarding logs to your expected **Log Analytics** workspace. The exact tables depend on what you’re collecting, but the detection pattern is consistent: inventory resources, join against diagnostic settings, and surface gaps.
+
+Example KQL pattern (adapt to your environment and table availability):
+
+```kusto
+// Goal: identify resources with no diagnostic settings sending to Log Analytics
+// Data sources vary by setup; validate which tables are populated in your workspace.
+
+let lookback = 7d;
+let expectedWorkspaceId = " ✅ Success: Your posture is not “set once.” It is continuously verifiable. When something changes, you know exactly what changed and can re-apply the baseline quickly.
+
+### 3) Why this works operationally
+Speed comes from standardization: one hardened identity template, one telemetry template, one tuning template, and one evidence package. Precision comes from validation: KQL checks, exports, and drift diffs that prove what’s configured—not what’s assumed.
+
+## Checklist
+- [ ] Apply a standardized **Conditional Access** policy set with explicit scopes and documented break-glass exclusions
+- [ ] Export **Conditional Access** policies via **Microsoft Graph PowerShell** and store as an evidence artifact
+- [ ] Configure **PIM** eligible assignments for privileged roles with time-bound activation and MFA requirements
+- [ ] Enable and validate **Microsoft Defender for Endpoint** onboarding coverage and sensor health expectations
+- [ ] Enable and validate **Microsoft Defender for Cloud** plans consistently across target subscriptions
+- [ ] Define a **Log Analytics** workspace strategy (scope, retention, RBAC) and enforce it consistently
+- [ ] Verify Azure diagnostic settings coverage; identify resources missing log forwarding using KQL
+- [ ] Establish a severity mapping standard and alert ownership routing aligned to operational teams
+- [ ] Implement analytic-rule tuning patterns (context scoping, allowlists, correlation) with documented rationale
+- [ ] Run drift checks on exported configuration artifacts and remediate deviations deterministically
+
+## FAQ
+### Can we really do this in 24 hours without cutting corners?
+
+
+### How do we reduce alert noise without missing real incidents?
+<p>Use deterministic tuning: scope detections to high-impact identities/resources, filter known automation with tight allowlists, and require stronger context (correlation) before paging. Every tuning change should be auditable with a query diff and backtest window.</p>
