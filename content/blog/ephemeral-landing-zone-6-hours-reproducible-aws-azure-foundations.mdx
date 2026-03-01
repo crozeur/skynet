@@ -1,0 +1,281 @@
+```javascript
+export const metadata = {
+ title: "Ephemeral Landing Zone in 6 Hours: Reproducible AWS/Azure Foundations",
+ description: "Spin up a hardened landing zone from code, validate guardrails, execute changes, and tear it down cleanly—fast and reproducible.",
+ date: "2026-02-23",
+ pillar: "CLOUD",
+ tags: ["cloud", "aws", "azure", "terraform"]
+};
+```
+
+## Introduction
+Snowflake cloud foundations and long-lived staging accounts create two predictable problems: slow delivery and an expanding attack surface. An ephemeral landing zone solves both by provisioning a production-grade baseline from code, enforcing guardrails, validating telemetry/encryption, running the workload change, then tearing everything down deterministically. The value is speed with precision: every run is reproducible, policy-backed, and auditable without leaving tooling sprawl behind. This post lays out the exact building blocks for AWS and Azure and the validation gates that keep the workflow safe.
+
+## Quick Take
+- Use **Terraform** to provision identity, networking, and baseline services with strict naming/tagging for deterministic inventory.
+- Enforce non-negotiable guardrails using **AWS Organizations SCPs** or **Azure Policy** with policy-as-code checked into Git.
+- Make telemetry and encryption mandatory: **AWS CloudTrail** + **CloudWatch Logs** + **KMS**, or **Azure Monitor** diagnostics + **Key Vault**.
+- Validate reality (not intent) with CLI checks for encryption, retention, and policy assignment before any workload change.
+- Teardown safely with **GitHub Actions** (or **Azure DevOps**) using pre-destroy inventory, drift checks, and post-destroy validation gates.
+
+## Standardized Execution: What “Ephemeral” Really Means
+### Define the contract: inputs, outputs, and invariants
+An ephemeral landing zone is not “temporary infra.” It’s a short-lived, fully hardened baseline with invariants that must be true on every run:
+
+- Identity boundaries are explicit (separate management vs workload scopes).
+- Network egress is controlled and logged.
+- Logging, retention, and encryption are enforced, not optional.
+- Every resource is tagged for inventory and teardown.
+- The pipeline refuses to proceed if validation fails.
+
+> ⚠️ Attention: “Ephemeral” is not a license to relax controls. Short-lived environments are high-churn, which makes misconfigurations easier to hide unless you validate aggressively.
+
+### Structure your **Terraform** repo for repeatability
+A practical repo layout that keeps blast radius small:
+
+- `modules/` for reusable building blocks (network, logging, keys, policy attachments)
+- `envs/aws-ephemeral/` and `envs/azure-ephemeral/` for environment composition
+- `policies/` for **SCP** JSON and **Azure Policy** definitions/assignments
+- `pipelines/` for **GitHub Actions** workflows
+
+Keep state remote and isolated per run (e.g., per branch/PR) so teardown is deterministic.
+
+```bash
+# Example: isolate Terraform state per ephemeral run (branch or run ID)
+export TF_VAR_run_id="${GITHUB_RUN_ID:-local}"
+terraform init \
+  -backend-config="key=ephemeral/${TF_VAR_run_id}.tfstate"
+terraform plan -out tfplan
+terraform apply -auto-approve tfplan
+```
+
+> 💡 Pro-Tip: Use a single `run_id` tag across all resources (plus `owner`, `env`, `expires_at`). It unlocks fast inventory queries and makes teardown verifiable.
+
+## Guardrails First: Policy-as-Code on AWS and Azure
+### AWS: enforce boundaries with **AWS Organizations SCPs**
+**SCPs** are ideal for ensuring “can’t happen” behaviors in ephemeral accounts/sub-accounts. Start with deny-by-default patterns for risky primitives (e.g., disabling logging, weakening encryption) while allowing break-glass paths only where explicitly required.
+
+Example SCP snippet to prevent disabling **CloudTrail** and to require encryption-at-rest on **S3** (illustrative; adapt to your services and org structure):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyStopOrDeleteCloudTrail",
+      "Effect": "Deny",
+      "Action": [
+        "cloudtrail:StopLogging",
+        "cloudtrail:DeleteTrail",
+        "cloudtrail:UpdateTrail"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyUnencryptedS3Put",
+      "Effect": "Deny",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::*/*",
+      "Condition": {
+        "StringNotEquals": {
+          "s3:x-amz-server-side-encryption": ["AES256", "aws:kms"]
+        }
+      }
+    }
+  ]
+}
+```
+
+Attach **SCPs** early in the pipeline so the environment is constrained before any human or pipeline step can drift.
+
+### Azure: enforce baseline with **Azure Policy**
+With **Azure Policy**, you can require diagnostics, disallow public IPs in the wrong places, and enforce resource standards. Use initiatives to bundle multiple policies and assign at the management group or subscription level.
+
+Example policy definition snippet to deny resources without tags (a teardown and audit prerequisite):
+
+```json
+{
+  "properties": {
+    "displayName": "Require standard tags",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "parameters": {
+      "tagName": { "type": "String", "defaultValue": "run_id" }
+    },
+    "policyRule": {
+      "if": {
+        "field": "tags[parameters('tagName')]",
+        "exists": "false"
+      },
+      "then": { "effect": "deny" }
+    }
+  }
+}
+```
+
+> ✅ Success: If someone attempts to deploy outside the contract (no tags, weakened logging, disabled trails), the control plane blocks it—before it becomes a cleanup problem.
+
+## Make Logging and Key Management Non-Optional
+### AWS: baseline telemetry with **AWS CloudTrail** and **CloudWatch Logs**
+A landing zone without immutable logs is a liability—especially when you’re spinning environments up and down rapidly.
+
+Minimum expectations:
+- **AWS CloudTrail** enabled organization/account-wide
+- Delivery to **S3** with encryption (prefer **KMS**)
+- Forwarding to **CloudWatch Logs** for near-real-time detection and troubleshooting
+- Retention explicitly set for log groups
+
+Validate **CloudTrail** is enabled and actively logging:
+
+```bash
+aws cloudtrail describe-trails --query 'trailList[].{Name:Name,IsMultiRegionTrail:IsMultiRegionTrail,LogValidationEnabled:LogFileValidationEnabled}'
+aws cloudtrail get-trail-status --name <trail-name> --query '{IsLogging:IsLogging,LatestDeliveryTime:LatestDeliveryTime}'
+```
+
+Validate **CloudWatch Logs** retention (example: check a specific log group):
+
+```bash
+aws logs describe-log-groups \
+  --log-group-name-prefix "/aws/cloudtrail" \
+  --query 'logGroups[].{Name:logGroupName,RetentionInDays:retentionInDays}'
+```
+
+Validate **KMS** key usage and policy hygiene (at least ensure keys exist and are enabled):
+
+```bash
+aws kms list-keys --query 'Keys[].KeyId'
+aws kms describe-key --key-id <key-id> --query 'KeyMetadata.{KeyState:KeyState,KeyManager:KeyManager,Origin:Origin}'
+```
+
+### Azure: diagnostics with **Azure Monitor** and keys with **Key Vault**
+For Azure, treat diagnostic settings as required plumbing. Pair them with controlled key storage and rotation practices in **Key Vault**.
+
+Validate diagnostic settings exist (example for a resource):
+
+```bash
+az monitor diagnostic-settings list --resource <resource-id>
+```
+
+Validate **Key Vault** soft-delete/purge protection state (baseline hardening):
+
+```bash
+az keyvault show --name <kv-name> --query "{name:name,softDelete:properties.enableSoftDelete,purgeProtection:properties.enablePurgeProtection,sku:properties.sku.name}"
+```
+
+> ⚠️ Attention: Don’t rely on “we’ll configure diagnostics later.” In ephemeral runs, “later” often means “never,” and you lose the forensic record as soon as teardown starts.
+
+## Deterministic Teardown: Inventory, Drift Checks, and Pipeline Gates
+### Pre-destroy inventory: prove what exists before you delete
+Before `destroy`, generate an authoritative inventory keyed on tags. This gives you:
+- a teardown manifest (what should be deleted)
+- an audit artifact (what existed)
+- a way to detect stragglers after teardown
+
+AWS inventory via **aws resourcegroupstaggingapi**:
+
+```bash
+aws resourcegroupstaggingapi get-resources \
+  --tag-filters Key=run_id,Values=<run-id> \
+  --query 'ResourceTagMappingList[].ResourceARN' \
+  --output json > pre_destroy_inventory.aws.json
+```
+
+Azure inventory via **az resource list**:
+
+```bash
+az resource list \
+  --tag run_id=<run-id> \
+  --query "[].{id:id,type:type,name:name,location:location}" \
+  -o json > pre_destroy_inventory.azure.json
+```
+
+### Drift checks: detect “hands-on-keyboard” changes
+Even in controlled workflows, drift happens (emergency firewall rules, hotfixes, service toggles). Fail fast if drift is present before applying or destroying.
+
+```bash
+terraform plan -detailed-exitcode
+# exit code 0: no changes; 2: changes present; 1: error
+```
+
+> 💡 Pro-Tip: Use `-refresh-only` plans as a separate gate to detect drift without proposing changes.
+
+### Pipeline implementation with **GitHub Actions** (example)
+A minimal workflow outline: validate → provision → verify → execute change → inventory → destroy → post-verify.
+
+```yaml
+name: ephemeral-landing-zone
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Terraform init/validate
+        run: |
+          terraform init
+          terraform validate
+
+      - name: Terraform apply
+        run: |
+          terraform plan -out tfplan
+          terraform apply -auto-approve tfplan
+
+      - name: Verification gates (example placeholders)
+        run: |
+          echo "Run CLI validation for logging/encryption/policy assignments"
+
+      - name: Pre-destroy inventory
+        run: |
+          echo "Generate tagged inventory artifacts"
+
+      - name: Terraform destroy
+        if: always()
+        run: |
+          terraform destroy -auto-approve
+
+      - name: Post-destroy validation
+        if: always()
+        run: |
+          echo "Confirm no tagged resources remain"
+```
+
+### Post-destroy validation: verify nothing is left behind
+Re-run the tagged inventory queries and assert they return empty sets. If not, fail the run and treat it as a defect.
+
+```bash
+# AWS: should return []
+aws resourcegroupstaggingapi get-resources \
+  --tag-filters Key=run_id,Values=<run-id> \
+  --query 'ResourceTagMappingList[].ResourceARN'
+
+# Azure: should return []
+az resource list --tag run_id=<run-id> -o json
+```
+
+> ✅ Success: You can prove the environment existed, prove it met guardrails, and prove it was destroyed—without residual resources or “mystery” bills.
+
+## Checklist
+- [ ] Define landing-zone invariants (identity boundaries, network egress controls, mandatory logging, mandatory encryption, mandatory tags).
+- [ ] Implement baseline infrastructure in **Terraform** with a per-run `run_id` tag on every resource.
+- [ ] Enforce AWS guardrails with **AWS Organizations SCPs** (deny disabling trails/logging; deny unencrypted object writes where applicable).
+- [ ] Enforce Azure guardrails with **Azure Policy** (require tags; require diagnostics where applicable; deny risky configurations).
+- [ ] Enable and validate **AWS CloudTrail** delivery and **CloudWatch Logs** retention (explicit retention values, not defaults).
+- [ ] Enable and validate Azure diagnostic settings through **Azure Monitor** for key resources.
+- [ ] Require encryption with **KMS**/**Key Vault** and validate key state and protective settings.
+- [ ] Add drift detection gates (`terraform plan -detailed-exitcode` and/or `-refresh-only`) before apply and before destroy.
+- [ ] Generate pre-destroy inventory using **aws resourcegroupstaggingapi** / **az resource list** filtered by `run_id`.
+- [ ] Run deterministic teardown via **GitHub Actions** (or **Azure DevOps**) with `destroy` in `always()` semantics.
+- [ ] Run post-destroy validation gates and fail the pipeline if any tagged resources remain.
+
+## FAQ
+### Is an ephemeral landing zone safe for production-grade changes?
+<p>Yes—if you treat the landing zone as a hardened, policy-constrained baseline and enforce validation gates (policy assignments, logging status, retention, encryption) before executing any workload change. The risk comes from skipping verification, not from the environment being short-lived.</p>
+
+### What’s the minimum set of controls you should never skip?
+<p>Policy guardrails (**AWS Organizations SCPs** or **Azure Policy**), mandatory telemetry (**AWS CloudTrail**/**CloudWatch Logs** or **Azure Monitor** diagnostics), mandatory encryption (**KMS**/**Key Vault**), and deterministic teardown validation (pre/post inventory keyed by tags).</p>
+
+### How does Skynet fit into this workflow?
+<p>Skynet’s Ephemeral Cloud Infrastructure execution pack implements the standardized run: deploy the landing zone from code, enforce guardrails, validate logging/encryption, execute the workload change, and teardown with drift and post-destroy gates—hours to a secure foundation, not months to stability.</p>
