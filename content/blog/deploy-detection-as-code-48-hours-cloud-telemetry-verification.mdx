@@ -1,0 +1,84 @@
+## Intro
+Cloud detections fail when telemetry is inconsistent, retention is wrong, and alerts can’t be reproduced on demand—so incident response starts blind. Detection-as-code fixes this only if you harden the telemetry pipeline and verify it end-to-end with deterministic evidence. Skynet delivers a standardized execution path (telemetry → normalization → alert rules → verification) across accounts/subscriptions in hours, not weeks. The result is a reproducible “telemetry-to-alert” evidence bundle with timestamps, IDs, and rollback-ready change control.
+
+## Quick take
+- Enforce organization-level **AWS CloudTrail** (multi-region + data events) and centralize logs to S3 with immutability.
+- Turn on **Amazon GuardDuty** org admin + auto-enrollment so new AWS accounts are covered immediately.
+- Enable **Microsoft Defender for Cloud** plans per Azure subscription and confirm coverage via CLI.
+- Use controlled canary events to validate ingestion and alerting with queryable timestamps and unique IDs.
+- Produce an evidence bundle: configuration snapshots, command outputs, finding IDs, and rollback diffs.
+
+## 1) Standardize telemetry first: make log absence impossible
+### Why “detections” fail without a hardened telemetry contract
+Detections are only as reliable as the upstream log contract: enabled everywhere, consistent scope, correct retention, and verifiable integrity. If a trail is regional, missing management events, or excludes critical data events, you’ll get partial timelines. If retention is short or mutable, you’ll lose the ability to replay and prove what happened.
+
+> ⚠️ Attention: If you cannot deterministically prove that telemetry was enabled and immutable at time T, your alert outcome is not reproducible.
+
+### AWS baseline: organization-level **AWS CloudTrail** with centralized, immutable storage
+Target state:
+- Organization trail (not per-account) with multi-region enabled.
+- Management events enabled; add data events where needed (e.g., S3 object-level, Lambda invoke) based on your detection catalog.
+- Central S3 bucket with versioning + Object Lock (where applicable) and a clearly defined retention mode.
+
+Validate trail status and multi-region configuration:
+```bash
+aws cloudtrail describe-trails --include-shadow-trails
+aws cloudtrail get-trail-status --name
+aws guardduty get-findings --detector-id <detector-id> --finding-ids <finding-id>
+```
+
+> ✅ Success: You can point to (1) the CloudTrail event record time, (2) the resulting **Amazon GuardDuty** finding ID, and (3) an unbroken mapping between them.
+
+### Azure canaries: controlled policy-impacting change + Defender coverage check
+For Azure, focus on safe control-plane changes that should be visible and attributable (in a dedicated resource group or subscription). Example canary patterns:
+- A deliberate, temporary NSG rule change in a sandbox.
+- A controlled change to a security setting that should be audited.
+
+You can validate coverage before and after:
+```bash
+az security pricing list -o json
+```
+
+Then verify that the canary action is visible in your telemetry path and that **Microsoft Defender for Cloud** produces the expected alert/finding type for the scenario you designed.
+
+> ⚠️ Attention: Canary design must align to your enabled plans and data sources. If your plan isn’t enabled, “no alert” is expected—and that’s still a valid verification outcome if documented.
+
+## 4) The 48-hour execution pattern: evidence bundle + rollback
+### Standardized execution steps (telemetry → detection → verification)
+A fast, repeatable deployment looks like this:
+- Day 0–1: Enforce telemetry baselines across AWS org + Azure subscriptions.
+- Day 1–2: Enforce threat detection service scope (**Amazon GuardDuty**, **Microsoft Defender for Cloud**) and validate drift controls.
+- Day 2: Run canaries and collect deterministic evidence.
+
+Deliverables that matter to operators:
+- Configuration snapshots (CLI outputs) proving enablement and scope.
+- Retention/immutability proof (S3 Object Lock settings, versioning status).
+- Finding IDs, timestamps, and mapping notes that link canary → telemetry → finding.
+- Rollback instructions (exact settings to revert) and a diff of what changed.
+
+### What Skynet changes operationally
+Skynet’s Proprietary Execution Engine applies the same baseline and verification sequence every time, across accounts/subscriptions, producing deterministic evidence rather than “it should be working.” The core advantage is execution precision: every step is validated with command output, every detection is verified with a controlled event, and every change is rollback-ready.
+
+> ✅ Success: You can reproduce an alert on demand, show the underlying event path, and prove retention/integrity—without hunting through inconsistent configurations.
+
+## Checklist
+- [ ] Confirm an organization-level, multi-region **AWS CloudTrail** trail exists and is logging.
+- [ ] Validate **AWS CloudTrail** event selectors include required management and scoped data events.
+- [ ] Centralize CloudTrail logs to a dedicated S3 bucket with versioning enabled.
+- [ ] Verify S3 Object Lock configuration and document retention mode/period.
+- [ ] Ensure **Amazon GuardDuty** is enabled in all required regions.
+- [ ] Confirm **Amazon GuardDuty** org membership/auto-enrollment is active for new accounts.
+- [ ] Enable required **Microsoft Defender for Cloud** plans for each Azure subscription.
+- [ ] Validate Defender plan coverage via `az security pricing list` and capture output.
+- [ ] Run at least one AWS canary and record event time + resulting finding ID.
+- [ ] Run at least one Azure canary and record action time + resulting alert/finding reference.
+
+## FAQ
+### How do we avoid canaries creating real risk?
+<p>Use dedicated canary identities and sandbox scopes, keep actions reversible, and immediately disable/delete any credentials created. Treat canaries as controlled test cases with change control and explicit rollback.</p>
+
+### What’s the minimum evidence we should store for “telemetry-to-alert” proof?
+<p>Store CLI outputs proving telemetry and detection enablement, retention/immutability settings (where applicable), and a mapping of canary action → telemetry record timestamp → finding/alert ID. If you can’t map those three, verification isn’t complete.</p>
+
+### How often should we re-verify detections after deployment?
+<p>Re-verify after any material cloud change (new accounts/subscriptions, new regions, major IAM changes) and on a recurring schedule. The goal is drift detection: catching coverage loss before an incident forces you to discover it.</p>
