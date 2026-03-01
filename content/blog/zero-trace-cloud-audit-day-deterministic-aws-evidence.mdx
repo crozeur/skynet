@@ -1,0 +1,262 @@
+```javascript
+export const metadata = {
+ title: "Zero-Trace Cloud Audit in a Day: Deterministic AWS Evidence",
+ description: "Collect immutable AWS evidence fast using time-boxed read-only access, verified CloudTrail/Config sources, and a signed control-mapped manifest.",
+ date: "2026-02-23",
+ pillar: "AUDIT",
+ tags: ["aws", "audit", "cloudtrail"]
+};
+```
+
+## Introduction
+Audit readiness stalls when evidence is scattered across accounts, regions, and teams—and every manual export creates gaps you only discover during review. A zero-trace cloud audit fixes this by collecting immutable, authoritative evidence from **AWS CloudTrail**, **AWS Config**, and locked **Amazon S3** destinations using time-boxed, read-only roles. The goal is deterministic output: a control-mapped evidence bundle plus a signed manifest that proves what was collected, from where, and when. Done right, you get auditor-grade artifacts in hours/days without leaving long-lived agents, standing infrastructure, or lingering access paths.
+
+## Quick Take
+- Stand up a time-boxed, least-privilege **AWS IAM** role with an external ID, and prove scope with **AWS STS** and **IAM policy simulation**.
+- Treat **AWS CloudTrail** org trails and **AWS Config** recorders as the authoritative sources; verify they are multi-region and continuous.
+- Ensure evidence destinations are immutable: **S3 Object Lock** + versioning + tightly scoped bucket policies.
+- Export artifacts deterministically (Config evaluations, CloudTrail event slices, resource inventories) and hash/sign them.
+- Map artifacts to generic control IDs (CIS/ISO/NIST-style) without claiming compliance.
+
+## 1) Build a time-boxed, read-only audit role (with provable scope)
+The fastest audits fail when access is over-broad (risk) or under-scoped (rework). Your execution should start with a dedicated audit role that is: (a) read-only, (b) scoped to evidence sources and inventory APIs, and (c) time-boxed.
+
+> ⚠️ Attention: Never request write permissions “just in case.” If evidence collection requires write access, you’re not collecting evidence—you’re changing the environment.
+
+### 1.1 Create a dedicated role with external ID
+Use a trust policy that requires an external ID and restricts who can assume it.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {"AWS": "arn:aws:iam::123456789012:root"},
+      "Action": "sts:AssumeRole",
+      "Condition": {
+        "StringEquals": {"sts:ExternalId": "AUDIT-EXT-ID-REPLACE"}
+      }
+    }
+  ]
+}
+```
+
+Attach a permissions policy that is intentionally narrow. Minimum viable read scope usually includes **CloudTrail**, **Config**, **S3** (read-only to the evidence buckets), plus inventory APIs for targeted services (for example **Amazon EC2**, **AWS IAM**, **Amazon EKS**, **Amazon RDS**) depending on audit scope.
+
+> 💡 Pro-Tip: Favor “deny-by-default” scoping to known evidence buckets and known org trails instead of blanket `s3:GetObject` across the account.
+
+### 1.2 Verify identity and account context immediately
+Before collecting anything, prove you’re in the expected account/role.
+
+```bash
+aws sts get-caller-identity
+aws configure list
+```
+
+Expected outcomes to capture (screenshot or JSON output): account ID, role ARN, and the credential source.
+
+### 1.3 Prove effective permissions with IAM simulation
+Use **AWS IAM** policy simulation to validate least privilege and prevent “silent failures” mid-run.
+
+```bash
+aws iam simulate-principal-policy \
+  --policy-source-arn arn:aws:iam::111111111111:role/SkynetAuditReadOnly \
+  --action-names cloudtrail:DescribeTrails cloudtrail:GetTrailStatus config:DescribeConfigurationRecorders s3:GetBucketVersioning
+```
+
+> ✅ Success: You have an assume-role path with external ID, a narrow read policy, and a captured proof-of-scope output (STS identity + simulation results).
+
+## 2) Confirm authoritative logging and configuration sources
+If **CloudTrail** or **Config** aren’t configured correctly, you can still collect data—but it won’t answer audit questions. Your job is to validate sources first, then export.
+
+### 2.1 Validate org-wide CloudTrail coverage
+Check trail configuration, multi-region behavior, log file validation, and destinations.
+
+```bash
+aws cloudtrail describe-trails --include-shadow-trails
+aws cloudtrail get-trail-status --name <trail-name>
+aws cloudtrail get-event-selectors --trail-name <trail-name>
+```
+
+Look for:
+- Multi-region trails (or explicit coverage for required regions)
+- Log file validation enabled
+- Delivery destination bucket and optional **Amazon CloudWatch Logs** integration
+
+> ⚠️ Attention: Event history is not a substitute for a trail. For audit evidence, prioritize trail-delivered logs stored in an immutable destination.
+
+### 2.2 Validate AWS Config recorders and delivery channels
+Confirm recorders are on, continuous, and delivering snapshots/history.
+
+```bash
+aws configservice describe-configuration-recorders
+aws configservice describe-configuration-recorder-status
+aws configservice describe-delivery-channels
+aws configservice describe-delivery-channel-status
+```
+
+Key checks:
+- Recorder is recording (not just defined)
+- Includes global resources if required (for example **AWS IAM**)
+- Delivery channel points to a known bucket/prefix
+
+### 2.3 Verify immutable evidence storage with S3 Object Lock
+For evidence destinations (CloudTrail and Config buckets), verify versioning and Object Lock state.
+
+```bash
+aws s3api get-bucket-versioning --bucket <evidence-bucket>
+aws s3api get-object-lock-configuration --bucket <evidence-bucket>
+aws s3api get-bucket-policy --bucket <evidence-bucket>
+aws s3api get-bucket-encryption --bucket <evidence-bucket>
+```
+
+What you want:
+- Versioning enabled
+- Object Lock enabled (governance/compliance mode based on org policy)
+- Bucket policy denies deletions/overwrites except tightly controlled break-glass
+
+> 💡 Pro-Tip: If Object Lock is not enabled, you can still collect evidence, but you must explicitly document immutability gaps in the manifest (what is immutable vs. merely retained).
+
+## 3) Deterministic evidence collection: export only what matters
+The execution engine mindset is “deterministic inputs → deterministic outputs.” Collect a bounded set of artifacts tied to control questions (logging, identity, network exposure, encryption, change tracking), then produce repeatable exports.
+
+### 3.1 Export Config resource inventory and evaluation results
+Start with what **AWS Config** knows: resource inventories, configuration history pointers, and rule evaluations (if rules exist).
+
+```bash
+# List recorded resources (inventory)
+aws configservice list-discovered-resources \
+  --resource-type AWS::EC2::Instance \
+  --region <region>
+
+# Pull configuration for a specific resource
+aws configservice get-resource-config-history \
+  --resource-type AWS::EC2::Instance \
+  --resource-id <i-xxxxxxxxxxxxxxxxx> \
+  --limit 10 \
+  --region <region>
+
+# If Config Rules are used, export compliance by rule
+aws configservice describe-compliance-by-config-rule --region <region>
+```
+
+Capture outputs as JSON files with stable naming (account/region/service/timestamp). Avoid ad-hoc edits.
+
+### 3.2 Extract CloudTrail evidence with targeted lookups
+Instead of exporting “all logs,” define evidence slices that map to questions:
+- Who changed IAM policies?
+- Who modified security groups/NACLs?
+- Who disabled logging?
+
+Use **AWS CloudTrail** `LookupEvents` for targeted, time-bounded summaries, then correlate to delivered log files if needed.
+
+```bash
+# Targeted event lookup (example: security group changes)
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AuthorizeSecurityGroupIngress \
+  --start-time 2026-02-21T00:00:00Z \
+  --end-time   2026-02-23T00:00:00Z \
+  --max-results 50
+
+# Example: IAM policy changes
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=PutRolePolicy \
+  --start-time 2026-02-21T00:00:00Z \
+  --end-time   2026-02-23T00:00:00Z
+```
+
+> ⚠️ Attention: `LookupEvents` is useful for rapid summaries, but delivered CloudTrail log files in **Amazon S3** remain the primary immutable record. If an auditor challenges an event, you must be able to point to the underlying log object key and integrity proof.
+
+### 3.3 Produce a signed evidence manifest (control-mapped)
+The manifest is what makes the audit deterministic: it lists every artifact you collected, its source, the collection time window, and cryptographic hashes. Keep control mapping generic (CIS/ISO/NIST-style IDs), and don’t claim compliance.
+
+Example manifest structure:
+
+```json
+{
+  "engagement": {
+    "account_ids": ["111111111111"],
+    "regions": ["us-east-1", "us-west-2"],
+    "time_window_utc": {
+      "start": "2026-02-21T00:00:00Z",
+      "end": "2026-02-23T00:00:00Z"
+    },
+    "assumed_role": "arn:aws:iam::111111111111:role/SkynetAuditReadOnly"
+  },
+  "artifacts": [
+    {
+      "path": "cloudtrail/lookup/AuthorizeSecurityGroupIngress_20260223.json",
+      "source": "AWS CloudTrail lookup-events",
+      "controls": ["CIS-LOGGING", "NIST-AU"],
+      "sha256": "<computed>"
+    },
+    {
+      "path": "config/recorder-status_us-east-1_20260223.json",
+      "source": "AWS Config describe-configuration-recorder-status",
+      "controls": ["CIS-CONFIG", "ISO-LOG"],
+      "sha256": "<computed>"
+    }
+  ]
+}
+```
+
+Generate hashes locally and sign the manifest. Use **OpenSSL** for a simple, auditable approach.
+
+```bash
+# Hash all artifacts (example)
+find evidence/ -type f -print0 | sort -z | xargs -0 sha256sum > evidence/SHA256SUMS.txt
+
+# Sign the manifest (example)
+openssl dgst -sha256 -sign signing-key.pem -out evidence/manifest.sig evidence/manifest.json
+openssl dgst -sha256 -verify signing-pub.pem -signature evidence/manifest.sig evidence/manifest.json
+```
+
+> ✅ Success: You can hand over a single bundle containing immutable-source exports, deterministic filenames, and a manifest that proves integrity and ties each artifact to control themes.
+
+## 4) Zero-trace closeout: remove access, prove nothing was left behind
+Zero-trace means no persistent runtime components and no lingering access. Closeout is a first-class deliverable.
+
+### 4.1 Revoke access deterministically
+If you created a dedicated role, delete it or remove the trust relationship and detach policies. If you used time-based conditions, let them expire and validate.
+
+```bash
+# Validate the role exists (then remove as appropriate)
+aws iam get-role --role-name SkynetAuditReadOnly
+
+# List attached policies for cleanup
+aws iam list-attached-role-policies --role-name SkynetAuditReadOnly
+aws iam list-role-policies --role-name SkynetAuditReadOnly
+```
+
+### 4.2 Capture proof of teardown
+Your final evidence bundle should include:
+- Role definition and trust policy (as collected)
+- Teardown actions (what changed, when)
+- A “no residual infrastructure” statement limited to what you can prove (do not overclaim)
+
+> 💡 Pro-Tip: If the customer requires an audit role to remain for follow-up, enforce short max session duration and time-based trust conditions, and document the exception explicitly in the manifest.
+
+## Checklist
+- [ ] Define audit time window (UTC) and target accounts/regions before collecting anything
+- [ ] Create a dedicated read-only **AWS IAM** role with external ID (and capture trust/policy JSON)
+- [ ] Validate identity with **AWS STS** (`aws sts get-caller-identity`) and store output
+- [ ] Simulate permissions with **AWS IAM** (`aws iam simulate-principal-policy`) for key APIs
+- [ ] Verify **AWS CloudTrail** trail settings (multi-region, validation, destinations)
+- [ ] Verify **AWS Config** recorder status and delivery channels in each required region
+- [ ] Verify evidence bucket immutability: **S3 Object Lock**, versioning, encryption, and policy
+- [ ] Export targeted **AWS CloudTrail** event lookups aligned to control questions
+- [ ] Export **AWS Config** inventories and config histories for in-scope resource types
+- [ ] Generate `SHA256SUMS.txt` and sign `manifest.json`; verify signature
+- [ ] Package artifacts + manifest into a single evidence bundle with deterministic paths
+- [ ] Revoke audit access and record teardown proof
+
+## FAQ
+### How is “zero-trace” different from “agentless”?
+<p>Zero-trace is stricter: you not only avoid agents, you also avoid leaving behind long-lived roles, log forwarders, or temporary infrastructure. The only durable output is the evidence bundle and its integrity proofs.</p>
+
+### What if CloudTrail or Config isn’t enabled everywhere?
+<p>You can still collect what exists, but you must treat coverage gaps as findings and document them in the manifest (which accounts/regions/services lacked authoritative telemetry during the time window). Don’t backfill with screenshots or ad-hoc exports when the primary sources are missing.</p>
+
+### How do you map evidence to controls without claiming compliance?
+<p>Use control themes (logging, change tracking, access control, encryption, retention) and map artifacts to generic IDs (CIS/ISO/NIST-style) as “supports evaluation of.” Keep language precise: provide evidence and traceability, not a compliance declaration.</p>
