@@ -388,18 +388,18 @@ export const Services = () => {
                     {language === "en" ? "Our Solution" : "Notre Solution"}
                   </h3>
                 </div>
-                <div className="group relative p-6 sm:p-8 rounded-3xl bg-slate-900 dark:bg-slate-900/80 border border-slate-800 dark:border-cyan-500/30 shadow-2xl shadow-cyan-900/20 dark:shadow-[0_8px_30px_rgba(6,182,212,0.15)] overflow-hidden transition-all duration-500 hover:shadow-cyan-500/20">
+                <div className="group relative p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-cyan-500/30 shadow-xl shadow-slate-200/50 dark:shadow-[0_8px_30px_rgba(6,182,212,0.15)] backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-cyan-500/20">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full transition-transform duration-700 group-hover:scale-110"></div>
                   <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 blur-3xl rounded-full transition-transform duration-700 group-hover:scale-110"></div>
-                  
-                  <h4 className="text-xl sm:text-2xl font-bold text-white mb-8 relative z-10 leading-snug">
+
+                  <h4 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-8 relative z-10 leading-snug">
                     {activeService.solution}
                   </h4>
                   <ul className="space-y-5 relative z-10">
                     {activeService.points.map((point, idx) => (
-                      <li key={idx} className="flex gap-4 text-sm font-medium text-slate-300 leading-relaxed">
-                        <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
-                          <CheckCircleIcon className="w-4 h-4 text-cyan-400" />
+                      <li key={idx} className="flex gap-4 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                        <div className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center border border-cyan-200 dark:border-cyan-800/50 group-hover:scale-110 transition-transform duration-300">
+                          <CheckCircleIcon className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                         </div>
                         <span>{point}</span>
                       </li>
