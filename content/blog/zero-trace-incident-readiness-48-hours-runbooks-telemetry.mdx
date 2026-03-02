@@ -1,0 +1,149 @@
+## Intro
+Most incident response plans fail at the same moment: when you need them, they’re vague, scattered, and depend on someone “remembering the steps.” SMEs feel this pain more because teams are small, tooling is mixed, and change windows are tight. You can still get meaningfully ready in 48 hours by focusing on deterministic runbooks and evidence-ready telemetry—while avoiding long-lived agents, permanent configuration sprawl, or new standing privileges. This is “zero-trace” readiness: prepare to respond fast, then roll back what you introduced.
+
+## Quick take
+- Use deterministic runbooks: pre-decide inputs, outputs, owners, and stop conditions.
+- Pre-stage “evidence-ready” logging that you can enable briefly and centrally collect.
+- Prefer reversible changes: time-boxed policies, temporary collection, and documented rollback.
+- Minimize new attack surface: avoid new always-on services, accounts, and inbound rules.
+- Practice once with a short scenario to validate timing, access, and data quality.
+
+## Deterministic runbooks: make decisions before the incident
+A deterministic runbook is not a narrative. It’s a set of steps with explicit triggers and outcomes. The goal is that two different responders following the same runbook produce the same result within predictable time.
+
+Practical structure (use this template for each scenario):
+- Trigger: What observable condition starts the runbook (example: “EDR alert: suspicious PowerShell + new local admin” or “impossible travel + MFA fatigue report”).
+- Scope inputs: Exactly what you need to know before acting (asset owner, criticality tier, user role, last known good time).
+- Actions: Ordered steps with commands/queries where possible.
+- Evidence outputs: What artifacts must be collected and where they go.
+- Decision points: If/then branches with criteria (example: “If host is a server in Tier 0, isolate immediately; else capture triage package first”).
+- Stop conditions: What “done” means (contained, eradicated, restored, and documented).
+- Rollback: How to remove temporary rules, accounts, logging boosts, or scripts introduced.
+
+Examples of deterministic runbooks SMEs can implement quickly:
+1) Suspected credential theft (email/IdP)
+- Trigger: anomalous sign-in + suspicious mailbox rule or OAuth consent.
+- Actions: disable risky session tokens, reset credentials, review recent sign-ins, check new forwarding rules, revoke suspicious app consent.
+- Evidence: sign-in logs, audit logs for mailbox/forwarding changes, list of tokens revoked (time + operator), affected user timeline.
+
+2) Ransomware early warning (endpoint)
+- Trigger: mass file rename/encryption behavior, shadow copy deletions, or admin share scanning.
+- Actions: isolate endpoint(s), block known-bad indicators at perimeter where feasible, identify patient zero via file server and endpoint telemetry.
+- Evidence: process tree, network connections, scheduled task/service changes, list of touched shares.
+
+3) Business email compromise (BEC)
+- Trigger: outbound payment change request + suspicious sign-in, or inbox rule creating hidden forwarding.
+- Actions: lock account, check delegated access, remove malicious rules, confirm recipient banking changes out-of-band.
+- Evidence: rule definitions, message trace headers, audit events of rule creation.
+
+To keep this “zero-trace,” store runbooks in a controlled location you already operate (your internal wiki, ticketing system, or version-controlled repository) rather than spinning up a new platform.
+
+## Evidence-ready telemetry without persistent footprints
+“Evidence-ready” means: when something happens, you can reconstruct what changed, by whom, from where, and when—without scrambling to enable logging after the fact. “Without persistent footprints” means you avoid installing permanent new agents everywhere or leaving high-verbosity logging enabled indefinitely.
+
+A practical approach is to define two telemetry modes:
+
+1) Baseline mode (always on, minimal)
+- Authentication logs (IdP, email, VPN, remote access)
+- Administrative actions (directory changes, role changes, mailbox rules, MFA resets)
+- Endpoint security alerts (whatever you already have)
+- DNS and proxy/firewall summaries (if available)
+
+2) Surge mode (time-boxed, evidence-focused)
+Enable for a short window (e.g., 4–24 hours) during an incident or drill:
+- Higher-fidelity endpoint event collection (process creation, script activity, network connections)
+- More detailed directory auditing (privileged group changes, new service accounts)
+- Expanded email auditing (rule changes, OAuth consents, forwarding events)
+
+How to keep surge mode “zero-trace”:
+- Use time-bounded policies where your environment supports them (temporary GPO, short-lived audit policies, scoped collection rules).
+- Prefer central toggles over host-by-host changes.
+- Document exactly what changed so rollback is deterministic.
+
+Where to store the evidence:
+- Choose one central evidence location that already exists (a secure file share with restricted access, a secured cloud storage bucket, or your ticketing system attachments).
+- Ensure immutability by process, even if you can’t technically enforce it: write-once naming conventions, hash files on arrival, and restrict delete permissions.
+
+Simple evidence packaging pattern for endpoints:
+- Triage bundle includes: system info, running processes, network connections, logged-in users, scheduled tasks/services, key log files, and relevant security events.
+- Create a standard folder structure per incident: `INC-YYYYMMDD-###/host/<hostname>/`.
+- Produce a short manifest file listing items collected and a hash for each artifact.
+
+## 48-hour plan: build, stage, test, and roll back
+This plan assumes you already have basic access to your identity platform, endpoints, and perimeter logs. The objective is not perfection—it’s reliable, repeatable readiness.
+
+Hour 0–6: Define scope and “must-answer” questions
+- Pick 3 scenarios most likely for your business (common choices: credential theft, ransomware, BEC).
+- Define your “must-answer” investigation questions:
+  - Which identities were used?
+  - Which systems were accessed?
+  - What changed (accounts, permissions, rules, tasks, configs)?
+  - What data exfiltration indicators exist?
+- Choose an evidence vault location and access model (who can read/write).
+
+Hour 6–18: Write deterministic runbooks
+- Use the same template across scenarios.
+- For each runbook, include:
+  - A communication plan (internal + customer/vendor if applicable) with who approves messaging.
+  - A containment matrix: isolate user account vs isolate device vs block network path.
+  - A “minimum viable evidence set” to collect before destructive actions, when safe.
+
+Hour 18–30: Stage surge telemetry and access paths
+- Identify toggles for surge mode (audit settings, policy changes, logging verbosity).
+- Create reversible change scripts or documented click-paths.
+- Pre-stage least-privilege access:
+  - Break-glass admin accounts (protected, monitored, and used only for emergencies).
+  - A dedicated incident responder role with just enough permissions to collect evidence.
+- Ensure responders can reach systems out-of-band (management network, secure remote access) without opening new inbound firewall rules.
+
+Hour 30–40: Run a tabletop + a short technical drill
+- Tabletop (30–60 minutes): walk through one runbook and confirm decision points.
+- Technical drill (60–90 minutes):
+  - Enable surge mode.
+  - Execute evidence collection on one test endpoint and one “important” endpoint.
+  - Store artifacts in the evidence vault, generate hashes, and validate you can open/read them.
+  - Roll back surge mode and confirm logs return to baseline.
+
+Hour 40–48: Fix friction and lock in operational hygiene
+- Update runbooks with what actually happened during the drill (missing permissions, unclear steps, data gaps).
+- Create a one-page “SOC on-call card”:
+  - Where runbooks live
+  - Evidence vault path
+  - Key contacts
+  - Containment do/do-not list
+- Add a recurring quarterly 60-minute drill to keep it real.
+
+## Minimize footprint while maximizing readiness
+“Zero-trace” is a mindset: reduce what you permanently add to the environment, while still being able to scale up response capability instantly.
+
+Techniques that help:
+- Reversibility: every readiness change must have a rollback step.
+- Time-boxing: surge telemetry and elevated access should expire.
+- Scoping: apply surge settings only to impacted users/hosts or a small ring of critical assets.
+- Separation of duties: the person enabling surge logging is not the same person approving a risky containment action when feasible.
+- Evidence discipline: collect what you need, label it, hash it, and store it centrally.
+
+Mapping to common best-practice frameworks (generic)
+- NIST/ISO/CIS-style guidance generally emphasizes preparation, detection, response, and continuous improvement. Your deterministic runbooks support preparation and response; your baseline/surge telemetry supports detection and analysis. Treat this as alignment, not compliance.
+
+## Checklist
+- [ ] Select the top 3 incident scenarios for your business and name an owner for each runbook.
+- [ ] Create a single evidence vault location with restricted access and a standard folder naming scheme.
+- [ ] Document baseline telemetry sources you already have (identity, email, endpoint, network).
+- [ ] Define surge telemetry settings and confirm they can be enabled and rolled back quickly.
+- [ ] Write deterministic runbooks with triggers, evidence outputs, decision points, and stop conditions.
+- [ ] Pre-stage incident roles/access (least privilege) and protect any break-glass accounts.
+- [ ] Create a standard endpoint triage bundle and a manifest + hashing step.
+- [ ] Add a containment matrix (account lock, device isolate, network block) with criteria.
+- [ ] Run one tabletop exercise and capture gaps as tickets.
+- [ ] Run one short technical drill: enable surge mode, collect evidence, store + hash, then roll back.
+
+## FAQ
+Q1: Does “zero-trace” mean no logs are collected?
+A1: No. It means you avoid permanent new tooling and long-lived high-verbosity settings; you keep a minimal baseline and enable higher detail briefly when needed.
+
+Q2: Won’t time-boxed logging miss attacker activity?
+A2: It can if you only rely on surge mode. That’s why baseline identity/email/admin auditing stays on; surge mode is for deep, short-window investigation.
+
+Q3: How do we avoid destroying evidence while containing an incident?
+A3: Define a minimum evidence set to capture before disruptive actions, and include exceptions where immediate isolation is required to stop impact.
