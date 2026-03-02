@@ -23,6 +23,9 @@ permissions:
 jobs:
   autotag:
     runs-on: ubuntu-latest
+    concurrency:
+      group: blog-metadata-update
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,33 +68,36 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"  
 
-          git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
-          if git diff --cached --quiet; then
-            echo "No changes needed."
-            exit 0
-          fi
+          for i in 1 2 3 4; do
+            if [ $i -gt 1 ]; then
+              echo "Re-running scripts for attempt $i..."
+              git fetch origin main
+              git reset --hard origin/main
+              node scripts/fix-missing-metadata.js
+              node scripts/auto_tag_blog_posts.js
+              node scripts/validate-blog-metadata.js
+            fi
 
-          git commit -m "chore(blog): auto-add topics/tags"
+            git add content/blog/*.mdx BLOG_ARTICLE_GUIDE.md
+            if git diff --cached --quiet; then
+              echo "No changes needed."
+              exit 0
+            fi
 
-          git stash || true
-          git pull --rebase origin main || true
-          git stash pop || true
+            git commit -m "chore(blog): auto-add topics/tags (attempt $i)" || true
 
-          for i in 1 2 3; do
+            git fetch origin main || true
+            git rebase origin/main || {
+              echo "Rebase failed, aborting and retrying..."
+              git rebase --abort || true
+              continue
+            }
+
             if git push origin HEAD:main; then
               echo "✅ Changes pushed to main"
               exit 0
             fi
-            echo "⚠️ Push failed (attempt $i), retrying after rebase..."     
-            git stash || true
-            git pull --rebase origin main
-            git stash pop || true
-          done
-          echo "❌ Push failed after retries"
-          exit 1
-
-      - name: Fail if changes are needed (fork PRs)
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+            echo "⚠️ Push failed (attempt $i), retrying..."
         run: |
           if git diff --quiet; then
             echo "No changes needed."

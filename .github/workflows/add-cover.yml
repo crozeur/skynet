@@ -25,7 +25,7 @@ jobs:
   add-cover:
     runs-on: ubuntu-latest
     concurrency:
-      group: add-cover-image-${{ github.event.client_payload.file_path || github.event.inputs.file_path || github.run_id }}
+      group: blog-metadata-update
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -262,9 +262,8 @@ jobs:
           # We serialize runs via `concurrency`, but still rebase+retry defensively.
           BRANCH="${GITHUB_REF_NAME:-main}"
           echo "ℹ️  Syncing with origin/${BRANCH} before push"
-          git stash || true
-          git pull --rebase origin "${BRANCH}" || true
-          git stash pop || true
+          git fetch origin "${BRANCH}" || true
+          git rebase "origin/${BRANCH}" || { git rebase --abort || true; }
 
           for attempt in 1 2 3; do
             echo "ℹ️  Push attempt ${attempt}/3"
@@ -279,9 +278,11 @@ jobs:
             fi
 
             echo "⚠️  Push failed; rebasing and retrying..."
-            git stash || true
-            git pull --rebase origin "${BRANCH}"
-            git stash pop || true
+            git fetch origin "${BRANCH}" || true
+            git rebase "origin/${BRANCH}" || {
+              echo "Rebase failed. Aborting."
+              git rebase --abort || true
+            }
           done
 
       - name: Revalidate site cache (optional)
