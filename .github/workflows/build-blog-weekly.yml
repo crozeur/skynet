@@ -1,4 +1,4 @@
-name: Build Blog & Deploy
+﻿name: Build Blog & Deploy
 
 on:
   schedule:
@@ -9,6 +9,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    concurrency:
+      group: blog-metadata-update
+      cancel-in-progress: false
     permissions:
       contents: write
     
@@ -42,23 +45,19 @@ jobs:
             echo "✅ No changes to commit"
           else
             git commit -m "🤖 Auto-generated: Blog articles compiled - $(date +'%Y-%m-%d %H:%M UTC')"
-            # Avoid non-fast-forward failures if main moved since checkout
-            git stash || true
-            git pull --rebase origin main || true
-            git stash pop || true
-            # Push with a small retry loop to handle transient races
-            for i in 1 2 3; do
+
+            for i in 1 2 3 4; do
+              git fetch origin main || true
+              git rebase origin/main || { git rebase --abort || true; echo "Rebase failed." ; }
+
               if git push origin HEAD:main; then
                 echo "✅ Changes pushed to GitHub"
                 exit 0
               fi
               echo "⚠️  Push failed (attempt $i). Retrying..."
-              git stash || true
-              git pull --rebase origin main
-              git stash pop || true
-              sleep 3
+              sleep 5
             done
-            echo "❌ Push failed after 3 attempts"
+            echo "❌ Push failed after retries"
             exit 1
           fi
         env:
