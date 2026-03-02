@@ -34,7 +34,10 @@ jobs:
         run: node scripts/fix-h3-formatting.js
       
       - name: Run blog build
-        run: npm run build:blog:dev
+        run: |
+          node scripts/fix-missing-metadata.js
+          node scripts/auto_tag_blog_posts.js
+          node scripts/build-blog.js --skip-translation
       
       - name: Commit and push changes
         run: |
