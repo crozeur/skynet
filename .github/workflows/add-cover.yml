@@ -258,6 +258,8 @@ jobs:
 
           git commit -m "✨ Add cover image to article"
 
+          git stash --include-untracked || true
+
           # Prevent occasional non-fast-forward failures when multiple dispatches land close together.
           # We serialize runs via `concurrency`, but still rebase+retry defensively.
           BRANCH="${GITHUB_REF_NAME:-main}"
