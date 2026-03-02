@@ -222,24 +222,25 @@ async function translateHtmlContent(html) {
 // Professional markdown to HTML converter
 function markdownToHtml(markdown) {
   let html = markdown;
-  
+
   // Horizontal rules
   html = html.replace(/^(-{3,}|\*{3,}|_{3,})$/gm, '<hr />');
-  
+
   // Code blocks first (before other replacements)
+  const codeBlocks = [];
   html = html.replace(/```([a-z]*)\n([\s\S]*?)```/gm, (match, lang, code) => {
     const escaped = code.trim()
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    return `<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`;
+    codeBlocks.push(`<pre><code class="language-${lang || 'plaintext'}">${escaped}</code></pre>`);
+    return `___CODE_BLOCK_${codeBlocks.length - 1}___`;
   });
 
   // Blockquotes & Callouts
   html = html.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
   html = html.replace(/(<blockquote>.*?<\/blockquote>)/gs, (match) => {
     const content = match.replace(/<blockquote>/g, '').replace(/<\/blockquote>/g, '\n').trim();
-    
     if (content.startsWith('⚠️') || content.toLowerCase().startsWith('attention')) {
       return `<div class="article-callout article-callout-warning"><div class="callout-icon">⚠️</div><div class="callout-content">${content.replace(/^⚠️\s*/, '').replace(/^attention\s*:\s*/i, '')}</div></div>`;
     } else if (content.startsWith('💡') || content.toLowerCase().startsWith('pro-tip') || content.toLowerCase().startsWith('astuce')) {
@@ -247,7 +248,6 @@ function markdownToHtml(markdown) {
     } else if (content.startsWith('✅') || content.toLowerCase().startsWith('succès') || content.toLowerCase().startsWith('success')) {
       return `<div class="article-callout article-callout-success"><div class="callout-icon">✅</div><div class="callout-content">${content.replace(/^✅\s*/, '').replace(/^(succès|success)\s*:\s*/i, '')}</div></div>`;
     }
-    
     return `<blockquote class="article-blockquote">${content}</blockquote>`;
   });
 
@@ -335,6 +335,7 @@ function markdownToHtml(markdown) {
         para.includes('<code>') ||
         para.includes('<blockquote>') ||
         para.includes('<pre>') ||
+        para.includes('___CODE_BLOCK_') ||
         para.includes('<img') ||
         para.includes('<hr') ||
         para.trim() === ''
@@ -347,6 +348,9 @@ function markdownToHtml(markdown) {
       return '';
     })
     .join('\n');
+
+  // Restore Code Blocks
+  html = html.replace(/___CODE_BLOCK_(\d+)___/g, (match, id) => codeBlocks[parseInt(id)]);
 
   return html;
 }
