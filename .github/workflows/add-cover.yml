@@ -32,6 +32,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Normalize metadata before cover update
         run: node scripts/fix-missing-metadata.js
 

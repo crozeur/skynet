@@ -37,8 +37,8 @@ jobs:
         with:
           node-version: 20
 
-      - name: Normalize metadata before auto-tagging (push)
-        if: github.event_name == 'push'
+      - name: Normalize metadata before auto-tagging (push/manual)
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: node scripts/fix-missing-metadata.js
 
       - name: Auto-assign topics/tags

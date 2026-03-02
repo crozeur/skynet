@@ -16,8 +16,6 @@ permissions:
 jobs:
   fix-metadata:
     runs-on: ubuntu-latest
-    env:
-      HAS_BOT_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN != '' }}
     
     steps:
       - name: Checkout code
@@ -51,13 +49,13 @@ jobs:
           fi
 
       - name: Skip PR (missing BOT_GITHUB_TOKEN)
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && env.HAS_BOT_TOKEN != 'true'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && secrets.BOT_GITHUB_TOKEN == ''
         run: |
           echo "Skipping PR creation: BOT_GITHUB_TOKEN is not configured."
           echo "This repository disallows GitHub Actions default token for PR creation."
 
       - name: Create PR with metadata fixes
-        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && env.HAS_BOT_TOKEN == 'true'
+        if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.changes.outputs.has_changes == 'true' && secrets.BOT_GITHUB_TOKEN != ''
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
