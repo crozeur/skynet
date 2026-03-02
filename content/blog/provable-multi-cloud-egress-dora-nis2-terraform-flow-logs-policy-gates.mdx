@@ -1,0 +1,283 @@
+export const metadata = {
+  title: "Multi-Cloud Egress You Can Actually Prove: DORA/NIS2-Ready Routing Controls with Terraform + Flow Logs + Policy Gates",
+  description: "Deterministic multi-cloud egress with Terraform, policy gates, and flow-log evidence you can defend under DORA/NIS2.",
+  date: "2026-03-01",
+  pillar: "CLOUD",
+  tags: ["multi-cloud", "terraform", "policy-as-code", "flow-logs", "routing-controls"]
+};
+
+## Introduction
+Multi-cloud egress is a control plane problem, not a diagram problem: routes drift, exceptions accumulate, and “temporary” paths become permanent. Under DORA/NIS2 expectations, you need demonstrable boundary control, rapid containment, and evidence that only approved egress exists—across AWS, Azure, and GCP. The fastest path is standardized execution: enforce deterministic routing via Terraform, block non-compliant diffs at review/apply time, and continuously validate with flow logs and config snapshots. Done correctly, you can prove allowed egress in hours, then keep it locked.
+
+## Quick Take
+- Deterministic egress starts with opinionated Terraform modules that pin default routes and centralize NAT/firewall.
+- Treat “shadow egress” as a build-time defect: fail plans with **OPA**/**Conftest** policies before merge/apply.
+- Flow logs are your continuous assertion layer: detect new egress points and unexpected destinations/ports.
+- Evidence is a pipeline artifact: store policy decisions, route snapshots, and query outputs per environment.
+- Standardized execution reduces variance: same controls, same proofs, across AWS/Azure/GCP.
+
+## Define a deterministic egress architecture (per cloud) in Terraform
+The goal is not “no internet.” The goal is: every path to the internet (and to external suppliers) is explicitly approved, routed through controlled enforcement points, and cannot be bypassed via ad-hoc gateways, peering, VPN, or service endpoints.
+
+### Define “controlled egress” as a first-class resource
+Create a consistent tagging/labeling contract used across clouds and tooling:
+- Controlled egress components (NAT, firewall, route tables, subnets) carry a marker.
+- Any default route to the internet must be owned by the module and must reference the controlled component.
+
+> 💡 Pro-Tip: Standardize tags/labels like `egress=controlled`, `owner=network-platform`, `change_control=pipeline` and require them in policy gates. This turns “intent” into something testable.
+
+### AWS: force 0.0.0.0/0 through centralized NAT + egress VPC
+Patterns vary (centralized egress VPC, shared services, inspection VPC), but the invariant is: workloads do not attach arbitrary **Internet Gateway** paths.
+
+Terraform snippet (illustrative) that pins the default route to a known NAT:
+
+```hcl
+resource "aws_route" "default_egress" {
+  route_table_id         = aws_route_table.private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.central.id
+}
+
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.workload.id
+
+  tags = {
+    egress = "controlled"
+  }
+}
+```
+
+> ⚠️ Attention: If teams can attach an **Internet Gateway** to workload VPCs (or create new route tables with 0.0.0.0/0 to IGW), you have bypass risk even if your intended path uses centralized NAT.
+
+### Azure: UDRs to Azure Firewall and Private Link for PaaS
+In Azure, default routing is often where drift hides: a subnet without a UDR, or a route exception that sends traffic to the internet.
+
+Terraform snippet for a subnet UDR that forces default route via **Azure Firewall**:
+
+```hcl
+resource "azurerm_route_table" "egress_udr" {
+  name                = "rt-egress-controlled"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+
+  route {
+    name           = "default"
+    address_prefix = "0.0.0.0/0"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = azurerm_firewall.fw.ip_configuration[0].private_ip_address
+  }
+
+  tags = {
+    egress = "controlled"
+  }
+}
+```
+
+### GCP: Cloud NAT + hierarchical firewall with pinned defaults
+In GCP, you typically control internet egress by forcing private subnets to egress via **Cloud NAT** attached to a **Cloud Router**, then constraining outbound behavior with firewall policy.
+
+Terraform snippet for **Cloud NAT**:
+
+```hcl
+resource "google_compute_router" "egress_router" {
+  name    = "r-egress"
+  region  = var.region
+  network = google_compute_network.vpc.id
+}
+
+resource "google_compute_router_nat" "egress_nat" {
+  name                               = "nat-egress-controlled"
+  router                             = google_compute_router.egress_router.name
+  region                             = var.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = true
+    filter = "ALL"
+  }
+}
+```
+
+> ✅ Success: With deterministic modules, default route behavior becomes predictable, reviewable, and repeatable across environments—no portal edits hiding off the books.
+
+## Stop shadow egress at review/apply time with policy gates
+Deterministic Terraform is necessary but not sufficient. You also need negative controls: explicit denials for patterns that create bypass paths.
+
+### Gate on Terraform plan output (not just code)
+Policy should evaluate `terraform show -json plan.out` output because it captures module expansions and the real resource graph.
+
+Generate a plan JSON artifact:
+
+```bash
+terraform init
+terraform plan -out=plan.out
+terraform show -json plan.out > plan.json
+```
+
+Run **Conftest**:
+
+```bash
+conftest test plan.json -p policy/
+```
+
+### OPA/Conftest: deny AWS default routes to IGW outside the approved module
+Policy intent:
+- Deny any `aws_route` where `destination_cidr_block == 0.0.0.0/0` and `gateway_id` starts with `igw-` unless it’s created by the approved egress module.
+
+```rego
+package terraform.egress
+
+deny[msg] {
+  rc := input.resource_changes[_]
+  rc.type == "aws_route"
+  after := rc.change.after
+  after.destination_cidr_block == "0.0.0.0/0"
+  startswith(after.gateway_id, "igw-")
+
+  not approved_egress_route(rc)
+  msg := sprintf("Denied: default route to IGW outside controlled egress: %s", [rc.address])
+}
+
+approved_egress_route(rc) {
+  contains(rc.address, "module.egress")
+}
+```
+
+> ⚠️ Attention: Tag-based approvals alone can be spoofed if teams can apply tags freely. Prefer module path plus account/subscription/project boundaries as the primary control, and tags as supporting evidence.
+
+### OPA/Conftest: deny Azure routes that send traffic directly to Internet
+Policy intent:
+- Deny any `azurerm_route_table` route where `next_hop_type == Internet` except in explicitly approved public tiers.
+
+```rego
+package terraform.egress
+
+deny[msg] {
+  rc := input.resource_changes[_]
+  rc.type == "azurerm_route_table"
+  after := rc.change.after
+  route := after.route[_]
+  lower(route.next_hop_type) == "internet"
+
+  not approved_azure_public_tier(rc)
+  msg := sprintf("Denied: Azure UDR nextHopType=Internet: %s", [rc.address])
+}
+
+approved_azure_public_tier(rc) {
+  contains(rc.address, "module.public_ingress")
+}
+```
+
+### Policy gates as evidence artifacts
+A gate should emit (and store): the evaluated plan hash, the policy bundle version, and pass/fail decisions with denied resources.
+
+> ✅ Success: When asked “how do you prevent drift?”, you can show enforced decision records—not intent statements.
+
+## Prove egress continuously with flow logs and targeted queries
+Once deterministic routing and gates are in place, you still need runtime verification. Reality diverges due to new peering/VPN paths, service endpoint edge cases, or newly provisioned egress components outside the controlled stack.
+
+### AWS: VPC Flow Logs + CloudTrail for new egress points and destinations
+Enable **AWS VPC Flow Logs** on relevant VPCs/subnets and centralize into **Amazon S3** or **CloudWatch Logs**. Use **AWS CloudTrail** to correlate route/gateway/attachment changes.
+
+Athena-style query idea to enumerate new destination IP/port pairs over the last 24 hours (schema varies by delivery format):
+
+```sql
+SELECT
+  srcaddr,
+  dstaddr,
+  dstport,
+  protocol,
+  COUNT(*) AS hits
+FROM vpc_flow_logs
+WHERE action = 'ACCEPT'
+  AND flow_direction = 'egress'
+  AND from_unixtime(start) >= now() - interval '24' hour
+GROUP BY 1,2,3,4
+ORDER BY hits DESC;
+```
+
+> 💡 Pro-Tip: Alert on first-seen destinations per workload boundary (VPC/VNet/project + subnet + security zone). “New anywhere” is noisy; “new from a restricted zone” is actionable.
+
+### Azure: NSG Flow Logs + Log Analytics for outbound-to-public anomalies
+With **Azure NSG Flow Logs** flowing into **Azure Log Analytics**, query outbound flows to public IPs outside an allowlist.
+
+```kusto
+AzureNetworkAnalytics_CL
+| where FlowDirection_s == "O" and Action_s == "A"
+| extend DstIp = DestinationIP_s
+| where ipv4_is_private(DstIp) == false
+| where DstIp !in ("203.0.113.10", "198.51.100.25")
+| summarize hits=count() by DstIp, DestinationPort_d, Protocol_s
+| order by hits desc
+```
+
+### GCP: VPC Flow Logs into BigQuery for first-seen external egress
+Export **GCP VPC Flow Logs** to **BigQuery** and query for new external destinations.
+
+```sql
+SELECT
+  json_value(connection, '$.src_ip') AS src_ip,
+  json_value(connection, '$.dest_ip') AS dest_ip,
+  json_value(connection, '$.dest_port') AS dest_port,
+  COUNT(1) AS hits
+FROM `project.dataset.gcp_vpc_flow_logs`
+WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+  AND json_value(connection, '$.direction') = 'EGRESS'
+  AND NOT REGEXP_CONTAINS(json_value(connection, '$.dest_ip'), r'^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.)')
+GROUP BY 1,2,3
+ORDER BY hits DESC;
+```
+
+> ⚠️ Attention: “Public IP” detection isn’t enough. You also need to detect new egress points (new NATs, new firewall instances, new gateway attachments). Pair flow analytics with config snapshots.
+
+## Operationalize evidence and containment for DORA/NIS2-style scrutiny
+This is about building controls that stand up to technical scrutiny and support rapid containment—without hand-waving.
+
+### Build an evidence pipeline
+Minimum viable evidence set per environment:
+- Terraform plan/apply records for controlled egress modules.
+- Policy gate outputs (policy version, plan hash, deny messages).
+- Scheduled route table/UDR snapshots and diffs.
+- Flow-log query outputs for first-seen destinations and anomalous egress.
+
+> ✅ Success: You can answer quickly: what egress is allowed today, what changed, who approved it, and what runtime telemetry observed.
+
+### Make containment a tested, deterministic mode
+Containment should be a controlled execution path, not a scramble. Common patterns:
+- Switch to a restricted allowlist at the centralized egress enforcement point.
+- Temporarily block all but critical supplier endpoints.
+- Freeze route changes via stricter policy gates during an incident window.
+
+Run containment through the same gates:
+
+```bash
+terraform plan -var="egress_mode=containment" -out=containment.out
+terraform show -json containment.out > containment.json
+conftest test containment.json -p policy/
+terraform apply containment.out
+```
+
+> 💡 Pro-Tip: Rehearse containment monthly in non-prod. If you can’t execute it in minutes under pressure, you don’t have a dependable control.
+
+## Checklist
+- [ ] Centralize egress per cloud (NAT/firewall) and document approved egress entry/exit points.
+- [ ] Pin default routes (0.0.0.0/0) in Terraform modules and mark resources as controlled.
+- [ ] Enforce account/subscription/project boundaries so workloads can’t create independent gateways.
+- [ ] Export Terraform plan JSON and run **Conftest** policy tests on every change.
+- [ ] Deny bypass patterns (IGW default routes, Azure nextHopType=Internet, unmanaged peering/VPN routes).
+- [ ] Enable **AWS VPC Flow Logs**, **Azure NSG Flow Logs**, and **GCP VPC Flow Logs** with centralized retention.
+- [ ] Build first-seen destination queries and alert on new external IP/port pairs.
+- [ ] Snapshot and diff route tables/UDRs; alert on unauthorized changes.
+- [ ] Store gate decisions, plan hashes, and query outputs as immutable pipeline artifacts.
+- [ ] Implement and rehearse an egress containment mode with a controlled rollout path.
+
+## FAQ
+### Will this reduce engineering velocity?
+<p>If egress is enforced through standardized Terraform modules and policy gates, most teams stop thinking about routing day-to-day. Friction only appears when someone tries to introduce a new egress path or destination—exactly when you want intent capture and traceability.</p>
+
+### How do we handle suppliers with changing IP ranges?
+<p>Centralize egress through a controlled enforcement point and manage supplier access with a small number of mechanisms (FQDN-aware controls where supported, controlled proxies, or curated IP sets when unavoidable). Backstop with flow-log first-seen detection so changes surface immediately.</p>
+
+### What is the fastest way to prove egress this week?
+<p>Pick one production-critical workload per cloud: deploy the controlled egress module, enable flow logs, and add a minimal policy bundle that blocks obvious bypass routes. Replicate the same execution pattern across environments to eliminate variance and produce consistent evidence.</p>
