@@ -90,10 +90,12 @@ export const About = () => {
                       <div className="w-full h-full bg-white dark:bg-slate-900 rounded-[14px] flex items-center justify-center">
                         <Icon className="h-7 w-7 text-transparent drop-shadow-sm select-none" style={{ stroke: 'url(#gradient-' + index + ')' }} />
                         <svg width="0" height="0" className="absolute">
-                          <linearGradient id={`gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop stopColor={item.colorClasses.includes('cyan') ? '#06b6d4' : '#3b82f6'} offset="0%" />
-                            <stop stopColor={item.colorClasses.includes('indigo') ? '#4f46e5' : '#0ea5e9'} offset="100%" />
-                          </linearGradient>
+                          <defs>
+                            <linearGradient id={`gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop stopColor={item.colorClasses.includes('cyan') ? '#06b6d4' : '#3b82f6'} offset="0%" />
+                              <stop stopColor={item.colorClasses.includes('indigo') ? '#4f46e5' : '#0ea5e9'} offset="100%" />
+                            </linearGradient>
+                          </defs>
                         </svg>
                       </div>
                     </div>
