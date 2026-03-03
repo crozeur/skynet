@@ -16,34 +16,34 @@ export const About = () => {
 
   const expertiseItems = [
     {
-      title: language === "en" ? "Global Reach, Local Impact" : "Portée Mondiale, Impact Local",
+      title: language === "en" ? "Global Reach, Local Impact" : "Envergure Internationale",
       bullets: language === "en"
         ? ["Global threat intelligence spanning multiple jurisdictions", "Seamless compliance across international frameworks (DORA, NIS2)"]
-        : ["Renseignement sur les menaces à l'échelle internationale", "Conformité fluide aux cadres réglementaires (DORA, NIS2)"],
+        : ["Collecte et analyse de la menace (CTI) à l'échelle mondiale", "Mise en conformité fluide multi-référentiels (DORA, NIS2, ISO)"],
       icon: GlobeAltIcon,
       colorClasses: "from-blue-500 to-indigo-600",
     },
     {
-      title: language === "en" ? "Engineering Excellence" : "Excellence en Ingénierie",
+      title: language === "en" ? "Engineering Excellence" : "Excellence Sectorielle",
       bullets: language === "en"
         ? ["Zero-trust architectures implemented by default", "Automation-first approach to all security operations"]
-        : ["Architectures Zero-Trust implémentées par défaut", "Approche orientée automatisation (Automation-first)"],
+        : ["Architectures Zero-Trust (ZTA) sécurisées par défaut (Secure-by-Design)", "Approche centrée sur l'automatisation de la riposte (SOAR)"],
       icon: CommandLineIcon,
       colorClasses: "from-cyan-400 to-blue-500",
     },
     {
-      title: language === "en" ? "Strategic Alignment" : "Alignement Stratégique",
+      title: language === "en" ? "Strategic Alignment" : "Alignement Business & Tech",
       bullets: language === "en"
         ? ["Cybersecurity tailored to your specific business drivers", "Clear tactical roadmaps with measurable ROI and milestones"]
-        : ["Cybersécurité calibrée sur vos enjeux d'affaires", "Feuilles de route tactiques avec jalons et ROI mesurables"],
+        : ["Cybersécurité pensée comme un levier de croissance de votre productivité", "Feuilles de route pragmatiques (Roadmaps) avec un ROI mesurable"],
       icon: PresentationChartLineIcon,
       colorClasses: "from-indigo-500 to-purple-500",
     },
     {
-      title: language === "en" ? "Uncompromising Quality" : "Exigence Sans Compromis",
+      title: language === "en" ? "Uncompromising Quality" : "Intransigeance Opérationnelle",
       bullets: language === "en"
         ? ["Offensive and defensive playbooks tested against real-world APTs", "Audit-ready reporting and highly transparent metrics"]
-        : ["Playbooks testés face aux menaces avancées (APT) réelles", "Rapports précis, métriques transparentes et prêts pour l'audit"],
+        : ["Protocoles d'intervention éprouvés face aux menaces persistantes (APT)", "Rapport de conformité exhaustifs et exploitables par vos équipes (Audit-Ready)"],
       icon: ShieldCheckIcon,
       colorClasses: "from-blue-600 to-cyan-500",
     },

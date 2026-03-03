@@ -38,34 +38,34 @@ export const Cta = () => {
                 </div>
 
                 <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] mb-6 break-words">
-                  {language === "en" ? "Initiate a Confidential Briefing" : "Initier un Briefing Confidentiel"}
+                  {language === "en" ? "Initiate a Confidential Briefing" : "Initier un Audit de Cadrage"}
                 </h2>
 
                 <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-10">
                   {language === "en"
                     ? "Bypass the traditional sales pitch. Connect directly with our senior operators to discuss your infrastructure, threats, and compliance requirements."
-                    : "Évitez les discours commerciaux traditionnels. Connectez-vous directement avec nos opérateurs seniors pour discuter de votre infrastructure, de vos menaces et de vos exigences de conformité."}
+                    : "Oubliez les traditionnels discours commerciaux. Sollicitez directement nos architectes et pilotes de crise (DFIR) pour challenger la résilience de vos infrastructures."}
                 </p>
 
                 <div className="space-y-5">
                   {[
                     {
                       label: language === "en" ? "Clearance" : "Habilitation",
-                      value: language === "en" ? "Senior Experts Only" : "Experts Seniors Uniquement",
+                      value: language === "en" ? "Senior Experts Only" : "Expertise Senior Exclusive",
                       icon: (
                         <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                       )
                     },
                     {
                       label: language === "en" ? "Confidentiality" : "Confidentialité",
-                      value: language === "en" ? "Strict NDA by Default" : "NDA Strict par Défaut",
+                      value: language === "en" ? "Strict NDA by Default" : "Engagement de Confidentialité (NDA) natif",
                       icon: (
                         <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                       )
                     },
                     {
                       label: language === "en" ? "Response Protocol" : "Protocole de Réponse",
-                      value: language === "en" ? "Triage < 24 Hours" : "Triage < 24 Heures",
+                      value: language === "en" ? "Triage < 24 Hours" : "Qualification < 24 Heures",
                       icon: (
                         <svg className="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                       )
@@ -104,7 +104,7 @@ export const Cta = () => {
                     <div className="bg-white dark:bg-slate-900 p-6 rounded-[15px] h-full flex flex-col">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-mono font-bold text-blue-600 dark:text-cyan-400 uppercase tracking-wider">
-                          {language === "en" ? "Protocol 01 // Live" : "Protocole 01 // Direct"}
+                          {language === "en" ? "Protocol 01 // Live" : "Session 01 // Échange Direct"}
                         </span>
                         <span className="flex h-2 w-2">
                           <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-cyan-400 opacity-75"></span>
@@ -112,10 +112,10 @@ export const Cta = () => {
                         </span>
                       </div>
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                        {language === "en" ? "Secure Video Briefing" : "Briefing Vidéo Sécurisé"}
+                        {language === "en" ? "Secure Video Briefing" : "Consultation Sécurisée"}
                       </h3>
                       <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-                        {language === "en" ? "Schedule a 30-minute encrypted session with a lead architect." : "Planifiez une session chiffrée de 30 minutes avec un architecte principal."}
+                        {language === "en" ? "Schedule a 30-minute encrypted session with a lead architect." : "Planifiez un échange qualifié de 30 minutes avec un architecte cybersécurité senior."}
                       </p>
                       <a
                         href="https://calendly.com/skynet-consulting-dz/30min"
@@ -136,7 +136,7 @@ export const Cta = () => {
                     <div className="bg-slate-50 dark:bg-slate-900/80 p-6 rounded-[15px] h-full flex flex-col">
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          {language === "en" ? "Protocol 02 // Async" : "Protocole 02 // Asynchrone"}
+                          {language === "en" ? "Protocol 02 // Async" : "Session 02 // Canal Asynchrone"}
                         </span>
                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -146,7 +146,7 @@ export const Cta = () => {
                         {language === "en" ? "Encrypted Transmission" : "Transmission Chiffrée"}
                       </h3>
                       <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
-                        {language === "en" ? "Send your requirements securely. We will analyze and respond within 24h." : "Envoyez vos besoins de manière sécurisée. Nous analyserons et répondrons sous 24h."}
+                        {language === "en" ? "Send your requirements securely. We will analyze and respond within 24h." : "Transmettez vos exigences de sécurité. Notre équipe analyse et réponds sous 24h."}
                       </p>
                       <a
                         href="mailto:skynet.consulting.dz@email.com"

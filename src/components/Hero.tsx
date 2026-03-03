@@ -71,7 +71,7 @@ export const Hero = () => {
                           <span className="absolute left-5 top-1 z-20 whitespace-nowrap rounded-md bg-gray-900 text-white px-2 py-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                             {language === "en"
                               ? "AI-Augmented Execution Platform"
-                              : "Plateforme d'Exécution Augmentée par l'IA"}
+                              : "Plateforme Cyberdéfense Augmentée par l'IA"}
                           </span>
                         </span>
                       )}
@@ -80,7 +80,7 @@ export const Hero = () => {
                       <p className="md:hidden mt-1 text-xs text-gray-600 dark:text-blue-100/80">
                         {language === "en"
                           ? "Powered by our Security Operations Center"
-                          : "Propulsé par notre Cerveau IA propriétaire"}
+                          : "Piloté par notre moteur d'IA propriétaire"}
                       </p>
                     )}
                   </div>
@@ -150,14 +150,14 @@ export const Hero = () => {
                   className="w-full sm:w-auto relative group inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg shadow-blue-500/25 hover:shadow-cyan-500/40 transform hover:-translate-y-0.5 transition-all outline-none overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 -skew-x-12 -ml-4 w-1/4"></div>
-                  {language === "en" ? "Demand an Assessment" : "Demander un Diagnostic"}
+                  {language === "en" ? "Demand an Assessment" : "Réserver un Audit Rapide"}
                 </a>
                 
                 <a 
                   href="#services-overview"
                   className="w-full sm:w-auto group inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-white dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-white font-bold text-sm shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
-                  {language === "en" ? "Discover the Engine" : "Découvrir le Moteur"}
+                  {language === "en" ? "Discover the Engine" : "Découvrir la Plateforme"}
                 </a>
               </div>
           </div>

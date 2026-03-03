@@ -1,0 +1,262 @@
+﻿# -*- coding: utf-8 -*-
+import re
+
+with open('src/components/Services.tsx', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+start_idx = content.find('  return (\n    <Container')
+end_idx = content.rfind('  );\n};\n')
+
+if start_idx != -1 and end_idx != -1:
+    new_return = """  return (
+    <Container id="capabilities" className="py-20 lg:py-32 relative">
+      {/* Background glow effects */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none"></div>
+      
+      {/* Header */}
+      <div className="text-center mb-16 relative z-10">
+        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-cyan-950/30 border border-slate-200 dark:border-cyan-800/50 w-fit mb-6">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+          </span>
+          <span className="text-xs font-mono font-bold text-slate-700 dark:text-cyan-400 uppercase tracking-widest">
+            {t.services_section_title}
+          </span>
+        </div>
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight mb-6 break-words">
+          {t.services_section_subtitle}
+        </h2>
+        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          {language === "en"
+            ? "Pick the pillar you need now and expand later. Each offer is designed to deliver fast, tangible results."
+            : "Commencez par le pilier dont vous avez besoin, puis élargissez ensuite. Nous garantissons des résultats rapides et concrets."}
+        </p>
+      </div>
+
+      {/* Horizontal Tabs (The 4 Pillars) */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {services.map((service, idx) => {
+          const Icon = service.icon;
+          const isActive = activeTab === idx;
+          return (
+            <button
+              key={idx}
+              onClick={() => setActiveTab(idx)}
+              className={`relative group p-5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${
+                isActive 
+                  ? "bg-slate-900 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.15)] dark:bg-slate-800" 
+                  : "bg-white/60 border-slate-200/50 hover:bg-white hover:border-cyan-300/50 dark:bg-slate-900/40 dark:border-slate-700/50 dark:hover:bg-slate-800/60"
+              }`}
+            >
+              {isActive && (
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
+              )}
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
+                  isActive ? "bg-cyan-500/20 text-cyan-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:text-cyan-500"
+                }`}>
+                  <Icon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-widest mb-1 text-slate-500 dark:text-slate-400">
+                    {language === "en" ? `Pillar 0${idx + 1}` : `Pilier 0${idx + 1}`}
+                  </div>
+                  <div className={`text-sm font-bold leading-tight ${isActive ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                    {service.title}
+                  </div>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Content Area (Glassmorphism Dashboard) */}
+      <div ref={contentRef} className="relative z-10 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/50 dark:border-cyan-500/20 rounded-[2.5rem] p-6 sm:p-10 lg:p-12 shadow-2xl overflow-hidden mb-12">
+        {/* Top scanning line */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
+        
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
+          {/* Left Column: The Problem & Target */}
+          <div className="space-y-10">
+            {/* Target Audience */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {language === "en" ? "Target Profile" : "Profil Cible"}
+                </h3>
+              </div>
+              {(() => {
+                const { chips, rest } = splitAudienceText(activeService.for);
+                const blocks = toReadableBlocks(rest);
+                return (
+                  <div className="space-y-4">
+                    {chips.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {chips.map((c) => (
+                          <span key={c} className="inline-flex items-center rounded-full border border-blue-200/50 bg-blue-50/50 px-3 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {blocks.lead && (
+                      <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                        {blocks.lead}
+                      </p>
+                    )}
+                    {blocks.bullets.length > 0 && (
+                      <ul className="space-y-2">
+                        {blocks.bullets.map((b) => (
+                          <li key={b} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
+                            <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-400" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* The Challenge */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {language === "en" ? "The Challenge" : "Le Défi"}
+                </h3>
+              </div>
+              {(() => {
+                const badges = extractBadges(activeService.problem);
+                const blocks = toReadableBlocks(activeService.problem);
+                return (
+                  <div className="p-6 rounded-2xl bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30">
+                    {badges.length > 0 && (
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {badges.map((b) => (
+                          <span key={b} className="inline-flex items-center rounded-full border border-red-200/50 bg-white/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+                            {b}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+                      {blocks.lead}
+                    </p>
+                    {blocks.bullets.length > 0 && (
+                      <ul className="mt-4 space-y-2">
+                        {blocks.bullets.map((b) => (
+                          <li key={b} className="flex gap-2 text-sm text-slate-600 dark:text-slate-400">
+                            <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400" />
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Right Column: Solution & Results */}
+          <div className="space-y-10">
+            {/* The Solution */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {language === "en" ? "Our Solution" : "Notre Solution"}
+                </h3>
+              </div>
+              <div className="p-6 sm:p-8 rounded-2xl bg-slate-900 dark:bg-slate-800/50 border border-slate-800 dark:border-cyan-500/30 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-2xl rounded-full"></div>
+                <h4 className="text-xl sm:text-2xl font-bold text-white mb-6 relative z-10">
+                  {activeService.solution}
+                </h4>
+                <ul className="space-y-4 relative z-10">
+                  {activeService.points.map((point, idx) => (
+                    <li key={idx} className="flex gap-3 text-sm text-slate-300 leading-relaxed">
+                      <CheckCircleIcon className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Expected Outcomes */}
+            <div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  {language === "en" ? "Expected Outcomes" : "Résultats Attendus"}
+                </h3>
+              </div>
+              <ul className="grid sm:grid-cols-2 gap-4">
+                {activeService.resultsList.map((result, idx) => (
+                  <li key={idx} className="flex gap-3 p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30">
+                    <CheckCircleIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-snug">{result}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Telemetry Bar (Our Priorities) */}
+      <div className="relative z-10 bg-slate-900 dark:bg-slate-950 rounded-3xl border border-slate-800 dark:border-slate-800 p-6 sm:p-8 overflow-hidden shadow-2xl">
+        <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-10"></div>
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full"></div>
+        
+        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+          <div className="flex items-center gap-4 lg:w-1/4">
+            <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+              <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <div>
+              <div className="text-xs font-mono text-slate-400 uppercase tracking-widest mb-1">
+                {language === "en" ? "Global Telemetry" : "Télémétrie Globale"}
+              </div>
+              <div className="text-lg font-bold text-white">
+                {language === "en" ? "Our Priorities" : "Nos Priorités"}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:w-3/4 w-full">
+            <div className="flex flex-col">
+              <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_threats || "Menaces"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_threats_value || "2,847"}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_response_time || "Réponse"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_response_value || "8m 42s"}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_system_health || "Santé"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_health_value || "99.8%"}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs font-mono text-slate-500 uppercase tracking-wider mb-2">{t.stats_coverage || "Couverture"}</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400">{t.stats_coverage_value || "100%"}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Container>"""
+    
+    new_content = content[:start_idx] + new_return + '\n  );\n};\n'
+    with open('src/components/Services.tsx', 'w', encoding='utf-8') as f:
+        f.write(new_content)
+    print('Success')
+else:
+    print('Failed to find indices')

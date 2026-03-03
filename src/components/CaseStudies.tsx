@@ -9,35 +9,35 @@ export const CaseStudies = () => {
   const isEn = language === "en";
 
   const content = {
-    title: isEn ? "Real Clients, Real ROI" : "Clients réels, ROI avéré",
-    subtitle: isEn ? "Transforming Risks into Measurable Results" : "Transformer le risque en résultats mesurables",
+    title: isEn ? "Real Clients, Real ROI" : "Cas Clients & Exécution",
+    subtitle: isEn ? "Transforming Risks into Measurable Results" : "Transformer le risque en R.O.I mesurable",
     cases: [
       {
-        title: isEn ? "Multinational Bank" : "Banque multinationale",
+        title: isEn ? "Multinational Bank" : "Groupe Bancaire International",
         sector: isEn ? "Financial Services" : "Services financiers",
         icon: "🏦",
-        before: isEn ? "No real-time incident detection, unidentified critical vulnerabilities in 50+ branches." : "Aucune détection d'incidents en temps réel, failles critiques ignorées sur 50+ agences.",
-        after: isEn ? "AI-augmented security audit and 24/7 SOC integration via ephemeral infrastructure." : "Audit augmenté par l'IA et intégration d'un SOC 24/7 via notre infrastructure éphémère.",
+        before: isEn ? "No real-time incident detection, unidentified critical vulnerabilities in 50+ branches." : "Défaut de supervision temps réel, vulnérabilités critiques non identifiées sur plus de 50 agences.",
+        after: isEn ? "AI-augmented security audit and 24/7 SOC integration via ephemeral infrastructure." : "Audit de sécurité augmenté par l'IA et intégration d'un SOC 24/7 via infrastructure managée.",
         stat: "< 2 min",
-        statLabel: isEn ? "Threat detection time" : "Temps de détection des menaces",
+        statLabel: isEn ? "Threat detection time" : "SLA de détection des avertissements (MTTD)",
       },
       {
-        title: isEn ? "Government Agency" : "Agence gouvernementale",
+        title: isEn ? "Government Agency" : "Institution Gouvernementale",
         sector: isEn ? "Public Sector" : "Secteur public",
         icon: "🏛️",
-        before: isEn ? "Zero visibility on security flaws, unpatched servers, critical breach risk." : "Aucune visibilité sur les failles, serveurs non patchés, risque critique de compromission.",
-        after: isEn ? "Complete technical audit + 90-day prioritized action plan based on threat impact." : "Audit technique complet + plan d'action sur 90 jours avec priorisation d'impact.",
+        before: isEn ? "Zero visibility on security flaws, unpatched servers, critical breach risk." : "Visibilité nulle sur la surface d'attaque, déficit de patching, risque d'exfiltration critique.",
+        after: isEn ? "Complete technical audit + 90-day prioritized action plan based on threat impact." : "Audit offensif complet (Pentest) + plan de remédiation à 90 jours priorisé par criticité.",
         stat: "32",
-        statLabel: isEn ? "Critical vulnerabilities fixed in 3 months" : "Failles critiques remédiées en 3 mois",
+        statLabel: isEn ? "Critical vulnerabilities fixed in 3 months" : "Vulnérabilités critiques remédiées (3 mois)",
       },
       {
-        title: isEn ? "Industrial Group" : "Groupe industriel européen",
+        title: isEn ? "Industrial Group" : "Leader Industriel Européen",
         sector: isEn ? "Manufacturing" : "Industrie / Multi-sites",
         icon: "🏭",
-        before: isEn ? "Dispersed infrastructure across regions, incidents undetected for weeks." : "Infrastructure dispersée, incidents non détectés pendant des semaines.",
+        before: isEn ? "Dispersed infrastructure across regions, incidents undetected for weeks." : "Infrastructures OT/IT dispersées, APT dormantes non détectées pendant plusieurs mois.",
         after: isEn ? "Standardized incident-response across all sites via our AI-powered playbooks." : "Réponse à incident standardisée sur tous les sites via nos playbooks IA.",
         stat: "-40%",
-        statLabel: isEn ? "Reduction in global cybersecurity costs" : "Réduction des coûts globaux de sécurité",
+        statLabel: isEn ? "Reduction in global cybersecurity costs" : "Réduction des coûts opérationnels (OPEX)",
       },
     ],
   };
