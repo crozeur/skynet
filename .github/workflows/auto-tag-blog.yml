@@ -7,6 +7,7 @@ on:
       - 'content/blog/**/*.mdx'
       - 'scripts/auto_tag_blog_posts.js'
       - 'scripts/validate-blog-metadata.js'
+      - 'scripts/blog_cover_duplicate_allowlist.json'
       - 'BLOG_ARTICLE_GUIDE.md'
   push:
     branches:
@@ -15,6 +16,7 @@ on:
       - 'content/blog/**/*.mdx'
       - 'scripts/auto_tag_blog_posts.js'
       - 'scripts/validate-blog-metadata.js'
+      - 'scripts/blog_cover_duplicate_allowlist.json'
       - 'BLOG_ARTICLE_GUIDE.md'
 
 permissions:
