@@ -1,3 +1,4 @@
+// @ts-check
 import createMDX from '@next/mdx';
 
 const withMDX = createMDX({
@@ -41,3 +42,4 @@ const nextConfig = {
 };
 
 export default withMDX(nextConfig);
+
