@@ -102,61 +102,64 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Right: form card */}
-          <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards]">
-              <div className="relative rounded-3xl border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-gray-900/70 backdrop-blur-2xl shadow-xl shadow-slate-200/50 dark:shadow-[0_28px_90px_-48px_rgba(0,0,0,0.75)] p-6 sm:p-8 lg:p-10 transition-all duration-700 hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-300/60">
-                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-slate-50/80 via-white/60 to-slate-50/80 dark:from-blue-600/10 dark:via-cyan-500/8 dark:to-indigo-600/10" aria-hidden />
-              <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 opacity-0 hover:opacity-20 blur-2xl transition-opacity duration-700" aria-hidden />
-              <div className="relative">
-                <div className="flex items-start justify-between gap-3 mb-6">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.1em] bg-gradient-to-r from-blue-600 via-cyan-600 to-indigo-600 dark:from-blue-400 dark:via-cyan-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                      {t.audit_form_title}
-                    </p>
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-white dark:via-blue-50 dark:to-white bg-clip-text text-transparent mt-2 leading-tight">
-                      {t.hero_audit_title}
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-blue-100/80 mt-2 leading-relaxed">
-                      {t.hero_audit_desc}
-                    </p>
-                  </div>
-                  <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-xl shadow-blue-500/30 dark:shadow-blue-500/20 hover:scale-110 transition-transform duration-300">
-                    <svg aria-hidden className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l7.5 4.5v9L12 21 4.5 16.5v-9L12 3z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
-                    </svg>
-                  </div>
+          {/* Right: Technical Terminal / Interactive block */}
+          <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards] h-full flex flex-col pt-10 lg:pt-0 lg:ml-10">    
+              {/* Terminal Window */}
+              <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-[0_0_50px_-12px_rgba(6,182,212,0.25)]">
+                
+                {/* Terminal Header */}
+                <div className="flex items-center px-4 py-3 bg-slate-900 border-b border-slate-800">
+                   <div className="flex gap-2">
+                     <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                     <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                     <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                   </div>
+                   <div className="mx-auto text-xs font-mono text-slate-500 flex items-center gap-2">
+                     <svg className="w-3 h-3 text-cyan-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                     openclaw-core-v3.2
+                   </div>
                 </div>
 
-                <AuditForm />
-
-                <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/50 bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-[fadeInUp_0.7s_ease-out] shadow-sm hover:shadow-md transition-all duration-500" style={{ animationFillMode: "backwards", animationDelay: "0.3s" }}>
-                  <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-blue-100">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-white/10 border border-slate-200 dark:border-white/20 text-blue-600 dark:text-blue-100 shadow-sm">
-                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h5l2 5-3 2c1.5 2.8 3.7 5 6.5 6.5l2-3 5 2v5c0 1.1-.9 2-2 2C10.3 24 0 13.7 0 2 0 .9.9 0 2 0h5l2 5-3 2" />
-                      </svg>
-                    </span>
-                    <div className="leading-snug space-y-1">
-                      <p className="font-semibold text-gray-900 dark:text-white">{t.hero_call_to_action}</p>
-                      <p className="text-xs text-gray-500 dark:text-blue-100/70">{t.hero_call_to_action_sub}</p>
-                      <div className="h-1 w-24 rounded-full bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 animate-[pulseGlow_2.6s_ease-in-out_infinite]" aria-hidden />
-                    </div>
-                  </div>
-                  <a
-                    href="https://calendly.com/skynet-consulting-dz/30min"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white text-sm font-bold hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 active:scale-95 transition-all duration-300 shadow-2xl shadow-blue-500/40 hover:shadow-[0_20px_50px_-12px_rgba(59,130,246,0.6)] hover:-translate-y-0.5 hover:scale-105"
-                  >
-                    {t.hero_schedule_call}
-                    <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </a>
+                {/* Terminal Body */}
+                <div className="p-5 font-mono text-sm leading-relaxed text-slate-300 h-[260px] sm:h-[300px] overflow-hidden relative">
+                   <div className="space-y-2.5 opacity-90">
+                      <div className="text-cyan-400">skynet@orchestrator:~$ <span className="text-white">init_mission --target enterprise</span></div>
+                      <div className="text-slate-500">[2026-03] Booting ephemeral infrastructure...</div>
+                      <div className="text-slate-500">[2026-03] Provisioning zero-trust VMs... <span className="text-emerald-400/80">[OK]</span></div>
+                      <div className="text-slate-400">Loading AI playbooks: <span className="text-emerald-400 font-bold">Read-Only Enforced</span></div>
+                      <div className="text-slate-400">Deploying scan agents... <span className="text-emerald-400">Success</span></div>
+                      <div className="text-cyan-400 mt-4">skynet@orchestrator:~$ <span className="text-white">run_audit --deep</span></div>
+                      <div className="text-yellow-400">[WARN] Critical vulnerability detected (CVE-2025-XXXX)</div>
+                      <div className="text-emerald-400 mt-2 font-bold">[SUCCESS] Perimeter secured. 12 vulnerabilities mapped.</div>
+                      <div className="text-cyan-400 mt-2 flex items-center">
+                        skynet@orchestrator:~$ <span className="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
+                      </div>
+                   </div>
+                   
+                   {/* Gradient fade out at bottom */}
+                   <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
                 </div>
               </div>
-            </div>
+
+              {/* Call to action boxes */}
+              <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full">
+                <a
+                  href="https://calendly.com/skynet-consulting-dz/30min" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto relative group inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-sm shadow-lg shadow-blue-500/25 hover:shadow-cyan-500/40 transform hover:-translate-y-0.5 transition-all outline-none overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 -skew-x-12 -ml-4 w-1/4"></div>
+                  {language === "en" ? "Demand an Assessment" : "Demander un Diagnostic"}
+                </a>
+                
+                <a 
+                  href="#services-overview"
+                  className="w-full sm:w-auto group inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-white dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 text-slate-800 dark:text-white font-bold text-sm shadow-sm hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                >
+                  {language === "en" ? "Discover the Engine" : "Découvrir le Moteur"}
+                </a>
+              </div>
           </div>
         </div>
 
