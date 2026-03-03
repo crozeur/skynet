@@ -2,183 +2,129 @@
 
 import { Container } from "@/components/Container";
 import { useLanguage } from "./LanguageProvider";
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
 export const CaseStudies = () => {
   const { language } = useLanguage();
+  const isEn = language === "en";
 
   const content = {
-    fr: {
-      title: "Résultats concrets pour nos clients",
-      subtitle: "Des organisations protégées, des résultats mesurables",
-      cases: [
-        {
-          title: "Banque multinationale – Région EMEA",
-          sector: "Services financiers | Audit Augmenté par l'IA",
-          icon: "🏦",
-          points: [
-            "Une banque régionale avec 50+ agences, sans équipe de sécurité dédiée",
-            "Aucune détection d'incidents en temps réel, vulnérabilités critiques non identifiées",
-            "Audit de sécurité complet et migration Cloud via infrastructure éphémère",
-            "Temps de détection réduit à < 2 minutes",
-            "90% des attaques bloquées automatiquement",
-          ],
-        },
-        {
-          title: "Agence gouvernementale – Administration centrale",
-          sector: "Secteur public | Audit & conformité",
-          icon: "🏛️",
-          points: [
-            "Une agence gouvernementale critique avec systèmes d'information vieillissants et infrastructure distribuée",
-            "Aucune visibilité sur les failles de sécurité, serveurs non patchés, risque de compromission élevé",
-            "Audit technique complet + plan d'actions sur 90 jours avec priorisation selon l'impact",
-            "32 vulnérabilités critiques remédiées en 3 mois, conformité réglementaire validée",
-            "Formation intensive de 80+ employés, infrastructure sécurisée et modernisée",
-          ],
-        },
-        {
-          title: "Groupe industriel européen – International",
-          sector: "Industrie | Services managés multi-sites",
-          icon: "🏭",
-          points: [
-            "Groupe avec sites en Europe, Afrique du Nord et Middle East",
-            "Infrastructure dispersée, incidents non détectés pendant des semaines",
-            "Exécution standardisée sur tous les sites via nos playbooks IA",
-            "Réduction de 40% des coûts de cybersécurité",
-            "Attaque ransomware confinée en < 15 minutes",
-          ],
-        },
-      ],
-    },
-    en: {
-      title: "Concrete results for our clients",
-      subtitle: "Protected organizations, measurable results",
-      cases: [
-        {
-          title: "Regional Bank – 50+ Branches",
-          sector: "Financial Services | AI-Augmented Audit",
-          icon: "🏦",
-          points: [
-            "Regional bank with 50+ branches, no dedicated security team",
-            "No real-time incident detection, unidentified critical vulnerabilities",
-            "Comprehensive security audit and Cloud migration via ephemeral infrastructure",
-            "Detection time reduced to < 2 minutes",
-            "90% of attacks blocked automatically",
-          ],
-        },
-        {
-          title: "Government Ministry – Critical Infrastructure",
-          sector: "Public Administration | Audit & Compliance",
-          icon: "🏛️",
-          points: [
-            "Ministry with critical information systems, aging infrastructure",
-            "No visibility on vulnerabilities, unpatched servers, high risk",
-            "Complete technical audit + 90-day prioritized action plan",
-            "32 critical vulnerabilities fixed in 3 months",
-            "80+ employees trained, infrastructure modernized",
-          ],
-        },
-        {
-          title: "Multinational Industrial Group – Global Operations",
-          sector: "Manufacturing | Multi-site Managed Services",
-          icon: "🏭",
-          points: [
-            "Global industrial group with multiple regional sites",
-            "Dispersed infrastructure, incidents undetected for weeks",
-            "Standardized execution across all sites via our AI playbooks",
-            "40% reduction in cybersecurity costs",
-            "Ransomware attack contained in < 15 minutes",
-          ],
-        },
-      ],
-    },
+    title: isEn ? "Real Clients, Real ROI" : "Clients réels, ROI avéré",
+    subtitle: isEn ? "Transforming Risks into Measurable Results" : "Transformer le risque en résultats mesurables",
+    cases: [
+      {
+        title: isEn ? "Multinational Bank" : "Banque multinationale",
+        sector: isEn ? "Financial Services" : "Services financiers",
+        icon: "🏦",
+        before: isEn ? "No real-time incident detection, unidentified critical vulnerabilities in 50+ branches." : "Aucune détection d'incidents en temps réel, failles critiques ignorées sur 50+ agences.",
+        after: isEn ? "AI-augmented security audit and 24/7 SOC integration via ephemeral infrastructure." : "Audit augmenté par l'IA et intégration d'un SOC 24/7 via notre infrastructure éphémère.",
+        stat: "< 2 min",
+        statLabel: isEn ? "Threat detection time" : "Temps de détection des menaces",
+      },
+      {
+        title: isEn ? "Government Agency" : "Agence gouvernementale",
+        sector: isEn ? "Public Sector" : "Secteur public",
+        icon: "🏛️",
+        before: isEn ? "Zero visibility on security flaws, unpatched servers, critical breach risk." : "Aucune visibilité sur les failles, serveurs non patchés, risque critique de compromission.",
+        after: isEn ? "Complete technical audit + 90-day prioritized action plan based on threat impact." : "Audit technique complet + plan d'action sur 90 jours avec priorisation d'impact.",
+        stat: "32",
+        statLabel: isEn ? "Critical vulnerabilities fixed in 3 months" : "Failles critiques remédiées en 3 mois",
+      },
+      {
+        title: isEn ? "Industrial Group" : "Groupe industriel européen",
+        sector: isEn ? "Manufacturing" : "Industrie / Multi-sites",
+        icon: "🏭",
+        before: isEn ? "Dispersed infrastructure across regions, incidents undetected for weeks." : "Infrastructure dispersée, incidents non détectés pendant des semaines.",
+        after: isEn ? "Standardized incident-response across all sites via our AI-powered playbooks." : "Réponse à incident standardisée sur tous les sites via nos playbooks IA.",
+        stat: "-40%",
+        statLabel: isEn ? "Reduction in global cybersecurity costs" : "Réduction des coûts globaux de sécurité",
+      },
+    ],
   };
 
-  const t = content[language];
-
   return (
-    <Container className="py-16 lg:py-24 relative">
+    <Container className="py-20 lg:py-28 relative border-t border-slate-200/50 dark:border-slate-800/50">
       {/* Background glow effects */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-blue-500/5 dark:bg-cyan-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="relative z-10">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-blue-900/20 border border-slate-200/80 dark:border-blue-800/30 text-slate-600 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6 shadow-sm shadow-slate-200/50">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            {t.subtitle}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-blue-900/20 border border-slate-200/80 dark:border-blue-800/30 text-slate-800 dark:text-cyan-400 text-sm font-semibold tracking-wide uppercase mb-6 shadow-sm shadow-slate-200/50">
+            <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+            {content.subtitle}
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight break-words">
-            {t.title}
+            {content.title}
           </h2>
         </div>
 
-        <div className="grid gap-8 lg:gap-10 lg:grid-cols-3">
-          {t.cases.map((caseStudy, idx) => (
+        <div className="grid gap-10 lg:gap-8 lg:grid-cols-3">
+          {content.cases.map((caseStudy, idx) => (
             <div
               key={idx}
-              className="group relative flex flex-col p-8 bg-white/90 dark:bg-slate-800/60 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-blue-900/5 border border-slate-200/80 dark:border-slate-700/50 backdrop-blur-md hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-blue-500/10 hover:-translate-y-2 transition-all duration-500 animate-[fadeInUp_0.6s_ease-out] cursor-default overflow-hidden"
-              style={{ animationDelay: `${idx * 0.1}s`, animationFillMode: "backwards" }}
+              className="group relative flex flex-col bg-white dark:bg-slate-900/80 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 backdrop-blur-md transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:border-cyan-500/50 hover:-translate-y-2 overflow-hidden"
             >
-              {/* Hover Gradient Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              {/* Top Accent Line */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-              {/* Icon & Title */}
-              <div className="relative z-10 flex flex-col gap-5 mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-3xl shadow-lg shadow-blue-500/30 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                    <span className="drop-shadow-md">{caseStudy.icon}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="inline-block px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-700/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      Case {idx + 1}
+              {/* Header Box */}
+              <div className="p-8 pb-6 border-b border-slate-100 dark:border-slate-800 relative overflow-hidden bg-slate-50 dark:bg-slate-900">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 dark:bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
+                 <div className="flex items-center justify-between relative z-10 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-2xl border border-slate-100 dark:border-slate-700">
+                      {caseStudy.icon}
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest font-mono">
+                      Case 0{idx + 1}
                     </span>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+                 </div>
+                 <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight mb-2 relative z-10">
                     {caseStudy.title}
-                  </h3>
-                  <p className="text-sm font-semibold text-blue-600 dark:text-cyan-400">
+                 </h3>
+                 <p className="text-sm font-semibold text-blue-600 dark:text-cyan-500 relative z-10">
                     {caseStudy.sector}
+                 </p>
+              </div>
+
+              {/* Before / After Body */}
+              <div className="p-8 flex-1 flex flex-col gap-6">
+                
+                {/* Before */}
+                <div className="flex-1 relative">
+                  <div className="text-[10px] uppercase font-bold text-red-500 tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                    {isEn ? "Before" : "Avant"}
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3">
+                    {caseStudy.before}
+                  </p>
+                </div>
+
+                <div className="flex justify-center -my-2 relative z-10">
+                   <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                      <ArrowRightIcon className="w-4 h-4" />
+                   </div>
+                </div>
+
+                {/* After */}
+                <div className="flex-1 relative">
+                  <div className="text-[10px] uppercase font-bold text-emerald-500 tracking-widest mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    {isEn ? "The Solution" : "La Solution"}
+                  </div>
+                  <p className="text-sm text-slate-800 dark:text-slate-300 font-medium line-clamp-3">
+                    {caseStudy.after}
                   </p>
                 </div>
               </div>
 
-              {/* Divider */}
-              <div className="relative z-10 w-full h-px bg-gradient-to-r from-slate-200/50 via-slate-200 to-transparent dark:from-slate-700/50 dark:via-slate-700 dark:to-transparent mb-6"></div>
+              {/* Huge Stat Footer */}
+              <div className="p-6 bg-slate-800 dark:bg-slate-950 text-white rounded-b-[2rem] border-t border-slate-800 dark:border-cyan-900/30 group-hover:bg-slate-900 dark:group-hover:bg-slate-900 transition-colors">
+                <div className="flex items-end gap-3 mb-1">
+                  <span className="text-4xl font-black tracking-tight text-white dark:text-cyan-400">{caseStudy.stat}</span>
+                </div>
+                <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">
+                  {caseStudy.statLabel}
+                </p>
+              </div>
 
-              {/* Points */}
-              <ul className="relative z-10 space-y-4 flex-1">
-                {caseStudy.points.map((point, pointIdx) => {
-                  const isProblem = pointIdx === 0 || pointIdx === 1;
-                  return (
-                    <li key={pointIdx} className="flex items-start gap-3 group/item">
-                      <span className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full mt-0.5 transition-transform duration-300 group-hover/item:scale-110 ${
-                        isProblem 
-                          ? "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400" 
-                          : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-                      }`}>
-                        {isProblem ? (
-                          <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                        ) : (
-                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </span>
-                      <span className={`text-sm leading-relaxed ${
-                        isProblem 
-                          ? "text-slate-600 dark:text-slate-400" 
-                          : "text-slate-800 dark:text-slate-200 font-medium"
-                      }`}>
-                        {point}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
           ))}
         </div>
