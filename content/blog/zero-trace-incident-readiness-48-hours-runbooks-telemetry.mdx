@@ -32,17 +32,17 @@ Practical structure (use this template for each scenario):
 - Rollback: How to remove temporary rules, accounts, logging boosts, or scripts introduced.
 
 Examples of deterministic runbooks SMEs can implement quickly:
-1) Suspected credential theft (email/IdP)
+### 1) Suspected credential theft (email/IdP)
 - Trigger: anomalous sign-in + suspicious mailbox rule or OAuth consent.
 - Actions: disable risky session tokens, reset credentials, review recent sign-ins, check new forwarding rules, revoke suspicious app consent.
 - Evidence: sign-in logs, audit logs for mailbox/forwarding changes, list of tokens revoked (time + operator), affected user timeline.
 
-2) Ransomware early warning (endpoint)
+### 2) Ransomware early warning (endpoint)
 - Trigger: mass file rename/encryption behavior, shadow copy deletions, or admin share scanning.
 - Actions: isolate endpoint(s), block known-bad indicators at perimeter where feasible, identify patient zero via file server and endpoint telemetry.
 - Evidence: process tree, network connections, scheduled task/service changes, list of touched shares.
 
-3) Business email compromise (BEC)
+### 3) Business email compromise (BEC)
 - Trigger: outbound payment change request + suspicious sign-in, or inbox rule creating hidden forwarding.
 - Actions: lock account, check delegated access, remove malicious rules, confirm recipient banking changes out-of-band.
 - Evidence: rule definitions, message trace headers, audit events of rule creation.
@@ -54,13 +54,13 @@ To keep this “zero-trace,” store runbooks in a controlled location you alrea
 
 A practical approach is to define two telemetry modes:
 
-1) Baseline mode (always on, minimal)
+### 1) Baseline mode (always on, minimal)
 - Authentication logs (IdP, email, VPN, remote access)
 - Administrative actions (directory changes, role changes, mailbox rules, MFA resets)
 - Endpoint security alerts (whatever you already have)
 - DNS and proxy/firewall summaries (if available)
 
-2) Surge mode (time-boxed, evidence-focused)
+### 2) Surge mode (time-boxed, evidence-focused)
 Enable for a short window (e.g., 4–24 hours) during an incident or drill:
 - Higher-fidelity endpoint event collection (process creation, script activity, network connections)
 - More detailed directory auditing (privileged group changes, new service accounts)
