@@ -244,7 +244,7 @@ export const Services = () => {
               onClick={() => setActiveTab(idx)}
               className={`relative group p-5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${
                 isActive
-                  ? "bg-slate-900 text-white border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.15)] dark:bg-slate-800"
+                  ? "bg-cyan-50 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.2)] dark:bg-slate-800 dark:border-cyan-500/50 dark:shadow-[0_0_30px_rgba(6,182,212,0.15)] text-slate-900 dark:text-white"
                   : "bg-white/90 text-slate-900 border-slate-200/80 hover:bg-white hover:border-cyan-300/50 hover:shadow-md hover:shadow-slate-300/50 dark:text-white dark:bg-slate-900/40 dark:border-slate-700/50 dark:hover:bg-slate-800/60 shadow-sm shadow-slate-200/50"
               }`}
             >
@@ -253,15 +253,15 @@ export const Services = () => {
               )}
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
-                  isActive ? "bg-cyan-500/20 text-cyan-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:text-cyan-500"
+                  isActive ? "bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 group-hover:text-cyan-500"
                 }`}>
                   <Icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono uppercase tracking-widest mb-1 text-slate-500 dark:text-slate-400">
+                  <div className={`text-[10px] font-mono uppercase tracking-widest mb-1 ${isActive ? "text-cyan-700 dark:text-cyan-400" : "text-slate-500 dark:text-slate-400"}`}>
                     {language === "en" ? `Pillar 0${idx + 1}` : `Pilier 0${idx + 1}`}
                   </div>
-                  <div className={`text-sm font-bold leading-tight ${isActive ? "text-white" : "text-slate-900 dark:text-white"}`}>
+                  <div className="text-sm font-bold leading-tight text-slate-900 dark:text-white">
                     {service.title}
                   </div>
                 </div>
