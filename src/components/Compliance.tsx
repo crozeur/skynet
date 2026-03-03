@@ -47,7 +47,7 @@ export const Compliance = () => {
       cta: "Audit de sécurité gratuit disponible",
     },
     en: {
-      title: "Compliance & Security",
+      title: "Regulatory Compliance & Defensive Security",
       subtitle: "Regulations",
       intro:
         "ISO 27001, NIS2, GDPR: concrete controls are required. Non-compliance leads to sanctions and weak resilience.",
