@@ -1,0 +1,66 @@
+name: Fix Blog Translations
+
+on:
+  schedule:
+    # Exécute tous les mercredis à 04:00 UTC
+    - cron: '0 4 * * 3'
+  workflow_dispatch: # Permet de déclencher manuellement
+
+jobs:
+  translate-blog:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: blog-metadata-update
+      cancel-in-progress: false
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run blog build and translation
+        run: |
+          npm run build:blog
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}  # Just in case translation needs DeepL or OpenAI API
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Commit and push translated changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add content/blog/ public/blog-data/ scripts/translation-cache.json src/lib/translateArticle.ts scripts/blog_title_overrides.fr.json
+          
+          if git diff --cached --quiet; then
+            echo "✅ No new translations to commit"
+          else
+            git commit -m "🤖 Auto-generated: Blog translations updated - $(date +'%Y-%m-%d')"
+            
+            # Retry mechanism for pushing changes to avoid race conditions
+            for i in 1 2 3 4; do
+              git fetch origin main || true
+              git rebase origin/main || { git rebase --abort || true; echo "Rebase failed." ; }
+              if git push origin HEAD:main; then
+                echo "✅ Changes pushed to GitHub"
+                exit 0
+              fi
+              echo "⚠️  Push failed (attempt $i). Retrying..."
+              sleep 5
+            done
+            echo "❌ Push failed after retries"
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
