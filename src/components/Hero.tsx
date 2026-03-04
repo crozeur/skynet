@@ -103,10 +103,10 @@ export const Hero = () => {
           {/* Right: Technical Terminal / Interactive block */}
           <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards] h-full flex flex-col pt-10 lg:pt-0 lg:ml-10">    
               {/* Terminal Window */}
-              <div className="relative w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-[0_0_50px_-12px_rgba(6,182,212,0.25)]">
+              <div className="relative w-full rounded-sm overflow-hidden bg-slate-50 dark:bg-[#0B1120] border border-slate-200 dark:border-blue-900/40 shadow-[0_0_50px_-12px_rgba(6,182,212,0.15)] dark:shadow-[0_0_50px_-12px_rgba(6,182,212,0.25)]">
                 
                 {/* Terminal Header */}
-                <div className="flex items-center px-4 py-3 bg-slate-900 border-b border-slate-800">
+                <div className="flex items-center px-4 py-3 bg-slate-200/50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-blue-900/40">
                    <div className="flex gap-2">
                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
@@ -119,23 +119,23 @@ export const Hero = () => {
                 </div>
 
                 {/* Terminal Body */}
-                <div className="p-5 font-mono text-sm leading-relaxed text-slate-300 h-[260px] sm:h-[300px] overflow-hidden relative">
+                <div className="p-5 font-mono text-sm leading-relaxed text-slate-700 dark:text-slate-300 h-[260px] sm:h-[300px] overflow-hidden relative">
                    <div className="space-y-2.5 opacity-90">
-                      <div className="text-cyan-400">skynet@console:~$ <span className="text-white">start_engagement --client enterprise</span></div>
-                      <div className="text-slate-500">[2026-03] Initializing secure analysis environment... <span className="text-emerald-400/80">[OK]</span></div>
+                      <div className="text-blue-600 dark:text-cyan-400">skynet@console:~$ <span className="text-slate-900 dark:text-white">start_engagement --client enterprise</span></div>
+                      <div className="text-slate-500">[2026-03] Initializing secure analysis environment... <span className="text-emerald-600 dark:text-emerald-400">[OK]</span></div>
                       <div className="text-slate-500">[2026-03] Loading detection signatures &amp; AI models...</div>
-                      <div className="text-slate-400">Applying security baseline... <span className="text-emerald-400 font-bold">Validated</span></div>
-                      <div className="text-slate-400">Running surface analysis... <span className="text-emerald-400">Active</span></div>
-                      <div className="text-cyan-400 mt-4">skynet@console:~$ <span className="text-white">analyze --scope full --report</span></div>
-                      <div className="text-yellow-400">[ALERT] Exposure detected — severity: HIGH</div>
-                      <div className="text-emerald-400 mt-2 font-bold">[DONE] Assessment complete. Report ready for delivery.</div>
-                      <div className="text-cyan-400 mt-2 flex items-center">
-                        skynet@console:~$ <span className="w-2 h-4 bg-cyan-400 ml-2 animate-pulse"></span>
+                      <div className="text-slate-600 dark:text-slate-400">Applying security baseline... <span className="text-emerald-600 dark:text-emerald-400">Validated</span></div>
+                      <div className="text-slate-600 dark:text-slate-400">Running surface analysis... <span className="text-emerald-600 dark:text-emerald-400">Active</span></div>
+                      <div className="text-blue-600 dark:text-cyan-400">skynet@console:~$ <span className="text-slate-900 dark:text-white">analyze --scope full --report</span></div>
+                      <div className="text-amber-600 dark:text-yellow-400">[ALERT] Exposure detected — severity: HIGH</div>
+                      <div className="text-emerald-600 dark:text-emerald-400">[DONE] Assessment complete. Report ready for delivery.</div>
+                      <div className="text-blue-600 dark:text-cyan-400 mt-2 flex items-center">
+                        skynet@console:~$ <span className="w-2 h-4 bg-blue-600 dark:bg-cyan-400 ml-2 animate-pulse"></span>
                       </div>
                    </div>
                    
                    {/* Gradient fade out at bottom */}
-                   <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-950 to-transparent pointer-events-none"></div>
+                   <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-50 dark:from-[#0B1120] to-transparent pointer-events-none"></div>
                 </div>
               </div>
 
