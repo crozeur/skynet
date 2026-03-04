@@ -149,7 +149,9 @@ export const Cta = () => {
                         {language === "en" ? "Send your requirements securely. We will analyze and respond within 24h." : "Transmettez vos exigences de sécurité. Notre équipe analyse et réponds sous 24h."}
                       </p>
                       <a
-                        href="mailto:skynet.consulting.dz@gmail.com"
+                        href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="mt-auto w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
