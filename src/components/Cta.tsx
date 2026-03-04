@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import { Container } from "@/components/Container";
 import { translations } from "@/lib/translations";
 import { useLanguage } from "./LanguageProvider";
+import { AuditForm } from "./AuditForm";
 
 export const Cta = () => {
   const { language } = useLanguage();
   const t = translations[language];
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <section id="secure-channel" className="relative py-20 lg:py-32 overflow-hidden bg-slate-50 dark:bg-[#0B1120]">
@@ -148,17 +151,15 @@ export const Cta = () => {
                       <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
                         {language === "en" ? "Send your requirements securely. We will analyze and respond within 24h." : "Transmettez vos exigences de sécurité. Notre équipe analyse et réponds sous 24h."}
                       </p>
-                      <a
-                        href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={(e) => { e.preventDefault(); setIsOpen(true); }}
                         className="mt-auto w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-200/50 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                         {language === "en" ? "Transmit Message" : "Transmettre le Message"}
-                      </a>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -167,6 +168,58 @@ export const Cta = () => {
           </div>
         </div>
       </Container>
+
+      {/* Form Modal */}
+      <Transition appear show={isOpen} as={React.Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsOpen(false)}>
+          <Transition.Child
+            as={React.Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={React.Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-blue-900/50 p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="flex justify-between items-center mb-6">
+                    <Dialog.Title as="h3" className="text-xl font-bold text-slate-900 dark:text-white">
+                      {language === "en" ? "Transmitting Requirements" : "Transmission des Exigences"}
+                    </Dialog.Title>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 transition-colors focus:outline-none"
+                    >
+                      <span className="sr-only">Close</span>
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <AuditForm language={language} />
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </section>
   );
 };
