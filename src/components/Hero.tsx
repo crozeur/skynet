@@ -15,7 +15,7 @@ export const Hero = () => {
     t.hero_desc ||
     "Around-the-clock threat detection and response, comprehensive audits, and strategic guidance. A holistic approach to secure, audit, and govern your cybersecurity.";
   const heroTag =
-    t.audit_form_title || "Request a Free Security Audit";
+    language === "en" ? "Elite Cyber Operations" : "Division Opérations Cyber";
 
   return (
     <section className="relative overflow-hidden py-10 sm:py-16 lg:py-24">

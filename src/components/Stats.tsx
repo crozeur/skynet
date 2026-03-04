@@ -145,7 +145,7 @@ export const Stats = () => {
                 href="#contact"
                 className="group inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 dark:hover:shadow-white/20"
               >
-                {language === "en" ? "Request a Free Audit" : "Demander un audit gratuit"}
+                {language === "en" ? "Transmitt Message" : "Transmettre le message"}
                 <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
