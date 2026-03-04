@@ -9,8 +9,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { CookieBanner } from "@/components/CookieBanner";
-import { StickyCta } from "@/components/StickyCta";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,7 +53,6 @@ export default function RootLayout({
             <div className="overflow-x-hidden">{children}</div>
             <Footer />
             <CookieBanner />
-            <StickyCta />
           </LanguageProvider>
         </ThemeProviderClient>
       </body>
