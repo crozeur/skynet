@@ -104,15 +104,15 @@ export const TechEngine = () => {
               {/* Client Engagement Nodes */}
               <div className="grid grid-cols-3 gap-4 w-full">
                 {[
-                  { label: isEn ? "Audit" : "Audit", color: "border-blue-500/40" },
-                  { label: isEn ? "SOC" : "SOC", color: "border-cyan-300 dark:border-cyan-500/40" },
-                  { label: isEn ? "Compliance" : "Conformité", color: "border-indigo-500/40" },
+                  { label: isEn ? "Audit" : "Audit", color: "border-blue-500/40", link: "#audit" },
+                  { label: isEn ? "SOC" : "SOC", color: "border-cyan-300 dark:border-cyan-500/40", link: "#soc" },
+                  { label: isEn ? "Cloud" : "Cloud", color: "border-indigo-500/40", link: "#cloud" },
                 ].map((node, i) => (
-                  <div key={i} className={`p-4 bg-slate-50 dark:bg-slate-900 border ${node.color} rounded-xl flex flex-col items-center justify-center text-center group-hover:scale-105 transition-transform duration-300`}>
-                    <ShieldCheckIcon className="w-6 h-6 text-slate-600 dark:text-slate-400 mb-2" />
-                    <div className="text-slate-900 dark:text-white font-mono text-[11px] uppercase tracking-wider">{node.label}</div>
-                    <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                  </div>
+                  <a href={node.link} key={i} className={`p-4 bg-slate-50 dark:bg-slate-900 border ${node.color} rounded-xl flex flex-col items-center justify-center text-center hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-cyan-500/20 hover:border-cyan-400 group/node`}>
+                    <ShieldCheckIcon className="w-6 h-6 text-slate-600 dark:text-slate-400 mb-2 group-hover/node:text-cyan-400 transition-colors" />
+                    <div className="text-slate-900 dark:text-white font-mono text-[11px] uppercase tracking-wider group-hover/node:font-bold">{node.label}</div>
+                    <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-400 group-hover/node:animate-ping group-hover/node:bg-cyan-400"></div>
+                  </a>
                 ))}
               </div>
             </div>
