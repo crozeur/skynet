@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           </p>
           <h2 className="text-xl font-semibold">Your rights</h2>
           <p>
-            You can request access, correction, or deletion of your personal data. Contact us at <a className="underline" href="mailto:skynet.consulting.dz@email.com">skynet.consulting.dz@email.com</a>.
+            You can request access, correction, or deletion of your personal data. Contact us at <a className="underline" href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com">skynet.consulting.dz@gmail.com</a>.
           </p>
           <h2 className="text-xl font-semibold">Cookies</h2>
           <p>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           </p>
           <h2 className="text-xl font-semibold">Contact</h2>
           <p>
-            For privacy questions, contact: <a className="underline" href="mailto:skynet.consulting.dz@email.com">skynet.consulting.dz@email.com</a>.
+            For privacy questions, contact: <a className="underline" href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com">skynet.consulting.dz@gmail.com</a>.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Last updated: 2025-12-14</p>
         </div>

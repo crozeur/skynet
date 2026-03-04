@@ -3,7 +3,7 @@
 import { useLanguage } from "./LanguageProvider";
 
 const calendlyUrl = "https://calendly.com/skynet-consulting-dz/30min";
-const emailUrl = "mailto:skynet.consulting.dz@email.com";
+const emailUrl = "https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com";
 
 export function StickyCta() {
   const { language } = useLanguage();

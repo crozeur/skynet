@@ -31,7 +31,7 @@ export default function TermsPage() {
           </p>
           <h2 className="text-xl font-semibold">Contact</h2>
           <p>
-            Questions about these terms: <a className="underline" href="mailto:skynet.consulting.dz@email.com">skynet.consulting.dz@email.com</a>.
+            Questions about these terms: <a className="underline" href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com">skynet.consulting.dz@gmail.com</a>.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">Last updated: 2025-12-14</p>
         </div>

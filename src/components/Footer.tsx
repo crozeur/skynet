@@ -31,7 +31,7 @@ export function Footer() {
             <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">{t.company_title}</h4>
             <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li><a href="/#about" className="hover:text-gray-900 dark:hover:text-white transition">{t.about_us}</a></li>
-              <li><a href="mailto:skynet.consulting.dz@email.com" className="hover:text-gray-900 dark:hover:text-white transition">{t.contact}</a></li>
+              <li><a href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com" className="hover:text-gray-900 dark:hover:text-white transition">{t.contact}</a></li>
               <li><a href="https://www.linkedin.com/company/skynet-consulting-dz/" className="hover:text-gray-900 dark:hover:text-white transition" target="_blank" rel="noreferrer">LinkedIn</a></li>
               <li><a href="/#contact" className="hover:text-gray-900 dark:hover:text-white transition">{t.careers}</a></li>
             </ul>
@@ -52,7 +52,7 @@ export function Footer() {
               © 2025 {t.company_name}. {t.copyright}
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <a href="mailto:skynet.consulting.dz@email.com" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm">skynet.consulting.dz@email.com</a>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=skynet.consulting.dz@gmail.com" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm">skynet.consulting.dz@gmail.com</a>
               <a href="https://www.linkedin.com/company/skynet-consulting-dz/" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition text-sm" target="_blank" rel="noreferrer">LinkedIn</a>
             </div>
           </div>
