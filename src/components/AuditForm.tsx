@@ -112,8 +112,8 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name Field */}
         <div className="group animate-[fadeInUp_0.7s_ease-out]" style={{ animationFillMode: "backwards" }}>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.audit_form_name_label} <span className="text-red-500">*</span>
+          <label htmlFor="name" className="block text-xs font-mono tracking-wider text-cyan-400/80 mb-2 uppercase">
+            {t.audit_form_name_label} <span className="text-cyan-500">*</span>
           </label>
           <input
             id="name"
@@ -122,14 +122,14 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 bg-[#0A1122]/80 border border-cyan-900/60 rounded-[2px] shadow-[inset_0_0_20px_rgba(8,145,178,0.02)] text-white placeholder-cyan-900/60 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:border-cyan-700/80 font-mono text-sm"
           />
         </div>
 
         {/* Company Field */}
         <div className="group animate-[fadeInUp_0.75s_ease-out]" style={{ animationFillMode: "backwards", animationDelay: "0.05s" }}>
-          <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.audit_form_company_label} <span className="text-red-500">*</span>
+          <label htmlFor="company" className="block text-xs font-mono tracking-wider text-cyan-400/80 mb-2 uppercase">
+            {t.audit_form_company_label} <span className="text-cyan-500">*</span>
           </label>
           <input
             id="company"
@@ -138,14 +138,14 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 bg-[#0A1122]/80 border border-cyan-900/60 rounded-[2px] shadow-[inset_0_0_20px_rgba(8,145,178,0.02)] text-white placeholder-cyan-900/60 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:border-cyan-700/80 font-mono text-sm"
           />
         </div>
 
         {/* Email Field */}
         <div className="group animate-[fadeInUp_0.8s_ease-out]" style={{ animationFillMode: "backwards", animationDelay: "0.1s" }}>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t.audit_form_email_label} <span className="text-red-500">*</span>
+          <label htmlFor="email" className="block text-xs font-mono tracking-wider text-cyan-400/80 mb-2 uppercase">
+            {t.audit_form_email_label} <span className="text-cyan-500">*</span>
           </label>
           <input
             id="email"
@@ -155,14 +155,14 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
-            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 bg-[#0A1122]/80 border border-cyan-900/60 rounded-[2px] shadow-[inset_0_0_20px_rgba(8,145,178,0.02)] text-white placeholder-cyan-900/60 focus:outline-none focus:ring-1 focus:ring-cyan-400 focus:border-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:border-cyan-700/80 font-mono text-sm"
           />
         </div>
 
         {/* Sector Field */}
         <div className="animate-[fadeInUp_0.85s_ease-out]" style={{ animationFillMode: "backwards", animationDelay: "0.15s" }}>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t.audit_form_sector_label} <span className="text-red-500">*</span>
+          <label className="block text-xs font-mono tracking-wider text-cyan-400/80 mb-3 uppercase">
+            {t.audit_form_sector_label} <span className="text-cyan-500">*</span>
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {sectorOptions.map((option, idx) => {
@@ -173,8 +173,8 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
                   htmlFor={`sector-${option.value}`}
                   className={`flex items-center gap-3 rounded-lg border px-3 py-2 cursor-pointer transition-all duration-200 ${
                     selected
-                        ? "border-slate-300 bg-slate-50 text-slate-800 dark:border-blue-400/80 dark:bg-blue-900/30 dark:text-blue-100 shadow-sm shadow-slate-200/50 scale-[1.01]"
-                        : "border-slate-200/80 dark:border-gray-700 bg-white/90 dark:bg-gray-800 text-slate-700 dark:text-gray-200 hover:border-slate-300/80 hover:shadow-sm hover:shadow-slate-200/50"
+                        ? "border-cyan-400/80 bg-cyan-950/40 text-cyan-100 shadow-[0_0_15px_rgba(34,211,238,0.15)] scale-[1.01]"
+                        : "border-cyan-900/40 bg-[#0A1122]/50 text-cyan-600/70 hover:border-cyan-700/60 hover:text-cyan-400 hover:bg-cyan-950/20"
                   } animate-[fadeInUp_0.9s_ease-out] hover:-translate-y-0.5`}
                   style={{ animationFillMode: "backwards", animationDelay: `${0.18 + idx * 0.03}s` }}
                 >
@@ -184,9 +184,9 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
                     checked={selected}
                     onChange={() => handleSectorToggle(option.value)}
                     disabled={loading}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-4 h-4 text-cyan-500 bg-[#0A1122] border-cyan-800 rounded-sm focus:ring-cyan-500 focus:ring-offset-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   />
-                  <span className="text-sm font-medium">{option.label}</span>
+                  <span className="text-[13px] font-mono tracking-wide">{option.label}</span>
                 </label>
               );
             })}
@@ -198,7 +198,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98] active:shadow-lg text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+            className="w-full px-6 py-3.5 bg-cyan-500 hover:bg-cyan-400 active:scale-[0.99] text-[#050A15] font-mono font-bold tracking-widest uppercase rounded-[2px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-cyan-400 focus:ring-offset-1 focus:ring-offset-[#050A15] shadow-[0_0_20px_rgba(34,211,238,0.2)] hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
             style={{ animation: loading ? "none" : "pulseGlow 2.8s ease-in-out infinite" }}
           >
             {loading ? (
@@ -221,8 +221,8 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
         <div
           className={`mt-4 p-4 rounded-lg text-sm font-medium ${
             message.type === "success"
-              ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800"
-              : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
+              ? "bg-cyan-950/40 text-cyan-300 border border-cyan-500/50 font-mono text-sm"
+              : "bg-red-950/40 text-red-400 border border-red-500/50 font-mono text-sm"
           } animate-[fadeInUp_0.6s_ease-out]`}
           style={{ animationFillMode: "backwards" }}
         >

@@ -195,23 +195,40 @@ export const Cta = () => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-blue-900/50 p-6 text-left align-middle shadow-xl transition-all">
-                  <div className="flex justify-between items-center mb-6">
-                    <Dialog.Title as="h3" className="text-xl font-bold text-slate-900 dark:text-white">
-                      {language === "en" ? "Transmitting Requirements" : "Transmission des Exigences"}
-                    </Dialog.Title>
+                <Dialog.Panel className="relative w-full max-w-2xl transform overflow-hidden rounded-[4px] bg-[#050A15] border border-cyan-500/30 p-6 sm:p-8 text-left align-middle shadow-[0_0_50px_rgba(34,211,238,0.1)] transition-all">
+                  
+                  {/* Cyber Modal Decorators */}
+                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
+                  <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-sm opacity-50"></div>
+                  <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-cyan-500/50 rounded-br-sm opacity-50"></div>
+
+                  <div className="flex justify-between items-start mb-8 relative z-10">
+                    <div>
+                      <div className="inline-flex items-center gap-2 mb-2">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                        </span>
+                        <span className="text-[10px] font-mono text-cyan-500 uppercase tracking-widest">
+                          Secure Link Established
+                        </span>
+                      </div>
+                      <Dialog.Title as="h3" className="text-2xl font-bold text-white tracking-tight">
+                        {language === "en" ? "Transmitting Requirements" : "Transmission des Exigences"}
+                      </Dialog.Title>
+                    </div>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 transition-colors focus:outline-none"
+                      className="text-cyan-600/50 hover:text-cyan-400 transition-colors focus:outline-none p-1 border border-transparent hover:border-cyan-500/30 rounded bg-[#0A1122]"
                     >
                       <span className="sr-only">Close</span>
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>
                   </div>
                   
-                  <div className="mt-4">
+                  <div className="mt-4 relative z-10">
                     <AuditForm language={language} />
                   </div>
                 </Dialog.Panel>
