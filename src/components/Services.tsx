@@ -272,7 +272,7 @@ export const Services = () => {
       </div>
 
       {/* Content Area (Glassmorphism Dashboard) */}
-      <div ref={contentRef} className="relative z-10 bg-white/90 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/20 rounded-[2.5rem] p-6 sm:p-10 lg:p-12 shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden mb-12">
+      <div ref={contentRef} className="relative z-10 bg-white/95 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-cyan-500/20 rounded-[2.5rem] p-6 sm:p-10 lg:p-12 shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden mb-12">
         {/* Top scanning line */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
         
@@ -280,7 +280,7 @@ export const Services = () => {
           {/* Left Column: The Problem & Target */}
           <div className="space-y-8">
             {/* Target Audience */}
-            <div className="group relative p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-[0_8px_30px_rgba(56,189,248,0.1)]">
+            <div className="group relative p-6 sm:p-8 rounded-3xl bg-white/95 dark:bg-slate-900/80 border border-slate-200 dark:border-blue-900/30 shadow-xl shadow-slate-200/50 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-[0_8px_30px_rgba(56,189,248,0.1)]">
               {/* Glowing accent line */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-transparent opacity-70"></div>
               
@@ -310,15 +310,15 @@ export const Services = () => {
                       </div>
                     )}
                     {blocks.lead && (
-                      <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                      <p className="text-lg font-semibold text-slate-800 dark:text-slate-200 leading-relaxed tracking-wide">
                         {blocks.lead}
                       </p>
                     )}
                     {blocks.bullets.length > 0 && (
-                      <ul className="space-y-3">
+                      <ul className="space-y-4">
                         {blocks.bullets.map((b) => (
-                          <li key={b} className="flex gap-3 text-sm font-medium text-slate-700 dark:text-slate-300">
-                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                          <li key={b} className="flex gap-4 text-[15px] font-medium text-slate-700 dark:text-slate-300 items-start">
+                            <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-sm bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)] rotate-45" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
@@ -359,14 +359,14 @@ export const Services = () => {
                         ))}
                       </div>
                     )}
-                    <p className="text-base font-medium text-slate-800 dark:text-slate-200 leading-relaxed">
+                    <p className="text-lg font-semibold text-slate-800 dark:text-slate-200 leading-relaxed tracking-wide">
                       {blocks.lead}
                     </p>
                     {blocks.bullets.length > 0 && (
-                      <ul className="mt-5 space-y-3">
+                      <ul className="mt-6 space-y-4">
                         {blocks.bullets.map((b) => (
-                          <li key={b} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
-                            <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500/80 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
+                          <li key={b} className="flex gap-4 text-[15px] font-medium text-slate-700 dark:text-slate-300 items-start">
+                            <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-sm bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] rotate-45" />
                             <span className="leading-relaxed">{b}</span>
                           </li>
                         ))}
