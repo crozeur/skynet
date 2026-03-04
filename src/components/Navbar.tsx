@@ -83,7 +83,7 @@ export const Navbar = () => {
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">
         <a href="/#hero" className="flex items-center gap-3 focus:outline-none brightness-0 dark:brightness-100 transform hover:scale-105 transition-transform duration-200 flex-shrink-0">
-          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={200} height={200} className="h-20 w-auto sm:h-24 md:h-28 lg:h-32 hover:opacity-90 transition-opacity duration-150" />
+          <Image src="/img/skynet-logo.svg" alt="Skynet Consulting" width={200} height={200} className="h-12 w-auto sm:h-16 md:h-20 lg:h-24 hover:opacity-90 transition-opacity duration-150" />
           <span className="sr-only">Skynet Consulting</span>
         </a>
         <div className={`hidden md:flex flex-1 min-w-0 items-center justify-center ${desktopNavGapClass} overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-1`}>
@@ -169,43 +169,32 @@ export const Navbar = () => {
           </div>
           
           {/* Mobile: compact icons with theme switcher and search above */}
-          <div className="md:hidden flex flex-col items-end gap-1">
-            <div className="flex items-center gap-1.5">
-              <ThemeChanger />
-              <SearchBar />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <LanguageSwitcher />
-              <button
-                onClick={() => setOpen(!open)}
-                aria-expanded={open}
-                aria-label={open ? "Close menu" : "Open menu"}
-                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {open ? (
-                  <>
-                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    <span className="text-xs font-semibold">{language === "en" ? "Close" : "Fermer"}</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                    <span className="text-xs font-semibold">{language === "en" ? "Menu" : "Menu"}</span>
-                  </>
-                )}
-              </button>
-            </div>
+          <div className="md:hidden flex items-center justify-end gap-2 pr-1">
+            <ThemeChanger />
+            <LanguageSwitcher />
+            <button
+              onClick={() => setOpen(!open)}
+              aria-expanded={open}
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="inline-flex items-center justify-center p-2 rounded-sm text-slate-800 dark:text-white bg-slate-100 dark:bg-slate-800 focus:outline-none"
+            >
+              {open ? (
+                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </Container>
 
       {/* Mobile menu */}
       {/* Mobile menu: uses max-height + opacity transition for slide/fade effect */}
-      <div className={`md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden transition-all duration-300 ${open ? 'max-h-[32rem] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}>
+      <div className={`md:hidden bg-white dark:bg-[#0B1120] border-t border-slate-200 dark:border-blue-900/40 overflow-hidden transition-all duration-300 ${open ? 'max-h-[32rem] opacity-100 py-4' : 'max-h-0 opacity-0 py-0'}`}>
         <Container className="px-4">
           <div className={`flex flex-col items-start gap-5 transition-transform duration-300 ${open ? 'translate-y-0' : '-translate-y-2 pointer-events-none'}`}>
             <a href="/#hero" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>

@@ -23,7 +23,7 @@ export const Cta = () => {
 
             <div className="grid lg:grid-cols-[1.1fr_1fr] gap-0">
               {/* Left Side: The Pitch */}
-              <div className="p-10 lg:p-16 flex flex-col justify-center relative">
+              <div className="p-6 sm:p-10 lg:p-16 flex flex-col justify-center relative">
                 {/* Decorative corner */}
                 <div className="absolute top-0 left-0 w-32 h-32 border-t border-l border-cyan-500/30 rounded-tl-[2.5rem] opacity-50"></div>
 
@@ -37,7 +37,7 @@ export const Cta = () => {
                   </span>
                 </div>
 
-                <h2 className="text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] mb-6 break-words">
+                <h2 className="text-3xl lg:text-5xl font-black text-slate-900 dark:text-white leading-[1.1] mb-6 break-words">
                   {language === "en" ? "Initiate a Confidential Briefing" : "Initier un Audit de Cadrage"}
                 </h2>
 
@@ -85,7 +85,7 @@ export const Cta = () => {
               </div>
 
               {/* Right Side: The Interface */}
-              <div className="bg-slate-50/80 dark:bg-slate-950/50 p-10 lg:p-16 border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-slate-800/50 relative flex flex-col justify-center">
+              <div className="bg-slate-50/80 dark:bg-slate-950/50 p-6 sm:p-10 lg:p-16 border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-slate-800/50 relative flex flex-col justify-center">
                 {/* Terminal-like header */}
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
                   <span className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest">
