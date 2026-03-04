@@ -78,7 +78,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className={`sticky top-0 z-50 bg-white/95 dark:bg-gray-900/90 backdrop-blur-md transition-all duration-300 ${
+    <nav className={`sticky top-0 z-50 border-b border-slate-200/80 dark:border-blue-900/30 bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[0_0_15px_rgba(59,130,246,0.05)] transition-all duration-300 ${
       scrolled ? "shadow-md shadow-slate-200/50 dark:shadow-black/50 py-0.5" : "shadow-sm shadow-slate-200/30 dark:shadow-black/20"
     }`}>
       <Container className="flex items-center justify-between gap-2 py-1.5 md:py-2 relative">

@@ -17,7 +17,7 @@ export const Cta = () => {
 
       <Container className="relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="relative rounded-[2.5rem] border border-slate-200/80 dark:border-cyan-500/20 bg-white/90 dark:bg-slate-900/60 backdrop-blur-2xl shadow-xl shadow-slate-200/50 dark:shadow-2xl overflow-hidden">
+          <div className="relative rounded-[2px] border border-slate-200 dark:border-blue-900/50 bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-2xl shadow-[0_0_40px_rgba(59,130,246,0.15)] relative overflow-hidden">
             {/* Top scanning line */}
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
 

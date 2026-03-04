@@ -276,7 +276,7 @@ export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, re
             <article className="min-w-0 max-w-4xl mx-auto lg:mx-0 w-full">
           {/* Hero cover image */}
           {metadata.coverImage && (
-            <div className="relative mb-10 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl bg-gray-100 dark:bg-gray-800">
+            <div className="relative mb-10 overflow-hidden rounded-sm border border-slate-200/80 dark:border-blue-900/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] bg-slate-100 dark:bg-[#0B1120]">
               <div className="relative aspect-[16/9] sm:aspect-[16/8]">
                 {/* Blurred background fill */}
                 <Image

@@ -122,7 +122,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
@@ -138,7 +138,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             disabled={loading}
-            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
@@ -155,7 +155,7 @@ export const AuditForm = ({ language: languageProp }: AuditFormProps) => {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             required
-            className="w-full px-4 py-3 border border-slate-200/80 dark:border-gray-700 rounded-lg bg-white/90 dark:bg-gray-800 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
+            className="w-full px-4 py-3 border border-slate-200 dark:border-blue-900/50 rounded-sm bg-white/95 dark:bg-[#0B1120]/90 backdrop-blur-xl shadow-[inset_0_0_15px_rgba(59,130,246,0.05)] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-slate-300/80 focus:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 group-hover:shadow-md group-hover:shadow-slate-200/50 hover:border-slate-300/80 dark:hover:border-gray-600"
           />
         </div>
 
