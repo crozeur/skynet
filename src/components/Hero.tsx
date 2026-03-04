@@ -103,10 +103,10 @@ export const Hero = () => {
           {/* Right: Technical Terminal / Interactive block */}
           <div className="animate-[fadeInUp_0.75s_ease-out_0.1s_backwards] h-full flex flex-col pt-10 lg:pt-0 lg:ml-10">    
               {/* Terminal Window */}
-              <div className="relative w-full rounded-sm overflow-hidden bg-slate-50 dark:bg-[#0B1120] border border-slate-200 dark:border-blue-900/40 shadow-[0_0_50px_-12px_rgba(6,182,212,0.15)] dark:shadow-[0_0_50px_-12px_rgba(6,182,212,0.25)]">
+              <div className="relative w-full rounded-sm overflow-hidden bg-white/90 dark:bg-[#0B1120]/95 backdrop-blur-xl border border-blue-200/80 dark:border-blue-900/40 shadow-[0_0_50px_-12px_rgba(59,130,246,0.20)] dark:shadow-[0_0_50px_-12px_rgba(6,182,212,0.25)]">
                 
                 {/* Terminal Header */}
-                <div className="flex items-center px-4 py-3 bg-slate-200/50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-blue-900/40">
+                <div className="flex items-center px-4 py-3 bg-blue-50/50 dark:bg-slate-900/80 border-b border-blue-100 dark:border-blue-900/40">
                    <div className="flex gap-2">
                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
@@ -135,7 +135,7 @@ export const Hero = () => {
                    </div>
                    
                    {/* Gradient fade out at bottom */}
-                   <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-50 dark:from-[#0B1120] to-transparent pointer-events-none"></div>
+                   <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-white/90 dark:from-[#0B1120] to-transparent pointer-events-none"></div>
                 </div>
               </div>
 
