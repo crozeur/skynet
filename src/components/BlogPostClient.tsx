@@ -848,6 +848,76 @@ export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, re
               background: linear-gradient(to right, transparent, #60a5fa, transparent);
             }
           `}</style>
+
+          {/* Mobile Table of Contents (collapsible) */}
+          {headings.length > 0 && (
+            <div className="lg:hidden mb-8 w-full rounded-2xl bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md shadow-sm overflow-hidden">
+              <details className="group [&_summary::-webkit-details-marker]:hidden">
+                <summary className="flex items-center justify-between p-4 cursor-pointer list-none font-bold text-slate-800 dark:text-slate-200 select-none">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center justify-center w-7 h-7 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h7" />
+                      </svg>
+                    </span>
+                    <span className="text-xs uppercase tracking-[0.2em] font-black">{getUIString("Table of contents", language)}</span>
+                  </div>
+                  <span className="transition-transform duration-300 group-open:-rotate-180 text-blue-600 dark:text-blue-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </summary>
+                
+                <nav className="border-t border-slate-200/80 dark:border-slate-800/80 p-4 pt-4 bg-white/40 dark:bg-black/20">
+                  <ul className="space-y-3 text-[14px]">
+                    {headings.map((heading) => {
+                      const isActive = activeHeadingId === heading.id;
+                      const isH2 = heading.level === 2;
+
+                      return (
+                        <li
+                          key={heading.id}
+                          className="relative flex items-start"
+                          style={{ paddingLeft: `${(heading.level - 2) * 1}rem` }}
+                        >
+                          {/* Active indicator dot */}
+                          <div className={`absolute left-0 top-[8px] w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                            isActive
+                              ? "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)] scale-125"
+                              : "bg-transparent scale-100"
+                          }`}></div>
+
+                          <a
+                            href={`#${heading.id}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              const el = document.getElementById(heading.id);
+                              if (el) {
+                                const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                                window.scrollTo({ top: y, behavior: "smooth" });
+                                window.history.pushState(null, "", `#${heading.id}`);
+                              }
+                            }}
+                            className={`block pl-4 leading-relaxed transition-all duration-200 ${
+                              isActive
+                                ? "text-blue-700 dark:text-cyan-400 font-bold translate-x-1"
+                                : isH2
+                                  ? "text-slate-700 dark:text-slate-300 font-semibold hover:text-blue-600 dark:hover:text-cyan-400 hover:translate-x-0.5"
+                                  : "text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200 hover:translate-x-0.5"
+                            }`}
+                          >
+                            {heading.text}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </details>
+            </div>
+          )}
+
           <div
             ref={articleRef}
             className="blog-content max-w-none"
