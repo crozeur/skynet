@@ -46,8 +46,8 @@ export const translations = {
 
     // Service 1: SOC 24/7
     service1_title: "24/7 Managed SOC & Threat Response",
-    service1_for: "SMEs, Mid-market companies, and organizations needing continuous protection without the cost of an internal team",
-    service1_problem: "Cyber threats don't sleep, but building an internal 24/7 Security Operations Center is too expensive and complex for most businesses.",
+    service1_for: "SMEs, Mid-market companies — organizations needing continuous protection without the cost of an internal team",
+    service1_problem: "Cyber threats do not sleep. Building an internal 24/7 Security Operations Center is too expensive and complex for most businesses.",
     service1_solution: "We deploy an AI-powered external SOC that monitors your infrastructure 24/7/365, detecting and neutralizing threats in minutes:",
     service1_point1: "24/7/365 continuous monitoring by security experts",
     service1_point2: "AI-driven threat detection (< 15 min response time)",
@@ -95,8 +95,8 @@ export const translations = {
 
     // Service 4: Cloud Modernization & FinOps
     service4_title: "Continuous Compliance & Automated FinOps",
-    service4_for: "Private groups, OIV, public institutions — organizations aiming to modernize their infrastructure or optimize IT costs",
-    service4_problem: "Maintaining compliance and managing cloud costs requires constant manual effort, leading to drift, audit failures, and budget overruns.",
+    service4_for: "Private groups, OIV, institutions — organizations aiming to modernize their infrastructure or optimize IT costs",
+    service4_problem: "Maintaining compliance and managing cloud costs requires constant effort. This lack of visibility leads to drift, audit failures, and budget overruns.",
     service4_solution: "Our platform continuously monitors your posture and costs, automatically generating the evidence you need:",
     service4_point1: "Automated evidence collection for ISO 27001 and SOC 2",
     service4_point2: "Real-time cloud cost optimization (FinOps) dashboards",
@@ -294,8 +294,8 @@ export const translations = {
 
     // Service 1: SOC 24/7
     service1_title: "SOC Managé & Réponse aux Incidents 24/7",
-    service1_for: "PME, ETI et organisations nécessitant une protection continue sans la charge d'une équipe interne",
-    service1_problem: "Les cybermenaces ne s'arrêtent jamais, mais le déploiement d'un Centre d'Opérations de Sécurité (SOC) en interne s'avère souvent trop complexe et onéreux pour la majorité des entreprises.",
+    service1_for: "PME, ETI — Organisations nécessitant une protection continue sans la charge d'une équipe interne",
+    service1_problem: "Les cybermenaces ne s'arrêtent jamais. Cependant, le déploiement d'un SOC en interne s'avère trop complexe et onéreux pour la majorité des entreprises.",
     service1_solution: "Nous mettons en place un SOC externe de pointe, assurant la supervision de votre infrastructure 24/7/365, avec une détection et neutralisation des menaces en quelques minutes seulement :",
     service1_point1: "Supervision continue 24/7/365 par nos analystes en cybersécurité",
     service1_point2: "Détection rapide et qualification des alertes (SLA de réponse < 15 min)",
@@ -343,8 +343,8 @@ export const translations = {
 
     // Service 4: Cloud Modernization & FinOps
     service4_title: "Conformité Continue & FinOps Automatisé",
-    service4_for: "Groupes Privés, OIV, DSI et Établissements Publics — Organisations souhaitant pérenniser leur infrastructure et maîtriser leurs coûts IT",
-    service4_problem: "Maintenir la conformité des systèmes et optimiser les coûts de l'infrastructure Cloud nécessite une vigilance constante. Ce manque de visibilité entraîne des dérives, l'échec de certains audits et des dépassements budgétaires.",
+    service4_for: "Groupes Privés, OIV, DSI, Établissements Publics — Organisations souhaitant pérenniser leur infrastructure et maîtriser leurs coûts IT",
+    service4_problem: "Maintenir la conformité des systèmes et optimiser les coûts Cloud nécessite une vigilance constante. Ce manque de visibilité entraîne des dérives et des échecs d'audits.",
     service4_solution: "Notre plateforme supervise en continu votre posture de sécurité et vos dépenses Cloud (FinOps), consolidant de façon automatisée les éléments de preuve nécessaires :",
     service4_point1: "Automatisation de la collecte de preuves (evidence gathering) pour les normes ISO 27001 et SOC 2",
     service4_point2: "Tableaux de bord d'optimisation en temps réel de vos dépenses Cloud (FinOps)",
