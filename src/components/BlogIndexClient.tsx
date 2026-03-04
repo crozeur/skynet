@@ -255,34 +255,31 @@ export function BlogIndexClient({
           
           <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
             {/* Tech Badge */}
-            <div className="mb-8 inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-slate-900/5 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 backdrop-blur-md shadow-sm">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-              </span>
-              <span className="text-xs sm:text-sm font-mono font-semibold text-slate-700 dark:text-cyan-300 tracking-widest uppercase">
-                {language === "en" ? "Threat Intelligence & Strategy" : "Renseignement & Stratégie"}
+            <div className="mb-8 inline-flex items-center gap-4 px-6 py-2 rounded-sm border border-slate-200/80 dark:border-blue-900/30 bg-white/95 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+              <div className="h-2 w-2 rounded-sm bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)] rotate-45 animate-pulse"></div>
+              <span className="text-xs sm:text-sm font-mono font-bold text-slate-800 dark:text-blue-300 tracking-[0.2em] uppercase">
+                {language === "en" ? "Threat Intelligence" : "Veille Stratégique"}
               </span>
             </div>
 
             {/* Main Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.1] mb-8 tracking-tight">
+            <h1 className="text-5xl sm:text-6xl lg:text-[5.5rem] font-black leading-[1.05] tracking-tight mb-8 uppercase">
               <span className="block text-slate-900 dark:text-white mb-2">
-                {language === "en" ? "Defend. Detect." : "Défendre. Détecter."}
+                {language === "en" ? "Strategic" : "Cyber"}
               </span>
               <span className="block relative inline-block">
-                <span className="absolute -inset-2 bg-gradient-to-r from-blue-600/20 to-cyan-400/20 blur-xl rounded-lg"></span>
-                <span className="relative bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
-                  {language === "en" ? "Respond." : "Réagir."}
+                <span className="absolute -inset-4 bg-gradient-to-r from-blue-600/30 via-cyan-500/20 to-blue-600/30 blur-2xl rounded-full opacity-60"></span>
+                <span className="relative bg-gradient-to-r from-slate-900 via-blue-800 to-slate-900 dark:from-white dark:via-blue-200 dark:to-white bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                  {language === "en" ? "Intelligence." : "Intelligence."}
                 </span>
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+            <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 mb-12 max-w-2xl mx-auto font-semibold tracking-wide leading-relaxed">
               {language === "en"
-                ? "Actionable insights, deep-dive tutorials, and strategic guidance for modern security teams."
-                : "Analyses pointues, guides pratiques et stratégies pour les équipes de sécurité modernes."}
+                ? "Actionable insights, raw intelligence, and elite architectural guidance for modern security apparatuses."
+                : "Renseignement brut, analyses pointues et architecture défensive pour les infrastructures critiques."}
             </p>
 
             {/* Search Bar with enhanced design */}
@@ -594,7 +591,9 @@ export function BlogIndexClient({
                 />
                 
                 {/* Card container */}
-                <div className="relative h-full flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/70 to-cyan-50/60 dark:bg-none dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl group-hover:shadow-2xl transition-all duration-500 group-hover:border-transparent overflow-hidden">
+                <div className="relative h-full flex flex-col bg-white/95 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-blue-900/30 rounded-[1.5rem] shadow-xl dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] group-hover:shadow-2xl group-hover:shadow-slate-300/50 dark:group-hover:shadow-[0_8px_30px_rgba(56,189,248,0.1)] transition-all duration-500 group-hover:border-blue-500/50 dark:group-hover:border-cyan-500/40 overflow-hidden">
+                  {/* Neon top border on hover */}
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-cyan-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20"></div>
                   
                   {/* Cover image/gradient section */}
                   {metadata.coverImage ? (
@@ -657,7 +656,8 @@ export function BlogIndexClient({
                   
                   {/* Pillar badge */}
                   <div className="absolute top-5 right-5 z-10 flex flex-col items-end gap-2">
-                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${PILLAR_COLORS[metadata.pillar]} shadow-lg ring-2 ring-white/30 backdrop-blur-sm group-hover:ring-white/50 transition-all duration-500`}>
+                    <span className={`inline-flex items-center px-4 py-1.5 rounded-sm text-xs font-black tracking-widest text-white bg-slate-900/80 border border-white/20 backdrop-blur-md shadow-[0_4px_15px_rgba(0,0,0,0.5)] group-hover:border-cyan-400/50 transition-all duration-500`}>
+                      <span className={`mr-2 h-1.5 w-1.5 rounded-full bg-gradient-to-r ${PILLAR_COLORS[metadata.pillar]} animate-pulse`}></span>
                       {metadata.pillar}
                     </span>
                     {metadata.topic && (
@@ -678,12 +678,14 @@ export function BlogIndexClient({
                   </div>
 
                   {/* Content section */}
-                  <div className="flex-1 flex flex-col p-6 sm:p-7 bg-gradient-to-br from-slate-50/95 via-blue-50/75 to-cyan-50/60 dark:bg-none dark:bg-gray-900 group-hover:from-slate-50/95 group-hover:to-cyan-50/70 dark:group-hover:from-gray-900/95 dark:group-hover:to-gray-800/95 transition-all duration-500">
+                  <div className="flex-1 flex flex-col p-6 sm:p-8 bg-transparent transition-all duration-500 z-10 relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-50/50 dark:to-slate-900/80 pointer-events-none"></div>
                     
-                    {/* Date and reading time */}
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="relative z-10 flex-1 flex flex-col">
+                      {/* Date and reading time */}
+                      <div className="flex items-center gap-4 mb-4 text-xs font-mono font-bold tracking-widest text-slate-500 dark:text-cyan-500/80 uppercase">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <time className="font-medium">
@@ -704,12 +706,12 @@ export function BlogIndexClient({
                     </div>
 
                     {/* Title */}
-                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-blue-600 group-hover:to-cyan-600 group-hover:bg-clip-text transition-all duration-500">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-3 line-clamp-2 tracking-tight group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-blue-500 group-hover:to-cyan-400 group-hover:bg-clip-text transition-all duration-500 relative z-10 drop-shadow-sm">
                       {highlight(translatedPosts[slug]?.title || metadata.title)}
                     </h2>
 
                     {/* Description */}
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 line-clamp-3 leading-relaxed mb-5 flex-1 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-500">
+                    <p className="text-sm sm:text-[15px] font-medium text-slate-700 dark:text-slate-300 line-clamp-3 leading-relaxed mb-6 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors duration-500 relative z-10">
                       {highlight(translatedPosts[slug]?.description || metadata.description)}
                     </p>
 
@@ -725,15 +727,17 @@ export function BlogIndexClient({
                     )}
 
                     {/* Read more link */}
-                    <div className="inline-flex items-center gap-3 text-blue-600 dark:text-blue-400 font-bold text-sm group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-500">
+                    <div className="relative z-10 inline-flex items-center gap-3 text-blue-600 dark:text-cyan-400 font-bold text-[15px] tracking-wide uppercase group-hover:text-blue-700 dark:group-hover:text-cyan-300 transition-colors duration-500 mt-auto pt-2">
+                      <div className="h-1.5 w-1.5 rounded-sm bg-blue-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.8)] rotate-45"></div>
                       <span>{language === "en" ? "Read article" : "Lire l'article"}</span>
                       <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
                   </div>
+                </div>
 
-                  {/* Glossy overlay on hover */}
+                {/* Glossy overlay on hover */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-45 dark:opacity-0 group-hover:opacity-70 dark:group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 </div>
               </Link>
