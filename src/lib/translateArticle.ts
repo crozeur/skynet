@@ -282,6 +282,8 @@ export const uiStrings: Record<string, Record<string, string>> = {
     "Back to Blog": "Retour au blog",
     "min read": "min de lecture",
     "Contents": "Sommaire",
+    "Table of contents": "Sommaire",
+    "Read more articles": "Lire plus d'articles",
     "Quick navigation": "Navigation rapide",
     "Copy link": "Copier le lien",
     "Link copied!": "Lien copié !",
