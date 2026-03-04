@@ -30,7 +30,7 @@ export const Hero = () => {
               {heroTag}
             </span>
           </div>
-          <h1 className="mt-6 text-5xl sm:text-6xl lg:text-7xl xl:text-[5rem] font-black leading-[1.05] tracking-tight text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-white dark:via-blue-100 dark:to-white animate-[fadeInUp_0.6s_ease-out] drop-shadow-[0_0_15px_rgba(255,255,255,0.08)] uppercase break-words relative">
+          <h1 className="mt-6 text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-black leading-[1.05] tracking-tight text-slate-900 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-white dark:via-blue-100 dark:to-white animate-[fadeInUp_0.6s_ease-out] drop-shadow-[0_0_15px_rgba(255,255,255,0.08)] uppercase break-words relative">
               <span className="absolute -inset-4 bg-gradient-to-r from-blue-600/20 via-cyan-500/10 to-blue-600/20 blur-2xl rounded-full opacity-0 dark:opacity-60 -z-10"></span> 
             {heroTitle}
           </h1>
