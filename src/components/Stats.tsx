@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Container } from "@/components/Container";
 import { SectionTitle } from "@/components/SectionTitle";
 import { useLanguage } from "./LanguageProvider";
@@ -77,8 +78,12 @@ export const Stats = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {metrics.map((metric, index) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
               className="group relative p-8 rounded-3xl bg-white/90 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/50 backdrop-blur-xl hover:bg-white dark:hover:bg-slate-800/50 transition-all duration-500 shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-300/50 hover:-translate-y-1"
             >
               {/* Subtle glow effect on hover */}
@@ -120,7 +125,7 @@ export const Stats = () => {
                   {language === "en" ? "Live tracking" : "Suivi en direct"}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

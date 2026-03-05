@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Container } from "@/components/Container";
 import { useLanguage } from "./LanguageProvider";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
@@ -60,8 +61,12 @@ export const CaseStudies = () => {
 
         <div className="grid gap-10 lg:gap-8 lg:grid-cols-3">
           {content.cases.map((caseStudy, idx) => (
-            <div
+            <motion.div
               key={idx}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.55, delay: idx * 0.12, ease: "easeOut" }}
               className="group relative flex flex-col bg-white dark:bg-slate-900/80 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 backdrop-blur-md transition-all duration-500 hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:border-cyan-500/50 hover:-translate-y-2 overflow-hidden"
             >
               {/* Header Box */}
@@ -125,7 +130,7 @@ export const CaseStudies = () => {
                 </p>
               </div>
 
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Container } from "@/components/Container";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translations } from "@/lib/translations";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircleIcon,
   ChevronRightIcon,
@@ -281,6 +281,14 @@ export const Services = () => {
         {/* Top scanning line */}
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-50"></div>
         
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+          >
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16">
           {/* Left Column: The Problem & Target */}
           <div className="space-y-8">
@@ -432,6 +440,8 @@ export const Services = () => {
             </div>
           </div>
         </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Telemetry Bar (Our Priorities) */}
