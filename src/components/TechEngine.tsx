@@ -57,7 +57,7 @@ export const TechEngine = () => {
   ];
 
   return (
-    <section className="py-20 lg:py-28 relative bg-slate-50 dark:bg-slate-900 border-t border-b border-slate-200 dark:border-cyan-900/50 overflow-hidden">
+    <section id="platform" className="py-20 lg:py-28 relative bg-slate-50 dark:bg-slate-900 border-t border-b border-slate-200 dark:border-cyan-900/50 overflow-hidden">
       {/* Dynamic Background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.05),transparent_50%)] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(6,182,212,0.15),transparent_50%)]" aria-hidden="true"></div>
 

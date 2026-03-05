@@ -34,7 +34,7 @@ export const Navbar = () => {
   useEffect(() => {
     if (pathname === "/") {
       const detectActiveSection = () => {
-        const sections = ["hero", "case-studies", "services-overview", "compliance", "about", "contact"];
+          const sections = ["hero", "case-studies", "services-overview", "platform", "about", "contact"];
         const scrollPos = window.scrollY + 100;
         for (const sectionId of sections) {
           const element = document.getElementById(sectionId);
@@ -125,15 +125,15 @@ export const Navbar = () => {
             </span>
           </a>
           <a
-            href="/#compliance"
-            className={navItemClass("compliance")}
+            href="/#platform"
+            className={navItemClass("platform")}
           >
             {language === "en" ? (
-              "Governance"
+              "Platform"
             ) : (
               <>
-                <span className="hidden lg:inline">Gouvernance</span>
-                <span className="lg:hidden">Gouvernance</span>
+                <span className="hidden lg:inline">Plateforme</span>
+                <span className="lg:hidden">Plateforme</span>
               </>
             )}
           </a>
@@ -230,8 +230,8 @@ export const Navbar = () => {
                 </span>
               </span>
             </a>
-            <a href="/#compliance" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
-              {language === "en" ? "Compliance" : "Conformité & Risques"}
+            <a href="/#platform" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
+              {language === "en" ? "Platform" : "Plateforme"}
             </a>
             <a href="/#about" className="w-full text-gray-700 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-300 transition font-semibold text-lg" onClick={() => setOpen(false)}>
               {language === "en" ? "About Us" : "À Propos"}
