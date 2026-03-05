@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Container } from "@/components/Container";
 import { useLanguage } from "./LanguageProvider";
 import { ServerIcon, ShieldCheckIcon, CubeTransparentIcon, CpuChipIcon } from "@heroicons/react/24/outline";
@@ -7,6 +8,16 @@ import { ServerIcon, ShieldCheckIcon, CubeTransparentIcon, CpuChipIcon } from "@
 export const TechEngine = () => {
   const { language } = useLanguage();
   const isEn = language === "en";
+  const [isPulseLine, setIsPulseLine] = useState(false);
+
+  const handleNodeClick = (e: React.MouseEvent) => {
+    // Declenchons seulement l'animation, sans empêcher le lien de fonctionner.
+    if (isPulseLine) return;
+    setIsPulseLine(true);
+    setTimeout(() => {
+      setIsPulseLine(false);
+    }, 1000);
+  };
 
   const title = isEn ? "Technology Built for the Enterprise" : "Ingénierie Cyber Déployée à l'Échelle";
   const subtitle = isEn ? "The Next Generation of Managed Security" : "Le Nouveau Standard du Service Managé (MSSP)";
@@ -97,8 +108,19 @@ export const TechEngine = () => {
               </div>
 
               {/* Connecting line */}
-              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative">
-                <div className="absolute top-0 left-[-2px] w-1 h-8 bg-cyan-500 dark:bg-cyan-400 animate-[bounce_3s_infinite]"></div>
+              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative overflow-hidden">
+                {/* Default bouncing trait */}
+                <div 
+                  className={`absolute top-0 left-[-2px] w-1 bg-cyan-500 dark:bg-cyan-400 transition-all duration-300 ${
+                    isPulseLine ? 'opacity-0' : 'h-8 animate-[bounce_3s_infinite] opacity-100'
+                  }`}
+                ></div>
+                {/* On-click animated beam */}
+                <div 
+                  className={`absolute left-[-2px] w-1 bg-cyan-400 shadow-[0_0_15px_#22d3ee] transition-all duration-[800ms] ease-out ${
+                    isPulseLine ? 'top-full h-32 opacity-0' : 'top-0 h-0 opacity-100'
+                  }`}
+                ></div>
               </div>
 
               {/* Client Engagement Nodes */}
@@ -108,7 +130,7 @@ export const TechEngine = () => {
                   { label: isEn ? "SOC" : "SOC", color: "border-cyan-300 dark:border-cyan-500/40", link: "#soc" },
                   { label: isEn ? "Cloud" : "Cloud", color: "border-indigo-500/40", link: "#cloud" },
                 ].map((node, i) => (
-                  <a href={node.link} key={i} className={`p-4 bg-slate-50 dark:bg-slate-900 border ${node.color} rounded-xl flex flex-col items-center justify-center text-center hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-cyan-500/20 hover:border-cyan-400 group/node`}>
+                  <a href={node.link} key={i} onClick={handleNodeClick} className={`p-4 bg-slate-50 dark:bg-slate-900 border ${node.color} rounded-xl flex flex-col items-center justify-center text-center hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-cyan-500/20 hover:border-cyan-400 group/node`}>
                     <ShieldCheckIcon className="w-6 h-6 text-slate-600 dark:text-slate-400 mb-2 group-hover/node:text-cyan-400 transition-colors" />
                     <div className="text-slate-900 dark:text-white font-mono text-[11px] uppercase tracking-wider group-hover/node:font-bold">{node.label}</div>
                     <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-400 group-hover/node:animate-ping group-hover/node:bg-cyan-400"></div>
