@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "@/components/Container";
 import { useLanguage } from "./LanguageProvider";
 import { ServerIcon, ShieldCheckIcon, CubeTransparentIcon, CpuChipIcon } from "@heroicons/react/24/outline";
@@ -108,19 +109,24 @@ export const TechEngine = () => {
               </div>
 
               {/* Connecting line */}
-              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative overflow-hidden">
-                {/* Default bouncing trait */}
-                <div 
-                  className={`absolute left-[-2px] w-1 h-8 bg-cyan-500 dark:bg-cyan-400 transition-opacity duration-300 ${
-                    isPulseLine ? 'opacity-0' : 'top-0 animate-[bounce_3s_infinite] opacity-100'
-                  }`}
-                ></div>
-                {/* On-click animated beam */}
-                <div 
-                  className={`absolute left-[-2px] w-1 bg-cyan-400 shadow-[0_0_15px_#22d3ee] pointer-events-none transition-all duration-700 ease-in ${
-                    isPulseLine ? 'top-[100%] h-24 opacity-100' : 'top-0 h-4 opacity-0'
-                  }`}
-                ></div>
+              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative">
+                {/* Default bouncing bar — visible when idle */}
+                {!isPulseLine && (
+                  <div className="absolute top-0 left-[-2px] w-1 h-8 rounded-sm bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)] animate-[bounce_3s_infinite]" />
+                )}
+                {/* Framer-motion sliding beam — plays on click */}
+                <AnimatePresence>
+                  {isPulseLine && (
+                    <motion.div
+                      key="beam"
+                      className="absolute left-[-2px] w-1 h-8 rounded-sm bg-cyan-400 shadow-[0_0_16px_rgba(34,211,238,1)] pointer-events-none"
+                      initial={{ top: 0, opacity: 1 }}
+                      animate={{ top: "calc(100% - 32px)", opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.65, ease: "easeIn" }}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Client Engagement Nodes */}
