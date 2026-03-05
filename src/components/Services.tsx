@@ -243,7 +243,7 @@ export const Services = () => {
             <button
               key={idx}
               onClick={() => setActiveTab(idx)}
-              className={`relative group p-5 rounded-2xl border transition-all duration-300 text-left overflow-hidden ${
+              className={`relative group p-5 rounded-2xl border transition-all duration-300 text-left ${
                 isActive
                   ? "bg-cyan-50 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.2)] dark:bg-slate-800 dark:border-cyan-500/50 dark:shadow-[0_0_30px_rgba(6,182,212,0.15)] text-slate-900 dark:text-white"
                   : "bg-white/90 text-slate-900 border-slate-200/80 hover:bg-white hover:border-cyan-300/50 hover:shadow-md hover:shadow-slate-300/50 dark:text-white dark:bg-slate-900/40 dark:border-slate-700/50 dark:hover:bg-slate-800/60 shadow-sm shadow-slate-200/50"
@@ -252,8 +252,8 @@ export const Services = () => {
               {isActive && (
                 <motion.div
                   layoutId="activePillarLine"
-                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-t-2xl"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
               <div className="flex items-center gap-4">
