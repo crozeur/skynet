@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Container } from "@/components/Container";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translations } from "@/lib/translations";
+import { motion } from "framer-motion";
 import {
   CheckCircleIcon,
   ChevronRightIcon,
@@ -249,7 +250,11 @@ export const Services = () => {
               }`}
             >
               {isActive && (
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
+                <motion.div
+                  layoutId="activePillarLine"
+                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
               )}
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors flex-shrink-0 ${
