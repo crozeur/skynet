@@ -108,17 +108,17 @@ export const TechEngine = () => {
               </div>
 
               {/* Connecting line */}
-              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative overflow-hidden">
+              <div className="flex-grow w-px border-l-2 border-dashed border-cyan-200 dark:border-cyan-800/60 relative">
                 {/* Default bouncing trait */}
                 <div 
-                  className={`absolute top-0 left-[-2px] w-1 bg-cyan-500 dark:bg-cyan-400 transition-all duration-300 ${
-                    isPulseLine ? 'opacity-0' : 'h-8 animate-[bounce_3s_infinite] opacity-100'
+                  className={`absolute top-0 left-[-2px] w-1 h-8 bg-cyan-500 dark:bg-cyan-400 transition-opacity duration-300 ${
+                    isPulseLine ? 'opacity-0' : 'animate-[bounce_3s_infinite] opacity-100'
                   }`}
                 ></div>
                 {/* On-click animated beam */}
                 <div 
-                  className={`absolute left-[-2px] w-1 bg-cyan-400 shadow-[0_0_15px_#22d3ee] transition-all duration-[800ms] ease-out ${
-                    isPulseLine ? 'top-full h-32 opacity-0' : 'top-0 h-0 opacity-100'
+                  className={`absolute left-[-2px] w-1 bg-cyan-400 shadow-[0_0_15px_#22d3ee] transition-all duration-700 ease-in-out ${
+                    isPulseLine ? 'top-full h-24 opacity-0' : 'top-0 h-4 opacity-0'
                   }`}
                 ></div>
               </div>
