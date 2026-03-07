@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Container } from "@/components/Container";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { PostSummary } from "@/lib/blog";
 import { pillarToSlug, topicToSlug } from "@/lib/topicSlug";
@@ -34,10 +34,12 @@ export function BlogIndexClient({
 }) {
   const { language } = useLanguage();
   const router = useRouter();
-  const [filterTag, setFilterTag] = React.useState<string | null>(null);
-  const [filterPillar, setFilterPillar] = React.useState<string | null>(initialPillar ?? null);
-  const [filterTopic, setFilterTopic] = React.useState<string | null>(initialTopic ?? null);
-  const [searchQuery, setSearchQuery] = React.useState<string>("");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [filterTag, setFilterTag] = React.useState<string | null>(searchParams.get("tag") ?? null);
+  const [filterPillar, setFilterPillar] = React.useState<string | null>(initialPillar ?? searchParams.get("pillar") ?? null);
+  const [filterTopic, setFilterTopic] = React.useState<string | null>(initialTopic ?? searchParams.get("topic") ?? null);
+  const [searchQuery, setSearchQuery] = React.useState<string>(searchParams.get("q") ?? "");
   const [translatedPosts, setTranslatedPosts] = React.useState<Record<string, TranslatedMetadata>>({});
   const [isTranslating, setIsTranslating] = React.useState(false);
 
@@ -83,6 +85,18 @@ export function BlogIndexClient({
     setTranslatedPosts(translations);
     setIsTranslating(false);
   }, [language, posts]);
+
+  // Sync filters to URL for shareability / back-button support
+  React.useEffect(() => {
+    const params = new URLSearchParams();
+    if (filterPillar) params.set("pillar", filterPillar);
+    if (filterTopic) params.set("topic", filterTopic);
+    if (filterTag) params.set("tag", filterTag);
+    if (searchQuery) params.set("q", searchQuery);
+    const qs = params.toString();
+    const url = qs ? `${pathname}?${qs}` : pathname;
+    router.replace(url, { scroll: false });
+  }, [filterPillar, filterTopic, filterTag, searchQuery, pathname, router]);
 
   const topicChipAccent = React.useMemo(() => {
     if (!filterPillar) {
@@ -150,16 +164,21 @@ export function BlogIndexClient({
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        ({ metadata }) =>
-          metadata.title.toLowerCase().includes(query) ||
-          metadata.description.toLowerCase().includes(query) ||
-          (metadata.tags || []).some((tag) => tag.toLowerCase().includes(query))
-      );
+      filtered = filtered.filter(({ slug, metadata }) => {
+        const tr = language === "fr" ? translatedPosts[slug] : null;
+        const title = tr?.title || metadata.title;
+        const description = tr?.description || metadata.description;
+        const tags = tr?.tags || metadata.tags || [];
+        return (
+          title.toLowerCase().includes(query) ||
+          description.toLowerCase().includes(query) ||
+          tags.some((tag) => tag.toLowerCase().includes(query))
+        );
+      });
     }
 
     return filtered;
-  }, [posts, filterPillar, searchQuery]);
+  }, [posts, filterPillar, searchQuery, language, translatedPosts]);
 
   const topicCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
@@ -207,14 +226,20 @@ export function BlogIndexClient({
     }
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(({ metadata }) => 
-        metadata.title.toLowerCase().includes(query) ||
-        metadata.description.toLowerCase().includes(query) ||
-        (metadata.tags || []).some(tag => tag.toLowerCase().includes(query))
-      );
+      filtered = filtered.filter(({ slug, metadata }) => {
+        const tr = language === "fr" ? translatedPosts[slug] : null;
+        const title = tr?.title || metadata.title;
+        const description = tr?.description || metadata.description;
+        const tags = tr?.tags || metadata.tags || [];
+        return (
+          title.toLowerCase().includes(query) ||
+          description.toLowerCase().includes(query) ||
+          tags.some((tag) => tag.toLowerCase().includes(query))
+        );
+      });
     }
     return filtered;
-  }, [posts, filterPillar, filterTopic, filterTag, searchQuery]);
+  }, [posts, filterPillar, filterTopic, filterTag, searchQuery, language, translatedPosts]);
 
   const pillars = ["SOC", "AUDIT", "CLOUD"] as const;
   const pageSize = 9;
