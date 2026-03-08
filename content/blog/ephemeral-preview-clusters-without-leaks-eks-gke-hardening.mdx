@@ -1,0 +1,297 @@
+export const metadata = {
+  title: "Ephemeral Kubernetes Environments That Don’t Leak",
+  description: "Hardening EKS/GKE preview clusters against DNS exfiltration, IAM abuse, and orphaned load balancers with deterministic teardown.",
+  date: "2026-03-08",
+  pillar: "CLOUD",
+  tags: ["kubernetes", "eks", "gke", "iam", "network-policy"]
+};
+
+## Introduction
+Preview Kubernetes clusters are supposed to live for hours, but in practice they often leave behind cloud-side artifacts (public load balancers, IPs, IAM bindings, routes) that quietly become long-lived attack surface. DNS egress is the fastest path to covert exfiltration in these environments because it survives most “app-only” hardening. Over-broad **IRSA** (EKS) and **Workload Identity** (GKE) bindings turn a disposable namespace into durable cloud API access. The fix is not another checklist—it’s standardized execution: a fixed baseline enforced at admission time, and teardown that is verified against both Kubernetes and the cloud control plane.
+
+## Quick Take
+- Ephemeral clusters fail when teardown is non-deterministic: validate deletion by querying the cloud APIs, not just `kubectl`.
+- Treat DNS as an egress-controlled protocol: default-deny pod egress and only allow DNS to approved resolvers and namespaces.
+- Block privileged + network-bypassing workloads at admission: deny `hostNetwork`, `privileged`, hostPath, and unapproved `LoadBalancer` services.
+- Scope cloud identity to a namespace + serviceAccount and deny wildcards; prove it with **AWS CLI**/**gcloud** verification.
+- Continuous verification must include L4/L7 artifacts (ELB/NEG), static IPs, forwarding rules, and IAM bindings—nothing survives the TTL.
+
+## Standardized execution model for ephemeral clusters
+### What “ephemeral” really means (and why it breaks)
+Ephemeral isn’t a label; it’s a lifecycle contract:
+- The cluster is created from a known baseline.
+- Only approved resources can be created inside it.
+- The cluster is destroyed at a known time.
+- Destruction is verified by checking the control plane of record (AWS/GCP), not human assumptions.
+
+Preview environments break this contract because Kubernetes deletion is asynchronous and cloud controllers reconcile resources outside the cluster’s immediate visibility. A `Service` deletion can race with finalizers. An ingress controller may have created a separate forwarding rule. A role binding may outlive the namespace if it was attached at the cloud IAM layer.
+
+> ⚠️ Attention: If your teardown job only checks `kubectl get all -A`, you’re blind to the most expensive and most exploitable leftovers: public endpoints and IAM bindings.
+
+### Baseline objectives
+A hardened ephemeral baseline should enforce:
+- Egress control (especially DNS).
+- Admission control for privilege, networking bypass, and externally reachable services.
+- Least-privilege cloud identity with explicit scoping.
+- Deterministic teardown plus post-destroy validation against cloud APIs.
+
+In Skynet terms, this is a standardized execution pipeline: policy-as-code gates + deterministic teardown + continuous verification of cloud-side artifacts (L4/L7, IAM bindings, DNS, routes) so the environment TTL is real.
+
+## Network egress hardening: deny-by-default and constrain DNS
+### Default-deny egress, then allow only what you can justify
+For ephemeral preview clusters, start with the assumption that pods should not reach the internet except through explicitly approved paths. Implement namespace-level default deny egress and selectively open:
+- DNS to **CoreDNS** (or node-local DNS).
+- Required internal services.
+- Egress proxies if you use them.
+
+Example: Kubernetes **NetworkPolicy** to default-deny egress in a namespace:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: preview
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress: []
+```
+
+Now allow DNS to **CoreDNS** in `kube-system` (adjust labels to your distro):
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-to-coredns
+  namespace: preview
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+```
+
+This doesn’t “solve” DNS exfiltration alone, but it forces all DNS through a controlled resolver path. Without a default-deny stance, any workload can talk directly to public resolvers.
+
+> 💡 Pro-Tip: Put preview workloads in a dedicated namespace (or a dedicated cluster) and enforce the same egress posture everywhere. If you make exceptions per app, you’ll miss the one that matters.
+
+### CoreDNS guardrails: reduce external resolution surface
+Even with egress restrictions, tighten **CoreDNS** to avoid acting as a general-purpose recursive resolver for anything a pod asks.
+
+Two pragmatic guardrails:
+- Prefer forwarding to known internal resolvers rather than “whatever the node has.”
+- Block/redirect specific zones you never expect preview workloads to query.
+
+Example **CoreDNS** snippet conceptually constraining forwarding (you’ll need to merge into your existing Corefile):
+```conf
+.:53 {
+  errors
+  health
+  ready
+  kubernetes cluster.local in-addr.arpa ip6.arpa {
+    pods insecure
+    fallthrough in-addr.arpa ip6.arpa
+  }
+  # Forward only to approved resolvers (example addresses)
+  forward . 10.0.0.2 10.0.0.3 {
+    max_concurrent 1000
+  }
+  cache 30
+  reload
+}
+```
+
+> ⚠️ Attention: DNS over HTTPS/TLS from pods bypasses UDP/TCP 53 policies. Admission policies should block unapproved egress tooling (e.g., curl to known DoH endpoints) via image allowlists, proxy requirements, or explicit egress gateways—choose the control you can enforce consistently.
+
+## Admission controls: prevent privilege escalation and unmanaged exposure
+### Block host-level escape hatches
+Ephemeral clusters are often permissive because “it’s just preview.” That’s exactly when `hostNetwork`, privileged containers, and hostPath mounts become attractive. Enforce deny rules at admission with **Gatekeeper** or **Kyverno**.
+
+Example **Kyverno** policy to block `hostNetwork` and privileged containers:
+```yaml
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: deny-hostnetwork-privileged
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: block-hostnetwork
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "hostNetwork is not allowed in preview environments."
+      pattern:
+        spec:
+          =(hostNetwork): "false"
+  - name: block-privileged
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Privileged containers are not allowed in preview environments."
+      pattern:
+        spec:
+          containers:
+          - =(securityContext):
+              =(privileged): "false"
+```
+
+### Control `LoadBalancer` services and public ingress
+Orphaned external load balancers happen when:
+- A `Service` of type `LoadBalancer` is created and not removed cleanly.
+- An ingress controller allocates additional cloud resources.
+- Finalizers or controller failures prevent cleanup.
+
+Enforce a rule: `LoadBalancer` services are denied unless explicitly labeled for external exposure, and ideally only in a specific namespace.
+
+Example **Gatekeeper** constraint template concept (Rego abbreviated) to allow `LoadBalancer` only when label `exposure=approved` is present:
+```rego
+package k8sdenylb
+
+deny[msg] {
+  input.review.kind.kind == "Service"
+  input.review.object.spec.type == "LoadBalancer"
+  not input.review.object.metadata.labels.exposure
+  msg := "LoadBalancer Services require metadata.labels.exposure=approved"
+}
+
+deny[msg] {
+  input.review.kind.kind == "Service"
+  input.review.object.spec.type == "LoadBalancer"
+  input.review.object.metadata.labels.exposure != "approved"
+  msg := "LoadBalancer Services must set exposure=approved"
+}
+```
+
+> ✅ Success: When these policies are enforced, “preview” no longer implies “permissive.” Engineers can still ship quickly, but the cluster will refuse constructs that create irreversible blast radius.
+
+## IAM guardrails: least-privilege IRSA and Workload Identity that can’t sprawl
+### EKS: IRSA scoping and verification
+For EKS, **IRSA** ties an **IAM Role** to a Kubernetes service account via an OIDC trust policy. The failure mode is almost always over-broad trust or over-broad permissions.
+
+Guardrails to encode in Terraform modules:
+- Trust policy restricted to a specific OIDC provider, namespace, and serviceAccount.
+- No wildcard `system:serviceaccount:*:*` subjects.
+- Permission policies bounded to the minimum API set; avoid `*` actions and `*` resources unless the AWS API forces it.
+
+Verification commands (use these in teardown validation and in pre-flight checks):
+```bash
+# Inspect policies attached to a role (permissions surface)
+aws iam list-attached-role-policies --role-name <role>
+aws iam list-role-policies --role-name <role>
+
+# Inspect the trust policy (who can assume it)
+aws iam get-role --role-name <role> --query 'Role.AssumeRolePolicyDocument'
+```
+
+> ⚠️ Attention: A perfectly scoped Kubernetes RBAC model does not constrain cloud API access granted via IRSA. Treat the IAM role as the perimeter.
+
+### GKE: Workload Identity scoping and verification
+In GKE, **Workload Identity** maps a Kubernetes service account to a Google service account (GSA). Common preview mistakes:
+- Binding `roles/iam.workloadIdentityUser` broadly to all KSAs in the cluster.
+- Reusing a privileged GSA across ephemeral environments.
+
+Verification commands:
+```bash
+# Verify IAM policy bindings on the Google service account
+gcloud iam service-accounts get-iam-policy <gsa-email>
+
+# Identify who can impersonate / use the GSA
+gcloud iam service-accounts get-iam-policy <gsa-email> \
+  --flatten="bindings[].members" \
+  --format="table(bindings.role, bindings.members)"
+```
+
+Hard rule for previews: bind the GSA only to the exact KSA identity string for the namespace/serviceAccount you expect.
+
+> 💡 Pro-Tip: Keep preview GSAs/roles separate from non-preview. If you can’t delete the IAM principal at teardown, you don’t have an ephemeral environment.
+
+## Deterministic teardown with post-destroy validation (AWS + GCP)
+### Teardown is a workflow, not a command
+A single `terraform destroy` (or cluster delete) is not proof. Deterministic teardown includes:
+- Deleting Kubernetes resources that create cloud artifacts (Ingress, `LoadBalancer` services) before cluster deletion.
+- Waiting for controllers/finalizers to complete.
+- Querying cloud APIs to confirm there are no residual resources.
+
+Example pre-teardown checks:
+```bash
+# Identify external services and ingresses that may allocate cloud resources
+kubectl get svc -A -o wide
+kubectl get ingress -A
+
+# Force-delete stuck services only when you understand the blast radius
+kubectl delete svc -n <ns> <name> --wait=true
+```
+
+### AWS validation: prove there are no leftover entry points
+Run these after destroy (or in a CI job that fails the pipeline if anything remains):
+```bash
+# Load balancers (ALB/NLB)
+aws elbv2 describe-load-balancers --query 'LoadBalancers[].{Name:LoadBalancerName,DNS:DNSName,State:State.Code}'
+
+# Elastic IPs (a frequent “quiet leftover”)
+aws ec2 describe-addresses --query 'Addresses[].{PublicIp:PublicIp,AllocationId:AllocationId,InstanceId:InstanceId}'
+
+# Optional: target groups can outlive LBs depending on deletion ordering
+aws elbv2 describe-target-groups --query 'TargetGroups[].{Name:TargetGroupName,Arn:TargetGroupArn}'
+```
+
+Common failure modes and remediation:
+- LB remains: find the originating `Service`/Ingress and confirm it was deleted before cluster deletion; check for finalizers on the object.
+- EIP remains: identify what allocated it (ingress controller, manual reservation) and release it explicitly.
+
+### GCP validation: confirm no forwarding rules / reserved addresses
+For GKE environments, verify L4/L7 artifacts explicitly:
+```bash
+# Forwarding rules (L4/L7 entry points)
+gcloud compute forwarding-rules list
+
+# Backend services (often tied to HTTP(S) load balancing)
+gcloud compute backend-services list
+
+# Reserved external addresses
+gcloud compute addresses list
+```
+
+> ✅ Success: A teardown that includes cloud API validation gives you an objective pass/fail signal: the preview environment either leaves nothing behind or it doesn’t ship.
+
+## Checklist
+- [ ] Enforce namespace-level default-deny egress **NetworkPolicy** for all preview namespaces.
+- [ ] Allow DNS only to **CoreDNS** (or node-local DNS) and avoid direct public resolver access.
+- [ ] Constrain **CoreDNS** forwarding to approved resolvers; avoid inheriting node `/etc/resolv.conf` without review.
+- [ ] Enforce admission policies (**Gatekeeper**/**Kyverno**) to deny `hostNetwork`, privileged pods, and risky host mounts.
+- [ ] Deny `Service.type=LoadBalancer` unless explicitly labeled/approved (and ideally limited to one namespace).
+- [ ] Scope **IRSA** trust policies to exact namespace + serviceAccount; deny wildcard subjects.
+- [ ] Scope **Workload Identity** bindings to exact KSA member strings; do not reuse privileged GSAs.
+- [ ] Add teardown ordering: delete Ingress + `LoadBalancer` services before cluster deletion.
+- [ ] Post-destroy validate AWS: **AWS CLI** checks for **ELBv2**, target groups, and EIPs return empty.
+- [ ] Post-destroy validate GCP: **gcloud** checks for forwarding rules, backend services, and reserved addresses return empty.
+
+## FAQ
+### How do we stop DNS exfiltration without breaking developer workflows?
+<p>Start with default-deny egress and allow DNS only to **CoreDNS**; then constrain **CoreDNS** forwarding to approved resolvers. If workloads still need controlled internet access, route it through a deliberate egress path (proxy/egress gateway) and keep DNS centralized so you can enforce policy consistently.</p>
+
+### What’s the minimum viable guardrail for IRSA/Workload Identity in previews?
+<p>Make identity bindings non-reusable and tightly scoped: one role/GSA per preview environment (or per app), bound only to the expected namespace and serviceAccount. Then prove it in pipelines with **AWS CLI**/**gcloud** commands that inspect both permission policies and trust/binding policies.</p>
+
+### Why isn’t deleting the Kubernetes cluster enough to guarantee teardown?
+<p>Kubernetes controllers create and manage cloud resources asynchronously; deletion can race with finalizers, controller failures, or ordering issues. The authoritative record for load balancers, forwarding rules, static IPs, and IAM bindings is the cloud control plane, so teardown is only complete when cloud API queries confirm there are zero residual resources.</p>
