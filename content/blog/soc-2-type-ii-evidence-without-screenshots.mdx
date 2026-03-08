@@ -1,0 +1,312 @@
+export const metadata = {
+  title: "SOC 2 Type II Evidence Without Screenshots: Reproducible Control Proof Using Terraform Plans, CloudTrail Digests, and Build/Deploy Attestations",
+  description: "Replace ad-hoc screenshots with reproducible, verifiable evidence bundles tied to control IDs across the full SOC 2 Type II review period.",
+  date: "2026-03-08",
+  pillar: "AUDIT",
+  tags: ["SOC 2", "Audit Evidence", "Terraform", "CloudTrail", "Supply Chain"]
+};
+
+## Introduction
+SOC 2 Type II audits stall when evidence can’t be reproduced across the full review period—especially in IaC-driven environments where “what existed” matters as much as “what exists.” Screenshots and one-off exports are brittle, hard to validate, and easy to challenge because they don’t prove continuous operation. The fastest path is to treat evidence as verifiable artifacts: deterministic **Terraform** plan/apply outputs, immutable audit-log digests from **AWS CloudTrail**, and signed build/deploy attestations from your CI/CD system. This post lays out a control-to-artifact blueprint, export commands, and an auditor re-run playbook that yields an auditor-ready package with minimal back-and-forth.
+
+## Quick Take
+- Evidence should be reproducible: if an auditor can’t re-run it, it’s weak.
+- Map each control to a minimal set of artifacts (Git metadata, CI logs, IaC plan JSON, audit-log query outputs).
+- Prefer immutable sources: append-only logs, digest files, and signature verification.
+- Package evidence as a deterministic bundle: fixed paths, hashes, and a single index mapping files to control IDs.
+- Give auditors a re-run playbook: read-only steps to reproduce, validate chains, and detect tampering.
+
+## Evidence Architecture: From “Screenshots” to Deterministic Artifacts
+### What “reproducible evidence” means in practice
+Reproducible evidence has three properties:
+
+1) Deterministic generation: the same inputs yield the same outputs (or explainable diffs).
+2) Verifiability: artifacts can be hashed and signature-verified.
+3) Traceability: each artifact is tied to a control ID, a time window, and the environment/account.
+
+A practical evidence bundle for Type II should include:
+- IaC proofs: **Terraform** plan/apply logs, `terraform show -json`, provider lockfiles, and state backends metadata.
+- Audit-log proofs: query outputs and digest validation for **AWS CloudTrail** (or equivalent cloud audit logs).
+- Delivery proofs: CI job logs plus signed build/deploy attestations bound to commit SHAs and environments.
+
+> ⚠️ Attention: If your evidence cannot show operation “throughout the period,” auditors will ask for sampling proofs (multiple dates) and compensating details. Design the bundle to cover the entire window (daily/weekly queries, continuous digests) rather than point-in-time exports.
+
+### Standardized evidence bundle layout (auditor-friendly)
+Use a fixed folder structure so the package is navigable and scriptable:
+
+```
+/evidence
+  /index
+    evidence-index.csv
+    controls-mapping.md
+    rerun-playbook.md
+  /iac
+    /terraform
+      README.md
+      providers.lock.hcl
+      plan
+        2026-02-01.prod.tfplan
+        2026-02-01.prod.plan.json
+      apply
+        2026-02-01.prod.apply.log
+  /audit-logs
+    /aws
+      cloudtrail-lake
+        queries
+          cc7-authfailures.sql
+        outputs
+          2026-02.authfailures.json
+      cloudtrail-digest
+        2026-02.digest-verification.txt
+  /cicd
+    /attestations
+      2026-02-01.build.attestation.json
+      2026-02-01.deploy.attestation.json
+    /job-logs
+      2026-02-01.build.log
+  /integrity
+    manifest.sha256
+    manifest.sha256.asc
+```
+
+The key is that every file is:
+- named with a date range or run date
+- tied to an environment/account
+- referenced in `evidence-index.csv`
+
+## Control-to-Artifact Mapping Blueprint (CC6/CC7/CC8)
+### Minimal artifacts that carry maximum audit weight
+The fastest way to avoid over-collection is to map controls to the fewest artifacts that can be independently verified.
+
+Below is a pragmatic blueprint (adapt control IDs to your own control set):
+
+### CC6 (Logical Access)
+Target: prove access is authorized, enforced, and reviewable.
+
+Recommended minimal artifacts:
+- Git merge metadata for access policy changes (PR title, approvers, commit SHA).
+- CI job logs showing policy tests and deployment.
+- **Terraform** plan JSON proving enforcement (SSO-only, MFA, role boundaries).
+- Cloud audit-log query output showing successful/failed auth patterns and admin actions.
+
+Example: capture Git merge metadata (provider-agnostic):
+
+```
+# Git: capture commit and merge context
+git log -1 --pretty=fuller > evidence/cicd/job-logs/commit-metadata.txt
+
+git show --name-status --pretty=fuller HEAD > evidence/cicd/job-logs/commit-diff.txt
+```
+
+### CC7 (System Operations / Detection)
+Target: prove you can detect and investigate security-relevant events.
+
+Recommended minimal artifacts:
+- Immutable audit-log configuration evidence (retention, write-once controls where available).
+- Period-wide queries for auth failures, privilege escalations, and key config changes.
+- Digest verification output showing logs weren’t altered.
+
+### CC8 (Change Management)
+Target: prove changes are controlled, reviewed, and deployed consistently.
+
+Recommended minimal artifacts:
+- PR approvals + branch protection evidence (exported settings or IaC config).
+- CI pipeline run record (job IDs, timestamps, result, artifact digests).
+- Build/deploy attestation tied to commit SHA and environment.
+- **Terraform** plan/apply artifacts for infrastructure changes.
+
+> 💡 Pro-Tip: Don’t attach raw dashboards. Export query outputs (JSON/CSV) plus the exact query text and the run timestamp. Auditors can re-run queries; screenshots can’t be validated.
+
+## Implementation Snippets + Export Commands (IaC + Audit Logs + Integrity)
+### Enforce access controls in Terraform (illustrative patterns)
+The exact resources vary, but the evidence pattern is consistent: policy-as-code + plan JSON + apply logs.
+
+Example: enforce tag-based ownership and session controls (generic **Terraform** HCL pattern):
+
+```
+# variables.tf
+variable "environment" { type = string }
+
+# locals.tf
+locals {
+  required_tags = {
+    "owner"       = "security"
+    "environment" = var.environment
+  }
+}
+
+# Example module interface to standardize tagging
+module "tags" {
+  source = "./modules/standard-tags"
+  tags   = local.required_tags
+}
+```
+
+Capture the high-value artifacts:
+
+```
+# Create a plan file (binary) and a machine-readable JSON rendering
+terraform init -lockfile=readonly
+terraform plan -out evidence/iac/terraform/plan/2026-02-01.prod.tfplan
+terraform show -json evidence/iac/terraform/plan/2026-02-01.prod.tfplan \
+  > evidence/iac/terraform/plan/2026-02-01.prod.plan.json
+
+# Apply (when appropriate) and capture logs (stdout/stderr)
+terraform apply -auto-approve evidence/iac/terraform/plan/2026-02-01.prod.tfplan \
+  | tee evidence/iac/terraform/apply/2026-02-01.prod.apply.log
+```
+
+> ⚠️ Attention: For audit evidence generation, re-runs should be read-only. Use plan-only reproduction for auditors (no apply), and include the exact provider versions (`.terraform.lock.hcl`) to avoid drift from provider changes.
+
+### Query and export audit logs (AWS + Azure examples)
+For **AWS CloudTrail Lake**, store the query text and export the output:
+
+```
+# Start a CloudTrail Lake query
+aws cloudtrail start-query \
+  --event-data-store arn:aws:cloudtrail:REGION:ACCOUNT:eventdatastore/STORE_ID \
+  --query-statement "SELECT eventTime, eventName, userIdentity.arn, sourceIPAddress \
+    FROM STORE_ID \
+    WHERE eventTime >= '2026-02-01T00:00:00Z' AND eventTime < '2026-03-01T00:00:00Z' \
+      AND eventName IN ('ConsoleLogin','AssumeRole','CreateUser','AttachRolePolicy')" \
+  > evidence/audit-logs/aws/cloudtrail-lake/outputs/2026-02.query-start.json
+
+# Then retrieve results (use the returned QueryId)
+aws cloudtrail get-query-results \
+  --query-id QUERY_ID \
+  > evidence/audit-logs/aws/cloudtrail-lake/outputs/2026-02.access-events.json
+```
+
+For **Azure Monitor** Activity Log export (subscription scope example):
+
+```
+az monitor activity-log list \
+  --start-time 2026-02-01T00:00:00Z \
+  --end-time   2026-03-01T00:00:00Z \
+  --status Succeeded Failed \
+  --output json \
+  > evidence/audit-logs/azure/activity-log/2026-02.activity.json
+```
+
+### Hash and sign the evidence bundle (tamper detection)
+Use a manifest and sign it. This is simple, fast, and high impact.
+
+```
+# Create a deterministic hash manifest (run from /evidence)
+cd evidence
+find . -type f -not -path "./integrity/*" -print0 \
+  | sort -z \
+  | xargs -0 sha256sum \
+  > integrity/manifest.sha256
+
+# Sign the manifest (GPG)
+gpg --armor --detach-sign integrity/manifest.sha256
+mv integrity/manifest.sha256.asc integrity/manifest.sha256.asc
+```
+
+> ✅ Success: An auditor can verify integrity by re-hashing files and verifying the detached signature, proving the package wasn’t modified after generation.
+
+## Auditor Re-Run Playbook: Deterministic Verification Without Elevated Access
+### Reproduce Terraform plans in read-only mode
+Provide auditors (or internal audit) with a read-only process that produces the same `terraform show -json` output, given the same commit and lockfile.
+
+Include these steps in `rerun-playbook.md`:
+
+```
+# 1) Checkout the exact commit
+git checkout <COMMIT_SHA>
+
+# 2) Pin providers exactly
+terraform init -lockfile=readonly
+
+# 3) Run a read-only plan
+terraform plan -refresh=true -out /tmp/audit.tfplan
+
+# 4) Render JSON and compare hashes
+terraform show -json /tmp/audit.tfplan > /tmp/audit.plan.json
+sha256sum /tmp/audit.plan.json
+```
+
+Guidance to reduce false diffs:
+- Use the same workspace/environment variables.
+- Ensure the same backend and state snapshot are referenced (document backend config, not secrets).
+- If drift exists, treat it as a finding: the point is to detect it, not hide it.
+
+### Validate CloudTrail digest chains and query provenance
+Your goal is to show two things:
+- the query ran against the right data store and time window
+- the log integrity mechanism was validated for the period
+
+Document:
+- the Event Data Store ARN
+- the query statement text (version-controlled)
+- the query run timestamp and QueryId
+- digest verification output (command + captured stdout)
+
+Even when the digest verification mechanism differs by service, preserve the pattern: “command used + output captured + hashed + signed.”
+
+### Validate build/deploy attestations and link them to changes
+Attestations should bind:
+- commit SHA
+- build artifact digest (e.g., container image digest)
+- environment (dev/stage/prod)
+- pipeline run ID
+
+Example attestation verification workflow (generic):
+
+```
+# Verify the attestation signature (tooling varies; keep the command + output)
+cat evidence/cicd/attestations/2026-02-01.deploy.attestation.json | jq . \
+  > /tmp/attestation.normalized.json
+sha256sum /tmp/attestation.normalized.json
+```
+
+> 💡 Pro-Tip: Normalize JSON (e.g., `jq -S`) before hashing to avoid formatting differences producing different hashes.
+
+## Skynet Execution Model: Zero-Trace Evidence Bundles in Hours
+### What “standardized execution” changes for audits
+Speed comes from eliminating bespoke evidence collection and making the output format identical across accounts/environments:
+- fixed evidence structure
+- fixed control-to-artifact mapping template
+- fixed export commands and query library
+- fixed integrity manifest + signature step
+
+Skynet’s execution engine produces a “zero-trace” bundle: proofs are derived from existing systems-of-record (IaC repos, audit logs, CI/CD) without requiring fragile screenshot workflows. The deliverable is an auditor-ready package with a single index mapping every artifact to a control ID and a re-run playbook auditors can execute.
+
+> ⚠️ Attention: Keep secrets out of evidence. Redact tokens, account IDs where required, and any sensitive fields in exported logs. Your index should reference redaction rules and show that hashes/signatures were computed after redaction.
+
+### The single index file auditors actually use
+Create an `evidence-index.csv` with columns like:
+- control_id
+- artifact_path
+- artifact_type
+- period_start
+- period_end
+- source_system
+- generation_command
+- hash (sha256)
+
+This converts “a folder of files” into a navigable control proof map.
+
+## Checklist
+- [ ] Define the audit period window and standardize timestamps to UTC in all artifacts.
+- [ ] Create a control-to-artifact map for CC6/CC7/CC8 with minimal, high-signal artifacts.
+- [ ] Store all query texts (CloudTrail Lake/Azure Activity) as version-controlled files.
+- [ ] Generate **Terraform** plan files and `terraform show -json` outputs for each sampled date/environment.
+- [ ] Capture CI job logs and merge metadata for every infrastructure/security policy change.
+- [ ] Export audit-log query results for the full period (monthly/weekly slices as needed).
+- [ ] Validate and capture audit-log integrity outputs (digest/immutability verification) for the same period.
+- [ ] Normalize and hash key JSON outputs (e.g., `jq -S`) to avoid formatting drift.
+- [ ] Build `manifest.sha256` for the entire evidence tree and sign it with **GPG**.
+- [ ] Produce `evidence-index.csv` mapping every file to control IDs, time window, and generation commands.
+- [ ] Include an auditor re-run playbook with read-only reproduction steps and expected outputs.
+
+## FAQ
+### How do we handle infrastructure drift during the Type II period?
+<p>Don’t hide drift—surface it. Use period-based plan artifacts and audit-log queries to show what changed, when it changed, and whether the change followed your approval and deployment process. If drift appears in a read-only re-run, document it as an exception with an associated remediation ticket and link that record in the evidence index.</p>
+
+### What if auditors ask for “screenshots anyway”?
+<p>Offer reproducible exports plus a re-run playbook. When a request is purely about readability, generate a human-readable render from the same source artifact (for example, a summarized view of plan JSON or a filtered audit-log JSON). The key is that any readable view must be derived from the hashed/signed canonical artifacts.</p>
+
+### How much evidence is “enough” without over-collecting?
+<p>Enough evidence is the smallest set that proves operation across the period and can be independently validated. Start with control-to-artifact mapping, then collect only artifacts that (a) are immutable or integrity-checked, (b) tie directly to change and access events, and (c) can be re-generated or re-queried deterministically. If a file can’t be explained, re-run, and mapped to a control ID, it’s usually noise.</p>
