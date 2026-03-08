@@ -1,0 +1,274 @@
+export const metadata = {
+  title: "Hunting Entra ID Token Replay in Hybrid Join Environments: Correlating Sign-In Logs, CloudTrail, and Endpoint Artifacts in <2 Hours",
+  description: "Correlate Entra sign-ins, Conditional Access, cloud audit trails, and endpoint artifacts to confirm token replay and contain it fast.",
+  date: "2026-03-08",
+  pillar: "SOC",
+  tags: ["Entra ID", "Token Replay", "CloudTrail", "Microsoft Defender", "OSQuery"]
+};
+
+## Introduction
+Token replay in hybrid-joined estates is rarely “in one place”: the identity event is in **Entra ID**, the blast radius appears in **AWS CloudTrail**/**Azure Activity Logs**, and the proof lives on endpoints. The cost is time—teams burn days exporting logs, normalizing fields, and building a defensible timeline before they can revoke sessions with confidence. Skynet’s approach is a time-boxed, standardized hunt pipeline that produces a correlated findings pack (queries, joins, and endpoint validation) in under two hours. The goal is deterministic: confirm or disprove replay, enumerate impacted identities/sessions, and ship containment steps that won’t break production.
+
+## Quick Take
+- Token replay often presents as “impossible travel” without the usual MFA/CA friction because the attacker is reusing existing session material, not re-authenticating.
+- Treat **Entra ID** Sign-in Logs + Conditional Access as the source of truth for session identifiers and correlation IDs; everything else should join back to those.
+- Use stable join keys across clouds: role session name/tags, user agent + TLS fingerprint hints, and correlation IDs carried into downstream API calls.
+- Validate on endpoints quickly with an **osquery** pack focused on browser/WAM artifacts and suspicious access timestamps—don’t guess from cloud logs alone.
+- Containment is a sequence: revoke sessions, tighten high-risk Conditional Access scopes, and lock down app registrations/service principals tied to the replayed sessions.
+
+## Standardized Hunt Pipeline (Time-Boxed)
+### 1) Establish the minimum viable timeline (MVTL)
+Your first 10–15 minutes should yield a bounded window and a small candidate identity set. The MVTL is:
+- Start/end time window (UTC)
+- Candidate users/service principals
+- Suspect apps (resource, client app, appId)
+- IPs/ASNs and geo deltas
+
+> ⚠️ Attention: Do not start by exporting “everything.” Token replay hunts fail by over-collecting early and under-correlating later.
+
+### 2) Export and normalize identity telemetry
+Pull **Entra ID** sign-in and Conditional Access decision data first, because it contains the correlation primitives you will need later (sign-in correlation ID, resource, client app, device identifiers, CA policies evaluated).
+
+If you’re using **Microsoft Sentinel**, a practical normalization pattern is to project a compact schema that you can reuse across joins.
+
+```kql
+// Entra sign-ins: compact projection for correlation
+let start = ago(48h);
+let end = now();
+SigninLogs
+| where TimeGenerated between (start .. end)
+| project
+    TimeGenerated,
+    UserPrincipalName,
+    UserId,
+    AppDisplayName,
+    AppId,
+    ResourceDisplayName,
+    IPAddress,
+    Location,
+    UserAgent,
+    ClientAppUsed,
+    CorrelationId,
+    AuthenticationRequirement,
+    ConditionalAccessStatus,
+    DeviceDetail,
+    Status
+| extend
+    DeviceId = tostring(DeviceDetail.deviceId),
+    JoinType = tostring(DeviceDetail.trustType)
+| order by TimeGenerated desc
+```
+
+For **Microsoft Defender** Advanced Hunting, focus on rapid identity scoping and “same identity, divergent network.”
+
+```kusto
+// Defender Advanced Hunting: sign-in anomalies pivot
+AADSignInEventsBeta
+| where Timestamp > ago(48h)
+| project Timestamp, AccountUpn, AppDisplayName, IPAddress, UserAgent, CorrelationId,
+          ConditionalAccessStatus, DeviceId, AuthenticationRequirement
+| summarize
+    FirstSeen=min(Timestamp),
+    LastSeen=max(Timestamp),
+    IPs=make_set(IPAddress, 50),
+    UserAgents=make_set(UserAgent, 20),
+    Devices=make_set(DeviceId, 50)
+  by AccountUpn, AppDisplayName
+| where array_length(IPs) >= 2 and array_length(Devices) >= 2
+| order by LastSeen desc
+```
+
+> 💡 Pro-Tip: For replay suspicion, prioritize cases where the same account/app shows rapid IP/geo churn but Conditional Access outcomes remain consistently “success” (no fresh challenge) and client app/user agent looks “too stable.”
+
+### 3) Define replay indicators you can prove
+In a hybrid join environment, “impossible travel” by itself is not proof. You want indicators that are defensible:
+- Same sign-in correlation ID appearing across disparate source IPs (rare, but high signal when present)
+- Repeated session identifiers downstream (e.g., role session name/tag reused across regions/IPs)
+- Anomalous device IDs (deviceId flips while user agent stays constant)
+- Token family reuse symptoms (practically, clusters of successful access without corresponding interactive sign-ins)
+
+> ✅ Success: You have a shortlist of identities and a 2–6 hour window where the anomalies cluster.
+
+## Cross-Cloud Correlation: Entra ↔ AWS ↔ Azure
+### 1) AWS CloudTrail pivots for assumed role activity
+If Entra-fed identities are accessing AWS via federated flows, your fastest CloudTrail pivot is **AssumeRole** and friends (depending on your federation design).
+
+```bash
+# AWS: look up AssumeRole events in a time window
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRole \
+  --start-time "2026-03-06T00:00:00Z" \
+  --end-time "2026-03-08T00:00:00Z" \
+  --max-results 50 \
+  --output json > assume_role_events.json
+```
+
+From there, extract high-value join keys: role session name, source IP, user agent, and any session tags your org sets.
+
+```bash
+# Parse CloudTrailEvent blobs for correlation fields
+jq -r '.Events[] | .CloudTrailEvent | fromjson | {
+  eventTime, eventName, sourceIPAddress, userAgent,
+  userIdentity: .userIdentity,
+  requestParameters: .requestParameters,
+  additionalEventData: .additionalEventData
+}' assume_role_events.json > assume_role_parsed.json
+```
+
+### 2) Azure Activity Log pivots for management-plane impact
+For Azure, focus on management-plane actions that indicate the actor is turning access into persistence: role assignments, app/service principal changes, key vault access policy edits, or network/security control changes.
+
+```bash
+# Azure: export Activity Log for a bounded window
+az monitor activity-log list \
+  --start-time 2026-03-06T00:00:00Z \
+  --end-time 2026-03-08T00:00:00Z \
+  --max-events 5000 \
+  --output json > azure_activity.json
+```
+
+Then filter on operations you actually care about (example: role assignment writes).
+
+```bash
+jq -r '.[] | select(.operationName.value | test("roleAssignments/write"; "i")) | {
+  eventTimestamp, caller, correlationId, operationName: .operationName.value,
+  status: .status.value, resourceGroupName, resourceId
+}' azure_activity.json > azure_role_assignments.json
+```
+
+### 3) Join strategy: deterministic keys first, heuristics second
+Do not start with fuzzy matching. Use deterministic joins where possible:
+- **Entra ID** CorrelationId ↔ Azure Activity Log correlationId
+- AWS role session name/tag ↔ identity attributes you control (naming conventions, tag values)
+
+When deterministic keys aren’t available end-to-end, add controlled heuristics:
+- Time proximity (e.g., ±5 minutes)
+- Same user agent string
+- Same IP or same /24 (only as a weak signal)
+
+A lightweight join approach using Python keeps this fast and reviewable.
+
+```python
+import json
+
+def load_jsonl_or_json(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        raw = f.read().strip()
+        if raw.startswith('['):
+            return json.loads(raw)
+        # JSONL fallback
+        return [json.loads(line) for line in raw.splitlines() if line.strip()]
+
+entra = load_jsonl_or_json('entra_signins.json')
+azure = load_jsonl_or_json('azure_role_assignments.json')
+
+azure_by_corr = {}
+for e in azure:
+    cid = (e.get('correlationId') or '').lower()
+    if cid:
+        azure_by_corr.setdefault(cid, []).append(e)
+
+matches = []
+for s in entra:
+    cid = (s.get('CorrelationId') or s.get('correlationId') or '').lower()
+    if cid in azure_by_corr:
+        for a in azure_by_corr[cid]:
+            matches.append({
+                "entra_time": s.get('TimeGenerated') or s.get('timeGenerated'),
+                "upn": s.get('UserPrincipalName') or s.get('userPrincipalName'),
+                "entra_ip": s.get('IPAddress') or s.get('ipAddress'),
+                "user_agent": s.get('UserAgent') or s.get('userAgent'),
+                "azure_time": a.get('eventTimestamp'),
+                "azure_op": a.get('operationName')
+            })
+
+print(json.dumps(matches[:50], indent=2))
+```
+
+> 💡 Pro-Tip: If you can’t join AWS events cleanly, enforce session tag hygiene going forward (e.g., tag assumed-role sessions with an Entra correlation ID or a deterministic user/session handle). That turns a hard hunt into a trivial lookup next time.
+
+## Endpoint Validation: Proving Replay vs. Normal Roaming
+### 1) What you’re trying to confirm on disk
+Cloud telemetry can tell you “this looks wrong.” Endpoint artifacts tell you “this is how it happened.” For Entra token replay patterns, the useful evidence often sits in:
+- Browser profile databases and recent access timestamps
+- Windows Web Account Manager (WAM) broker artifacts and related traces
+- Suspicious process ancestry around browsers or token brokers
+
+> ⚠️ Attention: Handle endpoint artifacts carefully—some are volatile and some are user-privacy sensitive. Keep the collection minimal and scoped to the affected users/devices.
+
+### 2) OSQuery pack: targeted and fast
+Below is a minimal **osquery** pack structure to flag suspicious access patterns to browser credential/token-adjacent stores and high-signal directories. Adjust paths for your supported browsers and profiles.
+
+```json
+{
+  "queries": {
+    "chrome_login_data_recent_access": {
+      "query": "select path, datetime(atime,'unixepoch') as last_access, datetime(mtime,'unixepoch') as last_modified from file where path like 'C:\\\\Users\\\\%\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\User Data\\\\%\\\\Login Data' and (strftime('%s','now') - atime) < 86400;",
+      "interval": 3600
+    },
+    "edge_login_data_recent_access": {
+      "query": "select path, datetime(atime,'unixepoch') as last_access, datetime(mtime,'unixepoch') as last_modified from file where path like 'C:\\\\Users\\\\%\\\\AppData\\\\Local\\\\Microsoft\\\\Edge\\\\User Data\\\\%\\\\Login Data' and (strftime('%s','now') - atime) < 86400;",
+      "interval": 3600
+    },
+    "recent_browser_process_tree": {
+      "query": "select p.pid, p.name, p.path, p.cmdline, p.parent, datetime(p.start_time,'unixepoch') as start_time from processes p where p.name in ('chrome.exe','msedge.exe','firefox.exe') order by p.start_time desc limit 200;",
+      "interval": 3600
+    }
+  }
+}
+```
+
+This isn’t about “catching everything.” It’s about quickly answering:
+- Did the suspect device access credential/token-adjacent stores shortly before the anomalous cloud activity?
+- Are there unexpected parent processes spawning the browser?
+- Do access timestamps align with the sign-in anomaly window?
+
+### 3) Containment steps that won’t waste cycles
+Once you have correlation + endpoint confirmation, containment should be precise:
+- Revoke user sessions and refresh tokens for the impacted identities in **Entra ID**
+- Force credential reset only where compromise is likely (avoid blanket disruption)
+- Tighten Conditional Access for the targeted apps (require device compliance, restrict legacy auth, enforce sign-in frequency where appropriate)
+- Review app registrations/service principals with permissions used during the window; rotate secrets/certs where needed
+
+> ✅ Success: You can point to (a) the identity event, (b) the cloud action(s) taken with that session context, and (c) the endpoint evidence that explains the access path.
+
+## Skynet Execution Output: What “Done” Looks Like
+### 1) The deterministic findings pack
+A completed hunt should produce artifacts that another engineer can rerun without interpretation:
+- A bounded timeline (UTC) with key pivots
+- A list of impacted identities, apps, and sessions
+- Copy/paste **KQL** and **Microsoft Defender** Advanced Hunting queries used for scoping
+- **AWS CLI**/**Azure CLI** commands used for the cross-cloud pivots
+- Endpoint **osquery** results for affected hosts
+
+### 2) Decision-ready conclusions
+Your conclusion should be binary wherever possible:
+- Confirmed token replay vs. unconfirmed anomaly
+- Confirmed cloud impact vs. no downstream activity observed
+- Confirmed endpoint access path vs. no supporting artifacts
+
+> 💡 Pro-Tip: If you can’t reach a binary conclusion, document exactly which missing telemetry prevents it (e.g., absent CloudTrail data events, incomplete Entra sign-in retention, no endpoint visibility). That becomes your hardening backlog.
+
+## Checklist
+- [ ] Bound the investigation window (UTC) and freeze it for all exports
+- [ ] Export **Entra ID** sign-in logs with CorrelationId, user agent, deviceId, and Conditional Access outcomes
+- [ ] Identify candidates: same user/app with divergent IP/ASN and inconsistent device IDs
+- [ ] Pull Conditional Access evaluation details for the same events and verify enforcement gaps
+- [ ] Run **AWS CloudTrail** lookup for **AssumeRole** (and any federation-relevant events) in the same window
+- [ ] Export **Azure Activity Logs** and filter to high-impact operations (RBAC, app identity, key vault, network/security)
+- [ ] Perform deterministic joins first (CorrelationId ↔ correlationId; session name/tags ↔ known conventions)
+- [ ] Apply controlled heuristics only when deterministic keys are absent (time proximity + user agent)
+- [ ] Execute an endpoint **osquery** pack on affected devices for browser/WAM-adjacent artifact access
+- [ ] Revoke sessions and refresh tokens for impacted identities; document exactly what was revoked
+- [ ] Tighten Conditional Access for the specific high-risk apps and flows observed
+- [ ] Produce a rerunnable findings pack (queries, commands, join logic, and timelines)
+
+## FAQ
+### What’s the fastest reliable signal that token replay is happening?
+<p>Look for successful access patterns that don’t line up with fresh interactive authentication: the same identity/app succeeding from divergent networks with stable client characteristics (user agent) and weak or unchanged Conditional Access outcomes, then validate with downstream cloud activity and endpoint artifact access in the same window.</p>
+
+### How do I avoid spending days normalizing logs across Entra, AWS, and Azure?
+<p>Start from Entra correlation primitives (CorrelationId, appId, client app, user agent, deviceId) and only export the minimum fields you need. Join deterministically where possible (Entra CorrelationId to Azure correlationId; AWS session tags/session name to your naming conventions), and keep heuristics time-boxed and explicitly documented.</p>
+
+### What should I change after a confirmed replay to reduce recurrence?
+<p>Revoke sessions for the impacted identities, constrain the specific apps/flows with tighter Conditional Access (device-bound access where feasible, reduced sign-in persistence for high-risk apps), and improve joinability by standardizing AWS session tagging and ensuring cloud audit trails retain the fields required for deterministic correlation.</p>
