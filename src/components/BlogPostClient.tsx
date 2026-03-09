@@ -368,7 +368,7 @@ export function BlogPostClient({ post, relatedPosts = [] }: { post: PostData, re
             )}
             
             {/* Divider */}
-            <div className="mt-8 h-0.5 w-16 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full" />
+            <div className="mt-8 h-px w-full bg-gradient-to-r from-blue-600/50 via-cyan-500/30 to-transparent" />
           </header>
 
           {/* Article Content */}

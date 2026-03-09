@@ -273,7 +273,7 @@ export function BlogIndexClient({
 
       <Container className="relative py-12 sm:py-20 lg:py-24">
         {/* Modern Hero Section */}
-        <div className="relative mb-20">
+        <div className="relative mb-12">
           {/* High-tech background accents */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-600/20 via-cyan-400/10 to-blue-600/20 blur-[100px] rounded-full pointer-events-none"></div>
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
@@ -301,7 +301,7 @@ export function BlogIndexClient({
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 mb-12 max-w-2xl mx-auto font-semibold tracking-wide leading-relaxed">
+            <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 mb-8 max-w-2xl mx-auto font-semibold tracking-wide leading-relaxed">
               {language === "en"
                 ? "Actionable insights, raw intelligence, and elite architectural guidance for modern security apparatuses."
                 : "Renseignement brut, analyses pointues et architecture défensive pour les infrastructures critiques."}
@@ -347,8 +347,8 @@ export function BlogIndexClient({
 
         {/* Expertise Section */}
         {pillars.length > 0 && (
-          <div className="mb-12">
-            <div className="text-center mb-8">
+          <div className="mb-8">
+            <div className="text-center mb-6">
               <h2 className="text-4xl sm:text-5xl font-black mb-3">
                 <span className="bg-gradient-to-r from-gray-900 via-blue-700 to-gray-900 dark:from-white dark:via-blue-300 dark:to-white bg-clip-text text-transparent">
                   {language === "en" ? "Explore Our Expertise" : "Découvrez notre Expertise"}
@@ -608,7 +608,7 @@ export function BlogIndexClient({
                     ? `/fr/blog/${slugFr || slug}`
                     : `/blog/${slugEn || slug}`
                 }
-                className="group relative h-full rounded-2xl overflow-hidden transition-all duration-500 hover:scale-105 hover:-translate-y-3"
+                className="group relative h-full rounded-2xl overflow-hidden transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1.5"
               >
                 {/* Background with gradient overlay */}
                 <div
@@ -772,20 +772,29 @@ export function BlogIndexClient({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-10 flex items-center justify-center gap-2">
+          <div className="mt-12 flex items-center justify-center gap-2">
             <button
               type="button"
               disabled={page === 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={`px-3 py-2 rounded-lg border text-sm ${page === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                page === 1
+                  ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-cyan-500 hover:text-blue-600 dark:hover:text-cyan-400 hover:shadow-md shadow-sm'
+              }`}
             >
-              {language === 'en' ? 'Previous' : 'Précédent'}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+              {language === 'en' ? 'Prev' : 'Préc.'}
             </button>
             {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setPage(i + 1)}
-                className={`w-9 h-9 rounded-lg border text-sm font-semibold ${page === i + 1 ? 'bg-gray-900 dark:bg-gray-700 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'} border-gray-300 dark:border-gray-700`}
+                className={`w-9 h-9 rounded-xl text-sm font-bold transition-all duration-200 ${
+                  page === i + 1
+                    ? 'bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/30 scale-110'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-cyan-500 hover:text-blue-600 dark:hover:text-cyan-400 shadow-sm'
+                }`}
               >
                 {i + 1}
               </button>
@@ -794,9 +803,14 @@ export function BlogIndexClient({
               type="button"
               disabled={page === totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className={`px-3 py-2 rounded-lg border text-sm ${page === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-800'} border-gray-300 dark:border-gray-700`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                page === totalPages
+                  ? 'opacity-40 cursor-not-allowed bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-cyan-500 hover:text-blue-600 dark:hover:text-cyan-400 hover:shadow-md shadow-sm'
+              }`}
             >
-              {language === 'en' ? 'Next' : 'Suivant'}
+              {language === 'en' ? 'Next' : 'Suiv.'}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
         )}
