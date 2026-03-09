@@ -287,20 +287,12 @@ function inferDescriptionFromContent(content) {
 
 function inferPillarFromSlug(slug) {
   const s = String(slug || "").toLowerCase();
-  // AUDIT keywords — check before SOC because "soc-2-type-ii" contains "soc"
-  if (
-    s.includes("audit") ||
-    s.includes("compliance") ||
-    s.includes("evidence") ||
-    s.includes("type-ii") ||
-    s.includes("dora") ||
-    s.includes("nis2") ||
-    s.includes("iso-27") ||
-    s.includes("gdpr") ||
-    s.includes("pci")
-  )
-    return "AUDIT";
-  // CLOUD keywords
+  // AUDIT strong signals — checked FIRST because "soc-2-type-ii" contains "soc".
+  // type-ii / evidence / iso / gdpr / pci always mean AUDIT regardless of other tokens.
+  if (s.includes("type-ii") || s.includes("iso-27") || s.includes("gdpr") || s.includes("pci-dss")) return "AUDIT";
+  if (s.includes("audit") || s.includes("evidence") || s.includes("compliance")) return "AUDIT";
+  // CLOUD — must be checked before weaker AUDIT tokens (dora/nis2) because
+  // "dora-nis2-multi-cloud-egress" is a CLOUD article, not an AUDIT article.
   if (
     s.includes("cloud") ||
     s.includes("aws") ||
@@ -319,9 +311,12 @@ function inferPillarFromSlug(slug) {
     s.includes("landing-zone") ||
     s.includes("egress") ||
     s.includes("multi-cloud")
-  )
-    return "CLOUD";
-  if (s.includes("soc") || s.includes("alert") || s.includes("triage") || s.includes("playbook") || s.includes("defender") || s.includes("kql") || s.includes("siem")) return "SOC";
+  ) return "CLOUD";
+  // Weaker AUDIT signals (no cloud context)
+  if (s.includes("dora") || s.includes("nis2")) return "AUDIT";
+  // SOC
+  if (s.includes("soc") || s.includes("alert") || s.includes("triage") || s.includes("playbook") ||
+      s.includes("defender") || s.includes("kql") || s.includes("siem")) return "SOC";
   return "SOC";
 }
 
