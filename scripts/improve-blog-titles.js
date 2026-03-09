@@ -24,20 +24,33 @@ const CHECK         = process.argv.includes("--check");
 //  1. Mojibake healing map
 //     Source: UTF-8 smart-typography bytes mis-decoded as Windows-1252
 // ─────────────────────────────────────────────────────────────────────────────
+// All keys are expressed as \uXXXX escapes to avoid encoding issues when the
+// source file is committed/transmitted across platforms (curly quotes like
+// U+201C/U+201D look identical to straight quotes and cause SyntaxErrors).
+//
+// How to read each entry:
+//   UTF-8 bytes of the original char → mis-decoded as cp1252 → Unicode codepoints used here
+//
 const MOJIBAKE_MAP = [
-  // Smart quotes and apostrophes (most common in bot-generated text)
-  ["â€™", "\u2019"],   // '  right single quotation mark
-  ["â€˜", "\u2018"],   // '  left  single quotation mark
-  ["â€œ", "\u201C"],   // "  left  double quotation mark
-  ["â€\u009d", "\u201D"], // "  right double quotation mark (raw byte 9D)
-  ["â€",  "\u201D"],   // "  catches the trailing fragment
-  // Dashes
-  ["â€"", "\u2014"],   // —  em dash
-  ["â€"", "\u2013"],   // –  en dash (must come AFTER em dash)
-  ["â€¢", "\u2022"],   // •  bullet
-  // Ellipsis
-  ["â€¦", "\u2026"],   // …
-  // Accented Latin (less common in English tech articles but still occurs)
+  // Right single quote ' U+2019: UTF-8 E2 80 99 → cp1252 U+00E2 U+20AC U+2122
+  ["\u00e2\u20ac\u2122", "\u2019"],
+  // Left single quote ' U+2018: UTF-8 E2 80 98 → cp1252 U+00E2 U+20AC U+02DC
+  ["\u00e2\u20ac\u02dc", "\u2018"],
+  // Left double quote " U+201C: UTF-8 E2 80 9C → cp1252 U+00E2 U+20AC U+0153
+  ["\u00e2\u20ac\u0153", "\u201c"],
+  // Right double quote " U+201D: UTF-8 E2 80 9D → cp1252 U+00E2 U+20AC U+009D
+  ["\u00e2\u20ac\u009d", "\u201d"],
+  // Em dash — U+2014: UTF-8 E2 80 94 → cp1252 U+00E2 U+20AC U+201D
+  ["\u00e2\u20ac\u201d", "\u2014"],
+  // En dash – U+2013: UTF-8 E2 80 93 → cp1252 U+00E2 U+20AC U+201C
+  ["\u00e2\u20ac\u201c", "\u2013"],
+  // Bullet • U+2022: UTF-8 E2 80 A2 → cp1252 U+00E2 U+20AC U+00A2
+  ["\u00e2\u20ac\u00a2", "\u2022"],
+  // Ellipsis … U+2026: UTF-8 E2 80 A6 → cp1252 U+00E2 U+20AC U+00A6
+  ["\u00e2\u20ac\u00a6", "\u2026"],
+  // Trailing 2-char fragment fallback (when the 3rd byte was dropped/undefined)
+  ["\u00e2\u20ac", "\u201d"],
+  // Accented Latin
   ["\u00c3\u00a9", "\u00e9"],  // é
   ["\u00c3\u00a0", "\u00e0"],  // à
   ["\u00c3\u00a8", "\u00e8"],  // è
@@ -46,10 +59,10 @@ const MOJIBAKE_MAP = [
   ["\u00c3\u00bb", "\u00fb"],  // û
   ["\u00c3\u00ae", "\u00ee"],  // î
   ["\u00c3\u00aa", "\u00ea"],  // ê
-  // Misc Windows-1252 leftovers
-  ["â„¢",  "\u2122"],  // ™
-  ["Â©",   "\u00a9"],  // ©
-  ["Â®",   "\u00ae"],  // ®
+  // Trademark/copyright/registered
+  ["\u00e2\u201e\u00a2", "\u2122"],  // ™  UTF-8 E2 84 A2 → cp1252 U+00E2 U+201E U+00A2
+  ["\u00c2\u00a9", "\u00a9"],        // ©  UTF-8 C2 A9 → cp1252 U+00C2 U+00A9
+  ["\u00c2\u00ae", "\u00ae"],        // ®  UTF-8 C2 AE → cp1252 U+00C2 U+00AE
 ];
 
 function fixMojibake(text) {
