@@ -453,10 +453,12 @@ function normalizeMetadata(existing, filename, content) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) meta.date = inferred.date;
 
   // Only infer pillar if not already set to a recognised value.
-  // NEVER overwrite a valid human-set pillar — inferPillarFromSlug is unreliable
-  // (e.g. "soc-2-type-ii-evidence…" → wrongly infers SOC instead of AUDIT).
+  // EXCEPTION: if the slug has a STRONG AUDIT or CLOUD signal, always enforce
+  // the inferred pillar — the bot often pushes pillar:"SOC" even for AUDIT/CLOUD articles.
   const VALID_PILLARS = new Set(["SOC", "AUDIT", "CLOUD"]);
-  if (!VALID_PILLARS.has(meta.pillar)) meta.pillar = expectedPillar;
+  if (!VALID_PILLARS.has(meta.pillar) || expectedPillar !== "SOC") {
+    meta.pillar = expectedPillar;
+  }
 
   const topic = typeof meta.topic === "string" ? meta.topic.trim() : "";
   const allowedTopics = TOPICS_BY_PILLAR[meta.pillar];
