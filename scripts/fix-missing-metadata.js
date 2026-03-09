@@ -360,6 +360,14 @@ function inferTopicFromSlug(slug, pillar) {
   return "SOC Setup";
 }
 
+// Default cover image (Cloudinary, allowlisted for shared use across articles)
+const DEFAULT_COVER_IMAGE = "https://res.cloudinary.com/dqmdwljit/image/upload/v1772398845/w13jrmoxzwxb5ccfv7mw.png";
+const DEFAULT_COVER_ALT_BY_PILLAR = {
+  SOC: "SOC team dashboard monitoring security events and alerts",
+  AUDIT: "Security audit checklist and compliance evidence collection",
+  CLOUD: "Cloud infrastructure security architecture diagram",
+};
+
 // Génération des métadonnées basée sur le slug et le contenu
 function generateMetadata(filename, content) {
   const slug = slugFromFilename(filename);
@@ -433,6 +441,14 @@ function normalizeMetadata(existing, filename, content) {
 
   if (!Array.isArray(meta.tags) || meta.tags.filter((t) => typeof t === "string" && t.trim()).length === 0) {
     meta.tags = inferred.tags;
+  }
+
+  // Assign a default coverImage if missing — required by validate-blog-metadata.js
+  if (!meta.coverImage || typeof meta.coverImage !== "string" || !meta.coverImage.trim()) {
+    meta.coverImage = DEFAULT_COVER_IMAGE;
+    if (!meta.coverAlt || typeof meta.coverAlt !== "string" || !meta.coverAlt.trim()) {
+      meta.coverAlt = DEFAULT_COVER_ALT_BY_PILLAR[meta.pillar] || DEFAULT_COVER_ALT_BY_PILLAR["SOC"];
+    }
   }
 
   return meta;
