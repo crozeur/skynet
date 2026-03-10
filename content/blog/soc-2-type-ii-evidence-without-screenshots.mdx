@@ -23,9 +23,9 @@ SOC 2 Type II audits stall when evidence can’t be reproduced across the full r
 ### What “reproducible evidence” means in practice
 Reproducible evidence has three properties:
 
-1) Deterministic generation: the same inputs yield the same outputs (or explainable diffs).
-2) Verifiability: artifacts can be hashed and signature-verified.
-3) Traceability: each artifact is tied to a control ID, a time window, and the environment/account.
+### 1) Deterministic generation: the same inputs yield the same outputs (or explainable diffs).
+### 2) Verifiability: artifacts can be hashed and signature-verified.
+### 3) Traceability: each artifact is tied to a control ID, a time window, and the environment/account.
 
 A practical evidence bundle for Type II should include:
 - IaC proofs: **Terraform** plan/apply logs, `terraform show -json`, provider lockfiles, and state backends metadata.
