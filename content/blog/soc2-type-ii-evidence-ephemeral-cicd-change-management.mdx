@@ -1,0 +1,279 @@
+export const metadata = {
+ title: "SOC 2 Type II Evidence for Ephemeral CI/CD Change Management",
+ description: "Generate durable, auditor-ready change-management evidence for ephemeral Terraform/Helm environments without slowing delivery.",
+ date: "2026-03-15",
+ pillar: "AUDIT",
+ tags: ["SOC 2", "CI/CD", "Change Management", "Terraform", "Audit Evidence"]
+};
+
+## Introduction
+Ephemeral PR environments are great for delivery speed but brutal for SOC 2 Type II change-management evidence because the infrastructure you need to prove existed is gone minutes later. Auditors still expect durable, testable evidence for who approved a change, what was deployed, when it ran, and what the cloud control plane actually did (think CC7/CC8-style expectations). If your proof is scattered across Git, runners, cloud logs, and artifact stores, your Type II story becomes brittle and time-consuming to reassemble. Skynet fixes this by deploying a standardized evidence spine that cryptographically links commit → pipeline run → IaC plan → approval → apply → control-plane truth into one immutable trail, collected on deterministic windows.
+
+## Quick Take
+- Ephemeral stacks aren’t the problem; missing chain-of-custody is.
+- Treat Terraform/Helm outputs as first-class audit artifacts: versioned, immutable, and hash-linked to commits.
+- Bind CI runners to cloud identity with OIDC to eliminate long-lived keys and improve attribution.
+- Prove “what really changed” by correlating pipeline run IDs to **AWS CloudTrail**/**Azure Activity Log**/**GCP Audit Logs** events.
+- Operationalize Type II by scheduling evidence snapshots, exception handling, and drift checks for long-lived baselines.
+
+## Build an immutable plan/apply evidence chain
+### 1) Define the minimum viable evidence set
+For ephemeral environments, your evidence must survive destruction while still being precise enough for sampling during the Type II period. At minimum, capture and retain:
+
+- Git commit SHA (and branch/PR reference)
+- Pipeline run ID + start/end timestamps
+- IaC plan output (machine-readable) and apply output (human-readable)
+- Approval signal (manual gate, required reviews, protected branch checks)
+- Artifact digests (container image digest, Helm chart version, SBOM if you already generate it)
+- Cloud identity used by the runner (workload identity subject + role assignment)
+
+> ⚠️ Attention: Storing only the “apply succeeded” log is not sufficient. Auditors typically want to see what was intended (plan), what was executed (apply), and what the provider says happened (control-plane logs).
+
+### 2) Make the Terraform plan auditable (and diffable)
+Store the Terraform plan in JSON form as an immutable artifact. This gives you stable fields for reviewers and scripts (resources, actions, attribute changes) and makes your evidence resilient to log formatting changes.
+
+```bash
+# Generate a binary plan and a JSON representation
+terraform init -input=false
+terraform plan -out=tfplan.bin -input=false
+terraform show -json tfplan.bin > tfplan.json
+
+# Hash artifacts for chain-of-custody
+sha256sum tfplan.bin tfplan.json | tee tfplan.sha256
+```
+
+For Helm-based changes, capture the rendered manifests and chart metadata:
+
+```bash
+helm dependency update ./chart
+helm template myapp ./chart \
+  --namespace pr-${PR_NUMBER} \
+  --values values-pr.yaml > rendered.yaml
+
+sha256sum rendered.yaml | tee rendered.sha256
+```
+
+### 3) Link evidence to a single “change identity”
+Pick one identifier that exists everywhere and propagate it through the pipeline: `CHANGE_ID`. A practical choice is a concatenation of repo + commit SHA + pipeline run ID.
+
+- Git: commit SHA
+- CI: run ID
+- Terraform: tag resources with `change_id`
+- Kubernetes: label namespaces and workloads with `change_id`
+- Cloud: include `change_id` as tags/labels where supported
+
+Example tagging for Terraform:
+
+```hcl
+locals {
+  change_id = var.change_id
+}
+
+resource "aws_s3_bucket" "example" {
+  bucket = "pr-${var.pr_number}-example"
+
+  tags = {
+    change_id  = local.change_id
+    pr_number  = var.pr_number
+    repository = var.repository
+  }
+}
+```
+
+> 💡 Pro-Tip: If a resource type can’t be tagged, tag the parent (VPC/project/resource group) and rely on control-plane correlation (timestamps + assumed role + request parameters).
+
+### 4) Enforce OIDC workload identity for runners
+Long-lived access keys destroy attribution and increase exception volume during audits. Use OIDC from your CI provider to your cloud provider so the “who/what” is a verifiable workload identity assertion.
+
+For **AWS IAM** with OIDC (conceptually):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {"Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/<OIDC_PROVIDER>"},
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "<OIDC_PROVIDER>:sub": "repo:<ORG>/<REPO>:ref:refs/heads/main"
+        }
+      }
+    }
+  ]
+}
+```
+
+> ✅ Success: Your evidence now includes a cryptographically verifiable workload identity, tied to a specific repo/ref/run context, instead of a shared key with ambiguous ownership.
+
+## Reconcile control-plane truth with pipeline intent
+### 1) Treat cloud audit logs as the source of record
+Terraform/Helm outputs show intent and execution, but only the cloud control plane can confirm the effective change: API calls, actor identity, and the timestamped request/response context.
+
+You need a deterministic correlation method to map:
+
+- pipeline run → assumed role / service account
+- assumed role → control-plane events
+- events → resources affected (including ephemeral ones)
+
+### 2) Correlate **AWS CloudTrail** events to a change
+If your CI job assumes a dedicated role per environment or per repo, you can search by `userIdentity.arn` and a bounded time window around the run. Export the results as immutable JSON.
+
+```bash
+# Example: pull CloudTrail events for a role within a time window
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=Username,AttributeValue=MyCIRole \
+  --start-time "2026-03-10T12:00:00Z" \
+  --end-time   "2026-03-10T12:20:00Z" \
+  --max-results 50 \
+  > cloudtrail-events.json
+
+sha256sum cloudtrail-events.json | tee cloudtrail-events.sha256
+```
+
+If you propagate `change_id` as resource tags, you can tighten the mapping by proving the tag write occurred during the run and then showing subsequent API calls against that tagged resource.
+
+> ⚠️ Attention: Time windows must be deterministic and recorded (run start/end + buffer), or your evidence becomes subjective and hard to re-test.
+
+### 3) Correlate **Azure Activity Log** and **GCP Audit Logs** similarly
+The mechanics differ, but the pattern is identical: filter by principal identity and bounded timestamps; export raw events; hash them; store alongside plan/apply artifacts.
+
+**Azure** (illustrative CLI pattern):
+
+```bash
+# Filter Azure Activity Log by time range and caller
+az monitor activity-log list \
+  --start-time 2026-03-10T12:00:00Z \
+  --end-time   2026-03-10T12:20:00Z \
+  --caller "<CI_PRINCIPAL_OBJECT_ID_OR_UPN>" \
+  --max-events 200 \
+  > azure-activity.json
+
+sha256sum azure-activity.json | tee azure-activity.sha256
+```
+
+**GCP** (illustrative CLI pattern):
+
+```bash
+gcloud logging read \
+  'logName:("projects/<PROJECT_ID>/logs/cloudaudit.googleapis.com%2Factivity")
+   AND protoPayload.authenticationInfo.principalEmail="<CI_SERVICE_ACCOUNT>"
+   AND timestamp>="2026-03-10T12:00:00Z" AND timestamp<="2026-03-10T12:20:00Z"' \
+  --format=json \
+  > gcp-audit.json
+
+sha256sum gcp-audit.json | tee gcp-audit.sha256
+```
+
+### 4) Produce an auditor-readable “change packet”
+Auditors will sample changes. Make each sampled change a single directory (or object prefix) that contains:
+
+- `change.json` (metadata: repo, commit, PR, run ID, timestamps, environments)
+- `tfplan.json`, `apply.log`, `rendered.yaml` (as applicable)
+- `approvals.json` (export from your Git platform)
+- `cloudtrail-events.json` / `azure-activity.json` / `gcp-audit.json`
+- `sha256manifest.txt` (hash list)
+
+```bash
+# Build a manifest file (example)
+( cd change-packet && find . -type f -maxdepth 1 -print0 | xargs -0 sha256sum ) \
+  | sort -k2 \
+  > change-packet/sha256manifest.txt
+```
+
+> ✅ Success: Sampling becomes a file open, not a scavenger hunt across four systems.
+
+## Prove ongoing operating effectiveness over the Type II period
+### 1) Schedule evidence snapshots (not just per PR)
+Type II is about operating effectiveness over time. Ephemeral environments rotate fast, but your baselines (IAM, logging, encryption, network boundaries) must be continuously evidenced.
+
+Implement scheduled snapshots for:
+
+- IAM role policies and trust policies used by CI
+- Logging configuration (CloudTrail/Activity Log sinks, retention)
+- Encryption settings (KMS key policies, bucket encryption, disk encryption)
+- Protected branch rules / required approvals
+
+Example: snapshot critical **AWS IAM** role trust policy nightly:
+
+```bash
+aws iam get-role --role-name MyCIRole > iam-role.json
+aws iam get-role-policy --role-name MyCIRole --policy-name DeployerPolicy > iam-policy.json
+sha256sum iam-role.json iam-policy.json > iam-snapshot.sha256
+```
+
+> 💡 Pro-Tip: Store snapshots with a deterministic naming convention (date + environment + account/project) so evidence windows are provable and repeatable.
+
+### 2) Exception handling: make break-glass explicit and testable
+Auditors will ask what happens when the pipeline fails or a hotfix is required. Your evidence model must capture exceptions without creating ambiguity.
+
+Minimum exception evidence:
+
+- Ticket/approval reference
+- Identity used (must be non-shared)
+- Time window and scope
+- Post-change verification evidence
+
+> ⚠️ Attention: “We sometimes apply changes manually” is not a control—it’s a gap unless you can show bounded authorization, traceability, and post-change validation.
+
+### 3) Drift detection for long-lived baselines
+Even if application stacks are ephemeral, controls like logging, IAM boundaries, and encryption are long-lived. Prove they remain in the expected state.
+
+Terraform-based drift check example:
+
+```bash
+terraform plan -detailed-exitcode -out=drift.bin || exit_code=$?
+terraform show -json drift.bin > drift.json
+
+# Exit codes: 0 no drift, 2 drift present
+test "${exit_code:-0}" -ne 2
+```
+
+Store `drift.json` and the exit status as evidence; route exceptions into your change process.
+
+> ✅ Success: You can demonstrate continuous control operation without relying on anecdotal explanations.
+
+## Skynet execution model: a standardized evidence spine
+### 1) What “standardized execution” means for audit evidence
+Skynet’s approach is to deploy a repeatable evidence spine that stays consistent across repos, clouds, and CI systems:
+
+- Deterministic collection windows anchored to pipeline run boundaries
+- Cryptographic linking (hashes) across artifacts, logs, and exported approvals
+- Single change identity propagated into IaC and cloud audit telemetry
+- Immutable packaging into auditor-ready bundles (control mapping + raw evidence + chain-of-custody)
+
+This is not about generating more logs; it’s about making evidence testable, attributable, and fast to retrieve.
+
+### 2) Deliverables you should expect
+For a defined Type II period, Skynet produces:
+
+- A per-change evidence packet for sampled changes (and optionally all changes)
+- Periodic baseline snapshots for key controls (logging, IAM, encryption)
+- A control-to-evidence map for your audit criteria (e.g., CC7/CC8-style change management expectations)
+- Chain-of-custody manifests (hash lists) to prove integrity of exported artifacts
+
+### 3) CTA: zero-trace audit execution
+If you need a SOC 2 Type II change-management evidence bundle that survives ephemeral infrastructure, use Skynet’s zero-trace audit execution to generate the full package (controls mapping + raw logs + chain-of-custody) in days—without slowing delivery.
+
+## Checklist
+- [ ] Propagate a single `change_id` from Git commit → CI run → IaC → cloud tags/labels.
+- [ ] Store Terraform plan output as `tfplan.json` and hash it at creation time.
+- [ ] Store apply logs and rendered Helm manifests as immutable artifacts.
+- [ ] Enforce OIDC workload identity for CI runners; eliminate long-lived cloud access keys.
+- [ ] Export approval evidence (PR reviews, protected branch checks) into the change packet.
+- [ ] Collect cloud control-plane events (**AWS CloudTrail**/**Azure Activity Log**/**GCP Audit Logs**) within deterministic run-bounded windows.
+- [ ] Hash exported cloud events and include them in a `sha256manifest.txt` for chain-of-custody.
+- [ ] Package each sampled change as a single, self-contained evidence directory/prefix.
+- [ ] Schedule baseline snapshots for IAM, logging configuration, and encryption settings.
+- [ ] Run drift detection on long-lived baselines and route drift into the change process.
+
+## FAQ
+### How do we prove change management if the environment is destroyed after the PR?
+<p>Prove the change, not the existence of the runtime. Persist an immutable packet that links commit, pipeline run, plan/apply artifacts, approvals, and cloud audit events, then hash the packet for chain-of-custody. The environment can be gone; the evidence must be durable and attributable.</p>
+
+### What evidence is most likely to fail a Type II sample in ephemeral CI/CD?
+<p>Missing linkage between “intent” and “truth.” Teams often have Terraform/Helm logs but can’t tie them to a specific workload identity in the cloud audit logs within a deterministic time window, or they can’t show the approval signal that authorized the run.</p>
+
+### How do we handle emergency changes without breaking the evidence model?
+<p>Use a defined exception path: bounded approval, non-shared identity, tight time window, and post-change verification. Capture the same artifacts as normal (plan/apply where possible plus control-plane logs), and store the exception record alongside the change packet so sampling remains consistent.</p>
