@@ -1,0 +1,307 @@
+export const metadata = {
+  title: "Multi-Cloud Kubernetes Egress Without Blind Spots: Enforcing TLS + DNS Controls Across Cilium, PrivateLink, and Cloud NAT",
+  description: "Standardize Kubernetes egress with Cilium L3–L7 policy, private endpoints, and verifiable telemetry across AWS/Azure/GCP in days, not quarters.",
+  date: "2026-03-15",
+  pillar: "CLOUD",
+  tags: ["kubernetes", "multi-cloud", "egress-control", "cilium", "privatelink"]
+};
+
+## Introduction
+Multi-cloud Kubernetes egress is where “we have policies” quietly turns into data leaving your estate through paths nobody is watching. The failure mode is consistent: CNI policy covers pods, but node-level NAT, unmanaged routes, DNS detours, and private connectivity gaps create bypass channels with inconsistent logging. The fix is not more dashboards—it’s standardized execution: enforce identity-based egress at L3–L7 with **Cilium**, pin critical dependencies to private endpoints (**AWS PrivateLink**/**Azure Private Link**/**GCP Private Service Connect**), and make every allowed flow provable via queryable telemetry. Done correctly, you get default-deny egress that still allows required dependencies, with fast rollback and continuous drift detection.
+
+## Quick Take
+- Default-deny egress is necessary but insufficient unless you also eliminate node/NAT and routing bypass paths.
+- Enforce identity-based rules (namespace + service account) and DNS-aware allowlists with **CiliumNetworkPolicy**.
+- Restrict TLS by SNI/FQDN at L7 where feasible; otherwise require private endpoints and controlled egress gateways.
+- Remove “shadow routes” by hardening route tables, NAT exposure, and enforcing private endpoints for registries, queues, and databases.
+- Prove it continuously: scripted checks for bypass primitives + cloud audit alerts on route/NAT changes + flow/DNS telemetry.
+
+## Threat Model: Where Egress Controls Commonly Fail
+### 1) Node-level NAT and host networking bypass pod policy
+Even with correct pod policies, these patterns routinely escape enforcement:
+- `hostNetwork: true` pods that share the node network namespace.
+- Privileged pods (or overly-permissive capabilities) that can manipulate routes/iptables.
+- DaemonSets that open unmanaged tunnels.
+- NodeLocal DNS behavior that changes resolution paths and logs.
+
+> ⚠️ Attention: If your “egress policy” does not explicitly account for host networking and node egress, assume you have blind spots—especially under incident conditions when teams deploy debug workloads.
+
+### 2) DNS is both control plane and exfil path
+Teams allow “DNS to kube-dns” and think they’ve solved name resolution. In practice, DNS can be:
+- Misrouted (custom resolvers, node-local caching, sidecars).
+- Encrypted (DoH/DoT) to external resolvers, bypassing central logging.
+- A covert channel if not constrained.
+
+### 3) Private connectivity gaps force traffic back to public internet
+If key dependencies are not reachable via private endpoints, teams often “temporarily” allow internet egress via **Cloud NAT**, **NAT Gateway**, or firewall egress—with little uniformity across clouds.
+
+### 4) Logging is inconsistent across clusters and clouds
+You can’t validate enforcement without:
+- L3/L4 flow visibility (who talked to what, from where)
+- DNS visibility (what names were requested)
+- L7 context where applicable (SNI/HTTP)
+- Cloud network logs (VPC/NSG/flow logs) tied to change events (route/NAT updates)
+
+## Standardized Execution Blueprint: Identity + Private Endpoints + Verifiable Telemetry
+### 1) Normalize identities before you write policy
+Make policy targets stable across clusters:
+- Standardize namespaces (e.g., `payments`, `data`, `platform`).
+- Standardize service accounts (e.g., `app`, `worker`, `migrations`).
+- Ensure workloads are labeled consistently (`app.kubernetes.io/name`, `team`, `env`).
+
+> 💡 Pro-Tip: Treat service accounts as egress identities. Namespaces drift; service accounts encode intent.
+
+### 2) Enforce L3–L7 controls with Cilium (default-deny + explicit allow)
+At minimum, enforce:
+- Default-deny egress for application namespaces
+- Explicit allows for cluster DNS
+- Explicit allows for private endpoints (and only those)
+- Optional: L7 restrictions for TLS SNI / HTTP host/path where supported
+
+Example: default-deny egress for a namespace (applies via endpoint selector).
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: payments
+spec:
+  endpointSelector: {}
+  egress: []
+```
+
+Example: allow DNS only to **CoreDNS** in `kube-system` (adjust labels to your deployment).
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-dns-to-coredns
+  namespace: payments
+spec:
+  endpointSelector: {}
+  egress:
+  - toEndpoints:
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: kube-system
+        k8s:k8s-app: kube-dns
+    toPorts:
+    - ports:
+      - port: "53"
+        protocol: UDP
+      - port: "53"
+        protocol: TCP
+      rules:
+        dns:
+        - matchPattern: "*"
+```
+
+Example: allow only specific FQDNs for egress (useful for controlled external dependencies during transition).
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-fqdn-deps
+  namespace: payments
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: billing
+  egress:
+  - toFQDNs:
+    - matchName: "api.stripe.com"
+    - matchName: "ocsp.digicert.com"
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
+```
+
+Example: identity-based allow (namespace + service account) to reach a private endpoint CIDR.
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-privatelink-cidr
+  namespace: payments
+spec:
+  endpointSelector:
+    matchLabels:
+      k8s:io.kubernetes.serviceaccount.name: app
+  egress:
+  - toCIDR:
+    - "10.42.0.0/16"  # replace with your endpoint subnet(s)
+    toPorts:
+    - ports:
+      - port: "443"
+        protocol: TCP
+```
+
+### 3) TLS enforcement: choose the right control point
+TLS controls can be applied at multiple layers; pick the one you can verify.
+
+- L7 policy (SNI/HTTP host) is precise but requires that traffic is visible at L7.
+- For opaque protocols or strict performance constraints, prefer private endpoints and restrict destinations at L3/L4.
+- If you must allow limited internet egress, do it via a controlled egress path (egress gateway) with consistent logs.
+
+> ⚠️ Attention: “TLS everywhere” is not a control if you can’t bind it to an allowed destination identity (SNI/FQDN/private endpoint). Encrypted exfil still leaves.
+
+## Remove Shadow Routes: PrivateLink/PSC + Harden NAT and Route Tables
+### 1) Pin critical dependencies to private connectivity
+For AWS/Azure/GCP, the pattern is the same:
+- Create private endpoints for services that support them (registries, storage, queues, managed databases, secrets).
+- Ensure private DNS is correctly scoped per VPC/VNet and shared with the cluster.
+- Disable or constrain public endpoints for those dependencies wherever possible.
+
+Expected outcome is simple:
+- Kubernetes workloads resolve service FQDNs to private IPs.
+- Egress to those IPs is explicitly allowed.
+- Any attempt to hit public endpoints is blocked by default-deny.
+
+> ✅ Success: A traceroute from a pod to a critical dependency stays on private IP space and never traverses internet egress.
+
+### 2) Terraform: restrict NAT egress and tighten routing
+Below is a minimal pattern you can adapt: lock down route tables and reduce places where “0.0.0.0/0 to NAT” can appear unexpectedly.
+
+```hcl
+# Pseudocode-style Terraform pattern: enforce explicit routes and tag-based policy checks.
+# Adapt to AWS/Azure/GCP modules and your network layout.
+
+variable "allowed_egress_cidrs" {
+  type    = list(string)
+  default = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+}
+
+# Example: deny creation of broad internet routes outside approved route tables
+# (Implement with policy-as-code in your CI/CD, or with cloud-native policy engines.)
+
+locals {
+  forbidden_routes = ["0.0.0.0/0", "::/0"]
+}
+
+output "egress_control_intent" {
+  value = {
+    default_deny_pods    = true
+    private_endpoints    = true
+    nat_egress_restricted = true
+    drift_detection      = true
+  }
+}
+```
+
+What matters operationally:
+- NAT resources exist only where explicitly approved.
+- Route tables used by worker subnets do not silently gain new default routes.
+- Private endpoint subnets are isolated and logged.
+
+### 3) Validate paths with traceroute, conntrack, and cloud flow logs
+Run these validations from inside a pod (or an ephemeral debug pod with restricted permissions):
+
+```bash
+# From a pod: confirm DNS answers are private
+nslookup your-service.example.internal
+
+# Confirm the network path stays private
+traceroute -n 10.42.12.34
+
+# Confirm only expected TCP sessions exist
+ss -tnp | head
+```
+
+On nodes (restricted, break-glass only), confirm there are no unexpected NAT rules or tunnels:
+
+```bash
+sudo iptables -t nat -S | sed -n '1,120p'
+sudo ip route show
+sudo conntrack -L | head
+```
+
+> 💡 Pro-Tip: Store “known-good” route/NAT snapshots per cluster version. If a later snapshot differs, treat it as drift until proven otherwise.
+
+## Prove It Continuously: Drift Detection + Audit Alerts + Queryable Telemetry
+### 1) Detect Kubernetes bypass primitives (scripted checks)
+You want a fast, repeatable check that flags workloads capable of bypassing egress controls.
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[1/4] hostNetwork pods"
+kubectl get pods -A -o json | jq -r '.items[] | select(.spec.hostNetwork==true) | [.metadata.namespace,.metadata.name] | @tsv'
+
+echo "[2/4] privileged containers"
+kubectl get pods -A -o json | jq -r '
+  .items[] |
+  . as $p |
+  ($p.spec.containers + ($p.spec.initContainers // []))[]? |
+  select(.securityContext.privileged==true) |
+  [$p.metadata.namespace,$p.metadata.name,.name] | @tsv'
+
+echo "[3/4] containers with NET_ADMIN"
+kubectl get pods -A -o json | jq -r '
+  .items[] | . as $p |
+  ($p.spec.containers + ($p.spec.initContainers // []))[]? |
+  select((.securityContext.capabilities.add // []) | index("NET_ADMIN")) |
+  [$p.metadata.namespace,$p.metadata.name,.name] | @tsv'
+
+echo "[4/4] egress policies present by namespace"
+kubectl get cnp -A 2>/dev/null | awk 'NR==1{next}{print $1}' | sort | uniq -c | sort -nr
+```
+
+### 2) Turn on telemetry you can actually query
+Minimum viable telemetry set across clouds and clusters:
+- **Cilium** flow logs (L3/L4) and DNS logs
+- Cloud-native network flow logs for VPC/VNet/subnet
+- Audit logs for route table, NAT, and private endpoint changes (e.g., **AWS CloudTrail**, **Azure Activity Log**, **GCP Cloud Audit Logs**)
+
+> ✅ Success: For any outbound connection attempt, you can answer in minutes: which pod (namespace + service account) attempted it, what it resolved via DNS, which path it took (private endpoint vs NAT), and why it was allowed or denied.
+
+### 3) Alert on control-plane drift (routes/NAT/endpoints)
+You’re not chasing every packet—you’re preventing the bypass from being introduced.
+Alert on:
+- Creation/modification of route tables that add default routes.
+- Creation/modification of NAT gateways / cloud NAT configs.
+- Changes to private endpoint policies and private DNS zones.
+- Changes to Kubernetes network policies in protected namespaces.
+
+## Execute in 48–72 Hours: The Skynet Egress-Control Module
+### 1) What gets standardized
+Skynet’s execution model focuses on repeatability and rollback:
+- A portable baseline for **Cilium** policies (default-deny, DNS-aware allow, identity-based egress)
+- A private endpoint map per cloud (PrivateLink/Private Link/PSC) tied to dependency inventory
+- Telemetry enablement with consistent naming, retention targets, and query paths
+- A rollback plan that is explicit (policy toggles, endpoint cutovers, and route changes)
+
+### 2) What you should expect after deployment
+- Egress is explicit: workloads can only reach enumerated dependencies.
+- Private endpoints are preferred: registries/queues/databases resolve privately.
+- NAT is constrained: internet egress is either blocked or forced through an approved, logged path.
+- Drift is loud: route/NAT changes trigger alerts; bypass workloads are flagged automatically.
+
+CTA: Deploy Skynet’s ephemeral cloud infrastructure module to standardize Kubernetes egress controls across clouds with end-to-end verification (policies + private endpoints + telemetry) in 48–72 hours.
+
+## Checklist
+- [ ] Enforce default-deny egress in application namespaces using **CiliumNetworkPolicy**.
+- [ ] Allow DNS only to approved in-cluster resolvers; block direct DoH/DoT unless explicitly required.
+- [ ] Implement identity-based egress rules using namespace + service account selectors.
+- [ ] Create an allowlist of critical dependencies and map each to private connectivity (**AWS PrivateLink**/**Azure Private Link**/**GCP PSC**) where available.
+- [ ] Ensure private DNS resolves critical dependency FQDNs to private IPs in each VPC/VNet.
+- [ ] Constrain **Cloud NAT**/**NAT Gateway** usage to approved subnets and explicitly managed route tables.
+- [ ] Validate paths from pods using `nslookup` and `traceroute -n` to confirm private routing.
+- [ ] Enable **Cilium** flow and DNS visibility and retain logs long enough for incident timelines.
+- [ ] Enable cloud network flow logs for worker subnets and private endpoint subnets.
+- [ ] Alert on route table, NAT, and private endpoint changes via **AWS CloudTrail**/**Azure Activity Log**/**GCP Cloud Audit Logs**.
+- [ ] Run scheduled bypass detection for `hostNetwork`, privileged pods, and `NET_ADMIN` capability.
+
+## FAQ
+### Does default-deny egress break deployments?
+<p>It breaks undeclared dependencies. The correct approach is to start with inventory (DNS + flows), convert required destinations into explicit allows (prefer private endpoints), then enforce default-deny with a rollback toggle. If you can’t enumerate dependencies, you don’t have an enforceable control.</p>
+
+### How do we enforce TLS destinations without terminating TLS?
+<p>Use a combination of DNS-aware controls and destination constraints: allow only approved FQDNs (where supported), restrict to private endpoint CIDRs, and limit outbound 443 to known egress paths. If you cannot bind encrypted traffic to an allowed destination identity, treat it as uncontrolled egress and eliminate the path.</p>
+
+### What’s the fastest way to detect egress policy bypass?
+<p>Continuously scan for bypass primitives (host networking, privileged pods, NET_ADMIN), then correlate cloud audit events (route/NAT/endpoint changes) with flow/DNS logs. If an unapproved route or NAT change occurs, you should be able to prove impact by querying which pods attempted outbound connections during the window.</p>
