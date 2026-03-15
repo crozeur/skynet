@@ -1,0 +1,258 @@
+export const metadata = {
+  title: "Microsoft Defender XDR + OSQuery: Catching Token Replay via Device Code Flow in Entra ID (and Proving Containment in <24h)",
+  description: "Detect Entra ID device-code token replay, validate host scope with OSQuery, and enforce precise Conditional Access + revocation with auditable evidence in <24h.",
+  date: "2026-03-15",
+  pillar: "SOC",
+  tags: ["Microsoft Defender XDR", "OSQuery", "Entra ID", "OAuth", "Conditional Access"]
+};
+
+## Introduction
+OAuth device-code flow and refresh-token replay can look like harmless “sign-in succeeded” events while an attacker silently reuses tokens from an unmanaged host. The fast path is to correlate **Entra ID** sign-in and audit signals with **Microsoft Defender XDR** telemetry, then validate endpoint token artifacts using targeted **OSQuery** snapshots. Done correctly, you can identify which identities and devices handled the tokens, revoke sessions, and harden policies with rollback-ready changes in under 24 hours. This post shows the investigation and containment pattern Skynet standardizes for repeatable, auditable execution.
+
+## Quick Take
+- Device-code abuse is primarily an OAuth grant problem: hunt the grant type, not just interactive MFA outcomes.
+- Use **Microsoft Defender XDR** advanced hunting to pivot from identity events to process/network evidence and affected devices.
+- Use **OSQuery** packs to validate token-handling artifacts and recent execution context on endpoints—at scale, not by hand.
+- Containment must include session revocation plus policy enforcement (compliance gates, sign-in frequency, risky flow controls).
+- Produce an auditable package: affected identities/devices, changes applied, and proof that sessions were invalidated.
+
+## Threat Model: Device-Code + Refresh Token Replay in Entra ID
+### 1) What actually gets replayed
+In many real incidents, the attacker is not “bypassing MFA” in the classic sense—they’re obtaining a token set (access token + refresh token) through a legitimate OAuth grant and then replaying the refresh token (or derived tokens) from a non-compliant device.
+
+Common patterns:
+- Device-code phishing: user completes verification on a legitimate Microsoft page, but the device code session was initiated by the attacker.
+- Token replay from an unmanaged host: refresh token is used from an attacker-controlled environment, producing valid access tokens without triggering typical interactive prompts.
+
+> ⚠️ Attention: Treat “MFA satisfied” as a weak signal for containment. If a refresh token is in play, the attacker may continue to mint new access tokens until sessions are revoked and policy blocks token issuance.
+
+### 2) What “good” looks like for detection
+You want determinism, not vibes:
+- Identify device-code grants and unusual OAuth grant paths in **Entra ID** logs.
+- Correlate to endpoint and network evidence in **Microsoft Defender XDR**.
+- Confirm whether endpoints have artifacts or recent activity consistent with token theft/exfil.
+
+## Standardized Execution: 24-Hour Investigation Pack
+### 1) Time-boxed workflow
+Skynet’s approach is a fixed sequence with explicit outputs:
+- Triage (0–2h): confirm device-code indicators; isolate identities and time window.
+- Scope (2–8h): enumerate affected users, IPs, devices; pivot to endpoint evidence.
+- Validate (8–16h): run targeted **OSQuery** snapshots across suspect devices.
+- Contain (16–24h): revoke sessions, apply policy hardening with rollback, and record evidence.
+
+### 2) Required inputs (minimal)
+- Affected user(s) or suspicious sign-in timestamps.
+- Tenant identifiers and log access for **Entra ID** sign-in/audit.
+- **Microsoft Defender XDR** advanced hunting access.
+- **OSQuery** execution capability (via your existing endpoint tooling or agent).
+
+> 💡 Pro-Tip: Start with the narrowest window where you have high confidence (e.g., first suspicious device-code sign-in), then expand. This reduces false pivots and accelerates containment proof.
+
+## Hunt 1: Detect Device-Code and Refresh Token Anomalies (KQL + CLI)
+### 1) Entra ID sign-in pivots (KQL-style patterns)
+In **Microsoft Defender XDR**, you can work from identity-related tables when available in your environment, then pivot to device/network/process.
+
+Use this as a starting point to surface device-code and non-interactive anomalies (adjust table names/fields based on your tenant schema and data connectors):
+
+```kusto
+// Identity sign-in hunt: device code and suspicious token use
+let lookback = 7d;
+IdentityLogonEvents
+| where Timestamp > ago(lookback)
+| where isnotempty(AccountUpn)
+| where tostring(AdditionalFields["grantType"]) has_any ("device_code", "DeviceCode")
+   or tostring(AdditionalFields["authenticationProtocol"]) has "OAuth"
+| project Timestamp, AccountUpn, Application, IPAddress, DeviceName, 
+          GrantType=tostring(AdditionalFields["grantType"]),
+          ClientApp=tostring(AdditionalFields["clientAppUsed"]),
+          UserAgent=tostring(AdditionalFields["userAgent"]),
+          ResultType, ResultDescription
+| order by Timestamp desc
+```
+
+Follow-on pivots that reduce noise:
+- Same user authenticating from new ASN/geo + new user agent shortly after a device-code grant.
+- Rapid token issuance across multiple apps after an initial device-code event.
+- Non-interactive sign-ins from hosts that are not compliant / not enrolled.
+
+> ✅ Success: You end this step with a short list of user principals, suspicious IPs, and time windows that are defensible (you can explain why each one is included).
+
+### 2) Pull detailed sign-in data (Graph / CLI)
+When you need richer detail than what’s visible in a portal view, pull sign-in logs via **Microsoft Graph**. The goal is reproducibility: the same query can be rerun and attached as evidence.
+
+Example using **Microsoft Graph** with a delegated/admin token (illustrative—use your organization’s auth method):
+
+```bash
+# List sign-ins that reference device code (filtering varies by tenant schema)
+# Requires appropriate Graph permissions for audit log access.
+
+TENANT_ID="<tenant-guid>"
+ACCESS_TOKEN="<token>"
+
+curl -sS -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "https://graph.microsoft.com/v1.0/auditLogs/signIns?$top=50&$orderby=createdDateTime%20desc" \
+| jq -r '.value[] | {createdDateTime,userPrincipalName,appDisplayName,ipAddress,clientAppUsed,resourceDisplayName,conditionalAccessStatus}'
+```
+
+From here, pin:
+- Client app / user agent
+- Authentication details (where available)
+- Correlation IDs you can reuse in other telemetry
+
+> ⚠️ Attention: Don’t block on perfect log fields. Your containment runbook should tolerate missing fields by pivoting on time window + identity + IP + app.
+
+## Hunt 2: Pivot into Defender XDR to Prove Host/Process Involvement
+### 1) Map identity events to device evidence
+Once you have suspect IPs and timestamps, pivot to device telemetry in **Microsoft Defender XDR**:
+- Device network connections near the sign-in times.
+- Browser processes or token broker activity.
+- Suspicious tooling that commonly accompanies token theft (LOLBins, archive tools, credential access patterns).
+
+Starter advanced hunting query to find devices communicating with suspicious IPs during the window:
+
+```kusto
+let start = datetime(2026-03-08 00:00:00);
+let end   = datetime(2026-03-09 00:00:00);
+let suspectIPs = dynamic(["203.0.113.10","198.51.100.25"]);
+DeviceNetworkEvents
+| where Timestamp between (start .. end)
+| where RemoteIP in (suspectIPs)
+| project Timestamp, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName,
+          RemoteIP, RemotePort, Protocol, ReportId
+| order by Timestamp desc
+```
+
+### 2) Confirm token-handling context (browser + broker)
+Token replay investigations often hinge on whether a managed endpoint actually handled tokens (or whether the attacker operated entirely off-host).
+
+Hunt for browser launches with unusual command lines and token broker-like activity (tune for your environment):
+
+```kusto
+let lookback = 3d;
+DeviceProcessEvents
+| where Timestamp > ago(lookback)
+| where FileName in~ ("msedge.exe","chrome.exe","firefox.exe","iexplore.exe")
+| where ProcessCommandLine has_any ("device", "code", "login", "oauth", "tenant")
+| project Timestamp, DeviceName, AccountName, FileName, ProcessCommandLine, InitiatingProcessFileName
+| order by Timestamp desc
+```
+
+> 💡 Pro-Tip: Your goal is not to “prove phishing” in this phase. It’s to prove which endpoints and accounts participated in token handling and whether they show any follow-on execution consistent with data access.
+
+## Hunt 3: Validate Endpoint Token Artifacts at Scale with OSQuery
+### 1) OSQuery pack strategy (fast, low-risk)
+Run a narrow pack that answers:
+- Did this device recently run browsers or identity broker processes around the incident window?
+- Are there signs of suspicious access to credential/token stores?
+- Is there recent tooling execution that correlates with token exfil or staging?
+
+> ⚠️ Attention: Avoid broad filesystem sweeps on user profiles during an active incident. Keep queries targeted to known paths and recent timestamps to reduce performance impact and privacy risk.
+
+### 2) Example OSQuery queries
+Process and network timeline:
+
+```sql
+-- Recently executed identity-relevant processes
+SELECT datetime(time, 'unixepoch') AS ts, name, path, cmdline, uid, parent
+FROM processes
+WHERE name IN ('msedge.exe','chrome.exe','firefox.exe','rundll32.exe','powershell.exe')
+ORDER BY ts DESC
+LIMIT 200;
+```
+
+Recent file modifications in known browser/profile areas (tune paths per org standard):
+
+```sql
+-- Windows: recent changes under common browser profile roots
+SELECT path, datetime(mtime, 'unixepoch') AS mtime, size
+FROM file
+WHERE path LIKE 'C:\\Users\\%\\AppData\\Local\\Microsoft\\Edge\\User Data\\%'
+   OR path LIKE 'C:\\Users\\%\\AppData\\Local\\Google\\Chrome\\User Data\\%'
+ORDER BY mtime DESC
+LIMIT 200;
+```
+
+Signed-in user context and last logons:
+
+```sql
+SELECT username, user_sid, directory, shell
+FROM users;
+```
+
+Local indicators of staging (archives created recently):
+
+```sql
+SELECT path, datetime(mtime, 'unixepoch') AS mtime, size
+FROM file
+WHERE path LIKE 'C:\\Users\\%\\Downloads\\%.zip'
+   OR path LIKE 'C:\\Users\\%\\Desktop\\%.7z'
+ORDER BY mtime DESC
+LIMIT 50;
+```
+
+> ✅ Success: You can classify devices into (A) directly involved, (B) adjacent/suspicious, (C) likely unrelated—based on a consistent set of OSQuery outputs attached to the case.
+
+## Contain with Precision: Policy Hardening + Session Revocation (Rollback-Ready)
+### 1) Immediate containment actions
+Containment needs two simultaneous outcomes:
+- Token invalidation (stop current sessions).
+- Token re-issuance prevention (stop new sessions from risky paths).
+
+Core actions in **Entra ID**:
+- Revoke user sessions for affected identities.
+- Force sign-in reauthentication where appropriate.
+- Disable/limit risky flows where justified by your environment.
+
+Example using **Microsoft Graph** to revoke sign-in sessions for a user:
+
+```bash
+# Revoke sign-in sessions for a user (requires appropriate Graph permissions)
+USER_ID="<user-guid-or-upn>"
+ACCESS_TOKEN="<token>"
+
+curl -sS -X POST \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  "https://graph.microsoft.com/v1.0/users/${USER_ID}/revokeSignInSessions" \
+| jq
+```
+
+### 2) Conditional Access controls that materially change the outcome
+The containment objective is to make replay from non-compliant hosts fail deterministically:
+- Require device compliance for high-risk apps and privileged roles.
+- Enforce sign-in frequency (appropriate to business tolerance).
+- Require phishing-resistant methods for privileged access where feasible.
+- Apply token protection controls available in your environment.
+
+> 💡 Pro-Tip: Make every policy change traceable: capture pre-change state, exact rule deltas, deployment timestamp, and rollback steps. This is what turns “we think it’s contained” into “we can prove it.”
+
+### 3) Proving containment
+Your containment evidence package should include:
+- The exact list of affected identities, suspicious IPs, and time window.
+- The revocation actions executed (who/when/what).
+- The policy enforcement changes applied.
+- Post-change verification queries showing blocked or re-authenticated activity.
+
+> ✅ Success: Within 24 hours you can answer, with evidence: “Which identities were impacted, which devices were involved, and what controls now prevent replay from unmanaged hosts?”
+
+## Checklist
+- [ ] Define incident time window and primary affected user principals (UPNs)
+- [ ] Pull **Entra ID** sign-in logs for device-code and non-interactive anomalies
+- [ ] Extract suspicious IPs, user agents, apps, and correlation IDs
+- [ ] Run **Microsoft Defender XDR** hunts to map identity events to devices
+- [ ] Validate suspicious device activity with **DeviceNetworkEvents** and **DeviceProcessEvents** pivots
+- [ ] Execute a targeted **OSQuery** pack on suspected endpoints and collect outputs centrally
+- [ ] Classify devices (involved/adjacent/unrelated) and document rationale
+- [ ] Revoke sessions for impacted identities and confirm revocation took effect
+- [ ] Implement precise **Conditional Access** hardening with rollback steps recorded
+- [ ] Re-run hunts post-change to confirm replay paths fail or require reauthentication
+
+## FAQ
+### Does device-code abuse always mean the endpoint is compromised?
+<p>No. In many cases the token issuance happens because a user completes a legitimate verification step, and the attacker uses the resulting tokens elsewhere. You still validate endpoints because some incidents include local token theft or follow-on execution, but don’t assume host compromise without endpoint evidence.</p>
+
+### What’s the fastest way to reduce noise when “sign-in succeeded” is everywhere?
+<p>Anchor on grant type and session behavior: device-code indicators, non-interactive sign-ins, sudden changes in client app/user agent, and rapid access across multiple resources. Then pivot into **Microsoft Defender XDR** for device/process/network corroboration before expanding scope.</p>
+
+### What should the 24-hour containment package contain?
+<p>Affected identities and devices, a timestamped log of revocation actions, exact **Conditional Access** changes (including rollback), and post-change verification queries showing that risky token issuance/reuse is blocked or forces reauthentication.</p>
