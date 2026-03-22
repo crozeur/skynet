@@ -1,0 +1,250 @@
+export const metadata = {
+  title: "Zero‑Trace SOC 2 Type II Evidence for Ephemeral Infrastructure",
+  description: "Prove SOC 2 control operation in ephemeral environments using immutable, least-retained evidence artifacts built from authoritative telemetry.",
+  date: "2026-03-22",
+  pillar: "AUDIT",
+  tags: ["SOC 2", "audit evidence", "ephemeral infrastructure", "Kubernetes", "AWS"]
+};
+
+## Introduction
+Ephemeral-by-default infrastructure breaks the auditor’s default assumption: the systems that ran yesterday’s controls no longer exist today. SOC 2 Type II still demands proof that controls operated consistently over time, even when Kubernetes nodes, serverless functions, and CI runners self-destruct in minutes. The only workable path is evidence that outlives compute—immutable artifacts derived from authoritative telemetry and change history, retained only as long as the control requires. This post shows how to build a “zero-trace” evidence set: minimal payload, maximum verifiability, and packaged to review fast.
+
+## Quick Take
+- Treat each SOC 2 control as a control-to-query mapping: define one authoritative source, one deterministic query, one expected output shape.
+- Make IaC the primary change-control record: capture plan/apply JSON, provider versions, and commit SHAs as signed artifacts.
+- Prefer metadata-grade evidence: redact payload-heavy fields (especially secrets) and store hashes + indexes for integrity.
+- Prove “operation over time” with time-windowed exports (daily/weekly) from **AWS CloudTrail**, **AWS Config**, and **Kubernetes Audit Logs**.
+- Ship an auditor-ready bundle: control mapping index + hashed artifacts + retention-by-control policy, not raw log dumps.
+
+## 1) Design Evidence That Survives Self-Destructing Workloads
+### 1) Evidence must be compute-independent
+When a node pool is replaced or a serverless container is recycled, the “host” is not a durable evidence surface. Durable evidence comes from:
+- Cloud control plane telemetry (ex: **AWS CloudTrail**, **AWS Config**)
+- Cluster control plane telemetry (ex: **Kubernetes Audit Logs**, admission controller events)
+- Source-of-truth history (ex: Git commit history, **Terraform** state/backends)
+
+> ⚠️ Attention: If your evidence is “ssh to the node and screenshot a config file,” you have already lost in ephemeral environments. The system you need to prove may not exist at audit time.
+
+### 2) Evidence must be minimal, deterministic, and reviewable
+Auditors don’t need your entire log lake; they need proof.
+- Minimal: only control-relevant fields
+- Deterministic: same query produces same output shape
+- Reviewable: consistent naming, timestamps, and scoped time windows
+
+A practical pattern is a per-control evidence artifact containing:
+- `control_id` (your internal mapping)
+- `time_window` (start/end)
+- `source` (authoritative system)
+- `query` (exact command or saved query ID)
+- `result` (redacted output)
+- `hash` (integrity)
+
+### 3) Establish “authoritative source” rules up front
+A common failure mode is presenting evidence from non-authoritative systems (e.g., app logs to prove IAM). Define rules like:
+- Identity & MFA posture: **AWS IAM** / **AWS Organizations**
+- API activity: **AWS CloudTrail**
+- Resource configuration drift: **AWS Config**
+- Kubernetes authz decisions: **Kubernetes Audit Logs**
+- Change control: Git + **Terraform** plan/apply artifacts
+
+> 💡 Pro-Tip: Put the authoritative source in the control mapping itself. If the mapping says “IAM → get-account-summary,” you remove debate during fieldwork.
+
+## 2) Build Control-to-Query Mappings (Control Evidence as Code)
+### 1) Define the mapping schema
+Create a versioned mapping file (store it in Git) that ties each control to the exact evidence you will export.
+
+Example mapping (YAML):
+```yaml
+controls:
+  CC6.1-access-control:
+    intent: "Access to systems is authorized and managed."
+    authoritative_sources:
+      - aws_iam
+      - aws_cloudtrail
+    evidence:
+      - name: "iam-account-mfa-enabled"
+        tool: "awscli"
+        command: "aws iam get-account-summary"
+        postprocess: "jq '.SummaryMap[\"AccountMFAEnabled\"]'"
+        expected: "nonzero"
+        retention: "90d"
+      - name: "cloudtrail-console-login"
+        tool: "cloudtrail-lake"
+        query_id: "saved/console-logins"
+        expected: "events_present"
+        retention: "180d"
+```
+
+This mapping becomes your single source for:
+- What to pull
+- From where
+- For which period
+- How long to retain
+
+### 2) Example: deterministic IAM posture check
+A compact artifact can prove the environment enforces MFA at the account level (where applicable) without dumping user lists.
+
+```bash
+aws iam get-account-summary | jq '.SummaryMap["AccountMFAEnabled"]'
+```
+
+Store the output as an artifact with a timestamp and window, for example:
+- `evidence/CC6.1-access-control/2026-03-01_2026-03-07/iam-account-mfa-enabled.json`
+
+> ✅ Success: You can rerun the same command across audit windows and show consistent posture without relying on ephemeral compute.
+
+### 3) Prove “operated over time” with windowed exports
+SOC 2 Type II is about operation over a period. Your evidence should be periodic and time-boxed.
+- Daily or weekly exports from **AWS CloudTrail**/**AWS Config**
+- Per-release exports from IaC pipelines
+- Per-change exports for privileged access grants
+
+For **AWS CloudTrail Lake** (where used), evidence should be:
+- A saved query definition (to prove what was queried)
+- A query run result for each time window
+
+If you use **CloudWatch Logs Insights**, store:
+- The exact query string
+- The log group(s)
+- The time window
+- The results (redacted)
+
+## 3) Attest IaC-Driven Changes for Ephemeral Stacks
+### 1) Capture plan/apply artifacts as evidence
+In ephemeral environments, “what existed” is best proven by “what was declared and applied.” For **Terraform**, capture:
+- Plan file
+- Plan JSON
+- Apply output
+- Provider versions
+- Module versions
+- Git commit SHA
+
+```bash
+terraform version
+terraform providers
+terraform plan -out tfplan
+terraform show -json tfplan > tfplan.json
+```
+
+### 2) Bind evidence to the exact change set (commit SHA)
+Write the commit SHA into the artifact metadata so the evidence is unambiguous.
+
+```bash
+git rev-parse HEAD > commit_sha.txt
+sha256sum tfplan tfplan.json commit_sha.txt > evidence.hashes
+```
+
+> ⚠️ Attention: A screenshot of a CI job “green check” is not a change-control record. Auditors will ask what changed, who approved it, and what was applied.
+
+### 3) Make the artifacts tamper-evident
+You don’t need a complex PKI to improve integrity. At minimum:
+- Hash every artifact
+- Create an index that lists artifact names + hashes
+- Store artifacts in write-once or immutability-enabled storage where available (e.g., object lock)
+
+Example index file:
+```json
+{
+  "bundle_id": "audit-evidence-2026-03-07",
+  "time_window": {"start": "2026-03-01", "end": "2026-03-07"},
+  "artifacts": [
+    {"path": "CC6.1-access-control/iam-account-mfa-enabled.json", "sha256": "..."},
+    {"path": "CC8.1-change-management/tfplan.json", "sha256": "..."}
+  ]
+}
+```
+
+> 💡 Pro-Tip: Keep the index human-auditable. Auditors like a single manifest that ties everything together.
+
+## 4) Timebox and Redact Evidence Without Losing Audit Value
+### 1) Adopt “least-retained evidence” as a control
+Ephemeral infrastructure often correlates with high-volume logs. Evidence retention should be driven by control needs, not by default log retention.
+- Retain metadata longer than payload
+- Retain aggregated results longer than raw events
+- Enforce retention per control mapping (e.g., 90d vs 180d)
+
+### 2) Kubernetes audit policy: avoid payload-heavy capture
+**Kubernetes Audit Logs** can explode in volume and may capture sensitive request bodies depending on policy. Use metadata-only logging for high-risk resources like secrets.
+
+```yaml
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+  - level: Metadata
+    resources:
+      - group: ""
+        resources: ["secrets"]
+  - level: RequestResponse
+    resources:
+      - group: ""
+        resources: ["configmaps"]
+```
+
+> ⚠️ Attention: Logging request/response for `secrets` risks storing sensitive material in your evidence trail. Evidence should prove control operation, not create a new data-exposure surface.
+
+### 3) Export “proof,” not “everything”
+For each time window, export one of the following evidence types:
+- Counted summaries (e.g., number of privileged role grants)
+- Sampled events (bounded, justified sampling)
+- Policy state snapshots (current config + change history)
+
+A bounded query pattern (example using **AWS CLI** + **jq** for shape enforcement):
+```bash
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=ConsoleLogin \
+  --start-time 2026-03-01T00:00:00Z \
+  --end-time 2026-03-07T23:59:59Z \
+  --max-results 50 \
+| jq '{Events: [.Events[] | {EventTime, Username, Resources, CloudTrailEvent: null}]}'
+```
+
+This keeps the output compact (and explicitly nulls payload fields you don’t want to retain).
+
+> ✅ Success: Your evidence set remains small enough to review quickly while still being verifiable and tied to authoritative telemetry.
+
+## 5) Package a Zero-Trace Evidence Set (Auditor-Ready Bundle)
+### 1) Standardize bundle structure
+Use a predictable folder layout so every audit window looks the same.
+- `index.json` (manifest + hashes)
+- `control-mapping.yaml` (versioned mapping used)
+- `artifacts/<control_id>/<time_window>/...`
+- `readme.md` (how to verify hashes, how to interpret artifacts)
+
+### 2) Verification workflow
+Provide a simple verification command sequence that an auditor (or internal reviewer) can run.
+
+```bash
+sha256sum -c index.sha256
+```
+
+If you include a JSON manifest, also include a generated checksum list:
+```bash
+find artifacts -type f -print0 | sort -z | xargs -0 sha256sum > index.sha256
+```
+
+### 3) Deliver evidence in days with standardized execution
+Skynet’s execution model fits this problem because it is deterministic: ingest control-relevant telemetry from **AWS CloudTrail**, **AWS Config**, and **Kubernetes Audit Logs**, bind it to Git/**Terraform** change history, redact to least-retained outputs, then export a hashed, indexed bundle aligned to your control-to-query mappings.
+
+> ✅ Success: You stop chasing deleted nodes and start proving control operation with durable, integrity-checked artifacts.
+
+## Checklist
+- [ ] Define an authoritative source for each control (cloud control plane, cluster control plane, or Git/IaC history)
+- [ ] Create a versioned control-to-query mapping file with expected output shapes
+- [ ] Export evidence on a fixed cadence (daily/weekly) to prove operation over time
+- [ ] Capture **Terraform** plan/apply JSON, provider versions, and module versions per release
+- [ ] Bind IaC evidence to Git commit SHAs and store hashes for tamper-evidence
+- [ ] Configure **Kubernetes Audit Logs** policy to avoid payload capture for sensitive resources (e.g., `secrets`)
+- [ ] Redact payload-heavy fields from telemetry exports while keeping identifiers and timestamps
+- [ ] Enforce retention-by-control (least-retained evidence) and document it in the mapping
+- [ ] Generate a bundle manifest (index) that lists every artifact and its SHA-256
+- [ ] Store bundles in an immutability-capable location when available and restrict access
+
+## FAQ
+### How do we prove a control operated if the workload no longer exists?
+<p>Prove it via the systems that outlive the workload: cloud control plane telemetry (for API activity and configuration state), cluster audit telemetry (for authorization decisions), and Git/IaC history (for declared and applied changes). Your evidence should be time-windowed exports plus integrity hashes so the proof persists even when compute is gone.</p>
+
+### What’s the minimum evidence we should retain to avoid “log dumping”?
+<p>Retain deterministic outputs that map directly to controls: policy/state snapshots, bounded query results, and summarized counts. Prefer metadata-only logging where payloads are sensitive, and enforce retention per control so you keep proof without building a secondary data lake of unnecessary content.</p>
+
+### How do we make evidence tamper-evident without heavy tooling?
+<p>Hash every exported artifact (SHA-256), generate a manifest that lists artifact paths and hashes, and keep the manifest with the bundle. If your storage supports immutability controls, enable them for the evidence bucket/container. This provides straightforward integrity verification during audit review.</p>
