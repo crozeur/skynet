@@ -43,8 +43,8 @@ A practical multi-cloud blueprint:
 - Ensure only the hub has a path to the public internet (if internet egress is allowed at all).
 
 ### Avoiding the two common breakpoints
-1) “Default route exists, but workloads still bypass.” Causes include public IPs on nodes, direct IGW routes on subnets, or serverless using managed egress.
-2) “Traffic reaches inspection, but responses never return.” Causes include asymmetric routes between hub/spokes, multiple NAT points, or per-AZ route inconsistencies.
+### 1) “Default route exists, but workloads still bypass.” Causes include public IPs on nodes, direct IGW routes on subnets, or serverless using managed egress.
+### 2) “Traffic reaches inspection, but responses never return.” Causes include asymmetric routes between hub/spokes, multiple NAT points, or per-AZ route inconsistencies.
 
 ## Kubernetes: Enforce Egress at Multiple Layers (Policy + Routing + Cloud)
 ### Layer 1: Kubernetes egress policy (deny-by-default)
