@@ -1,0 +1,284 @@
+export const metadata = {
+  title: "Kubernetes Audit-Ready Runtime Forensics in Under 24 Hours",
+  description: "Map pod → node → cloud principal → API action using eBPF plus CloudTrail and export a deterministic evidence bundle fast.",
+  date: "2026-03-29",
+  pillar: "SOC",
+  tags: ["kubernetes", "ebpf", "cloudtrail", "forensics", "incident-response"]
+};
+
+## Introduction
+Kubernetes incident forensics breaks down when you can’t prove which workload (pod/service account) triggered specific cloud control-plane API calls. The root cause is identity and network indirection: kube RBAC, IRSA/Workload Identity, node roles, NAT egress, and shared credentials blur attribution. Skynet’s approach is standardized execution: deploy an ephemeral, repeatable forensic stack, pull only a strict time window of telemetry, and deterministically map pod → node → cloud principal → API action. The outcome is an audit-ready timeline bundle with validation checks, produced in hours instead of days.
+
+## Quick Take
+- Pod-to-cloud attribution fails without pod-level runtime provenance and control-plane logs in the same time window.
+- eBPF telemetry should be enriched with pod UID, serviceAccount, and image digest to withstand redeploy churn.
+- Cloud control-plane logs (**AWS CloudTrail**, **Azure Activity Log**) must be queried for STS/role sessions and API calls, not just the final action.
+- Deterministic correlation hinges on stable join keys: timestamps, node identity/ENI, source IP, and role session (principalId/sessionName).
+- Deliverables should be a signed timeline plus “gaps checks” (missing audit logs, retention limits, clock drift) to avoid false confidence.
+
+## Standardized execution: the minimum forensic stack that actually correlates
+### What you must capture (and why)
+To prove pod → cloud API action, you need three planes of evidence captured for the same bounded interval:
+
+- Runtime provenance (process + network) per pod: “what executed” and “what endpoints were contacted,” with Kubernetes identity attached.
+- Kubernetes control-plane evidence: API server audit events for authn/authz context, object changes, and serviceAccount usage.
+- Cloud control-plane evidence: API activity with the calling principal, session, source IP, and relevant resources.
+
+> ⚠️ Attention: If you only have **CloudTrail** (or only have eBPF), you can often suspect a workload but you cannot prove it. You need the runtime plane to tie network/process behavior to pod identity, and the cloud plane to tie the same activity to a cloud principal/session.
+
+### Deploy an ephemeral eBPF sensor and collectors
+Skynet’s runbook-style execution uses a short-lived forensic deployment that can be removed cleanly after evidence export. In practice, this is typically a DaemonSet for eBPF sensors plus minimal log collection.
+
+Example: deploy **Cilium Tetragon** as an eBPF sensor (cluster-specific manifests omitted intentionally; pin the version you already approve and keep it reproducible):
+
+```bash
+kubectl apply -f tetragon.yaml
+kubectl -n kube-system rollout status ds/tetragon
+
+# Verify connect/exec visibility quickly
+kubectl -n kube-system logs ds/tetragon --tail=200 | egrep '"process"|"connect"'
+```
+
+If you prefer policy-focused runtime visibility, **Falco** with eBPF can capture exec/connect signals as well. The key requirement is enrichment: pod UID, namespace, serviceAccount, and container image digest.
+
+> 💡 Pro-Tip: Always persist pod UID and image digest (SHA256) into your event stream. Names and labels change during incident response; UID and digest survive redeploys and prevent “wrong pod” attribution.
+
+### Time-bounding and evidence minimization
+Standardized execution should enforce a tight scope:
+
+- Start time: earliest suspected malicious activity.
+- End time: containment action completed (or a fixed “+2h” to catch stragglers).
+- Collection: only the fields required for correlation and audit (avoid dumping entire clusters).
+
+This isn’t about being conservative; it’s about producing an evidence bundle that is reviewable and defensible.
+
+## Capture pod-level provenance with eBPF (exec + connect) and enrich identity
+### Required fields for correlation
+From the runtime side, you need enough to uniquely identify the workload and the action:
+
+- Event timestamp (high resolution if available)
+- Pod UID, namespace, name
+- serviceAccount name
+- Node name
+- Container image digest
+- Process path/args (for exec)
+- Destination IP/port and protocol (for connect)
+
+Example: filter eBPF logs down to a suspect namespace and emit JSON lines for later joins:
+
+```bash
+NS=suspect-ns
+kubectl -n kube-system logs ds/tetragon \
+  | jq -c --arg ns "$NS" 'select(.process.pod.namespace == $ns) \
+    | {ts:.time, node:.node_name, podUID:.process.pod.uid, pod:.process.pod.name, \
+       ns:.process.pod.namespace, sa:.process.pod.service_account, \
+       img:.process.pod.container.image_id, \
+       event:.event_type, exec:.process.exec, dest:.destination}' \
+  > tetragon.filtered.jsonl
+```
+
+> ⚠️ Attention: If your cluster nodes are behind NAT or share egress, “source IP” alone won’t map to a pod. You still need node identity (and often ENI/instance identity) to bridge to cloud logs.
+
+### Tie runtime events to node and infrastructure identity
+For AWS, you’ll often need to map node → instanceId → ENI(s) → private IP(s). Capture these at collection time so correlation does not depend on later reconstruction.
+
+Example: export a node inventory snapshot (instance ID and provider IDs) from Kubernetes:
+
+```bash
+kubectl get nodes -o json \
+  | jq -c '.items[] | {node:.metadata.name, providerID:.spec.providerID, \
+      internalIP:(.status.addresses[]|select(.type=="InternalIP")|.address)}' \
+  > nodes.inventory.jsonl
+```
+
+If you run **EKS** with IRSA, also snapshot serviceAccount annotations (role ARN) for the suspect namespaces:
+
+```bash
+kubectl get sa -A -o json \
+  | jq -c '.items[] | {ns:.metadata.namespace, sa:.metadata.name, \
+      roleArn:(.metadata.annotations["eks.amazonaws.com/role-arn"] // "")}' \
+  > serviceaccounts.irsa.jsonl
+```
+
+> ✅ Success: At this point you can answer “what executed and what it connected to” with pod UID + image digest, and you have a frozen mapping of node identity and (if applicable) IRSA role bindings.
+
+## Correlate to cloud control-plane activity (CloudTrail) and attribute principals
+### Query the right CloudTrail events for attribution
+For AWS, attribution typically hinges on:
+
+- STS session establishment (**AssumeRole**, **AssumeRoleWithWebIdentity**, **GetCallerIdentity**)
+- The target API actions of interest (e.g., **PutObject**, **GetSecretValue**, **CreateAccessKey**, **ModifySecurityGroupRules**)
+
+Example: pull all role assumption events for the window:
+
+```bash
+START="2026-03-29T00:00:00Z"
+END="2026-03-29T04:00:00Z"
+
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRoleWithWebIdentity \
+  --start-time "$START" --end-time "$END" \
+  --output json > cloudtrail.assume-webid.json
+
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRole \
+  --start-time "$START" --end-time "$END" \
+  --output json > cloudtrail.assume-role.json
+```
+
+Then pull actions for the suspected principal/role session(s). The most reliable join keys vary by organization, but common pivots include username (assumed-role ARN), principalId, sourceIPAddress, and eventTime.
+
+```bash
+ROLE_SESSION_ARN="arn:aws:sts::123456789012:assumed-role/MyRole/my-session"
+
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=Username,AttributeValue="$ROLE_SESSION_ARN" \
+  --start-time "$START" --end-time "$END" \
+  --output json > cloudtrail.actions.by-session.json
+```
+
+> 💡 Pro-Tip: Don’t skip session establishment events. If you only query for the “final” API calls, you may miss the pivot that proves how the workload obtained credentials (web identity token vs node role vs static keys).
+
+### Map CloudTrail source to Kubernetes nodes (and then pods)
+You generally bridge cloud → cluster via one (or more) of:
+
+- sourceIPAddress (when it’s a node IP / egress IP you can map)
+- VPC flow context (if available in your environment)
+- ENI identifiers (from infrastructure inventory)
+- role session naming conventions (if you set them deterministically)
+
+This is why the node inventory snapshot matters. In many incidents, multiple pods share a node and share egress; you need runtime connect events to isolate which pod initiated outbound traffic at the same timestamps.
+
+> ⚠️ Attention: Clock drift kills correlation. If node time is off by minutes, timestamp joins become guesswork. Capture NTP/chrony status (or at least node time) as part of the evidence bundle.
+
+## Build a deterministic timeline bundle (and prove your gaps)
+### Produce the evidence bundle: timeline + joins + validation
+A defensible artifact set includes:
+
+- `timeline.jsonl` (normalized events)
+- `joins.jsonl` (explicit mapping podUID → principal/session → API action)
+- `inventory/` (nodes, serviceAccounts/roles, container digests)
+- `validation.json` (gaps checks and collection metadata)
+
+Below is a minimal join script that:
+
+- Reads Kubernetes audit log JSON lines (`kube-audit.jsonl`)
+- Reads CloudTrail lookup output (`cloudtrail.actions.by-session.json`)
+- Emits a joined, time-ordered timeline
+
+```bash
+python3 - <<'PY'
+import json
+from datetime import datetime, timezone
+
+def parse_ts(s):
+    # Accept RFC3339/ISO8601 with Z
+    if not s: return None
+    if s.endswith('Z'): s = s[:-1] + '+00:00'
+    return datetime.fromisoformat(s).astimezone(timezone.utc)
+
+# Inputs
+kube_audit_path = 'kube-audit.jsonl'
+ct_path = 'cloudtrail.actions.by-session.json'
+
+# Load CloudTrail events
+ct_raw = json.load(open(ct_path))
+ct_events = []
+for e in ct_raw.get('Events', []):
+    ce = json.loads(e.get('CloudTrailEvent', '{}'))
+    ct_events.append({
+        'ts': parse_ts(ce.get('eventTime')),
+        'type': 'cloudtrail',
+        'eventName': ce.get('eventName'),
+        'userArn': (ce.get('userIdentity') or {}).get('arn'),
+        'principalId': (ce.get('userIdentity') or {}).get('principalId'),
+        'sourceIP': ce.get('sourceIPAddress'),
+        'request': ce.get('requestParameters'),
+        'resources': ce.get('resources'),
+    })
+
+# Load kube-audit events
+ka_events = []
+with open(kube_audit_path) as f:
+    for line in f:
+        line=line.strip()
+        if not line: continue
+        a = json.loads(line)
+        ka_events.append({
+            'ts': parse_ts(a.get('requestReceivedTimestamp') or a.get('stageTimestamp')),
+            'type': 'kube-audit',
+            'verb': a.get('verb'),
+            'user': (a.get('user') or {}).get('username'),
+            'userAgent': a.get('userAgent'),
+            'objectRef': a.get('objectRef'),
+            'sourceIPs': a.get('sourceIPs'),
+            'annotations': a.get('annotations'),
+        })
+
+# Naive time-based merge (replace with stricter joins for your environment)
+all_events = [e for e in ct_events + ka_events if e.get('ts')]
+all_events.sort(key=lambda x: x['ts'])
+
+for e in all_events:
+    out = dict(e)
+    out['ts'] = out['ts'].isoformat().replace('+00:00','Z')
+    print(json.dumps(out, separators=(',',':')))
+PY
+```
+
+This script is intentionally conservative: it normalizes and orders evidence. Your deterministic correlation step should then add explicit join logic based on your environment (node IP ↔ sourceIP, serviceAccount ↔ role ARN, and session ↔ API calls).
+
+### Gaps checks that prevent false conclusions
+In addition to the timeline, produce explicit validation artifacts:
+
+- Audit log continuity: are there missing ranges or dropped events?
+- Log retention: is the requested window fully retained (cluster + cloud)?
+- Clock drift: are node and control-plane timestamps aligned?
+- Identity binding completeness: do you have IRSA/Workload Identity bindings for all suspect serviceAccounts?
+
+> ✅ Success: A reviewer can replay your joins and understand exactly how you mapped pod UID + image digest to a cloud principal/session and then to a specific API action, with known gaps documented.
+
+## Operationalizing in Skynet: runbook-driven correlation in hours
+### The Pod → Principal Correlation Runbook
+Skynet’s standardized execution focuses on repeatability and precision:
+
+- Deploy ephemeral eBPF sensors and bounded collectors
+- Snapshot node and identity inventories
+- Pull CloudTrail events for a fixed window (including STS establishment)
+- Run deterministic correlation jobs and emit a fixed evidence bundle
+- Execute validation checks and sign the output
+
+The key is that every step is scripted, time-bounded, and produces machine-verifiable artifacts.
+
+### What “done” looks like
+Your final deliverable should answer, without hand-waving:
+
+- Which pod UID (and image digest) initiated the activity
+- Which serviceAccount and binding path applied (IRSA/Workload Identity/node role/static keys)
+- Which cloud principal/session performed which API actions
+- When it happened, with a contiguous timeline and declared gaps
+
+> 💡 Pro-Tip: Store the evidence bundle as immutable objects (e.g., **Amazon S3** with object lock where available) and include the exact collection commands, tool versions, and hashes of exported files.
+
+## Checklist
+- [ ] Define the incident time window (start/end) and document the rationale
+- [ ] Deploy an ephemeral eBPF sensor DaemonSet (e.g., **Cilium Tetragon** or **Falco**) pinned to an approved version
+- [ ] Verify exec/connect events are captured and enriched with pod UID + serviceAccount + image digest
+- [ ] Export a node inventory snapshot (node name, providerID, internal IP)
+- [ ] Export serviceAccount identity bindings (e.g., IRSA role ARN annotations) for suspect namespaces
+- [ ] Pull **AWS CloudTrail** events for STS establishment (AssumeRole/AssumeRoleWithWebIdentity) for the window
+- [ ] Pull **AWS CloudTrail** events for target API actions for the same window and relevant principals
+- [ ] Normalize and time-order evidence into a single timeline file
+- [ ] Perform deterministic joins (pod → node → principal/session → API action) and emit a join artifact
+- [ ] Run gaps checks (audit continuity, retention coverage, clock drift) and record results
+- [ ] Package and hash/sign the evidence bundle for handoff and review
+
+## FAQ
+### What if multiple pods share the same node and egress IP?
+<p>Use runtime connect events from the eBPF sensor to attribute outbound connections to a specific pod UID at specific timestamps, then bridge to cloud logs via the node identity/egress context. If you rely on egress IP alone, you can narrow to a node but not prove the initiating workload.</p>
+
+### Can I do this without Kubernetes audit logs?
+<p>You can still build strong attribution using eBPF runtime provenance plus **CloudTrail**, but you lose key control-plane context (who created/changed objects, token usage patterns, RBAC decisions). Treat missing audit logs as an explicit gap and document the impact in the validation artifact.</p>
+
+### How do I handle time skew between nodes and cloud logs?
+<p>Capture node time/clock sync status during collection, then apply a measured offset if required. If you can’t quantify skew, avoid tight timestamp joins and instead join on session identifiers (principalId/sessionName) plus broader time windows, while documenting the reduced certainty.</p>
