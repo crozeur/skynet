@@ -1,0 +1,245 @@
+export const metadata = {
+  title: "SOC 2 Type II Evidence for GitOps Without Long-Lived Systems",
+  description: "Zero-trace, control-indexed SOC 2 Type II evidence for ephemeral CI runners, short-lived IAM, and Terraform drift.",
+  date: "2026-03-29",
+  pillar: "AUDIT",
+  tags: ["SOC 2", "GitOps", "Terraform", "CloudTrail", "OIDC"]
+};
+
+## Introduction
+SOC 2 Type II evidence collection breaks when your CI runners vanish, IAM sessions expire in minutes, and Terraform continuously mutates infrastructure via GitOps. Auditors still need durable proof of access control, change control, and monitoring—even when nothing is “durable” at the compute layer. The fastest path is to treat evidence as a reproducible build artifact: derive it from source-of-truth systems (Git, Terraform state, cloud control plane, IdP) and package it immutably for a specific audit window. Skynet operationalizes this as standardized execution: a fixed evidence pipeline that outputs a control-indexed, hashed evidence pack without interactive access to production.
+
+## Quick Take
+- Evidence must be derived from authoritative logs and state, not from runner disks or screenshots.
+- Map each SOC 2 control to a machine-verifiable signal (query + expected shape + retention).
+- Prove GitOps change control with signed commits/tags, protected branches, CODEOWNERS, and check-run attestations.
+- Eliminate drift debates by reconciling Terraform-declared vs cloud-actual continuously and exporting time-bounded exceptions.
+- Package everything into an immutable ZIP (hash manifest, timestamps, query outputs) traceable to control IDs.
+
+## Build a Zero-Trace Evidence Model (Signals, Not Screens)
+### Define “zero-trace” for audits
+In fast-moving GitOps, “evidence” cannot depend on:
+- filesystem artifacts on ephemeral runners
+- interactive sessions into production
+- manual screenshots or ad-hoc exports
+
+A zero-trace model treats evidence as query outputs pulled from durable systems that already record the truth:
+- **GitHub**/**GitLab**: commit history, protected branch rules, CODEOWNERS decisions, check runs
+- **Terraform**: state snapshots, plans, apply logs, module versions
+- Cloud control plane: **AWS CloudTrail**, **AWS Config**, **Azure Activity Log**, **GCP Cloud Audit Logs**
+- Identity: **Okta**, **Microsoft Entra ID** sign-in logs, group membership changes, policy changes
+
+> 💡 Pro-Tip: Don’t “collect everything.” Define a small set of signals per control that are (1) durable, (2) time-bounded, (3) independently verifiable.
+
+### Map SOC 2 criteria to queryable signals
+You’re not trying to “prove compliance.” You’re trying to produce repeatable, testable evidence that aligns to common SOC 2 expectations (e.g., CC6.x access control, CC7.x monitoring, PI1.x change management).
+
+A practical control-to-signal mapping has:
+- Control ID (your internal ID, mapped to SOC 2 criteria)
+- Source system
+- Query/endpoint
+- Output schema expectation (fields that must exist)
+- Retention requirement (minimum window)
+
+Example (access control signal: access key creation in AWS):
+```
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=CreateAccessKey \
+  --start-time 2026-01-01T00:00:00Z \
+  --end-time   2026-03-31T23:59:59Z \
+  --max-results 50
+```
+What to store:
+- raw JSON output
+- normalized summary (eventTime, userIdentity.arn, requestParameters)
+- hash of the raw file
+
+> ⚠️ Attention: If **CloudTrail** is not centralized and immutable (separate audit account, restricted writes, retention), your evidence chain is easy to challenge.
+
+## Prove Change Control Under GitOps (Who Approved What)
+### Use branch protection + CODEOWNERS as the control surface
+In GitOps, change control is branch policy enforcement, not ticket commentary. Auditors typically want to see that:
+- direct pushes to main/prod branches are prevented
+- changes require review/approval by appropriate owners
+- required checks gate merges
+- policy is consistent across repositories/environments
+
+Evidence sources in **GitHub** include:
+- branch protection rules (required reviews, required status checks)
+- CODEOWNERS file history
+- pull request review events
+- merge commit + checks at merge time
+
+### Verify commit integrity (signed commits/tags)
+If you claim integrity, you need cryptographic verification.
+
+For locally obtained commits (mirrored repo or fetched by the pipeline):
+```
+git verify-commit <sha>
+```
+If you enforce signed tags for releases:
+```
+git verify-tag <tag>
+```
+Store the verification output and the commit/tag object.
+
+> ✅ Success: An auditor can trace a deployed artifact back to a signed commit/tag and see the approval gates that allowed it to merge.
+
+### Pull check-run and approval evidence via API
+You want durable, API-sourced proof that required checks passed at merge time.
+
+For **GitHub**, retrieve check runs tied to a commit SHA:
+```
+gh api repos/<org>/<repo>/commits/<sha>/check-runs \
+  -H "Accept: application/vnd.github+json" \
+  --jq '.check_runs[] | {name, status, conclusion, started_at, completed_at, details_url}'
+```
+Capture:
+- check names that correspond to your gated controls (e.g., policy-as-code, tests, terraform plan)
+- conclusions and timestamps
+- repository and commit identifiers
+
+> ⚠️ Attention: If your pipeline can be re-run with different inputs, store the workflow run ID plus immutable artifacts (e.g., plan JSON, policy evaluation output) tied to that run.
+
+## Evidence for Ephemeral Runners and Short-Lived IAM (STS/OIDC)
+### Treat identity as a log trail, not a server
+Ephemeral runners are a feature: they reduce standing privileges. The audit challenge is proving:
+- who initiated the workflow
+- what identity the workload assumed
+- what permissions it had
+- what actions it performed
+
+In AWS GitHub Actions OIDC patterns, the core chain is:
+1) **GitHub** workflow run -> OIDC token minted for that run
+2) **AWS STS** AssumeRoleWithWebIdentity -> role session created
+3) **CloudTrail** logs every API call under that session
+
+You can’t rely on the runner to retain token/session details, so pull them from durable logs.
+
+### Query CloudTrail for STS role assumptions
+Use **CloudTrail** to find assumptions of your deployment roles within the audit window:
+```
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=AssumeRoleWithWebIdentity \
+  --start-time 2026-01-01T00:00:00Z \
+  --end-time   2026-03-31T23:59:59Z
+```
+Then correlate fields:
+- eventTime
+- userIdentity.sessionContext.sessionIssuer.arn (role)
+- requestParameters.roleArn
+- sourceIPAddress / userAgent
+
+If you also standardize session tags, you can make correlation deterministic (e.g., repo, workflow, environment). Store your IAM role trust policy as evidence as well.
+
+> 💡 Pro-Tip: Enforce session tagging in your assume-role path (where supported) and encode `repo`, `ref`, `workflow`, and `run_id`. This turns “forensics” into “lookup.”
+
+### Prove least privilege with policy snapshots
+Evidence should include the exact permission set granted during the window:
+- role policy documents
+- permission boundary (if used)
+- attached managed policy versions
+
+In AWS, capture role configuration:
+```
+aws iam get-role --role-name <role>
+aws iam list-attached-role-policies --role-name <role>
+aws iam list-role-policies --role-name <role>
+```
+For inline policies:
+```
+aws iam get-role-policy --role-name <role> --policy-name <name>
+```
+Store outputs as raw JSON plus a normalized summary. Time-bound these snapshots (e.g., at start and end of the audit window) or record every change event via **CloudTrail**.
+
+## Eliminate Drift Arguments (Terraform Declared vs Cloud Actual)
+### Make “drift-free” a continuously testable claim
+GitOps teams lose time when audits devolve into “but the cloud console shows…” arguments. Solve it by producing:
+- the declared infrastructure intent (Terraform state/plan)
+- the observed configuration (cloud configuration queries)
+- a diff/exceptions report with timestamps
+
+### Export Terraform state in machine-readable form
+Evidence should be based on the state used for applies, not a developer’s local checkout.
+
+From the pipeline (or a secured evidence runner) pull state and render JSON:
+```
+terraform show -json | jq '.' > terraform-state.json
+```
+To extract a narrow slice (example: IAM roles):
+```
+terraform show -json \
+  | jq '[.values.root_module.resources[]? | select(.type=="aws_iam_role") | {address, name: .values.name}]'
+```
+Store:
+- the exact Terraform version
+- provider versions (lockfile)
+- module source and ref
+
+> ⚠️ Attention: If your Terraform backend permits state tampering, your “declared intent” can be challenged. Lock down state write access and audit it.
+
+### Query cloud configuration for actual state
+Use **AWS Config** advanced queries to prove what exists and how it is configured:
+```
+aws configservice select-resource-config \
+  --expression "SELECT resourceId, resourceType, accountId, awsRegion, configuration \
+               WHERE resourceType = 'AWS::IAM::Role'"
+```
+Then compare to Terraform-declared resources. Output an exceptions file that includes:
+- resource identifier
+- mismatch type (missing/unexpected/config-diff)
+- first-seen timestamp
+- last-seen timestamp
+
+> ✅ Success: When exceptions exist, you can show they were detected, triaged, and resolved within defined timelines—without arguing from screenshots.
+
+## Package an Immutable, Control-Indexed Evidence Pack
+### Define the evidence pack structure
+A useful evidence deliverable is navigable and verifiable:
+- `/control-index.json` (control IDs -> evidence artifacts)
+- `/queries/` (raw outputs)
+- `/summaries/` (normalized, auditor-friendly views)
+- `/configs/` (policy snapshots, branch protection exports)
+- `/hashes/manifest.sha256` (hash of every file)
+- `/README.md` (scope: audit window, accounts, repos, environments)
+
+Example manifest generation:
+```
+find . -type f -not -path './hashes/*' -print0 \
+  | sort -z \
+  | xargs -0 shasum -a 256 > hashes/manifest.sha256
+```
+
+### Make it time-bounded and reproducible
+Evidence should be generated for a specific window (e.g., quarter) and be reproducible with the same inputs.
+- Store query parameters (start/end, regions, accounts, repos)
+- Store tool versions (**awscli**, **gh**, **terraform**, **jq**)
+- Store immutable identifiers (commit SHAs, workflow run IDs, trail names)
+
+Skynet’s standardized execution focuses on speed and precision here: the same pipeline, same structure, every time—producing a control-indexed ZIP with a hash manifest and traceability to the underlying systems of record.
+
+CTA: Use Skynet’s Zero-Trace SOC 2 Evidence Pack to generate a control-indexed, auditor-ready ZIP (hash manifest + query outputs) for any audit window in hours.
+
+## Checklist
+- [ ] Define an audit window (start/end) and enforce it across all queries.
+- [ ] Establish a control-to-signal mapping (control ID -> source -> query -> expected fields).
+- [ ] Centralize and lock down **AWS CloudTrail** (or equivalent) with sufficient retention.
+- [ ] Export branch protection rules and CODEOWNERS history for in-scope repositories.
+- [ ] Capture commit/tag signature verification outputs for deployed refs.
+- [ ] Export **GitHub**/**GitLab** check-run results tied to merge commits (include timestamps).
+- [ ] Collect STS/OIDC assume-role events and correlate them to workflow runs.
+- [ ] Snapshot IAM role policies/attachments (or record every policy change event).
+- [ ] Export Terraform state JSON plus version/lockfile evidence.
+- [ ] Run **AWS Config** (or equivalent) queries and generate a drift exceptions report.
+- [ ] Build a hashed evidence manifest and store it with the evidence pack.
+- [ ] Produce a control-indexed ZIP with a README describing scope and sources.
+
+## FAQ
+### How do we provide evidence when nothing persists on the runner?
+<p>Don’t treat the runner as an evidence source. Pull evidence from durable systems of record: Git events and repository policy, cloud control-plane logs (e.g., CloudTrail), identity logs, and Terraform state backends. Package the resulting query outputs into a time-bounded, hashed evidence pack.</p>
+
+### Will short-lived STS sessions satisfy access-control evidence expectations?
+<p>Yes, if you can show the full chain: who triggered the workflow, which role was assumed (trust policy + session context), and what actions were executed (CloudTrail events) within the audit window. The key is deterministic correlation (run IDs/session tags) and immutable log retention.</p>
+
+### How do we avoid auditors claiming Terraform drift invalidates our controls?
+<p>Continuously reconcile declared intent (Terraform state/plan) against observed configuration (e.g., AWS Config queries). Export exceptions with timestamps and remediation outcomes. This turns drift from a debate into a measurable, time-bounded control signal.</p>
