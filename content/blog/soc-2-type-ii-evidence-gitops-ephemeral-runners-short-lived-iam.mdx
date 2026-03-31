@@ -113,9 +113,9 @@ Ephemeral runners are a feature: they reduce standing privileges. The audit chal
 - what actions it performed
 
 In AWS GitHub Actions OIDC patterns, the core chain is:
-1) **GitHub** workflow run -> OIDC token minted for that run
-2) **AWS STS** AssumeRoleWithWebIdentity -> role session created
-3) **CloudTrail** logs every API call under that session
+### 1) **GitHub** workflow run -> OIDC token minted for that run
+### 2) **AWS STS** AssumeRoleWithWebIdentity -> role session created
+### 3) **CloudTrail** logs every API call under that session
 
 You can’t rely on the runner to retain token/session details, so pull them from durable logs.
 
