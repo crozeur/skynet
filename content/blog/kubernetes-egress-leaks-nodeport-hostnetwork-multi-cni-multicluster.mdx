@@ -1,0 +1,281 @@
+export const metadata = {
+ title: "Kubernetes Egress You Didn’t Know You Had in Multi-Cluster Cloud",
+ description: "Eliminate hidden Kubernetes egress paths via NodePort, hostNetwork, and routing leaks in multi-cluster EKS/AKS/GKE with repeatable tests and fixes.",
+ date: "2026-04-05",
+ pillar: "CLOUD",
+ tags: ["kubernetes", "egress-control", "cloud-networking", "multicluster", "calico", "cilium"]
+};
+
+## Introduction
+Kubernetes “pod egress locked down” often means “pods can’t talk out”—while the cluster still can. In multi-cluster EKS/AKS/GKE deployments with mixed CNIs and meshes, traffic frequently escapes through NodePort, hostNetwork workloads, privileged DaemonSets, or unintended VPC/TGW/peering route propagation. The result is stealth exfil paths, audit gaps, and controls that pass policy review but fail packet-level reality. This post gives a fast, repeatable egress-closure blueprint: enumerate non-obvious vectors, prove the path, then harden policy, node firewalling, and cloud routing in the correct order.
+
+## Quick Take
+- Node-level egress is not governed by Pod egress controls; anything on the host network can bypass your intent.
+- NodePort and hostNetwork frequently re-open egress even when **Kubernetes NetworkPolicy** looks strict.
+- Mixed **Calico**/**Cilium** + service mesh adds routing layers that hide “who really forwarded what” unless you validate on the node.
+- You need proof: node tcpdump + in-cluster probes + cloud route-table correlation.
+- Close egress in an ordered runbook: remove/contain host access, restrict node egress, then pin routes to dedicated egress paths with verification.
+
+## 1) Threat Model the Hidden Paths (Before You Touch Policy)
+The fastest way to burn days is writing perfect policies for the wrong dataplane. In multi-cluster environments, egress usually leaks through one of these categories:
+
+### 1) NodePort and externalTrafficPolicy side-effects
+A **Service** of type NodePort can expose a port on every node. Even if the service is “inbound,” it can become an egress relay if:
+- a hostNetwork/privileged workload binds a local port and forwards traffic
+- kube-proxy rules (iptables/IPVS) steer traffic in unexpected ways
+- node-local daemons (agents, exporters) unintentionally accept connections
+
+> ⚠️ Attention: Treat NodePort as “node surface area,” not just “service exposure.” NodePort plus permissive node egress equals a potential forwarding plane.
+
+### 2) hostNetwork and privileged DaemonSets
+Anything running with `hostNetwork: true` is outside the pod network. Combine that with `privileged: true` or `NET_ADMIN` and you’ve effectively granted direct access to node interfaces, routes, and firewall rules.
+
+### 3) Multi-CNI routing seams and mesh sidecars
+In mixed **Calico**/**Cilium** estates (or migrations), you can end up with:
+- different enforcement points (eBPF vs iptables)
+- node-local masquerade behavior that differs per cluster
+- mesh egress that looks “in-policy” at L7 but still uses node routes you didn’t intend
+
+### 4) Cloud routing propagation (the silent multiplier)
+Even if Kubernetes is tight, cloud routes can reopen destination reachability:
+- AWS **Transit Gateway** propagation to “unexpected” attachments
+- VPC peering routes shared across environments
+- Azure **Virtual Network Peering** with “allow forwarded traffic”
+- GCP **VPC** custom routes that widen reachability between projects
+
+> 💡 Pro-Tip: In multi-cluster, assume at least one cluster’s route domain is broader than you think. Verify by querying route tables, not diagrams.
+
+## 2) Enumerate the Egress Vectors (Fast, Deterministic)
+You’re looking for “things that can talk as the node” or “things that open node surfaces.” Start with Kubernetes objects, then validate at the OS level.
+
+### 1) Identify hostNetwork, privileged, and NET_ADMIN workloads
+Use **kubectl** to find workloads that can bypass pod egress controls.
+
+```bash
+# hostNetwork pods
+kubectl get pods -A -o json \
+ | jq -r '.items[] | select(.spec.hostNetwork==true) \
+ | [.metadata.namespace,.metadata.name,.spec.nodeName] | @tsv'
+
+# privileged containers
+kubectl get pods -A -o json \
+ | jq -r '.items[] as $p | ($p.spec.containers[]? | select(.securityContext.privileged==true)) \
+ | [$p.metadata.namespace,$p.metadata.name,$p.spec.nodeName] | @tsv'
+
+# NET_ADMIN capability
+kubectl get pods -A -o json \
+ | jq -r '.items[] as $p | ($p.spec.containers[]? \
+ | select((.securityContext.capabilities.add//[]) | index("NET_ADMIN"))) \
+ | [$p.metadata.namespace,$p.metadata.name,$p.spec.nodeName] | @tsv'
+
+# daemonsets (common for host access)
+kubectl get daemonsets -A -o wide
+```
+
+### 2) Enumerate NodePort/LoadBalancer services and kube-proxy mode
+NodePort is often the fastest “oops” to find.
+
+```bash
+# NodePort and LoadBalancer services
+kubectl get svc -A -o json \
+ | jq -r '.items[] \
+ | select(.spec.type=="NodePort" or .spec.type=="LoadBalancer") \
+ | [.metadata.namespace,.metadata.name,.spec.type, (.spec.ports[] | "\(.port):\(.nodePort // "-")/") ] | @tsv'
+
+# kube-proxy mode (iptables vs ipvs) if accessible
+kubectl -n kube-system get cm kube-proxy -o yaml | sed -n '1,140p'
+```
+
+### 3) Validate node listeners and forwarding behavior
+From the node, confirm what is actually listening and whether IP forwarding/NAT is active. If you can’t SSH, use your standard node access method (SSM, Serial Console, etc.).
+
+```bash
+# listeners (Linux)
+ss -lntup
+
+# forwarding flags
+sysctl net.ipv4.ip_forward net.ipv6.conf.all.forwarding
+
+# iptables rules (kube-proxy + any custom chains)
+iptables -S
+iptables -t nat -S
+
+# routes actually present
+ip route
+ip rule
+```
+
+> ✅ Success: At the end of enumeration you have a short list of: (a) node-surface services, (b) workloads with host privileges, and (c) clusters whose routes are broader than their security model.
+
+## 3) Prove the Leak with Packet-Level Tests (No Assumptions)
+You want to answer: “Does traffic leave via pod interface, node interface, or an unintended cloud route?” Do it with one debug pod, one node capture, and one cloud route check.
+
+### 1) Launch a controlled debug pod for egress tests
+Use a disposable pod with known tooling. Keep it short-lived.
+
+```bash
+kubectl -n default run egress-debug --rm -it \
+  --image=ghcr.io/nicolaka/netshoot:latest \
+  --restart=Never -- \
+  sh
+
+# inside the pod
+ip route
+cat /etc/resolv.conf
+mtr -n -c 5 1.1.1.1 || true
+curl -sS --max-time 3 https://example.com >/dev/null && echo OK
+```
+
+### 2) Capture on the node (the ground truth)
+Run **tcpdump** on the node interface that would carry egress (commonly `eth0`/`ens*` plus the CNI/overlay device).
+
+```bash
+# Identify likely egress interfaces
+ip -br link
+ip route get 1.1.1.1
+
+# Capture egress; filter to a test destination to keep it small
+tcpdump -ni eth0 host 1.1.1.1 -vv
+
+# If you suspect NodePort forwarding, capture both host and CNI-facing devices
+tcpdump -ni any 'tcp and (port 30000 or port 443)'
+```
+
+Correlate timestamps: run `curl`/`mtr` from the debug pod while capturing on the node. If you see the traffic on the node’s primary interface but you expected it to exit via an egress gateway/subnet, you have a leak.
+
+> ⚠️ Attention: If a hostNetwork pod is generating traffic, NetworkPolicy on pod CIDRs won’t help. You must control node egress and restrict hostNetwork usage.
+
+### 3) Correlate with cloud route tables (example: AWS)
+Confirm whether your nodes have a route to destinations that should be unreachable.
+
+```bash
+# AWS: find route tables and inspect propagation/attachments (adjust filters)
+aws ec2 describe-route-tables \
+  --filters Name=vpc-id,Values=vpc-xxxxxxxx \
+  --query 'RouteTables[].{Id:RouteTableId,Routes:Routes,Associations:Associations}' \
+  --output json
+
+# AWS: TGW routes can silently widen reachability
+aws ec2 search-transit-gateway-routes \
+  --transit-gateway-route-table-id tgw-rtb-xxxxxxxx \
+  --filters Name=state,Values=active \
+  --max-results 50
+```
+
+Use the same pattern in Azure (**az network route-table**, **az network vnet peering**) or GCP (**gcloud compute routes list**) to identify routes that enable the “unexpected destination.”
+
+## 4) Close Egress in the Right Order (Policy + Node + Routing)
+The correct sequence matters. If you apply NetworkPolicy first, you may think you’re done while host-level paths remain.
+
+### 1) Eliminate or contain NodePort
+Preferred: remove NodePort where not required; otherwise, limit who can reach it.
+- Use **Ingress** + internal **LoadBalancer** where appropriate.
+- If NodePort must exist, restrict node security group/NACL inbound to known sources (and audit it).
+
+```bash
+# Find services that can usually be moved off NodePort
+kubectl get svc -A | egrep 'NodePort|LoadBalancer'
+```
+
+### 2) Restrict hostNetwork and host privileges with Pod Security
+Enforce Pod Security Standards (or equivalent admission) to prevent new leaks.
+
+```yaml
+# Namespace-level Pod Security admission example
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: workloads
+  labels:
+    pod-security.kubernetes.io/enforce: "restricted"
+    pod-security.kubernetes.io/audit: "restricted"
+    pod-security.kubernetes.io/warn: "restricted"
+```
+
+If you must allow hostNetwork for specific components, isolate them into dedicated namespaces and nodes (taints/tolerations + node selectors) and treat those nodes as “egress-controlled infrastructure nodes.”
+
+### 3) Enforce egress with CNI policy (example: Cilium) and add an egress gateway
+Use **CiliumNetworkPolicy** to explicitly allow only required egress destinations and (when needed) route egress through a controlled gateway.
+
+```yaml
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-egress
+  namespace: workloads
+spec:
+  endpointSelector: {}
+  egress: []
+```
+
+Then add explicit egress allow rules per app namespace/service. Keep them tight (DNS, required APIs, required CIDRs).
+
+> 💡 Pro-Tip: Pair “default deny egress” with explicit DNS rules; DNS is usually the first unplanned dependency that breaks deployments.
+
+### 4) Enforce node egress allowlists (because hostNetwork exists somewhere)
+Even with strong CNI policy, you still need node egress control to cover:
+- hostNetwork workloads
+- node agents
+- kubelet/container runtime traffic
+
+On AWS, use security group egress allowlists for node ENIs and isolate egress to dedicated subnets/NAT where possible.
+
+```hcl
+# Terraform sketch: restrict node security group egress to approved CIDRs
+resource "aws_security_group_rule" "node_egress_allow_https" {
+  type              = "egress"
+  security_group_id = aws_security_group.nodes.id
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["203.0.113.0/24"] # replace with approved egress proxy/NAT CIDRs
+}
+```
+
+### 5) Pin routes to dedicated egress paths and stop propagation surprises
+The cloud routing layer must align with your intended “where can this cluster reach?” model.
+- Disable or constrain TGW/peering propagation where it widens reachability.
+- Ensure cluster node subnets route internet-bound traffic only via designated NAT/egress subnets.
+- Use separate route tables per environment/cluster tier to prevent shared reachability.
+
+> ✅ Success: After fixes, the same debug pod tests and node tcpdump show egress only via the approved gateway/NAT path, and cloud route tables no longer advertise unintended destinations.
+
+## 5) Standardized Execution: The Egress-Closure Blueprint (Hours/Days)
+Skynet’s execution model is simple: run a deterministic blueprint across clusters, generate before/after evidence, and leave behind a repeatable runbook.
+
+### 1) Blueprint phases
+- Enumerate: Kubernetes objects + node listeners + CNI flow visibility
+- Trace: debug pod probes + node packet capture + cloud routing correlation
+- Fix: policy + node egress allowlists + routing constraints
+- Verify: rerun probes and captures, export diffs, and lock controls via admission
+
+### 2) Evidence you should require at the end
+- Lists of hostNetwork/privileged workloads with owners and approved exceptions
+- Diff of NodePort/LoadBalancer inventory before vs after
+- Before/after packet captures proving the path change
+- Cloud route-table snapshots showing propagation constraints
+
+### 3) CTA
+If you need to roll this across multiple clusters quickly, Skynet runs the egress-closure blueprint end-to-end—policies, Terraform changes, and verification tests—with packet-level evidence and consistent outcomes in days.
+
+## Checklist
+- [ ] Inventory all **Service** objects of type NodePort/LoadBalancer across clusters and flag unexpected exposures
+- [ ] Identify all pods using `hostNetwork: true` and confirm each has an approved exception owner
+- [ ] Identify all privileged containers and any with `NET_ADMIN`; isolate or remove where possible
+- [ ] Confirm kube-proxy mode and document the enforcement dataplane per cluster (**Calico**, **Cilium**, iptables/IPVS)
+- [ ] Run a standard debug pod egress test suite (DNS, HTTPS, required CIDRs) and save outputs
+- [ ] Capture node traffic with **tcpdump** during tests to confirm the actual egress interface/path
+- [ ] Review cloud route tables and propagation (TGW/peering) for unintended reachable CIDRs
+- [ ] Implement default-deny egress at the namespace level and add explicit allow rules per app
+- [ ] Enforce Pod Security to restrict hostNetwork/privileged usage and prevent regressions
+- [ ] Restrict node security group/NACL egress to approved destinations and pin to dedicated egress subnets
+
+## FAQ
+### How do I know it’s a NodePort/hostNetwork leak versus a normal pod egress path?
+<p>If you see the traffic on the node’s primary interface during a pod-originated test while your design expects egress via a controlled gateway/subnet, it’s a leak. Confirm by capturing on both the CNI/overlay interface and the node interface with **tcpdump** while repeating the same curl/mtr probes.</p>
+
+### Can I rely on Kubernetes NetworkPolicy alone for egress control in multi-cluster?
+<p>No. NetworkPolicy applies to pod traffic in the pod network; it does not govern hostNetwork traffic or arbitrary node processes. In multi-cluster estates, you need a layered control: CNI egress policy plus node egress allowlists plus cloud routing constraints.</p>
+
+### What’s the fastest safe remediation sequence to avoid breaking production?
+<p>Start by enumerating and proving paths, then restrict new host-level privileges via Pod Security, then implement egress policy with explicit allowlists, and finally constrain node egress and cloud routes. Validate at each step using the same repeatable test suite and node packet capture so you can attribute any breakage to a specific change.</p>
