@@ -1,0 +1,326 @@
+export const metadata = {
+  title: "Zero-Trace SOC 2 Type II Evidence for Ephemeral Infrastructure",
+  description: "Generate deploy-time, immutable, signed evidence for short-lived stacks without retaining workload data—ready for SOC 2 Type II audits.",
+  date: "2026-04-05",
+  pillar: "AUDIT",
+  tags: ["soc-2", "audit-evidence", "ephemeral-infrastructure", "policy-as-code", "immutable-logs"]
+};
+
+## Introduction
+Ephemeral infrastructure breaks the default audit playbook: workloads, namespaces, and runners disappear, but the expectation to prove control operation over time does not. The only reliable strategy is to capture evidence at the moment controls execute—then seal it as immutable, timestamped artifacts that can survive beyond the infrastructure lifecycle. This post outlines a deterministic, zero-trace evidence pipeline that records what mattered (control decisions, change metadata, integrity proofs) without retaining sensitive workload data. The result is audit-ready packages per deployment cycle and per month, generated in hours/days rather than after-the-fact reconstruction.
+
+## Quick Take
+- Evidence for ephemeral stacks must be generated at deploy-time, not recovered later.
+- Record control decisions (allow/deny), change metadata, and actor context as signed artifacts.
+- Centralize cloud audit logs and configuration history into write-once storage with retention locks.
+- Produce periodic attestation bundles (admission audits, provenance, baseline scans) that are hashed, signed, and indexed.
+- Treat evidence like build outputs: deterministic, reproducible, exportable, and immutable.
+
+## Design the Evidence Model for “Zero-Trace” Ephemeral Systems
+### Define what “evidence” is (and what it is not)
+In ephemeral environments (short-lived **Kubernetes** namespaces, **AWS Lambda**, disposable CI runners), persistence is an anti-pattern—yet audit evidence must persist. “Zero-trace” here means you retain control artifacts and integrity proofs, not workload data.
+
+A practical evidence model for SOC 2 Type II-style audits typically needs:
+- Change identity: repo, commit SHA, PR, pipeline run ID, artifact digest.
+- Control decision: policy evaluation result (allow/deny), exceptions, approver, ticket ID.
+- Execution proof: timestamps, principal, environment, tool versions.
+- Integrity: hash chain, signatures, and tamper-evident storage.
+- Retention & export: locked retention period, queryable index, auditor-facing export bundle.
+
+> ⚠️ Attention: If your evidence pipeline stores request payloads, secrets, or customer data “for convenience,” you just created a high-value audit evidence store with unnecessary blast radius.
+
+### Standardize the evidence envelope
+Create a minimal, consistent JSON schema for every evidence event (policy gate, deploy, scan, admission decision). Example envelope:
+
+```json
+{
+  "evidence_version": "1.0",
+  "event_type": "policy-decision",
+  "timestamp": "2026-04-05T12:34:56Z",
+  "actor": {
+    "principal": "arn:aws:sts::123456789012:assumed-role/ci-role/build-9281",
+    "source": "ci"
+  },
+  "change": {
+    "repo": "git@github.com:org/app.git",
+    "commit": "b7c1f0d...",
+    "pipeline_run_id": "9281",
+    "workspace": "prod-us-east-1"
+  },
+  "control": {
+    "name": "iac-policy-gate",
+    "policy_set": "baseline-v3",
+    "decision": "deny",
+    "reason": "S3 bucket missing Object Lock"
+  },
+  "integrity": {
+    "sha256": "<computed>"
+  }
+}
+```
+
+> 💡 Pro-Tip: Keep a strict “no payloads” rule. Store identifiers (digests, resource ARNs, PR URLs) and derived metadata, not raw configs or logs that could contain sensitive values.
+
+## Evidence at Deploy-Time: Terraform + Policy Gates That Emit Signed Decisions
+### Gate infrastructure changes and emit decision logs
+Infrastructure controls must be provable at the point of change. Use **Terraform** with a policy gate (**OPA**, **Conftest**, or **Sentinel**) and force every plan/apply to produce:
+- Policy evaluation decision (allow/deny)
+- Control version (policy bundle digest)
+- Change metadata (commit SHA, workspace, build ID)
+- Signed evidence artifact (to prove it wasn’t altered)
+
+A common pattern is:
+1) `terraform plan` produces a plan JSON.
+2) Policy gate evaluates the plan.
+3) Gate writes an evidence JSON event.
+4) Evidence is signed and uploaded to immutable storage.
+
+### Example: Conftest + OPA policy decision recording
+Policy (Rego) that denies public S3 access and returns a reason string:
+
+```rego
+package terraform.guardrails
+
+deny[msg] {
+  resource := input.resource_changes[_]
+  resource.type == "aws_s3_bucket_public_access_block"
+  after := resource.change.after
+  after.block_public_acls == false
+  msg := "S3 PublicAccessBlock must block_public_acls=true"
+}
+```
+
+CI step to evaluate plan and emit evidence:
+
+```bash
+set -euo pipefail
+
+PLAN_JSON=plan.json
+EVIDENCE_JSON=evidence-policy.json
+
+terraform show -json tfplan > "$PLAN_JSON"
+
+# Evaluate policy
+if conftest test "$PLAN_JSON" --policy policy/ --output json > decision.json; then
+  DECISION="allow"
+else
+  DECISION="deny"
+fi
+
+COMMIT_SHA="${GIT_COMMIT_SHA}"
+RUN_ID="${CI_RUN_ID}"
+WORKSPACE="${TF_WORKSPACE}"
+TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+jq -n \
+  --arg ts "$TS" \
+  --arg decision "$DECISION" \
+  --arg commit "$COMMIT_SHA" \
+  --arg run "$RUN_ID" \
+  --arg ws "$WORKSPACE" \
+  --slurpfile details decision.json \
+  '{
+    evidence_version:"1.0",
+    event_type:"policy-decision",
+    timestamp:$ts,
+    change:{commit:$commit,pipeline_run_id:$run,workspace:$ws},
+    control:{name:"iac-policy-gate",decision:$decision,details:$details}
+  }' > "$EVIDENCE_JSON"
+
+sha256sum "$EVIDENCE_JSON" | awk '{print $1}' > "$EVIDENCE_JSON.sha256"
+```
+
+### Sign evidence artifacts (deterministic integrity)
+Use **Cosign** (keyless or key-based) to sign the evidence file. This gives you cryptographic non-repudiation for the artifact.
+
+```bash
+cosign sign-blob --key cosign.key evidence-policy.json \
+  --output-signature evidence-policy.sig \
+  --output-certificate evidence-policy.crt
+
+cosign verify-blob --key cosign.pub \
+  --signature evidence-policy.sig evidence-policy.json
+```
+
+> ✅ Success: For any deployment, you can show the exact policy version and the allow/deny decision that gated the change, bound to a commit SHA and build ID, with verifiable signatures.
+
+## Immutable Audit Trail: Centralize Logs and Config History into Write-Once Storage
+### AWS: CloudTrail/CloudWatch + AWS Config into S3 Object Lock
+For control operation over time, you need an immutable trail of “who did what, when” and “what changed.” In AWS, that typically means **AWS CloudTrail**, **CloudWatch Logs**, and **AWS Config** delivered into a dedicated evidence account/bucket.
+
+Key requirements:
+- Dedicated evidence bucket
+- **S3 Object Lock** enabled (requires bucket versioning)
+- Retention mode defined (Governance or Compliance) aligned to your audit period
+- Explicit deny policies for deletion/overwrite paths
+
+Create an Object Lock bucket (bucket must be created with Object Lock enabled):
+
+```bash
+aws s3api create-bucket \
+  --bucket skynet-evidence-prod \
+  --region us-east-1
+
+aws s3api put-bucket-versioning \
+  --bucket skynet-evidence-prod \
+  --versioning-configuration Status=Enabled
+
+aws s3api put-object-lock-configuration \
+  --bucket skynet-evidence-prod \
+  --object-lock-configuration \
+  'ObjectLockEnabled=Enabled,Rule={DefaultRetention={Mode=COMPLIANCE,Days=365}}'
+```
+
+Verify retention on an object:
+
+```bash
+aws s3api head-object \
+  --bucket skynet-evidence-prod \
+  --key cloudtrail/AWSLogs/123456789012/CloudTrail/us-east-1/2026/04/05/file.json.gz
+```
+
+> ⚠️ Attention: Don’t rely on “restricted IAM” alone. Immutability must be enforced by storage controls (Object Lock / immutable policies), otherwise deletion is a permissions bug away.
+
+### Azure: Activity Logs to Immutable Storage
+In Azure, route **Azure Activity Log** and diagnostic logs to a Storage Account configured for immutability. A typical pattern is:
+- Dedicated Storage Account for evidence
+- Immutable blob policy (time-based retention)
+- Separate subscription/resource group to isolate evidence from workloads
+
+Example: set an immutability policy on a container:
+
+```bash
+az storage container immutability-policy create \
+  --account-name skynetevidenceprod \
+  --container-name activitylogs \
+  --period 365 \
+  --allow-protected-append-writes true
+
+az storage container immutability-policy show \
+  --account-name skynetevidenceprod \
+  --container-name activitylogs
+```
+
+> 💡 Pro-Tip: Store only the minimum necessary log sources for your defined controls, then document the mapping (control → log source → retention → query). Over-collection increases cost and review time.
+
+## Control Operation Proofs: Periodic Attestation Bundles (Admission, Provenance, Baselines)
+### Kubernetes admission audits (what was allowed into the cluster)
+If workloads are short-lived, admission decisions are durable evidence. Capture **Kubernetes** admission events (e.g., **OPA Gatekeeper** audits) and package them periodically.
+
+Bundle script (daily or per deployment) that exports audit results, hashes, and signs:
+
+```bash
+set -euo pipefail
+OUTDIR="attestations/$(date -u +%Y-%m-%d)"
+mkdir -p "$OUTDIR"
+
+kubectl get constrainttemplates -A -o yaml > "$OUTDIR/constrainttemplates.yaml"
+kubectl get constraints -A -o yaml > "$OUTDIR/constraints.yaml"
+
+# If Gatekeeper audit is enabled
+kubectl get constraints -A -o json > "$OUTDIR/gatekeeper-audit.json"
+
+tar -czf "$OUTDIR/k8s-admission-attestation.tgz" -C "$OUTDIR" .
+sha256sum "$OUTDIR/k8s-admission-attestation.tgz" > "$OUTDIR/k8s-admission-attestation.tgz.sha256"
+
+cosign sign-blob --key cosign.key "$OUTDIR/k8s-admission-attestation.tgz" \
+  --output-signature "$OUTDIR/k8s-admission-attestation.sig"
+```
+
+### Container image provenance (what you ran, exactly)
+For ephemeral compute, image provenance is your anchor. Use **Cosign** to sign images and store SBOM/provenance artifacts in your registry.
+
+```bash
+# Sign an image after build
+cosign sign --key cosign.key registry.example.com/app:${GIT_COMMIT_SHA}
+
+# Verify during deploy
+cosign verify --key cosign.pub registry.example.com/app:${GIT_COMMIT_SHA}
+```
+
+### Baseline evidence: CIS-aligned scans without claiming compliance
+You can generate baseline scan outputs (e.g., host/container/Kubernetes benchmarks) as evidence of control operation. Use **CIS** benchmarks as a reference point without claiming certification.
+
+Example: run a benchmark tool in CI and capture only the report artifacts:
+
+```bash
+set -euo pipefail
+REPORT_DIR="reports/$(date -u +%Y-%m-%d)"
+mkdir -p "$REPORT_DIR"
+
+# Example placeholder command: replace with your chosen benchmark/scanner
+./benchmark-tool --target kube --output "$REPORT_DIR/cis-k8s-report.json"
+
+sha256sum "$REPORT_DIR/cis-k8s-report.json" > "$REPORT_DIR/cis-k8s-report.json.sha256"
+cosign sign-blob --key cosign.key "$REPORT_DIR/cis-k8s-report.json" \
+  --output-signature "$REPORT_DIR/cis-k8s-report.sig"
+```
+
+> ✅ Success: For any audit period, you can produce a time-indexed set of signed attestations that show controls were operating, even if the underlying namespaces, nodes, and runners are long gone.
+
+## Assemble Auditor-Ready Evidence Packages (Per Deploy + Per Month)
+### Build an evidence index that auditors can navigate
+Evidence is only valuable if it’s searchable and exportable. Maintain an index (CSV/JSON) that maps:
+- control ID/name → evidence artifact(s)
+- time window → storage location → hash/signature
+- system boundary (account/subscription/cluster)
+
+Example index row (JSONL):
+
+```json
+{"ts":"2026-04-05T12:34:56Z","control":"iac-policy-gate","artifact":"s3://skynet-evidence-prod/deploy/9281/evidence-policy.json","sha256":"...","signature":"...","commit":"b7c1f0d","run_id":"9281"}
+```
+
+### Export bundles without exposing sensitive data
+Your export should be:
+- Minimal (only what supports the control)
+- Reproducible (same query yields same set)
+- Integrity-verified (hash + signature)
+
+Example: export a monthly bundle from S3 by prefix and generate a manifest:
+
+```bash
+set -euo pipefail
+MONTH="2026-04"
+PREFIX="evidence/${MONTH}/"
+OUT="export-${MONTH}.tgz"
+
+aws s3 sync s3://skynet-evidence-prod/${PREFIX} ./evidence-export/${MONTH}
+
+find ./evidence-export/${MONTH} -type f -maxdepth 5 -print0 \
+  | sort -z \
+  | xargs -0 sha256sum > "manifest-${MONTH}.sha256"
+
+tar -czf "$OUT" "manifest-${MONTH}.sha256" -C ./evidence-export "${MONTH}"
+cosign sign-blob --key cosign.key "$OUT" --output-signature "${OUT}.sig"
+```
+
+> 💡 Pro-Tip: Make “auditor export” a first-class pipeline target. If export is manual, it will be delayed, inconsistent, and risk-prone.
+
+### Where Skynet fits: standardized, deterministic audit execution
+Skynet’s AUDIT execution focuses on deterministic evidence generation for ephemeral systems:
+- Per-deployment evidence bundles (policy decisions, attestations, integrity proofs)
+- Per-month exports with locked retention and manifest verification
+- Zero-trace packaging: retain control artifacts, not workload data
+
+## Checklist
+- [ ] Define a strict evidence envelope schema (event type, timestamp, actor, change metadata, control decision, integrity).
+- [ ] Enforce a “no payloads” rule (no secrets, request bodies, or customer data in evidence artifacts).
+- [ ] Gate **Terraform** changes with a policy engine (**OPA**/**Conftest**/**Sentinel**) and emit allow/deny decision artifacts.
+- [ ] Bind evidence to commit SHA, workspace/environment, and CI run/build ID.
+- [ ] Hash and sign every evidence artifact (for example with **Cosign**).
+- [ ] Centralize **AWS CloudTrail**/**AWS Config** (or **Azure Activity Logs**) into a dedicated evidence store.
+- [ ] Enable immutability controls (**S3 Object Lock** / Azure immutability policies) with audit-period retention.
+- [ ] Generate periodic **Kubernetes** admission attestation bundles and sign them.
+- [ ] Enforce and verify container image signing during deploy (**Cosign** verify gate).
+- [ ] Produce monthly exports with a manifest, hashes, and signatures; store/export as a single sealed bundle.
+
+## FAQ
+### How do we prove control operation when the namespace or runner no longer exists?
+<p>Capture evidence at the control execution point (policy gate, admission decision, provenance verification) and store only signed artifacts plus integrity proofs in immutable storage. The disappearing workload is expected; the durable proof is the control decision, metadata, and tamper-evident retention.</p>
+
+### What’s the minimum evidence we should retain to stay “zero-trace”?
+<p>Retain control decisions, timestamps, actor identity, change identifiers (commit SHA, pipeline run ID), artifact digests, and cryptographic proofs (hashes/signatures). Avoid storing raw configs, full request payloads, or application logs unless they are explicitly required for a defined control and can be minimized.</p>
+
+### How do we keep evidence exports fast during an audit?
+<p>Pre-index evidence by control and time window, store it under predictable prefixes, and generate monthly sealed bundles with a manifest and signatures. When the request arrives, you export deterministically (by prefix/query) and verify integrity via the manifest rather than assembling evidence ad hoc.</p>
