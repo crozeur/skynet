@@ -1,0 +1,261 @@
+export const metadata = {
+  title: "Hunting Lateral Movement via Entra ID Device Code + OAuth Consent Abuse: A 60-Minute Detection & Containment Runbook",
+  description: "Detect and contain Device Code phishing and malicious OAuth consent grants using Entra ID logs, Defender, KQL, and deterministic Graph remediation.",
+  date: "2026-04-05",
+  pillar: "SOC",
+  tags: ["Entra ID", "Microsoft Defender", "KQL", "OAuth", "Incident Response", "Device Code"]
+};
+
+## Introduction
+Device Code phishing plus malicious OAuth consent can bypass interactive MFA prompts and create durable access that looks nothing like password spray. If you only key on failed sign-ins, you’ll miss the token-based path that pivots through **Microsoft Graph**, **Exchange Online**, and **SharePoint Online** with minimal noise. This runbook standardizes detection for Device Code flow and risky consent grants, then executes a fixed containment sequence that cuts off persistence fast. Outcome: within ~60 minutes you can identify the principal, scope the blast radius, and revoke the exact grants/tokens enabling lateral movement.
+
+## Quick Take
+- Device Code flow is legitimate but high-abuse when users are tricked into entering a verification code.
+- OAuth consent abuse creates long-lived access via refresh tokens and delegated permissions (e.g., `offline_access`, `Mail.Read`, `Sites.ReadWrite.All`).
+- Prioritize correlation: Device Code sign-ins + unfamiliar network + unusual client + recent consent/app credential events.
+- Containment must be deterministic: revoke sessions/tokens, remove permission grants, disable the service principal, and rotate impacted credentials.
+- Harden by constraining consent, gating admin approval, and continuously alerting on new grants and app credentials.
+
+## Threat Model: What Actually Happens in the Tenant
+### Device Code flow abuse (why it bypasses “normal” MFA friction)
+Device Code authentication is designed for input-constrained devices. The user is shown a code and a URL; they complete auth on a second device. Attackers weaponize this by socially engineering the victim to enter the code, resulting in a valid token issuance without the attacker ever needing the password.
+
+Operationally, your logs often show:
+- Successful sign-in to **Microsoft Graph**/**Office** resources
+- Client app patterns consistent with device code (vs. browser-based interactive)
+- Fewer failed attempts and little “spray” signature
+
+> ⚠️ Attention: Don’t assume “MFA enabled” means the session is safe. Token issuance via a tricked user can still produce a valid refresh token path if `offline_access` is granted.
+
+### OAuth consent abuse (why it persists)
+Once a user (or admin) consents to a malicious application, the attacker can:
+- Obtain delegated permissions to mail/files
+- Use refresh tokens for long-lived access
+- Create/rotate app credentials if they gain enough privileges
+
+Key artifacts:
+- **Entra ID** `AuditLogs` events for consent, service principal creation, or app updates
+- **Microsoft Defender for Cloud Apps** (if enabled) alerts for OAuth app anomalies
+
+### Lateral movement patterns
+Typical pivot paths after initial token access:
+- **Exchange Online**: mailbox read, search, forwarding rules
+- **SharePoint Online/OneDrive**: file discovery and exfil
+- **Microsoft Graph**: directory reconnaissance, group membership, app role assignments
+
+## Detection: KQL Queries to Surface Device Code + Risky Consent
+### Data sources to wire before you query
+You want these flowing into your query plane (typically **Microsoft Sentinel** or **Microsoft Defender XDR** advanced hunting where applicable):
+- **Entra ID** Sign-in logs
+- **Entra ID** Audit logs
+- **Microsoft Defender** (XDR) signals (identity + cloud app where available)
+
+> 💡 Pro-Tip: Normalize IP enrichment early (ASN/org/geo). Device Code abuse is easiest to spot when “who/where/how” changes quickly around a successful token event.
+
+### KQL: Flag likely Device Code sign-ins
+Use this to isolate Device Code-style sign-ins and focus on successful authentications.
+
+```kql
+// Entra ID Sign-in logs - hunt for Device Code flow indicators
+SigninLogs
+| where TimeGenerated > ago(7d)
+| where ResultType == 0
+| extend ClientApp = tostring(ClientAppUsed)
+| extend Grant = tostring(AuthenticationDetails[0].authenticationStepResultDetail)
+| where ClientApp has_any ("DeviceCode", "Device Code", "DeviceCodeFlow")
+    or tostring(AuthenticationProtocol) has "DeviceCode"
+    or tostring(ConditionalAccessStatus) == "success" and ClientApp has "Mobile Apps and Desktop clients"
+| project TimeGenerated, UserPrincipalName, AppDisplayName, ResourceDisplayName, IPAddress, ClientAppUsed, AuthenticationRequirement, ConditionalAccessStatus, CorrelationId
+| order by TimeGenerated desc
+```
+
+Notes:
+- Field availability varies by ingestion path and tenant settings. If your schema differs, pivot on `AppDisplayName`, `ClientAppUsed`, `AuthenticationProtocol`, and `CorrelationId`, then iterate.
+
+### KQL: Correlate Device Code sign-ins to unfamiliar network and unusual client
+This version adds basic “new IP” behavior within a short lookback window.
+
+```kql
+let lookback = 14d;
+let window = 1d;
+let base = SigninLogs
+| where TimeGenerated > ago(lookback)
+| where ResultType == 0
+| project TimeGenerated, UserPrincipalName, IPAddress, ClientAppUsed, AppDisplayName, ResourceDisplayName, CorrelationId;
+let recent = base | where TimeGenerated > ago(window);
+let history = base | where TimeGenerated between (ago(lookback) .. ago(window));
+recent
+| join kind=leftanti (
+    history
+    | summarize by UserPrincipalName, IPAddress
+) on UserPrincipalName, IPAddress
+| where ClientAppUsed has_any ("Device", "Mobile Apps and Desktop clients")
+| project TimeGenerated, UserPrincipalName, IPAddress, ClientAppUsed, AppDisplayName, ResourceDisplayName, CorrelationId
+| order by TimeGenerated desc
+```
+
+> ✅ Success: You get a tight list of “new IP for user + token-style client” sign-ins to triage first.
+
+### KQL: Hunt consent grants and risky permissions
+Focus on consent events and then extract the application and actor.
+
+```kql
+// Entra ID AuditLogs - consent and app/service principal activity
+AuditLogs
+| where TimeGenerated > ago(30d)
+| where OperationName in~ (
+    "Consent to application",
+    "Add service principal",
+    "Add app role assignment to service principal",
+    "Add delegated permission grant",
+    "Update application",
+    "Add password credential",
+    "Add key credential"
+)
+| extend Target0 = tostring(TargetResources[0].displayName)
+| extend TargetId0 = tostring(TargetResources[0].id)
+| extend InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName)
+| extend InitiatorApp = tostring(InitiatedBy.app.displayName)
+| project TimeGenerated, OperationName, InitiatorUPN, InitiatorApp, Target0, TargetId0, Result, CorrelationId
+| order by TimeGenerated desc
+```
+
+Then, pivot from the service principal/app to permission scopes. In many workspaces, the raw scope string appears in `AdditionalDetails` or nested `TargetResources.modifiedProperties`.
+
+```kql
+// Extract modified permission scopes if present
+AuditLogs
+| where TimeGenerated > ago(30d)
+| where OperationName in~ ("Consent to application", "Add delegated permission grant")
+| mv-expand TargetResources
+| mv-expand TargetResources.modifiedProperties
+| extend Prop = tostring(TargetResources_modifiedProperties.displayName)
+| extend NewVal = tostring(TargetResources_modifiedProperties.newValue)
+| where Prop has_any ("Scope", "OAuth2Permissions", "Delegated")
+| project TimeGenerated, OperationName, tostring(TargetResources.displayName), tostring(TargetResources.id), Prop, NewVal, tostring(InitiatedBy.user.userPrincipalName), CorrelationId
+| order by TimeGenerated desc
+```
+
+Triage priorities (if seen in `NewVal` or in your app’s effective permissions):
+- `offline_access`
+- `Mail.Read`, `Mail.ReadWrite`, `MailboxSettings.Read`
+- `Sites.Read.All`, `Sites.ReadWrite.All`, `Files.Read.All`
+- Directory-sensitive scopes depending on role model (treat as critical)
+
+## Containment: Deterministic 60-Minute Response Sequence
+### 0) Freeze the case scope
+Within the first 5–10 minutes, lock in the identifiers you’ll use everywhere:
+- Victim `UserPrincipalName`
+- Suspect `AppId` / `ServicePrincipalId`
+- Time window around first Device Code sign-in
+- `CorrelationId` values from sign-ins and audit events
+
+> ⚠️ Attention: Don’t “hunt forever” before you contain. If you have a confirmed malicious consent or confirmed suspicious Device Code sign-in, start token revocation while you continue scoping.
+
+### 1) Revoke user sessions and refresh tokens
+Use **Microsoft Graph PowerShell** to revoke sign-in sessions for the suspected user(s).
+
+```powershell
+# Microsoft Graph PowerShell
+Connect-MgGraph -Scopes "User.ReadWrite.All","Directory.AccessAsUser.All"
+
+# Revoke sign-in sessions (invalidates refresh tokens and forces re-auth)
+Revoke-MgUserSignInSession -UserId "user@domain.com"
+```
+
+If you need to invalidate on-prem or hybrid considerations, pair with your identity team’s standard password reset process. Don’t reset passwords blindly without understanding authentication methods in play.
+
+### 2) Disable the malicious service principal (stop active token use)
+Disable the enterprise app immediately to break new token exchanges.
+
+```powershell
+# Disable service principal (enterprise application)
+Update-MgServicePrincipal -ServicePrincipalId "<SERVICE_PRINCIPAL_ID>" -AccountEnabled:$false
+```
+
+### 3) Remove delegated permission grants and app role assignments
+This is the step that removes the “authorized” path.
+
+```powershell
+# Enumerate OAuth2 permission grants for the service principal
+$spId = "<SERVICE_PRINCIPAL_ID>"
+Get-MgServicePrincipalOauth2PermissionGrant -ServicePrincipalId $spId
+
+# Remove a specific OAuth2PermissionGrant
+Remove-MgOauth2PermissionGrant -OAuth2PermissionGrantId "<GRANT_ID>"
+
+# Enumerate and remove app role assignments (if present)
+Get-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $spId
+Remove-MgServicePrincipalAppRoleAssignedTo -ServicePrincipalId $spId -AppRoleAssignmentId "<ASSIGNMENT_ID>"
+```
+
+### 4) Remove app credentials added during the intrusion
+If the attacker managed to add a client secret or certificate, remove it.
+
+```powershell
+# List password and key credentials
+Get-MgServicePrincipal -ServicePrincipalId "<SERVICE_PRINCIPAL_ID>" | select -ExpandProperty PasswordCredentials
+Get-MgServicePrincipal -ServicePrincipalId "<SERVICE_PRINCIPAL_ID>" | select -ExpandProperty KeyCredentials
+
+# Remove a password credential by keyId
+Remove-MgServicePrincipalPassword -ServicePrincipalId "<SERVICE_PRINCIPAL_ID>" -KeyId "<KEY_ID>"
+
+# Remove a certificate credential by keyId
+Remove-MgServicePrincipalKey -ServicePrincipalId "<SERVICE_PRINCIPAL_ID>" -KeyId "<KEY_ID>"
+```
+
+> ✅ Success: After grants + credentials are removed and the SP is disabled, the attacker loses the durable re-entry path even if they previously obtained refresh tokens.
+
+### 5) Rotate impacted credentials and eradicate mailbox/file footholds
+What you rotate depends on what the tokens accessed:
+- If mail access occurred: check **Exchange Online** rules, forwarding, suspicious OAuth apps; revert changes.
+- If SharePoint access occurred: review sharing links and external shares; invalidate where required.
+- If any admin account was involved: rotate break-glass carefully, confirm Conditional Access policy integrity.
+
+## Hardening: Make Device Code and Consent Abuse Expensive
+### Restrict user consent and enforce admin consent workflow
+Goal: reduce the probability that a single user click grants broad access.
+- Configure **Entra ID** consent settings to limit user consent to verified publishers / low-impact permissions.
+- Use an admin consent workflow for any elevated scopes.
+
+> 💡 Pro-Tip: Treat any consent including `offline_access` plus mail/files scopes as a pre-approved incident triage trigger, not a “review later” item.
+
+### Conditional Access strategy for Device Code
+Where feasible, constrain Device Code flow:
+- Block legacy/unmanaged clients for high-value users
+- Require compliant device or trusted network for device-code style clients
+- Scope exclusions carefully (some operations teams rely on device code for automation and constrained devices)
+
+> ⚠️ Attention: A blanket block can break legitimate device workflows. Roll out with an allowlist model and explicit exception owners.
+
+### Continuous monitoring for consent and credential changes
+Create alert rules on:
+- New consent grants
+- New service principal creation
+- App credential additions (secrets/certs)
+- App role assignment changes
+- Device Code sign-ins from new IP/ASN for privileged users
+
+Execution matters: the detection is only useful if containment steps are run in a fixed order with no “hand-offs” waiting for interpretation.
+
+## Checklist
+- [ ] Confirm suspicious Device Code sign-in(s) and capture `UserPrincipalName`, `IPAddress`, and `CorrelationId`.
+- [ ] Pull **Entra ID** `AuditLogs` for consent, service principal creation, and app credential events in the same window.
+- [ ] Identify the suspect `AppId` and `ServicePrincipalId` and list effective delegated scopes (flag `offline_access`, mail, sites/files).
+- [ ] Revoke user sign-in sessions for impacted users via **Microsoft Graph PowerShell**.
+- [ ] Disable the suspect enterprise application (service principal) immediately.
+- [ ] Remove OAuth2 permission grants and app role assignments tied to the suspect service principal.
+- [ ] Remove any newly-added app secrets/certificates and document `keyId` values removed.
+- [ ] Review mailbox rules/forwarding and SharePoint sharing for the impacted user(s) and revert malicious changes.
+- [ ] Validate **Conditional Access** and consent policy settings weren’t modified during the window.
+- [ ] Add/verify alerting on new consent grants and app credential additions.
+
+## FAQ
+### Does revoking sessions always kick out OAuth-consented apps immediately?
+<p>Revoking a user’s sign-in sessions invalidates refresh tokens and forces re-auth for the user context, but you still need to remove the OAuth2 permission grant and disable the service principal to fully eliminate the authorized path. Do both: session revocation stops active reuse; grant removal prevents re-authorization.</p>
+
+### What’s the fastest way to tie a suspicious sign-in to a consent event?
+<p>Start from the sign-in’s time window and user, then pivot into Entra ID AuditLogs for “Consent to application” and service principal events within ±1 hour. Use correlation IDs when available, but don’t depend on them—time + actor + target app is usually sufficient to proceed with containment.</p>
+
+### How do we harden without breaking legitimate Device Code usage?
+<p>Use Conditional Access scoping: allow Device Code only for specific users/groups, from trusted locations, or on compliant devices, and require an exception owner for any bypass. Pair that with restricted user consent and an admin consent workflow so a single tricked user can’t grant durable mail/files access.</p>
