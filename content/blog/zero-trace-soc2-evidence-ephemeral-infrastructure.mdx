@@ -73,10 +73,10 @@ Infrastructure controls must be provable at the point of change. Use **Terraform
 - Signed evidence artifact (to prove it wasn’t altered)
 
 A common pattern is:
-1) `terraform plan` produces a plan JSON.
-2) Policy gate evaluates the plan.
-3) Gate writes an evidence JSON event.
-4) Evidence is signed and uploaded to immutable storage.
+### 1) `terraform plan` produces a plan JSON.
+### 2) Policy gate evaluates the plan.
+### 3) Gate writes an evidence JSON event.
+### 4) Evidence is signed and uploaded to immutable storage.
 
 ### Example: Conftest + OPA policy decision recording
 Policy (Rego) that denies public S3 access and returns a reason string:
