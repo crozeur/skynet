@@ -1,0 +1,242 @@
+export const metadata = {
+  title: "Hunting Entra ID OAuth Consent Abuse in 60 Minutes: Detect Rogue Service Principals with Unified Audit + Sign-in Correlation",
+  description: "Correlate Entra ID consent grants to workload sign-ins and cloud app activity to identify and contain rogue service principals fast.",
+  date: "2026-04-12",
+  pillar: "SOC",
+  tags: ["Entra ID", "OAuth", "Threat Hunting", "Microsoft Sentinel", "Microsoft Graph"]
+};
+
+## Introduction
+OAuth consent abuse in **Microsoft Entra ID** creates durable access paths (refresh tokens, app role grants, and service principal credentials) that often bypass endpoint signals. The problem is not a lack of logs—it’s that the evidence is split across **AuditLogs**, **SigninLogs**, and cloud app activity, so the attacker’s “grant → token use → API calls” chain goes unconnected. In 60 minutes, you can run a repeatable hunt that stitches those fragments into a single timeline and produces an explicit list of suspect grants and principals. The payoff is speed: you revoke the right grants, disable the right identities, and capture artifacts that hold up under review.
+
+## Quick Take
+- Correlate **Entra ID AuditLogs** consent/grant events to **SigninLogs** workload sign-ins within a tight post-grant window (e.g., 2 hours).
+- Treat “new service principal + privileged permission grant + immediate sign-in from new IP” as the baseline high-fidelity pattern.
+- Use **Microsoft Defender for Cloud Apps** activity to validate real API usage (what data was touched, from where, and by which app).
+- Contain deterministically: revoke **oauth2PermissionGrants**, disable the service principal, rotate app credentials, then validate sign-in suppression.
+- Prevent recurrence by locking consent: admin consent workflow, restricted app registration, verified publisher requirements, and workload identity guardrails.
+
+## Build the 60-minute hunt: normalize the right signals
+### 1) Identify the events that matter
+In Entra OAuth consent abuse, the attacker goal is durable authorization that survives password resets and endpoint hardening. Your hunt should prioritize four event groups:
+
+- Consent and grant creation (delegated permissions)
+- App role assignments (application permissions)
+- Service principal creation / updates (new identities, new secrets/certs)
+- Post-grant token usage (workload sign-ins) and downstream API calls
+
+> ⚠️ Attention: Don’t treat “Consent to application” as benign just because it’s user-initiated. Shadow-IT and compromised privileged users can legally mint high-impact permissions if tenant consent settings allow it.
+
+### 2) Make sure you can query across sources
+Skynet’s SOC workflow assumes you can query at least:
+
+- **Microsoft Sentinel** (or equivalent workspace) tables: **AuditLogs**, **SigninLogs**
+- **Microsoft Defender for Cloud Apps** (MDCA) activity (via the Sentinel connector or MDCA portal)
+
+If your MDCA events are in Sentinel, validate table availability (names vary by connector version). You’re looking for “cloud app activity” that includes app identity, IP, user/actor, and operation.
+
+> 💡 Pro-Tip: In Sentinel, start by running a 24-hour “table presence” check (not a full hunt) to confirm ingestion and column shapes before you burn time refining joins.
+
+## KQL detections: tie consent to token use (high signal, low noise)
+### 1) Find new grants, app role assignments, and service principal creation
+Use the **AuditLogs** table as the authoritative “control plane change” record. Start broad, then narrow.
+
+```kusto
+AuditLogs
+| where OperationName in (
+  "Consent to application",
+  "Add OAuth2PermissionGrant",
+  "Add app role assignment to service principal",
+  "Add service principal",
+  "Add service principal credentials",
+  "Update application",
+  "Update service principal"
+)
+| project TimeGenerated, OperationName, Result, InitiatedBy, TargetResources, AdditionalDetails
+| order by TimeGenerated desc
+```
+
+What to look for immediately:
+
+- A new OAuth2 permission grant (delegated permissions) followed by any workload sign-in
+- “Add app role assignment to service principal” for privileged APIs (e.g., directory-wide read/write scopes)
+- “Add service principal credentials” shortly after principal creation
+
+> ✅ Success: You can name the exact principal/app involved, who initiated it, and the timestamp of the authorization event.
+
+### 2) Correlate service principal sign-ins shortly after consent
+The critical move is correlating a grant to actual token usage. The following pattern finds workload sign-ins that occur within a short window after the grant.
+
+```kusto
+let window = 2h;
+let grants = AuditLogs
+| where OperationName has "Consent" or OperationName has "OAuth2PermissionGrant"
+| extend AppId = tostring(TargetResources[0].id)
+| project GrantTime = TimeGenerated, AppId, OperationName, InitiatedBy;
+SigninLogs
+| where isnotempty(AppId)
+| join kind=inner (grants) on AppId
+| where TimeGenerated between (GrantTime .. GrantTime + window)
+| project TimeGenerated, GrantTime, AppId, AppDisplayName, ResourceDisplayName, IPAddress, UserAgent,
+          GrantOperation = OperationName, GrantInitiator = InitiatedBy
+| order by TimeGenerated desc
+```
+
+Tuning guidance for SMEs:
+
+- Add a filter to exclude known enterprise apps that legitimately sign in frequently (your allowlist).
+- Tighten the window to 30–60 minutes if you’re investigating an active incident.
+- Enrich with IP reputation from your existing threat intel feed if available (don’t invent one).
+
+> ⚠️ Attention: AppId fields can differ across log types (application ID vs service principal object ID). When joins don’t hit, pivot by display name, then resolve IDs via **Microsoft Graph**.
+
+### 3) Add “privilege” context to reduce false positives
+Consent abuse becomes high impact when the granted permissions are sensitive. Extend the hunt to pull the permission/scopes if your logs include them (often in AdditionalDetails or modifiedProperties).
+
+```kusto
+AuditLogs
+| where OperationName has "OAuth2PermissionGrant" or OperationName has "Consent"
+| mv-expand TargetResources
+| project TimeGenerated, OperationName, Result,
+          InitiatedBy,
+          TargetType = tostring(TargetResources.type),
+          TargetId = tostring(TargetResources.id),
+          TargetDisplayName = tostring(TargetResources.displayName),
+          TargetModifiedProps = tostring(TargetResources.modifiedProperties)
+| order by TimeGenerated desc
+```
+
+Operationally, you’re trying to answer:
+
+- Was this delegated consent for a broad scope (e.g., mail, files, directory)?
+- Was this an application permission via app role assignment?
+- Did it come from a privileged initiator or an unexpected user population?
+
+## Validate impact: correlate with cloud app activity (what was actually accessed)
+### 1) Use MDCA to confirm downstream API calls
+Audit and sign-in correlation tells you “authorization happened” and “token was used.” You still need “what did it do.” This is where **Microsoft Defender for Cloud Apps** activity closes the loop.
+
+Hunting approach:
+
+- Pivot on AppId/AppDisplayName from the KQL results
+- Filter activity to the post-grant window (e.g., 0–24 hours after GrantTime)
+- Identify high-risk operations: bulk download, mailbox access, file sharing changes, directory reads at scale
+
+If MDCA activity is in Sentinel under a connector-specific table, query it with the same join keys you used above. Example template (adjust table/columns to your environment):
+
+```kusto
+let suspectApps = (
+  SigninLogs
+  | where TimeGenerated > ago(24h)
+  | where isnotempty(AppId)
+  | summarize by AppId, AppDisplayName
+);
+// Replace CloudAppEvents with your MDCA activity table name in Sentinel.
+CloudAppEvents
+| where TimeGenerated > ago(24h)
+| join kind=inner (suspectApps) on AppId
+| project TimeGenerated, AppDisplayName, IPAddress, Operation, ObjectName, UserAgent, RawEventData
+| order by TimeGenerated desc
+```
+
+> 💡 Pro-Tip: When cloud app activity lacks AppId, pivot by IP and time window from the suspicious workload sign-in, then back-resolve the app via the raw event payload.
+
+### 2) Produce an evidence-grade timeline
+Your output should be a deterministic chain:
+
+- Grant event: timestamp, initiator, target app/service principal
+- First workload sign-in: timestamp, IP, user agent, resource
+- Cloud app activity: operations performed, target objects, volume indicators (if available)
+
+> ✅ Success: You can hand an auditor or incident commander a single timeline that proves which authorization change enabled which downstream access.
+
+## Containment in minutes: revoke grants, disable principals, rotate creds
+### 1) Revoke delegated permission grants (OAuth2PermissionGrants)
+Once you have the service principal object ID, enumerate and delete delegated grants using **Microsoft Graph** via **Azure CLI**.
+
+```bash
+# List delegated permission grants for a service principal (clientId = service principal object ID)
+az rest --method GET \
+  --uri "https://graph.microsoft.com/v1.0/oauth2PermissionGrants?$filter=clientId eq '{sp_object_id}'"
+
+# Delete each grant by id
+az rest --method DELETE \
+  --uri "https://graph.microsoft.com/v1.0/oauth2PermissionGrants/{grant_id}"
+```
+
+> ⚠️ Attention: Deleting grants can break legitimate integrations. If you’re not in a confirmed incident, snapshot the grants first (store the GET output as an artifact) and revoke only the suspicious ones.
+
+### 2) Disable the service principal and rotate application credentials
+If the principal is rogue or compromised, disable it first to stop token acquisition, then rotate credentials.
+
+```bash
+# Disable the service principal (blocks sign-in)
+az ad sp update --id {appId} --set accountEnabled=false
+
+# Rotate/append a new credential (use a secure secret handling process)
+az ad app credential reset --id {appId} --append
+```
+
+Validation checks after containment:
+
+- No new workload sign-ins for the AppId after disablement
+- No new cloud app activity attributed to the app
+- Any expected business apps re-onboarded through a controlled path (if applicable)
+
+> ✅ Success: You can show “before/after” sign-in evidence that the identity is no longer usable.
+
+### 3) Deterministic remediation artifacts (what to save)
+Capture artifacts that make the response verifiable:
+
+- Raw **AuditLogs** events for consent/grant and role assignment
+- Export of deleted grant IDs and their scopes
+- Service principal state change (enabled → disabled)
+- Credential rotation output (without leaking secrets)
+- Post-action KQL results demonstrating suppression of sign-ins
+
+## Prevent recurrence: lock down consent and workload identity paths
+### 1) Enforce a tenant consent model that matches your risk
+Key guardrails in **Microsoft Entra ID**:
+
+- Admin consent workflow for permissions requiring elevated approval
+- Block user consent to risky permissions; allow only scoped, low-impact consent where business-justified
+- Restrict who can register apps (reduce shadow-IT app sprawl)
+- Require verified publisher where feasible to reduce impersonation risk
+
+> 💡 Pro-Tip: If you allow any user consent, treat it as a monitored control: alert on new grants with broad scopes and require post-grant validation of sign-ins.
+
+### 2) Add workload identity conditions
+Workload identities are operationally different from humans. Apply controls that fit:
+
+- Conditional access patterns for workload sign-ins (where supported)
+- Named locations / IP allowlists for critical apps (where business allows)
+- Separate environments/tenants for dev/test integrations
+
+### 3) Make the hunt repeatable
+Skynet’s standardized execution approach is a fixed workflow: collect → normalize → correlate → contain → verify → produce artifacts. The goal is not a “clever query”; it’s a repeatable procedure that gets the same quality outcome under time pressure.
+
+> ✅ Success: Every run yields the same deliverables: suspect grants list, confirmed token-use correlation, and a documented remediation trail.
+
+## Checklist
+- [ ] Confirm **AuditLogs** and **SigninLogs** ingestion into **Microsoft Sentinel** for the last 24–72 hours.
+- [ ] Run the broad **AuditLogs** query to enumerate consent, grant, role assignment, and service principal changes.
+- [ ] Extract AppId/service principal identifiers from TargetResources and resolve mismatches via **Microsoft Graph**.
+- [ ] Correlate grants to workload sign-ins within a 30–120 minute window and flag new IPs/user agents.
+- [ ] Pivot suspicious AppIds into **Microsoft Defender for Cloud Apps** activity to confirm downstream operations.
+- [ ] Build a single timeline per app: grant → sign-in → cloud activity, preserving raw event payloads.
+- [ ] Snapshot current OAuth2PermissionGrants for each suspicious principal before making changes.
+- [ ] Revoke suspicious delegated grants (DELETE **oauth2PermissionGrants**) and record deleted grant IDs.
+- [ ] Disable suspicious service principals and verify sign-in suppression post-action.
+- [ ] Rotate application credentials for impacted apps and ensure secrets are handled out-of-band.
+- [ ] Implement admin consent workflow and restrict risky user consent tenant-wide.
+- [ ] Restrict app registration and enforce publisher/identity guardrails for new integrations.
+
+## FAQ
+### How do I distinguish delegated consent abuse from normal third-party app onboarding?
+<p>Look for a tight sequence: a new consent/grant event in **AuditLogs**, followed by workload sign-ins in **SigninLogs** from an unexpected IP/user agent, followed by real data operations in **Microsoft Defender for Cloud Apps**. Legitimate onboarding usually has change records, approvals, and predictable sign-in patterns tied to known integration infrastructure.</p>
+
+### What if my joins fail because AppId/object IDs don’t match across logs?
+<p>This is common. Pivot from the **AuditLogs** TargetResources (display name + IDs), then resolve the exact application ID and service principal object ID using **Microsoft Graph**. Once you have both identifiers, re-run the correlation using the identifier present in each log source.</p>
+
+### What’s the minimum containment action that reliably stops abuse fast?
+<p>Disable the service principal (to block further token issuance) and revoke the delegated permission grants via **Microsoft Graph**. Then validate by re-querying **SigninLogs** to confirm there are no new workload sign-ins for the AppId after the action, and preserve the “before/after” evidence.</p>
