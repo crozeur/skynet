@@ -1,0 +1,241 @@
+export const metadata = {
+ title: "Ephemeral Kubernetes for High-Risk Migrations: Self-Destructing EKS/GKE",
+ description: "One-time EKS/GKE clusters for migrations with enforced guardrails and deterministic teardown that preserves tamper-evident forensics.",
+ date: "2026-04-12",
+ pillar: "CLOUD",
+ tags: ["kubernetes", "eks", "gke", "cloud-migration", "forensics"]
+};
+
+## Introduction
+Rapid migrations often require “temporary” Kubernetes clusters for staging, sync, and cutover—but those clusters frequently outlive the migration and become a quiet, high-privilege attack surface. The fix is not a new policy doc; it’s an execution pattern: time-bounded infrastructure, forced guardrails, and a teardown that is deterministic and evidence-preserving. This post shows how to provision one-time **EKS**/**GKE** clusters with least-privilege identity, locked-down networking, and pre-destruction forensic capture. The objective is speed with precision: migrate fast, prevent shadow production, and retain a verifiable forensic package after the cluster self-destructs.
+
+## Quick Take
+- Ephemeral clusters should be created with an explicit TTL, short-lived credentials, and zero static cloud keys.
+- Guardrails must be enforced at provision time (private endpoints, no public load balancers, restricted egress), not “reviewed later.”
+- Use Kubernetes-native controls (Pod Security + NetworkPolicy) to shrink blast radius immediately after cluster creation.
+- Treat forensics as a first-class artifact: export cluster state and ship logs to immutable object storage before teardown.
+- Teardown should be deterministic (IaC-driven) and leave behind a tamper-evident evidence bundle for validation and audits.
+
+## Design Pattern: One-Time Cluster With a Deterministic Lifecycle
+Ephemeral migration clusters fail in two predictable ways:
+
+1) They become sticky: a staging cluster survives cutover “just in case,” and slowly accretes exceptions (RBAC grants, open security groups, public ingress).
+2) They erase evidence: the eventual cleanup removes the exact telemetry needed to validate migration integrity and investigate anomalies.
+
+Skynet’s approach is a standardized execution lifecycle:
+
+### Define the lifecycle contract (TTL + allowed surfaces)
+Start by declaring “what must be true” for the cluster to exist:
+- Maximum lifetime (hours/days, not “until we remember”).
+- No public control plane; private endpoints where supported.
+- No public services of type LoadBalancer unless explicitly waived.
+- Restricted egress; explicit allow-lists for registries and migration endpoints.
+- Mandatory log export destinations (audit, flow, and container logs).
+
+> ⚠️ Attention: If “temporary” isn’t enforced in infrastructure, you will eventually run an unpatched, over-permissioned cluster connected to production data paths.
+
+### Build around immutable artifacts, not mutable environments
+Make the migration run reproducible:
+- Version your **Terraform**/**OpenTofu** modules.
+- Pin Kubernetes versions and node images.
+- Treat admission controls and baseline policies as part of the module.
+- Produce an evidence bundle (snapshots + log pointers + hashes) as a deliverable.
+
+> ✅ Success: Every migration run results in a short-lived cluster plus a durable forensic package that outlives the cluster.
+
+## Provisioning: Guardrailed EKS/GKE With OIDC and Policy Checks
+The fastest way to drift is to let CI/CD use long-lived keys or let engineers “just open a port” to unblock a sync job. For ephemeral clusters, identity and guardrails are non-negotiable.
+
+### Enforce short-lived identity (no static cloud keys)
+Use OIDC federation for CI/CD so access expires and can be scoped tightly.
+
+On **AWS**, use **IAM OIDC** with your CI system and map roles to the exact actions required for provisioning and log shipping. On **GCP**, use **Workload Identity Federation** for short-lived tokens.
+
+Practical checks you can run during execution:
+- Fail the run if access keys are present in CI variables.
+- Require that provisioning roles have maximum session duration aligned to the cluster TTL.
+- Require that Kubernetes auth is mapped to named roles with a narrow window.
+
+> 💡 Pro-Tip: Set session durations shorter than the planned cutover window (e.g., 1–4 hours). If someone needs more time, they should re-auth and re-justify, not silently keep access.
+
+### Enforce “plan-time” guardrails with policy checks
+Guardrails should be validated before anything is created. A lightweight option is to parse the **Terraform** plan JSON and fail on risky resources.
+
+Example: detect Services being created as public load balancers.
+
+```
+terraform plan -out plan.bin
+terraform show -json plan.bin | jq '.resource_changes[]
+  | select(.type=="kubernetes_service")
+  | .change.after.spec.type'
+```
+
+You can hard-fail if any output equals `"LoadBalancer"` without an explicit allow-list.
+
+Similarly, enforce that control plane endpoints are private where available:
+- **EKS**: require private endpoint enabled; restrict public endpoint CIDRs if public endpoint must exist.
+- **GKE**: prefer private clusters; constrain master authorized networks.
+
+> ⚠️ Attention: “We’ll lock it down after the cutover” is how staging becomes externally reachable with production-adjacent credentials.
+
+### Node and workload identity: stop broad node IAM/service accounts
+Reduce what a compromised pod can do:
+- **EKS**: use **IRSA** (IAM Roles for Service Accounts) so pods assume least-privilege IAM roles rather than inheriting node permissions.
+- **GKE**: use **Workload Identity** so pods map to dedicated GCP service accounts.
+
+Baseline execution rule: nodes should not have broad permissions to object storage, secrets services, or network admin APIs. Pods that need those capabilities get narrowly scoped identities.
+
+## Lock Down Blast Radius Inside the Cluster (Fast, Kubernetes-Native)
+Once the cluster exists, you need guardrails that apply even if a workload deploys with unsafe defaults.
+
+### Baseline Pod Security and admission controls
+Apply Pod Security standards appropriate for the environment. Even a “temporary” cluster runs real workloads and should not allow privileged pods by default.
+
+```
+kubectl apply -f pod-security-standards.yaml
+```
+
+At minimum:
+- Disallow privileged containers.
+- Require non-root where feasible.
+- Restrict hostPath mounts.
+- Lock down hostNetwork/hostPID.
+
+> ✅ Success: Most opportunistic post-exploitation paths (privileged pods, host access) are blocked without needing workload-by-workload negotiation.
+
+### Default-deny network policy with explicit egress
+Assume compromise and limit lateral movement:
+
+```
+kubectl apply -f default-deny-networkpolicy.yaml
+```
+
+Then add explicit policies for:
+- Migration source/destination endpoints.
+- Artifact registries.
+- DNS (or dedicated DNS endpoints).
+- Observability/log shipping endpoints.
+
+> 💡 Pro-Tip: If you can’t describe egress destinations in a short list, the cluster is doing too much. Ephemeral means purpose-built.
+
+### Detect risky RBAC quickly (and keep it that way)
+Cluster-admin bindings proliferate during “get it done” phases. Catch them immediately:
+
+```
+kubectl get clusterrolebinding -o json | jq '.items[]
+  | select(.roleRef.name=="cluster-admin")
+  | {name:.metadata.name, subjects:.subjects}'
+```
+
+Execution rule:
+- No human identities should hold `cluster-admin` for the full duration of the run.
+- Break-glass access should be time-bounded and logged.
+- Service accounts should be scoped to namespaces and verbs they require.
+
+> ⚠️ Attention: A lingering `cluster-admin` binding turns a single leaked token into full control plane compromise.
+
+## Preserve Forensics Before Self-Destruct (Without Slowing the Cutover)
+If the cluster is meant to disappear, your evidence must be exported and made tamper-evident before teardown.
+
+### What to preserve (minimum viable forensic package)
+Capture both state and telemetry:
+- Cluster object snapshot: workloads, services, RBAC, configmaps/secrets metadata (be careful with secret material), network policies.
+- Kubernetes audit logs (control plane).
+- Network flow logs (VPC flow logs / GCP VPC flow logs).
+- Container logs and critical app logs.
+- Build/provisioning artifacts: IaC commit SHA, plan file hash, module versions.
+
+A simple cluster snapshot (state capture):
+
+```
+kubectl get all -A -o yaml > cluster-snapshot.yaml
+kubectl get networkpolicy -A -o yaml > networkpolicy-snapshot.yaml
+kubectl get role,rolebinding,clusterrole,clusterrolebinding -A -o yaml > rbac-snapshot.yaml
+```
+
+> ⚠️ Attention: Exporting “everything” can unintentionally dump secret values. Prefer exporting secret metadata (names, namespaces) unless you have a controlled redaction step.
+
+### Ship logs to immutable storage
+Use object storage immutability controls:
+- **Amazon S3 Object Lock** (WORM retention) for forensics buckets.
+- **GCS Bucket Lock** (retention policy + lock) for equivalent guarantees.
+
+Example: ship collected logs to an immutable **S3** location, namespaced by migration run:
+
+```
+aws s3 cp ./logs s3://forensics-bucket/migration-run-$(date +%F)/ --recursive
+```
+
+If you’re on **GCP**, use **gsutil** to copy to a locked bucket path.
+
+> ✅ Success: After teardown, you retain auditability: who changed what, when, from where—and the surrounding network context.
+
+### Make evidence verifiable (hash it)
+Create a manifest and hash artifacts so tampering is detectable.
+
+```
+sha256sum cluster-snapshot.yaml networkpolicy-snapshot.yaml rbac-snapshot.yaml > evidence-manifest.sha256
+sha256sum -c evidence-manifest.sha256
+```
+
+Store the manifest alongside the evidence in immutable storage.
+
+> 💡 Pro-Tip: Include the IaC plan JSON and a hash of the plan output. It makes post-cutover review faster because intent is recorded, not reconstructed.
+
+## Deterministic Teardown: Destroy the Cluster, Not the Evidence
+Teardown must be boring and repeatable. “Click around the console” is how resources linger.
+
+### Pre-destroy gate: prove evidence export completed
+Before destroy, assert:
+- Evidence bundle exists (snapshots + log copy confirmation + manifest).
+- Immutable retention is enabled and locked.
+- Kubernetes API is still reachable to capture final state.
+
+A minimal execution sequence:
+
+```
+# 1) Capture final state
+kubectl get all -A -o yaml > cluster-snapshot.yaml
+
+# 2) Hash evidence
+sha256sum cluster-snapshot.yaml > evidence-manifest.sha256
+
+# 3) Copy evidence to immutable storage
+aws s3 cp cluster-snapshot.yaml s3://forensics-bucket/migration-run-$(date +%F)/
+aws s3 cp evidence-manifest.sha256 s3://forensics-bucket/migration-run-$(date +%F)/
+
+# 4) Destroy infrastructure deterministically
+terraform destroy -auto-approve
+```
+
+### Cleanly revoke access and invalidate credentials
+After destroy:
+- Revoke federated session permissions by removing role bindings or disabling the trust policy/identity provider relationship for the run.
+- Remove any temporary firewall exceptions.
+- Confirm that DNS entries and load balancer artifacts are gone.
+
+> ✅ Success: The cluster disappears on schedule, and no credentials or network pathways remain that could be reused later.
+
+## Checklist
+- [ ] Set an explicit TTL for the migration cluster and enforce it in execution (not as a calendar reminder).
+- [ ] Use OIDC federation for CI/CD and prohibit static cloud access keys.
+- [ ] Require private control plane endpoints (or tightly scoped authorized networks if public access is unavoidable).
+- [ ] Block public load balancers by default; allow only via explicit, reviewed exception.
+- [ ] Enforce least-privilege workload identity (**IRSA** on **EKS** / **Workload Identity** on **GKE**).
+- [ ] Apply baseline Pod Security controls immediately after cluster creation.
+- [ ] Apply default-deny NetworkPolicy and explicitly allow required egress destinations.
+- [ ] Scan for `cluster-admin` bindings and remove/expire them; use time-bounded break-glass.
+- [ ] Export cluster state snapshots (workloads, RBAC, network policy) before teardown.
+- [ ] Ship audit/flow/container logs to immutable object storage (**S3 Object Lock** / **GCS Bucket Lock**).
+- [ ] Hash evidence artifacts and store the manifest with the evidence bundle.
+- [ ] Run deterministic teardown via **Terraform** and verify no cloud resources remain.
+
+## FAQ
+### How do we prevent an ephemeral cluster from becoming “shadow production”? 
+<p>Enforce lifecycle and guardrails in execution: TTL, no static keys, least-privilege workload identity, and default-deny networking. If the cluster can’t accept broad ingress/egress and access expires automatically, it’s structurally hard for it to evolve into a long-lived environment.</p>
+
+### Won’t destroying the cluster break our ability to investigate incidents later? 
+<p>Not if you export state and telemetry first. Preserve Kubernetes audit logs, network flow logs, container logs, and a final cluster snapshot, then store them in immutable object storage with a hash manifest so post-cutover validation and investigations remain possible after teardown.</p>
+
+### What’s the minimum forensic package we should keep for a migration run? 
+<p>At minimum: final cluster state snapshot (including RBAC and network policies), control plane audit logs, network flow logs, and workload logs for critical namespaces. Add IaC artifacts (module/version identifiers and plan hashes) so the environment can be reconstructed conceptually even after it’s gone.</p>
