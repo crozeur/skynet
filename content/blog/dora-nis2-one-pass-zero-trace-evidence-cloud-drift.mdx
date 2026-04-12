@@ -1,0 +1,271 @@
+export const metadata = {
+  title: "DORA + NIS2 in One Pass: Converting Cloud Control Drift into Zero-Trace Audit Evidence with Immutable Change Records",
+  description: "Turn cloud drift into immutable change lineage and point-in-time snapshots for auditor-ready DORA/NIS2 evidence—fast, minimal, and verifiable.",
+  date: "2026-04-12",
+  pillar: "AUDIT",
+  tags: ["DORA", "NIS2", "Audit Evidence", "AWS CloudTrail", "Terraform"]
+};
+
+## Introduction
+DORA and NIS2 don’t fail teams on intent—they fail on proof: what exactly ran, who/what triggered it, and what configuration resulted. In modern cloud estates, that proof is fragmented across **Git**, **CI/CD**, **Terraform**, **AWS CloudTrail**, and ticketing, creating gaps between “policy” and executed reality. The fastest path to defensible evidence is a deterministic pipeline that binds every change to an immutable lineage and pairs it with point-in-time control snapshots. Skynet executes that pipeline in one pass and produces a minimal, regulator-mapped evidence bundle without persistent agents (“zero-trace”).
+
+## Quick Take
+- Evidence must be reproducible from first principles: commit → pipeline run → cloud API call → resulting config.
+- Immutable change lineage is more defensible than screenshots, wiki pages, or ad-hoc exports.
+- Treat **AWS CloudTrail** as the authoritative record of “what actually happened,” then join it to CI identity.
+- Generate evidence from **Terraform** plan/apply artifacts, not post-hoc state guesses.
+- Package time-bounded extracts + signed artifacts + control mapping into a single auditor packet with no long-lived collectors.
+
+## Build an Immutable Change Lineage (Commit → Run → API Call → Result)
+The core problem in DORA/NIS2 audits is proving repeatability and accountability across ICT risk controls: not only “is encryption enabled,” but “how do you know it was enabled by a controlled change process and not drift?” The answer is a lineage chain with deterministic joins.
+
+### 1) Define the lineage keys you will join on
+At minimum, standardize these identifiers across every run:
+- Git commit SHA (source-of-truth intent)
+- Pipeline run ID + timestamp (execution context)
+- Deployer identity (OIDC subject / role session)
+- Cloud API event IDs (execution in the control plane)
+- Resulting configuration snapshot hash (post-change ground truth)
+
+> ⚠️ Attention: If your pipeline uses long-lived IAM users or shared credentials, attribution collapses. Use short-lived credentials via OIDC federation so each run has a unique, queryable identity.
+
+### 2) Extract control-relevant API calls from **AWS CloudTrail**
+For AWS, pull a time-bounded slice of events that correspond to control-impacting changes (IAM, KMS, networking, logging). Start narrow and expand based on your control catalog.
+
+```bash
+# Example: retrieve recent KMS key policy changes
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=EventName,AttributeValue=PutKeyPolicy \
+  --max-results 50 | \
+  jq -r '.Events[] | [.EventTime,.Username,.Resources[0].ResourceName,.CloudTrailEvent] | @tsv'
+```
+
+For broader coverage, query by time window and filter by event source + names:
+
+```bash
+START="2026-04-01T00:00:00Z"
+END="2026-04-12T00:00:00Z"
+
+aws cloudtrail lookup-events \
+  --start-time "$START" \
+  --end-time "$END" \
+  --max-results 1000 | \
+  jq -r '
+    .Events[]
+    | (.CloudTrailEvent | fromjson) as $e
+    | select($e.eventSource == "iam.amazonaws.com"
+         or $e.eventSource == "kms.amazonaws.com"
+         or $e.eventSource == "ec2.amazonaws.com"
+         or $e.eventSource == "logs.amazonaws.com")
+    | [
+        $e.eventTime,
+        $e.eventName,
+        ($e.userIdentity.arn // ""),
+        ($e.userAgent // ""),
+        ($e.requestParameters // {} | tostring),
+        ($e.responseElements // {} | tostring)
+      ]
+    | @tsv'
+```
+
+### 3) Join CloudTrail identity to CI identity (OIDC) to prove “who/what changed what”
+In mature setups, your pipeline assumes an IAM role using an OIDC provider. That yields a session that can be linked back to the pipeline run (for example via session name, subject, repository, or run ID), and that linkage must be deterministic.
+
+Practical approach:
+- Enforce a role session naming convention containing the pipeline run ID and commit SHA.
+- Require tags on the assumed role session (where supported) for repo, environment, and change ticket ID.
+- In evidence, show (a) the pipeline run metadata, (b) the assume-role event, and (c) the subsequent control-impacting API calls.
+
+> 💡 Pro-Tip: Don’t rely on “human memory” joins. If a join requires a person to interpret which run caused an event, it will fail under scrutiny. Encode the join keys into session name/tags every time.
+
+## Generate DORA/NIS2 Evidence from **Terraform** Plan/Apply Artifacts
+When IaC is your control plane, the most defensible evidence is what your tooling computed and applied at the moment of change—not a later export of state that may have drifted.
+
+### 1) Capture a signed, time-stamped plan and a machine-readable diff
+Store artifacts per run:
+- `plan.bin` (binary plan)
+- JSON-rendered plan output (for deterministic parsing)
+- Apply summary output
+- Provider lockfile, Terraform version, and module SHAs
+
+```bash
+terraform init
+terraform plan -out plan.bin
+terraform show -json plan.bin | jq '.resource_changes[] | {addr:.address, actions:.change.actions}'
+terraform apply -auto-approve plan.bin
+```
+
+To make evidence tamper-evident, generate a content hash and sign it (example uses **GnuPG**; use your enterprise signing mechanism if different):
+
+```bash
+sha256sum plan.bin > plan.bin.sha256
+sha256sum terraform.tfstate > tfstate.sha256 || true
+
+gpg --batch --yes --armor --detach-sign plan.bin.sha256
+```
+
+> ⚠️ Attention: Do not treat the state file as your evidence source-of-truth. State can be rewritten; your audit narrative should anchor on signed plan/apply outputs plus cloud API events.
+
+### 2) Map plan/apply outputs to control statements without claiming “compliance”
+DORA and NIS2 requirements are expressed as resilience, incident readiness, and security measures. Your evidence packet should map technical facts to requirements in a neutral way:
+- Encryption-at-rest enabled for data stores (KMS key usage, policies)
+- Key management practices (rotation settings, access controls)
+- Logging enabled and protected (CloudTrail, log retention)
+- Least privilege (IAM policies, role assumptions)
+- Network segmentation (VPC, security group constraints)
+
+Example: extract only the resource changes relevant to encryption/logging and render a minimal change record.
+
+```bash
+terraform show -json plan.bin | jq '
+  .resource_changes[]
+  | select(
+      (.type|test("kms|s3|rds|dynamodb|cloudtrail|cloudwatch|iam"))
+    )
+  | {
+      address: .address,
+      type: .type,
+      actions: .change.actions,
+      before: (.change.before // {}),
+      after: (.change.after // {})
+    }'
+```
+
+### 3) Produce an immutable record chain for every run
+Skynet’s execution model is deterministic: each run yields a set of artifacts, hashes, and joins. Your goal is to make it impossible to present an artifact that cannot be linked back to:
+- a specific commit
+- a specific run
+- a specific cloud event set
+- a specific point-in-time configuration snapshot
+
+> ✅ Success: An auditor can pick any control-impacting change and you can replay the story end-to-end in minutes—without manual reconstruction.
+
+## Zero-Trace Control Snapshots: Point-in-Time Ground Truth Without Persistent Agents
+Auditors will test that your “declared controls” match actual configuration at a specific time. You can satisfy that with read-only API collection executed on demand.
+
+### 1) Collect minimal snapshots from cloud APIs
+Keep snapshots targeted. Focus on the control assertions you need to support and capture only what is required.
+
+```bash
+# IAM account posture summary
+aws iam get-account-summary
+
+# KMS inventory (keys + metadata)
+aws kms list-keys
+
+# Network baseline
+aws ec2 describe-vpcs
+aws ec2 describe-security-groups
+
+# Logging configuration examples
+aws cloudtrail describe-trails
+aws cloudtrail get-trail-status --name "<trail-name>"
+```
+
+For “zero-trace,” run these as part of an execution job that:
+- uses short-lived credentials
+- writes artifacts to an immutable store (WORM or retention-locked bucket)
+- leaves no daemon/agent in the environment
+
+> 💡 Pro-Tip: Capture the exact API responses as raw JSON plus a normalized “control view” derived from them. Raw JSON is defensible; normalized views are readable.
+
+### 2) Normalize snapshots into a control view
+Example: flatten security-group ingress rules into a canonical list that can be diffed between points in time.
+
+```bash
+aws ec2 describe-security-groups | jq -r '
+  .SecurityGroups[]
+  | .GroupId as $gid
+  | .IpPermissions[]?
+  | {
+      group_id: $gid,
+      protocol: .IpProtocol,
+      from: (.FromPort // -1),
+      to: (.ToPort // -1),
+      cidrs: ([.IpRanges[]?.CidrIp] | sort | unique),
+      ipv6: ([.Ipv6Ranges[]?.CidrIpv6] | sort | unique)
+    }'
+```
+
+### 3) Detect drift and bind it back to lineage
+Drift is not just “configuration changed.” The audit-relevant question is: was the drift caused by a controlled change path (tracked lineage) or by an untracked path?
+
+Operational rule:
+- If a config delta exists without a corresponding CloudTrail event attributable to an approved pipeline identity and run ID, treat it as an exception.
+- Evidence packet includes: (a) drift diff, (b) absence/presence of lineage, (c) remediation change record.
+
+> ⚠️ Attention: Drift detection without attribution is noise. Always couple drift with identity and execution context.
+
+## Packaging the Auditor Packet: Minimal, Time-Bounded, Regulator-Mapped
+A strong evidence packet is small, deterministic, and reviewable. It should not be a data dump.
+
+### 1) Contents of a minimal evidence bundle
+Include these components per audit period or per control domain:
+- Controls matrix (DORA/NIS2 requirement → technical assertions → evidence artifacts)
+- Time-bounded **AWS CloudTrail** extracts for control-impacting events
+- **Terraform** artifacts (signed plan/apply outputs, module SHAs, versions)
+- Point-in-time snapshots (raw JSON + normalized views)
+- Attestation document describing the execution run (what was collected, when, by which identity)
+
+### 2) Make the mapping explicit and testable
+The mapping is not prose—it’s a table keyed by:
+- requirement ID/name (as you track it internally)
+- control statement
+- evidence artifact path + hash
+- collection time window
+- source system (**AWS CloudTrail**, **Terraform**, cloud API snapshots)
+
+Example YAML structure stored alongside artifacts:
+
+```bash
+cat > evidence-map.yaml <<'YAML'
+audit_window:
+  start: "2026-04-01T00:00:00Z"
+  end: "2026-04-12T00:00:00Z"
+controls:
+  - control: "Encryption at rest enforced for data stores"
+    sources:
+      - system: "Terraform"
+        artifact: "terraform/plan.bin.sha256"
+      - system: "AWS CloudTrail"
+        artifact: "cloudtrail/kms-events.tsv"
+      - system: "Cloud API Snapshot"
+        artifact: "snapshots/kms-list-keys.json"
+  - control: "Central logging enabled and protected"
+    sources:
+      - system: "AWS CloudTrail"
+        artifact: "cloudtrail/trail-config.json"
+      - system: "Cloud API Snapshot"
+        artifact: "snapshots/cloudtrail-describe-trails.json"
+YAML
+```
+
+### 3) What Skynet executes in one pass
+Skynet’s AUDIT execution compiles the above into a deterministic run:
+- snapshots the current control state from cloud APIs
+- binds every relevant change to an immutable chain (commit → run → API call → resulting config)
+- outputs a minimal evidence bundle mapped to DORA/NIS2 requirements, ready for review
+
+> ✅ Success: You can answer “show me the evidence” with a single packet: bounded scope, verifiable hashes, clear lineage, and no persistent collection footprint.
+
+## Checklist
+- [ ] Standardize lineage keys (commit SHA, run ID, role session name, time window) across all pipelines.
+- [ ] Enforce short-lived deployment identity via OIDC role assumption; ban shared/static credentials.
+- [ ] Define a control-relevant CloudTrail event catalog (IAM/KMS/network/logging) and version it.
+- [ ] Collect time-bounded **AWS CloudTrail** extracts per run and store them immutably.
+- [ ] Capture **Terraform** `plan.bin`, JSON plan, apply output, versions, and module SHAs per run.
+- [ ] Hash and sign critical artifacts; store hashes alongside artifacts.
+- [ ] Collect point-in-time read-only snapshots for the control set (raw JSON + normalized views).
+- [ ] Implement drift detection that requires attribution; flag deltas without matching lineage.
+- [ ] Generate a controls matrix mapping requirements to specific artifact paths + hashes.
+- [ ] Package everything into a single auditor packet with a run attestation (who/what/when/where).
+
+## FAQ
+### How do we prove “zero-trace” without weakening evidence quality?
+<p>Use short-lived credentials plus on-demand read-only API collection, then store outputs as immutable artifacts. The environment retains no agent, while the evidence remains verifiable via hashes, signatures, and CloudTrail-backed execution context.</p>
+
+### What’s the minimum to show immutable change lineage for cloud controls?
+<p>At minimum: a Git commit SHA, a pipeline run record, CloudTrail events for the control-impacting API calls, and a point-in-time snapshot of the resulting configuration. If any link can’t be deterministically joined, the chain is incomplete.</p>
+
+### How should we handle controls that are partially IaC and partially console-managed?
+<p>Make the discrepancy explicit: capture the IaC artifacts for what is managed as code, then rely on CloudTrail + snapshots for console-managed changes. Any drift without pipeline attribution becomes an exception with its own remediation change record and evidence trail.</p>
