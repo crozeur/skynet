@@ -22,8 +22,8 @@ Rapid migrations often require “temporary” Kubernetes clusters for staging, 
 ## Design Pattern: One-Time Cluster With a Deterministic Lifecycle
 Ephemeral migration clusters fail in two predictable ways:
 
-1) They become sticky: a staging cluster survives cutover “just in case,” and slowly accretes exceptions (RBAC grants, open security groups, public ingress).
-2) They erase evidence: the eventual cleanup removes the exact telemetry needed to validate migration integrity and investigate anomalies.
+### 1) They become sticky: a staging cluster survives cutover “just in case,” and slowly accretes exceptions (RBAC grants, open security groups, public ingress).
+### 2) They erase evidence: the eventual cleanup removes the exact telemetry needed to validate migration integrity and investigate anomalies.
 
 Skynet’s approach is a standardized execution lifecycle:
 
